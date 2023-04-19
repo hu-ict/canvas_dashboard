@@ -47,9 +47,16 @@ def getDateTimeObj(dateTimeStr):
     dateTimeObj = dateTimeObj.astimezone(timezone)
     return dateTimeObj
 
+
+def getDateTimeStr(date_time):
+    dateTimeStr = date_time.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
+    return dateTimeStr
+
+
 def str_date_to_day(actual_date_str):
     if actual_date_str != None:
         actual_date = datetime.strptime(actual_date_str, '%Y-%m-%dT%H:%M:%SZ')
     else:
         actual_date = datetime.strptime("2023-02-14", '%Y-%m-%d')
     return (actual_date - start_date).days
+

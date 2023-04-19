@@ -71,10 +71,10 @@ course_config_start = read_course_config_start()
 course_config = read_course_config(course_config_start.config_file_name)
 
 # Initialize a new Canvas object
-canvas = Canvas(API_URL, course_config.api_key)
+canvas = Canvas(API_URL, course_config_start.api_key)
 user = canvas.get_current_user()
 print(user.name)
-canvas_course = canvas.get_course(course_config.course_id)
+canvas_course = canvas.get_course(course_config_start.course_id)
 course = Course(canvas_course.id, canvas_course.name, actual_date.strftime("%A %d-%m-%Y"))
 users = canvas_course.get_users(enrollment_type=['student'])
 student_count = 0

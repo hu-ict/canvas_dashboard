@@ -1,21 +1,24 @@
 class StudentGroup:
-    def __init__(self, id, name, coach):
+    def __init__(self, id, name):
         self.id = id
         self.name = name
-        self.coach = coach
+        self.teachers = []
         self.students = []
 
     def to_json(self, scope):
         return {
             'id': self.id,
             'name': self.name,
-            'coach': self.coach,
+            'teachers': self.teachers,
             'students': list(map(lambda s: s.to_json(scope), self.students)),
         }
 
     def __str__(self):
-        return f'StudentGroup({self.id}, {self.name}, {self.coach})'
+        return f'StudentGroup({self.id}, {self.name}, {self.teachers})\n'
 
     @staticmethod
     def from_dict(data_dict):
-        return StudentGroup(data_dict['id'], data_dict['name'], data_dict['coach'])
+        new_student_group = StudentGroup(data_dict['id'], data_dict['name'])
+        new_student_group.teachers = data_dict['teachers']
+        return new_student_group
+

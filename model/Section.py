@@ -9,6 +9,11 @@ class Section:
             'name': self.name,
         }
 
+    def __str__(self):
+        line = f' Section({self.id}, {self.name})\n'
+        return line
+
+
     @staticmethod
     def from_dict(data_dict):
         return Section(data_dict['id'], data_dict['name'])
