@@ -27,7 +27,7 @@ course_config = CourseConfig(course.name)
 #ophalen secties
 course_sections = canvas_course.get_sections()
 for course_section in course_sections:
-    new_section = Section(course_section.id, course_section.name)
+    new_section = Section(course_section.id, course_section.name, "role")
     course_config.sections.append(new_section)
     print("course_section", new_section)
 
@@ -36,7 +36,7 @@ canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignm
 for canvas_assignment_group in canvas_assignment_groups:
     print("assignment_group", canvas_assignment_group)
     group_points_possible = 0
-    assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name, "teacher", "scale", 0, 0, 0)
+    assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name, [], "scale", 0, 0, 0)
     for canvas_assignment in canvas_assignment_group.assignments:
         if canvas_assignment['overrides']:
             for overrides in canvas_assignment['overrides']:

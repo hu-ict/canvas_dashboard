@@ -12,7 +12,6 @@ class Submission:
         self.score = score
         self.comments = []
 
-
     def to_json(self):
         return {
             'id': self.id,

@@ -10,7 +10,7 @@ class Statistics:
         }
 
     def __str__(self):
-        return f'Comment({self.submission_count}, {self.not_graded_count}'
+        return f'Statistics({self.submission_count}, {self.not_graded_count}\n'
 
     @staticmethod
     def from_dict(data_dict):

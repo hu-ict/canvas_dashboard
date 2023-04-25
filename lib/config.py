@@ -11,16 +11,13 @@ not_graded = "Nog niet beoordeeld."
 plot_path = "./dashboard - lokaal/plotly/"
 
 
-group_names = {
-    61406: "TEAM",
-    62667: "GILDE",
-    63004: "Peilmomenten",
-    62149: "AI",
-    62903: "BIM",
-    61719: "CSC",
-    61367: "SD_B",
-    62609: "SD_F",
-    62138: "TI",
+group_id_dict = {
+    "AI": 62149,
+    "BIM": 62903,
+    "CSC": 61719,
+    "SD_B": 61367,
+    "SD_F": 62609,
+    "TI": 62138,
 }
 
 score_tabel = {0: "Geen voortgang", 1: "Onvoldoende voortgang", 2: "Voldoende voortgang", 3: "Goede voortgang"}

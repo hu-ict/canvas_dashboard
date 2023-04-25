@@ -40,30 +40,8 @@ class CourseConfig:
             'roles': list(map(lambda r: r.to_json([]), self.roles)),
             'teachers': list(map(lambda t: t.to_json(), self.teachers)),
             'assignment_groups': list(map(lambda ag: ag.to_json(scope), self.assignmentGroups)),
-            'student_groups': list(map(lambda sg: sg.to_json([]), self.studentGroups)),
+            'student_groups': list(map(lambda sg: sg.to_json(['submission']), self.studentGroups)),
         }
-
-    def find_assignment_group(self, group_id):
-        for group in self.assignmentGroups:
-            if group.id == group_id:
-                return group
-
-    def find_assignment_group_by_name(self, group_name):
-        for group in self.assignmentGroups:
-            if group.name == group_name:
-                return group
-
-    def find_assignment_group_by_role(self, role_name):
-        for role in self.roles:
-            if role.name == role_name:
-                return self.find_assignment_group(role.assignment_group_id)
-
-    def find_role(self, role_names):
-        for role_name in role_names:
-            if role_name != "INNO":
-                for role in self.roles:
-                    if role.name == role_name:
-                        return role
 
     def find_student_group(self, group_id):
         for group in self.studentGroups:
@@ -71,10 +49,73 @@ class CourseConfig:
                 return group
         return None
 
+    def find_assignment_group(self, group_id):
+        for group in self.assignmentGroups:
+            if group.id == group_id:
+                return group
+        return None
+
+    def find_perspective_by_assignment_group(self, group_id):
+        for perspective in self.perspectives:
+            if group_id in perspective.assignment_groups:
+                return perspective
+        return None
+
+    def find_assignment_group_by_name(self, group_name):
+        print(group_name)
+        for group in self.assignmentGroups:
+            print("find_assignment_group_by_name", group_name, group)
+            if group.name == group_name:
+                return group
+        return None
+
+    def find_assignment(self, assigment_group_id, assignment_id):
+        assignmentGroup = self.find_assignment_group(assigment_group_id)
+        if not assignmentGroup:
+            return None
+        for assigment in assignmentGroup.assignments:
+            if assigment.id == assignment_id:
+                return assigment
+        return None
+
+    def find_assignment_group_by_role(self, role_name):
+        for role in self.roles:
+            if role.name == role_name:
+                return self.find_assignment_group(role.assignment_group_id)
+        return None
+
+    def find_role(self, role_names):
+        for role_name in role_names:
+            if role_name != "INNO":
+                for role in self.roles:
+                    if role.name == role_name:
+                        return role
+        return None
+
+    def find_role_by_section(self, section_id):
+        for section in self.sections:
+            if section.id == section_id:
+                return section.role
+        return None
+
+    def find_student(self, student_id):
+        for group in self.studentGroups:
+            for student in group.students:
+                if student.id == student_id:
+                    return student
+        return None
+
     def find_teacher_by_group(self, group_id):
         for teacher in self.teachers:
             if group_id in teacher.projects:
                 return teacher
+        return None
+
+    def find_teacher(self, id):
+        for teacher in self.teachers:
+            if id == teacher.id:
+                return teacher
+        return None
 
     @staticmethod
     def from_dict(data_dict):
