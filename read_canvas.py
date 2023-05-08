@@ -9,8 +9,6 @@ from lib.config import not_graded, actual_date, API_URL
 
 course_config_start = read_course_config_start()
 course_config = read_course_config(course_config_start.course_file_name)
-total_submissions = 0
-total_not_graded = 0
 
 def submissionBuilder(student, assignment, canvas_submission, assignmentDate):
     local_comment = ""
@@ -76,30 +74,20 @@ canvas_assignments = canvas_course.get_assignments(include=['overrides'])
 for canvas_assignment in canvas_assignments:
     assignment_group = course_config.find_assignment_group(canvas_assignment.assignment_group_id)
     if assignment_group:
-        print("Processing G {0:8} - {1}".format(assignment_group.id, assignment_group.name))
+        # print("Processing G {0:8} - {1}".format(assignment_group.id, assignment_group.name))
         assignment = course_config.find_assignment(assignment_group.id, canvas_assignment.id)
         if assignment:
-            print("Processing A {0:8} - {1}".format(assignment.id, assignment.name))
+            print("Processing Assignment {0:6} - {1} {2}".format(assignment.id, assignment_group.name, assignment.name))
             if canvas_assignment.overrides:
                 for override in canvas_assignment.overrides:
                     assignment_date = AssignmentDate(override.id, override.due_at, override.lock_at)
-                    canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments'])
-                    for canvas_submission in canvas_submissions:
-                    #print("override C", canvas_submission)
-                        student = course.find_student(canvas_submission.user_id)
-                        if student:
-                            submissionBuilder(student, assignment, canvas_submission, assignment_date)
             else:
-                # canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments'])
                 assignment_date = AssignmentDate(canvas_assignment.id, canvas_assignment.due_at, canvas_assignment.lock_at)
-                canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments'])
-                for canvas_submission in canvas_submissions:
-                    # print("override C", canvas_submission)
-                    student = course.find_student(canvas_submission.user_id)
-                    if student:
-                        submissionBuilder(student, assignment, canvas_submission, assignment_date)
-                    else:
-                        print("Student not found", canvas_submission.user_id)
+            canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments'])
+            for canvas_submission in canvas_submissions:
+                student = course.find_student(canvas_submission.user_id)
+                if student:
+                    submissionBuilder(student, assignment, canvas_submission, assignment_date)
 
 
 def get_submitted_at(item):

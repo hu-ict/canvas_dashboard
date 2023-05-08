@@ -15,7 +15,7 @@ days_in_semester= timedelta.days
 print("days_in_semester", days_in_semester)
 course_config_start = read_course_config_start()
 course_config = read_course_config(course_config_start.course_file_name)
-course = read_course_results(course_config_start.results_file_name)
+results = read_course_results(course_config_start.results_file_name)
 
 bins_bar = [0, 0.9, 1.9, 2.9, 3.9, 4.9]
 labels_bar = ['Leeg', 'Geen', 'Onvoldoende', 'Voldoende', 'Goede']
@@ -274,7 +274,7 @@ def plot_student(course_config, student):
     fig.write_html(asci_file_name, include_plotlyjs="cdn")
 
 
-for group in course.studentGroups:
+for group in results.studentGroups:
     for student in group.students:
         plot_student(course_config, student)
 

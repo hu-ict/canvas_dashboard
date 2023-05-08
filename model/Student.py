@@ -8,14 +8,13 @@ class Student:
         self.name = name
         self.coach_initials = coach_initials
         self.roles = []
-        self.perspectives = {}
-        self.assignments = {}
+        self.perspectives = []
 
     def get_role(self):
-        for role in self.roles:
-            if role != "INNO":
-                return role
-        return "None"
+        if len(self.roles) >= 1:
+            return self.roles[0]
+        else:
+            return None
 
     def get_perspective(self, name):
         for perspective in self.perspectives:
@@ -49,10 +48,10 @@ class Student:
             }
 
     def __str__(self):
-        line = f'Student({self.id}, {self.group_id}, {self.name}, {self.coach_initials}, {self.roles}'
-        for b in self.perspectives:
-            line += " b "+str(b)
-        return line
+        line = f'Student({self.id}, {self.group_id}, {self.name}, {self.coach_initials}, {self.roles}\n'
+        for perspective in self.perspectives:
+            line += " p "+str(perspective)
+        return line+"\n"
 
     @staticmethod
     def from_dict(data_dict):

@@ -84,12 +84,10 @@ class CourseConfig:
                 return self.find_assignment_group(role.assignment_group_id)
         return None
 
-    def find_role(self, role_names):
-        for role_name in role_names:
-            if role_name != "INNO":
-                for role in self.roles:
-                    if role.name == role_name:
-                        return role
+    def get_role(self, role_short):
+        for role in self.roles:
+            if role.short == role_short:
+                return role
         return None
 
     def find_role_by_section(self, section_id):

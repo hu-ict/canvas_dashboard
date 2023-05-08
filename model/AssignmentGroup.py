@@ -35,10 +35,21 @@ class AssignmentGroup:
                 'upper_points': self.upper_points,
         }
 
+    def find_assignment(self, a_assignment):
+        for assignment in self.assignments:
+            if assignment.id == a_assignment.id:
+                return True
+        return False
+
+    def append_assignment(self, assignment):
+        if not self.find_assignment(assignment):
+            self.assignments.append(assignment)
+
+
     def __str__(self):
-        line =  f'AssigmentGroup({self.id}, {self.name}, {self.teachers}, {self.roles}, {self.total_points}, {self.lower_points}, {self.upper_points})\n'
-        # for assignments in self.assignments:
-        #     line += str(assignments)
+        line = f'AssigmentGroup({self.id}, {self.name}, {self.teachers}, {self.roles}, {self.total_points}, {self.lower_points}, {self.upper_points})\n'
+        for assignment in self.assignments:
+            line += str(assignment)
         return line
 
     @staticmethod

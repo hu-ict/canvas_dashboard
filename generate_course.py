@@ -53,9 +53,9 @@ for student in course.students.values():
             new_perspective = Perspective(perspective.name)
             assignment_group_id = group_id_dict[student.roles[0]]
             new_perspective.assignment_groups.append(assignment_group_id)
-            student.perspectives[perspective.name] = new_perspective
+            student.perspectives.append(new_perspective)
         else:
-            student.perspectives[perspective.name] = perspective
+            student.perspectives.append(perspective)
 
 canvas_group_categories = canvas_course.get_group_categories()
 for canvas_group_category in canvas_group_categories:
@@ -73,6 +73,8 @@ for canvas_group_category in canvas_group_categories:
                     if len(studentGroup.teachers) > 0:
                         student.coach_initials = course_config.find_teacher(studentGroup.teachers[0]).initials
                     studentGroup.students.append(student)
+
+print(course_config)
 
 with open(course_config_start.course_file_name, 'w') as f:
     dict_result = course_config.to_json(["assignment"])

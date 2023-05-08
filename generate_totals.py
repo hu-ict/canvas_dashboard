@@ -6,11 +6,20 @@ from plotly.subplots import make_subplots
 import json
 import numpy as np
 
-from lib.config import start_date, str_date_to_day, plot_path, course_config_file
-from lib.file import read_course_config, read_student_json
+from lib.config import start_date, str_date_to_day, plot_path
+from lib.file import read_course_config_start, read_course_config, read_course_results
+
+course_config_start = read_course_config_start()
+course = read_course_config(course_config_start.course_file_name)
+results = read_course_results(course_config_start.results_file_name)
 
 actual_date = datetime.now()
 actual_day = (actual_date - start_date).days
+
+student_totals = {}
+for perspective in course.perspectives:
+    student_totals[perspective.name] = {}
+    for teaqcher in course.
 
 student_totals = {
     'student_count': 0,
@@ -21,7 +30,6 @@ student_totals = {
 }
 
 late_list = []
-course_config = read_course_config(course_config_file)
 
 def student_total(perspective):
     cum_score = 0
@@ -40,13 +48,12 @@ def get_submitted_at(item):
     return item.submitted_at
 
 def count_student(course_config, student):
-    if "INNO" in student.roles:
-        add_total(student_totals['team']['count'], int(student_total(student.team)))
-        add_total(student_totals['gilde']['count'], int(student_total(student.gilde)))
+    for perspective in student.perspectives:
+        add_total(student_totals[perspective.name]['count'], int(student_total(perspective.submissions)))
 
-    role = student.get_role()
-    total_points = course_config.find_assignment_group_by_role(role).total_points
-    add_total(student_totals['kennis']['count'], int(student_total(student.kennis)/total_points*100))
+    # role = student.get_role()
+    # total_points = course_config.find_assignment_group_by_role(role).total_points
+    # add_total(student_totals['kennis']['count'], int(student_total(student.kennis)/total_points*100))
 
 
 def check_for_late(student, submission, perspective):
@@ -146,10 +153,9 @@ def plot_totals():
     file_name = plot_path + "totals" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")
 
-
-students = read_student_json()
-for student in students:
-    count_student(course_config, student)
+for group in results.studentGroups:
+    for student in group.students:
+        count_student(course, student)
 plot_totals()
 
 late_list = sorted(late_list, key=itemgetter('submitted_at'))

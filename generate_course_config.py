@@ -58,7 +58,7 @@ for canvas_assignment_group in canvas_assignment_groups:
                 else:
                     section_id = 0
                 assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'], canvas_assignment['assignment_group_id'], section_id, points_possible, assignment_date)
-                assignment_group.assignments.append(assignment)
+                assignment_group.append_assignment(assignment)
         else:
             if canvas_assignment['points_possible']:
                 group_points_possible += canvas_assignment['points_possible']
@@ -76,7 +76,7 @@ for canvas_assignment_group in canvas_assignment_groups:
             assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'],
                                     canvas_assignment['assignment_group_id'], 0,
                                     points_possible, assignment_date)
-            assignment_group.assignments.append(assignment)
+            assignment_group.append_assignment(assignment)
 
     assignment_group.total_points = group_points_possible
     print("assignment_group", canvas_assignment_group, group_points_possible)

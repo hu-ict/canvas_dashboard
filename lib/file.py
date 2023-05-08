@@ -27,12 +27,14 @@ def read_course_config(course_config_file_name):
 #         course = CourseConfig.from_dict(data)
 #         return course
 
+
 def read_course_results(course_result_file_name):
     print("read_course_results",course_result_file_name)
     with open(course_result_file_name, mode='r', encoding="utf-8") as file_result:
         data = json.load(file_result)
         course = Course.from_dict(data)
         return course
+
 
 def read_late_json():
     f = open('late.json')
@@ -44,6 +46,7 @@ def read_late_json():
     # Closing file
     f.close()
     return late_list
+
 
 def read_student_json():
     f = open('student_results.json')
