@@ -2,12 +2,11 @@ from datetime import datetime
 import pytz
 
 API_URL = "https://canvas.hu.nl/"
+DATE_TIME_STR = '%Y-%m-%dT%H:%M:%SZ'
+ALT_DATE_TIME_STR = '%Y-%m-%dT%H:%M:%S.%f%z'
 timezone = pytz.timezone("Europe/Amsterdam")
 actual_date = datetime.now()
-start_date = datetime.strptime('06-02-23', '%d-%m-%y')
-end_date = datetime.strptime('26-06-23', '%d-%m-%y')
-actual_day = (actual_date - start_date).days
-not_graded = "Nog niet beoordeeld."
+NOT_GRADED = "Nog niet beoordeeld."
 plot_path = "./dashboard - lokaal/plotly/"
 
 
@@ -33,27 +32,33 @@ roles = {"AI": "AI",
          "Innovation 1": "INNO"
          }
 
+
 def get_role(name):
     if roles.get(name):
         return roles[name]
     else:
         return ""
 
-def getDateTimeObj(dateTimeStr):
-    dateTimeObj = datetime.strptime(dateTimeStr, '%Y-%m-%dT%H:%M:%S.%f%z')
-    dateTimeObj = dateTimeObj.astimezone(timezone)
-    return dateTimeObj
+
+def get_date_time_obj(date_time_str):
+    date_time_obj = datetime.strptime(date_time_str, DATE_TIME_STR)
+    date_time_obj = date_time_obj.astimezone(timezone)
+    return date_time_obj
 
 
-def getDateTimeStr(date_time):
-    dateTimeStr = date_time.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
-    return dateTimeStr
+def get_date_time_str(date_time):
+    date_time_str = date_time.strftime(DATE_TIME_STR)
+    return date_time_str
 
 
-def str_date_to_day(actual_date_str):
-    if actual_date_str != None:
-        actual_date = datetime.strptime(actual_date_str, '%Y-%m-%dT%H:%M:%SZ')
-    else:
-        actual_date = datetime.strptime("2023-02-14", '%Y-%m-%d')
-    return (actual_date - start_date).days
+def date_to_day(start_date, actual_date):
+    if actual_date:
+        return (actual_date - start_date).days
+    return 1
 
+# def str_date_to_day(actual_date_str):
+#     if actual_date_str:
+#         actual_date = datetime.strptime(actual_date_str, DATE_TIME_STR)
+#     else:
+#         actual_date = datetime.strptime("2023-02-14", '%Y-%m-%d')
+#     return (actual_date - start_date).days

@@ -14,23 +14,25 @@ def read_course_config_start():
         course_config_start = CourseConfigStart.from_dict(data)
         return course_config_start
 
-def read_course_config(course_config_file_name):
-    print("read_course_config",course_config_file_name)
-    with open(course_config_file_name, mode='r', encoding="utf-8") as course_config_file:
+
+def read_config(config_file_name):
+    print("read_course_config",config_file_name)
+    with open(config_file_name, mode='r', encoding="utf-8") as course_config_file:
         data = json.load(course_config_file)
         course_config = CourseConfig.from_dict(data)
         return course_config
 
-# def read_course(course_result_file_name):
-#     with open(course_result_file_name, mode='r', encoding="utf-8") as file_result:
-#         data = json.load(file_result)
-#         course = CourseConfig.from_dict(data)
-#         return course
+
+def read_course(course_file_name):
+    with open(course_file_name, mode='r', encoding="utf-8") as file_course:
+        data = json.load(file_course)
+        course = CourseConfig.from_dict(data)
+        return course
 
 
-def read_course_results(course_result_file_name):
-    print("read_course_results",course_result_file_name)
-    with open(course_result_file_name, mode='r', encoding="utf-8") as file_result:
+def read_results(result_file_name):
+    print("read_results", result_file_name)
+    with open(result_file_name, mode='r', encoding="utf-8") as file_result:
         data = json.load(file_result)
         course = Course.from_dict(data)
         return course
@@ -49,7 +51,7 @@ def read_late_json():
 
 
 def read_student_json():
-    f = open('student_results.json')
+    f = open('results.json')
     students = []
     data = json.load(f)
     for student_json in data['student_groups']:

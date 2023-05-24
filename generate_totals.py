@@ -6,20 +6,18 @@ from plotly.subplots import make_subplots
 import json
 import numpy as np
 
-from lib.config import start_date, str_date_to_day, plot_path
-from lib.file import read_course_config_start, read_course_config, read_course_results
+from lib.config import plot_path
+from lib.file import read_course_config_start, read_course, read_results
 
 course_config_start = read_course_config_start()
-course = read_course_config(course_config_start.course_file_name)
-results = read_course_results(course_config_start.results_file_name)
-
-actual_date = datetime.now()
-actual_day = (actual_date - start_date).days
+course = read_course(course_config_start.course_file_name)
+results = read_results(course_config_start.results_file_name)
+actual_day = (results.actual_date - course_config_start.start_date).days
 
 student_totals = {}
-for perspective in course.perspectives:
-    student_totals[perspective.name] = {}
-    for teaqcher in course.
+# for perspective in course.perspectives:
+#     student_totals[perspective.name] = {}
+#     for teacher in course.
 
 student_totals = {
     'student_count': 0,
@@ -37,6 +35,7 @@ def student_total(perspective):
         cum_score += submission.score
     return cum_score
 
+
 def add_total(totals, total):
     totals.append(total)
     # if total not in totals.keys():
@@ -44,12 +43,15 @@ def add_total(totals, total):
     # else:
     #     totals[total] += 1
 
+
 def get_submitted_at(item):
     return item.submitted_at
 
+
 def count_student(course_config, student):
     for perspective in student.perspectives:
-        add_total(student_totals[perspective.name]['count'], int(student_total(perspective.submissions)))
+        if perspective.name != "peil":
+            add_total(student_totals[perspective.name]['count'], int(student_total(perspective.submissions)))
 
     # role = student.get_role()
     # total_points = course_config.find_assignment_group_by_role(role).total_points
@@ -62,7 +64,7 @@ def check_for_late(student, submission, perspective):
             selector = student.coach_initials
         else:
             selector = student.get_role()
-        late_days = int(actual_day - str_date_to_day(submission.submitted_at))
+        late_days = (results.actual_date - submission.submitted_at).days
         if late_days <= 7:
             student_totals[perspective]['pending'][selector] += 1
         elif 7 < late_days <= 14:
@@ -102,13 +104,11 @@ def plot_totals():
         bargroupgap=0.1,  # gap between bars of the same location coordinates
         barmode='stack'
     )
-    for student in students:
-        for submission in student.team:
-            check_for_late(student, submission, "team")
-        for submission in student.gilde:
-            check_for_late(student, submission, "gilde")
-        for submission in student.kennis:
-            check_for_late(student, submission, "kennis")
+    for student_group in results.studentGroups:
+        for student in student_group.students:
+            for perspective in student.perspectives:
+                for submission in perspective.submissions:
+                    check_for_late(student, submission, perspective.name)
 
     x_team = list(student_totals['team']['pending'].keys())
     y_counts = list(student_totals['team']['pending'].values())
@@ -153,9 +153,11 @@ def plot_totals():
     file_name = plot_path + "totals" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")
 
+
 for group in results.studentGroups:
     for student in group.students:
         count_student(course, student)
+
 plot_totals()
 
 late_list = sorted(late_list, key=itemgetter('submitted_at'))

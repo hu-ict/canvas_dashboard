@@ -15,9 +15,9 @@ class Perspective:
         }
 
     def __str__(self):
-        line = f' Perspective({self.name}, {self.assignment_groups}, {self.submissions})\n'
+        line = f' Perspective({self.name}, {self.assignment_groups})\n'
         for submission in self.submissions:
-            line += " p " + str(submission)+ "\n"
+            line += " s " + str(submission) + "\n"
         return line
 
     def get_submission(self, assigment_id):

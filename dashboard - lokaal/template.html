@@ -46,13 +46,13 @@
             }
         }
 
-        function setCoach(className) {
-            console.info("Coach! "+className);
+        function setCoach(coach_initials) {
+            console.info("Coach! "+coach_initials);
             const boxes = document.getElementsByClassName("coach");
             console.info("Boxes: "+boxes.length);
             for (i = boxes.length - 1; i >= 0; --i) {
                 console.info("check "+ boxes[i].className)
-                if (boxes[i].className != "card shadow mb-4 coach "+className) {
+                if (boxes[i].className != "card shadow mb-4 coach "+coach_initials) {
                     console.info("remove "+boxes[i].className)
     // whenever we run splice, the array gets reindexed
     // so we will skip over an index
@@ -182,13 +182,7 @@
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                                <a onClick="setCoach('Berend_Wilkens');" class="btn btn-secondary btn-icon-split btn-sm"> <span class="text">BW</span></a>
-                                                <a onClick="setCoach('Hans_van_Gastel');" class="btn btn-secondary btn-icon-split btn-sm"> <span class="text">HvG</span></a>
-                                                <a onClick="setCoach('Karin_Elich');" class="btn btn-secondary btn-icon-split btn-sm"> <span class="text">KE</span></a>
-                                                <a onClick="setCoach('Maarten_Bordewijk');" class="btn btn-secondary btn-icon-split btn-sm"> <span class="text">MB</span></a>
-                                                <a onClick="setCoach('Matthias_van_Dijk');" class="btn btn-secondary btn-icon-split btn-sm"> <span class="text">MvD</span></a>
-                                                <a onClick="setCoach('Peter_van_Rooijen');" class="btn btn-secondary btn-icon-split btn-sm"> <span class="text">PvR</span></a>
-                                                <a onClick="setCoach('Teun_Pieter_Modderman');" class="btn btn-secondary btn-icon-split btn-sm"> <span class="text">TPM</span></a>
+                                                $coaches
                                             </div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800"></div>
                                         </div>

@@ -5,7 +5,6 @@ from model.Section import Section
 from model.StudentGroup import StudentGroup
 from model.Teacher import Teacher
 
-
 class CourseConfig:
     def __init__(self, name):
         self.name = name
@@ -53,6 +52,12 @@ class CourseConfig:
         for group in self.assignmentGroups:
             if group.id == group_id:
                 return group
+        return None
+
+    def find_perspective_by_name(self, name):
+        for perspective in self.perspectives:
+            if name == perspective.name:
+                return perspective
         return None
 
     def find_perspective_by_assignment_group(self, group_id):
