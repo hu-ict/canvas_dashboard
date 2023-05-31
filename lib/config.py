@@ -8,7 +8,7 @@ timezone = pytz.timezone("Europe/Amsterdam")
 actual_date = datetime.now()
 NOT_GRADED = "Nog niet beoordeeld."
 plot_path = "./dashboard - lokaal/plotly/"
-
+template_path = "./dashboard - lokaal/"
 
 group_id_dict = {
     "AI": 62149,
@@ -19,7 +19,40 @@ group_id_dict = {
     "TI": 62138,
 }
 
-score_tabel = {0: "Geen voortgang", 1: "Onvoldoende voortgang", 2: "Voldoende voortgang", 3: "Goede voortgang"}
+peil_labels = ["halfweg", "eind"]
+
+hover_style=dict(
+        bgcolor="white",
+        font_size=16,
+        font_family="Helvetica"
+)
+
+colors_bar = {
+    'Leeg': '#666666',
+    'Geen': '#f25829',
+    'Onvoldoende': '#f2a529',
+    'Voldoende': '#85e043',
+    'Goede': '#2bad4e'
+}
+
+score_tabel = {
+    0: "Geen",
+    1: "In ontwikkeling",
+    2: "Op niveau",
+    3: "Boven niveau"}
+
+voortgang_tabel = {
+    0: "Geen voortgang",
+    1: "Onvoldoende voortgang",
+    2: "Voldoende voortgang",
+    3: "Goede voortgang"}
+
+color_tabel={
+    0: '#f25829',
+    1: '#f2a529',
+    2: '#85e043',
+    3: '#2bad4e'
+}
 
 roles = {"AI": "AI",
          "BIM": "BIM",

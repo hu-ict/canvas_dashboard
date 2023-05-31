@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
 from plotly.subplots import make_subplots
-from lib.config import plot_path, score_tabel, date_to_day
+from lib.config import plot_path, voortgang_tabel, date_to_day, peil_labels, colors_bar, hover_style, score_tabel
 from lib.file import read_course_config_start, read_course, read_results
 
 from lib.translation_table import translation_table
@@ -12,20 +12,17 @@ from model.Assignment import Assignment
 
 traces = []
 course_config_start = read_course_config_start()
-days_in_semester = (course_config_start.end_date - course_config_start.start_date).days
-print("days_in_semester", days_in_semester)
 course = read_course(course_config_start.course_file_name)
 results = read_results(course_config_start.results_file_name)
 
+days_in_semester = (course_config_start.end_date - course_config_start.start_date).days
+print("days_in_semester", days_in_semester)
+
 bins_bar = [0, 0.9, 1.9, 2.9, 3.9, 4.9]
 # Define bar properties
-colors_bar = {'Leeg': '#666666',
-              'Geen': '#f25829',
-              'Onvoldoende': '#f2a529',
-              'Voldoende': '#85e043',
-              'Goede': '#2bad4e'}
 
 print(colors_bar.keys())
+
 
 def calc_dev(iterations, a, b, c):
     iteration_list = []
@@ -38,26 +35,24 @@ def calc_dev(iterations, a, b, c):
 
 
 def peil_contruct():
-    peil_perspectives = {}
-    for perspective in course.perspectives:
-        if perspective.name != course_config_start.peil_perspective:
-            peil_perspectives[perspective.name] = []
-        else:
-            peil_perspective = perspective
+    peilingen = {}
+    for peil in peil_labels:
+        peilingen[peil] = []
+    # for perspective in course.perspectives:
+    #     if perspective.name != course_config_start.peil_perspective:
+    #         peil_perspectives[perspective.name] = []
+    #     else:
+    #         peil_perspective = perspective
     #         print("peil_perspective", peil_perspective)
     # print("peil_perspectives", peil_perspectives)
+    peil_perspective = course.find_perspective_by_name(course_config_start.peil_perspective)
     assignment_group = course.find_assignment_group(peil_perspective.assignment_groups[0])
     for assignment in assignment_group.assignments:
-        for peil_perspective in peil_perspectives:
-            if peil_perspective.lower() in assignment.name.lower():
-                peil_perspectives[peil_perspective].append(assignment)
-    return peil_perspectives
+        for peil_label in peil_labels:
+            if peil_label.lower() in assignment.name.lower():
+                peilingen[peil_label].append(assignment)
+    return peilingen
 
-peil_construction = peil_contruct()
-for peil in peil_construction:
-    print(peil)
-    for assignment in peil_construction[peil]:
-        print(assignment)
 
 def plot_bandbreedte(a_row, a_col, fig, assignmentGroup):
     if assignmentGroup.total_points <= 0:
@@ -70,7 +65,7 @@ def plot_bandbreedte(a_row, a_col, fig, assignmentGroup):
         fig.update_yaxes(title_text="Punten", range=[0, assignmentGroup.total_points], row=a_row, col=a_col)
     else:
         a = 0
-        b = assignmentGroup.lower_points / (days_in_semester - 30)
+        b = assignmentGroup.lower_points / (days_in_semester-14 - 30)
         c = - 30 * b
         band_lower = calc_dev(days_in_semester-14, a, b, c)
         band_upper = calc_dev(days_in_semester-14, a, b, c + assignmentGroup.upper_points - assignmentGroup.lower_points)
@@ -90,7 +85,7 @@ def plot_bandbreedte(a_row, a_col, fig, assignmentGroup):
         row=a_row, col=a_col
     )
 
-def plot_submissions(a_row, a_col, fig, submissions):
+def plot_submissions(a_row, a_col, a_fig, submissions):
     x_submission = [0]
     y_submission = [0]
     y_hover = ['Start']
@@ -99,7 +94,10 @@ def plot_submissions(a_row, a_col, fig, submissions):
         x_submission.append(date_to_day(course_config_start.start_date, submission.submitted_at))
         cum_score += submission.score
         y_submission.append(cum_score)
-        hover = submission.assignment_name + "<br>Score: " + str(submission.score)
+        if submission.score > 3:
+            hover = submission.assignment_name + "<br>Score: " + str(submission.score)
+        else:
+            hover = submission.assignment_name + "<br>" + score_tabel[int(submission.score)]
         for comment in submission.comments:
             value = comment.author_name + " - " + comment.comment
             wrapper = textwrap.TextWrapper(width=75)
@@ -108,16 +106,25 @@ def plot_submissions(a_row, a_col, fig, submissions):
                 hover += "<br>" + line
         y_hover.append(hover)
 
-    fig.add_trace(
+    a_fig.add_trace(
         go.Scatter(
             x=x_submission,
             y=y_submission,
             hoverinfo="text",
-            hovertext=y_hover),
+            hovertext=y_hover,
+            hoverlabel=hover_style),
         row=a_row, col=a_col
     )
+    a_fig.update_xaxes(title_text="Dagen in semester", range=[0, days_in_semester], row=a_row, col=a_col)
     return {"x": x_submission, "y": y_submission}
 
+def get_bar_perspective(a_peilmoment):
+    peil_perspective = course.find_perspective_by_name(course_config_start.peil_perspective)
+    for perspective in course.perspectives:
+        if perspective.name != peil_perspective.name:
+            if perspective.name.lower() in a_peilmoment.name.lower():
+                return perspective.name
+    return None
 
 def get_bar_score(a_peilmoment):
     score = 0.1
@@ -132,7 +139,7 @@ def get_bar_hover(a_peilmoment):
     if a_peilmoment:
         if a_peilmoment.graded:
             score = a_peilmoment.score + 1
-        hover = a_peilmoment.assignment_name + " - " + score_tabel[int(score-1)]
+        hover = a_peilmoment.assignment_name + " - " + voortgang_tabel[int(score-1)]
         for comment in a_peilmoment.comments:
             value = comment.author_name + " - " + comment.comment
             wrapper = textwrap.TextWrapper(width=75)
@@ -141,64 +148,60 @@ def get_bar_hover(a_peilmoment):
                 hover += "<br>" + line
     return hover
 
+
 def plot_peilmoment_bar(a_row, a_col, a_fig, a_perspective):
     score = []
     x_ax = []
     y_hover = []
-    for perspective in peil_construction:
-        for assignment in peil_construction[perspective]:
-            submission = a_perspective.get_submission(assignment.id)
-            x_ax.append(perspective)
-            score.append(get_bar_score(submission))
-            if submission:
-                y_hover.append(get_bar_hover(submission))
-            else:
-                y_hover.append(assignment.name+" - geen data")
+    perspective = []
 
+    # make data structure
+    for peil in peil_construction:
+        for assignment in peil_construction[peil]:
+            perspective_str = get_bar_perspective(assignment)
+            if perspective_str:
+                submission = a_perspective.get_submission(assignment.id)
+                x_ax.append(peil)
+                score.append(get_bar_score(submission))
+                perspective.append(perspective_str)
+                if submission:
+                    y_hover.append(get_bar_hover(submission))
+                else:
+                    y_hover.append(assignment.name+" - geen data")
 
-    # y_hover = ["", "", ""]
-    # peilmoment = a_perspective.get_submission(247772)
-    # team_score, y_hover[0] = get_bar(peilmoment)
-    # peilmoment = a_perspective.get_submission(247773)
-    # gilde_score, y_hover[1] = get_bar(peilmoment)
-    # peilmoment = a_perspective.get_submission(247771)
-    # kennis_score, y_hover[2] = get_bar(peilmoment)
-    # Build dataframe
     df = pd.DataFrame({'peil': x_ax,
+                       'perspective': perspective,
                        'score': score,
                        'text': y_hover,
                        'label': pd.cut(score,
                                        bins=bins_bar,
                                        labels=colors_bar.keys())
                        })
-    print(df)
-    for label, label_df in df.groupby('peil'):
-        print(label)
-        print(label_df)
-        a_fig.add_trace(
-            go.Bar(
-                x=label_df.peil,
-                y=label_df.score,
-                hoverinfo="text",
-                hovertext=label_df.text,
-                name=label
-            ),
-            a_row,
-            a_col
-        )
-    # for label, label_df in df.groupby('label'):
-    #     a_fig.add_trace(
-    #         go.Bar(
-    #             x=label_df.x,
-    #             y=label_df.y,
-    #             hoverinfo="text",
-    #             hovertext=label_df.text,
-    #             name=label,
-    #             marker={'color': colors_bar[label]}
-    #         ),
-    #         a_row,
-    #         a_col
-    #     )
+    # print(df.loc[:, ['peil', 'perspective', 'score', 'label']] )
+    index = 0
+    for peil_label in peil_labels:
+        index += 1
+        for label, label_df in df.loc[df['peil'] == peil_label].groupby('label'):
+
+            # print("peil_label", peil_label)
+            # print("label", label)
+            # print("label_df", label_df.text)
+            a_fig.add_trace(
+                go.Bar(
+                    x=label_df.perspective,
+                    y=label_df.score,
+                    hoverinfo="text",
+                    hovertext=label_df.text,
+                    name="perspective",
+                    hoverlabel=hover_style,
+                    offsetgroup=index,
+                    marker={'color': colors_bar[label]}
+                ),
+                a_row,
+                a_col
+            )
+
+    a_fig.update_layout(barmode='group')
     a_fig.update_yaxes(
         showticklabels=False,
         range=[0, 4.5],
@@ -206,7 +209,7 @@ def plot_peilmoment_bar(a_row, a_col, a_fig, a_perspective):
         col=a_col
     )
 
-def plot_voortgang(a_row, a_col, a_fig, a_peil):
+def plot_gauge(a_row, a_col, a_fig, a_peil):
     # plotting de gauge
     plot_bgcolor = "#fff"
     quadrant_colors = list(colors_bar.values())[1:]
@@ -248,40 +251,39 @@ def plot_voortgang(a_row, a_col, a_fig, a_peil):
 
 
 def plot_student(course_config, a_student):
-    specs = [[{'type': 'scatter', 'colspan': 2}, None, {'type': 'scatter', 'colspan': 2}, None],
-             [{'type': 'scatter', "colspan": 2}, None, {'type': 'bar'}, {'type': 'domain'}]]
-    titles = ["Team", "Kennis", "Gilde", "Perspectief", "Voortgang"] #, "Peilmomenten"
-    positions = {'team': {'row': 1, 'col': 1}, 'gilde': {'row': 2, 'col': 1}, 'kennis': {'row': 1, 'col': 3}, 'peil': {'row': 2, 'col': 4}}
-    fig = make_subplots(rows=2, cols=4, subplot_titles=titles, specs=specs, vertical_spacing=0.15, horizontal_spacing=0.08)
+    specs = [[{'type': 'scatter', 'colspan': 2, "rowspan": 2}, None, {'type': 'scatter', 'colspan': 2, "rowspan": 2}, None],
+             [None, None, None, None],
+             [{'type': 'scatter', "colspan": 2, "rowspan": 2}, None, {'type': 'bar', "rowspan": 2}, {'type': 'domain'}],
+             [None, None, None, {'type': 'domain'}]]
+    titles = ["Team", "Kennis", "Gilde", "Perspectief", "Halfweg", "Eind"] #, "Peilmomenten"
+    positions = {'team': {'row': 1, 'col': 1}, 'gilde': {'row': 3, 'col': 1}, 'kennis': {'row': 1, 'col': 3}, 'peil': {'row': 3, 'col': 3}, 'halfweg': {'row': 3, 'col': 4}, 'eind': {'row': 4, 'col': 4}}
+    fig = make_subplots(rows=4, cols=4, subplot_titles=titles, specs=specs, vertical_spacing=0.15, horizontal_spacing=0.08)
     for perspective in a_student.perspectives:
         row = positions[perspective.name]['row']
         col = positions[perspective.name]['col']
-        if perspective.name == "peil":
-            plot_peilmoment_bar(2, 3, fig, perspective)
+        if perspective.name == course_config_start.peil_perspective:
+            plot_peilmoment_bar(row, col, fig, perspective)
             # Voortgang overall
             if a_student.get_peilmoment(247774):
-                plot_voortgang(row, col, fig, a_student.get_peilmoment(247774).score + 0.5)
+                plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig, a_student.get_peilmoment(247774).score + 0.5)
             else:
-                plot_voortgang(row, col, fig, 0.1)
+                plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig, 0.1)
+            plot_gauge(positions['eind']['row'], positions['eind']['col'], fig, 0.1)
         else:
             assigment_group = course_config.find_assignment_group(perspective.assignment_groups[0])
             plot_bandbreedte(row, col, fig, assigment_group)
             plot_submissions(row, col, fig, perspective.submissions)
 
-    fig.update_layout(height=800, width=1200, showlegend=False)
-    fig.update_xaxes(title_text="Dagen in semester", range=[0, days_in_semester], row=1, col=1)
-    fig.update_xaxes(title_text="Dagen in semester", range=[0, days_in_semester], row=2, col=1)
-    fig.update_xaxes(title_text="Dagen in semester", range=[0, days_in_semester], row=1, col=3)
+    fig.update_layout(height=1000, width=1200, showlegend=False)
     file_name = plot_path + student.name + ".html"
     asci_file_name = file_name.translate(translation_table)
     print(asci_file_name)
     fig.write_html(asci_file_name, include_plotlyjs="cdn")
 
+peil_construction = peil_contruct()
 
 count = 0
 for group in results.studentGroups:
     for student in group.students:
-        count += 1
-        if count == 30:
-            plot_student(course, student)
+        plot_student(course, student)
 

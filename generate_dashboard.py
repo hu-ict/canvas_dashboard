@@ -1,3 +1,4 @@
+from lib.config import template_path
 from lib.file import read_late_json, read_course, read_course_config_start, read_results
 from lib.translation_table import translation_table
 from string import Template
@@ -9,8 +10,7 @@ results = read_results(course_config_start.results_file_name)
 days_in_semester = (course_config_start.end_date - course_config_start.start_date).days
 semester_day = (results.actual_date - course_config_start.start_date).days
 print("Day in semester", semester_day, days_in_semester)
-plot_path = "./dashboard - lokaal/plotly/"
-template_path = "./dashboard - lokaal/"
+
 index_path = template_path
 
 # Het Bootstrap dashboard wordt hier opgebouwd
@@ -46,7 +46,8 @@ for group in results.studentGroups:
         teacher = course.find_teacher(teacher_id)
         coaches[teacher.id] = teacher
     else:
-        teacher = "Leeg"
+        teacher = None
+
     for student in group.students:
         student_count += 1
         role = student.get_role()
@@ -65,8 +66,11 @@ for group in results.studentGroups:
                 submission_count += 1
                 if not submission.graded:
                     not_graded_count += 1
+    if teacher:
+        group_html_string = group_html_template.substitute({'coach': teacher.initials, 'student_group_name': group.name, 'students': students_html_string})
+    else:
+        group_html_string = group_html_template.substitute({'coach': "Leeg", 'student_group_name': group.name, 'students': students_html_string})
 
-    group_html_string = group_html_template.substitute({'coach': teacher.initials, 'student_group_name': group.name, 'students': students_html_string})
     groups_html_string += group_html_string
 
 

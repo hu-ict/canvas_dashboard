@@ -5,33 +5,35 @@ from lib.file import read_course_config_start, read_course
 from model.AssignmentDate import AssignmentDate
 from model.Comment import Comment
 from model.Course import *
-from lib.config import not_graded_str, actual_date, API_URL, get_date_time_str, NOT_GRADED
+from lib.config import actual_date, API_URL, NOT_GRADED
 from model.Submission import Submission
 
 course_config_start = read_course_config_start()
 course = read_course(course_config_start.course_file_name)
 
 
-def submissionBuilder(student, assignment, canvas_submission, assignmentDate):
+def submissionBuilder(a_student, a_assignment, a_canvas_submission, a_assignment_date):
     local_comment = ""
-    if canvas_submission.score is not None:
-        if canvas_submission.grade == 'complete':
+    if a_canvas_submission.score is not None:
+        if a_canvas_submission.grade == 'complete':
             # print("Grade", canvas_submission.grade, canvas_submission.score, canvas_submission.assignment_id)
             score = 1.0
-        elif canvas_submission.grade == 'incomplete':
+        elif a_canvas_submission.grade == 'incomplete':
             # print("Grade", canvas_submission.grade, canvas_submission.score, canvas_submission.assignment_id)
             score = 0.5
         else:
-            if "correctie" in assignment.name:
-                score = -round(canvas_submission.score, 2)
+            if a_assignment.group_id == 61367 and "*" not in a_assignment.name:
+                score = 1.0
+            elif "correctie" in a_assignment.name:
+                score = -round(a_canvas_submission.score, 2)
             else:
-                score = round(canvas_submission.score, 2)
+                score = round(a_canvas_submission.score, 2)
         graded = True
     else:
-        if not canvas_submission.submitted_at:
+        if not a_canvas_submission.submitted_at:
             return
         else:
-            if not canvas_submission.grader_id:
+            if not a_canvas_submission.grader_id:
                 score = 0
                 graded = False
                 local_comment = NOT_GRADED
@@ -39,21 +41,21 @@ def submissionBuilder(student, assignment, canvas_submission, assignmentDate):
                 graded = True
                 score = 0.0
 
-    if canvas_submission.submitted_at:
-        submitted_at = get_date_time_obj(canvas_submission.submitted_at)
+    if a_canvas_submission.submitted_at:
+        submitted_at = get_date_time_obj(a_canvas_submission.submitted_at)
     else:
-        if assignmentDate.lock_at:
-            submitted_at = get_date_time_obj(assignmentDate.lock_at)
+        if a_assignment_date.lock_at:
+            submitted_at = get_date_time_obj(a_assignment_date.lock_at)
         else:
-            if assignmentDate.due_at:
-                submitted_at = get_date_time_obj(assignmentDate.due_at)
+            if a_assignment_date.due_at:
+                submitted_at = get_date_time_obj(a_assignment_date.due_at)
             else:
                 submitted_at = get_date_time_obj("2023-02-06T12:00:00Z")
 
     # maak een submission en voeg de commentaren toe
-    submission = Submission(canvas_submission.id, assignment.group_id, assignment.id, student.id,
-                            assignment.name, submitted_at, graded, score)
-    canvas_comments = canvas_submission.submission_comments
+    submission = Submission(a_canvas_submission.id, a_assignment.group_id, a_assignment.id, a_student.id,
+                            a_assignment.name, submitted_at, graded, score)
+    canvas_comments = a_canvas_submission.submission_comments
     if len(local_comment) > 0:
         submission.comments.append(Comment(0, "System", local_comment))
     for canvas_comment in canvas_comments:
