@@ -33,6 +33,13 @@ student_totals = {
 
 late_list = []
 
+submissions_late = {
+    'team': {'BW': [], 'MB': [], 'KE': [], 'TPM': [], 'PVR': [], 'MVD': [], 'HVG': []},
+    'gilde': {'AI': [], 'BIM': [], 'CSC': [], 'SD_B': [], 'SD_F': [], 'TI': []},
+    'kennis': {'AI': [], 'BIM': [], 'CSC': [], 'SD_B': [], 'SD_F': [], 'TI': []}
+}
+
+
 def student_total(perspective):
     cum_score = 0
     for submission in perspective:
@@ -78,9 +85,12 @@ def count_student(course_config, student):
 
 
 def check_for_late(student, submission, perspective):
-    if not submission.graded and student.coach_initials != "None":
-        if perspective == 'team':
-            selector = student.coach_initials
+    if not submission.graded:
+        if student.coach_initials != "None":
+            if perspective == 'team':
+                selector = student.coach_initials
+            else:
+                selector = student.get_role()
         else:
             selector = student.get_role()
         late_days = (results.actual_date - submission.submitted_at).days
@@ -88,8 +98,10 @@ def check_for_late(student, submission, perspective):
             student_totals[perspective]['pending'][selector] += 1
         elif 7 < late_days <= 14:
             student_totals[perspective]['late'][selector] += 1
+            submissions_late[perspective][selector].append(submission.to_json())
         else:
             late_list.append(submission.to_json())
+            submissions_late[perspective][selector].append(submission.to_json())
             student_totals[perspective]['to_late'][selector] += 1
         add_total(student_totals['late']['count'], late_days)
 
@@ -122,7 +134,7 @@ def plot_totals():
         xaxis4_title_text='Pending',  # xaxis label
         xaxis5_title_text='Pending',  # xaxis label
         xaxis6_title_text='Pending',  # xaxis label
-#        xaxis9_title_text='Dagen na inlevering',  # xaxis label
+        xaxis7_title_text='Dagen na inlevering',  # xaxis label
         yaxis_title_text='Aantal',  # yaxis label
         yaxis4_title_text='Aantal',  # yaxis label
         # yaxis9_title_text='Aantal',  # yaxis label
@@ -166,9 +178,9 @@ def plot_totals():
             labels.append(voortgang_tabel[key])
         for color in color_tabel.values():
             colors.append(color)
-        print(labels)
-        print(values)
-        print(colors)
+        # print(labels)
+        # print(values)
+        # print(colors)
         trace = go.Pie(
             values=values,
             labels=labels, marker_colors=colors,
@@ -195,3 +207,13 @@ late_list = sorted(late_list, key=itemgetter('submitted_at'))
 
 with open("late.json", 'w') as f:
     json.dump(late_list, f, indent=2)
+
+for perspective in submissions_late.keys():
+    print(perspective)
+    for selector in submissions_late[perspective].keys():
+        print(selector)
+        late_list = sorted(submissions_late[perspective][selector], key=itemgetter('submitted_at'))
+
+        with open("late_"+perspective+"_"+selector+".json", 'w') as f:
+            json.dump(late_list, f, indent=2)
+

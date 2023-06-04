@@ -83,6 +83,23 @@
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4 .gap-2">
                         <h2 class="mt-4">Dashboard $course_name - Editie: Feb-23</h2>
+                            <div class="col-lg-4">
+                                        <a onclick="setDetailName('', '')"
+                                            target="iframe_a"
+                                            href="late.html"
+                                            class="btn btn-outline-dark btn-sm">
+                                            <span class="icon text-white-50"><i class="fas fa-flag"></i></span>
+                                            <span class="text">Lijst overtijd (> week)</span>
+                                        </a>
+                                        <a onclick="setDetailName('', '')"
+                                            target="iframe_a"
+                                            href="plotly/totals.html"
+                                            class="btn btn-outline-dark btn-sm">
+                                            <span class="icon text-white-50"><i class="fas fa-flag"></i></span>
+                                            <span class="text">Overzicht totalen</span>
+                                        </a>
+
+                            </div>
                     </div>
 
                     <!-- Content Row -->
@@ -207,23 +224,6 @@
                                     <div class="row">
                                     <div class="col-lg-10">
                                         <h6 class="m-0 font-weight-bold text-primary" id="detail_name"></h6>
-                                    </div>
-                                    <div class="col-lg-2">
-                                        <a onclick="setDetailName('', '')"
-                                            target="iframe_a"
-                                            href="late.html"
-                                            class="btn btn-primary btn-icon-split btn-sm">
-                                            <span class="icon text-white-50"><i class="fas fa-flag"></i></span>
-                                            <span class="text">Lijst overtijd (>14d)</span>
-                                        </a>
-                                        <a onclick="setDetailName('', '')"
-                                            target="iframe_a"
-                                            href="plotly/totals.html"
-                                            class="btn btn-primary btn-icon-split btn-sm">
-                                            <span class="icon text-white-50"><i class="fas fa-flag"></i></span>
-                                            <span class="text">Overzicht totalen</span>
-                                        </a>
-
                                     </div>
                                     </div>
                                 </div>

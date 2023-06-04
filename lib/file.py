@@ -38,8 +38,8 @@ def read_results(result_file_name):
         return course
 
 
-def read_late_json():
-    f = open('late.json')
+def read_late_json(late_file_name):
+    f = open(late_file_name)
     late_list = []
     data = json.load(f)
     for late_json in data:
