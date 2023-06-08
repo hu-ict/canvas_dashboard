@@ -13,7 +13,7 @@ class Section:
         }
 
     def __str__(self):
-        line = f' Section({self.id}, {self.name}, {self.role})\n'
+        line = f' Section({self.id}, {self.name}, {self.role})'
         return line
 
 

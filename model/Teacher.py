@@ -16,7 +16,7 @@ class Teacher:
         }
 
     def __str__(self):
-        return f'Teacher({self.id}, {self.name}, {self.initials}, {self.projects}, {self.assignment_groups}\n'
+        return f'Teacher({self.id}, {self.name}, {self.initials}, {self.projects}, {self.assignment_groups}'
 
     @staticmethod
     def from_dict(data_dict):

@@ -12,8 +12,8 @@ class CourseConfig:
         self.perspectives = []
         self.roles = []
         self.teachers = []
-        self.assignmentGroups = []
-        self.studentGroups = []
+        self.assignment_groups = []
+        self.student_groups = []
 
     def __str__(self):
         line = f'CourseConfig({self.name})\n'
@@ -25,10 +25,10 @@ class CourseConfig:
         #     line += str(role)
         for perspectives in self.perspectives:
             line += str(perspectives)+"\n"
-        for assignmentGroup in self.assignmentGroups:
-            line += str(assignmentGroup)
-        for studentGroup in self.studentGroups:
-            line += str(studentGroup)
+        for assignment_group in self.assignment_groups:
+            line += str(assignment_group)
+        for student_group in self.student_groups:
+            line += str(student_group)
         return line
 
     def to_json(self, scope):
@@ -38,18 +38,18 @@ class CourseConfig:
             'perspectives': list(map(lambda p: p.to_json(), self.perspectives)),
             'roles': list(map(lambda r: r.to_json([]), self.roles)),
             'teachers': list(map(lambda t: t.to_json(), self.teachers)),
-            'assignment_groups': list(map(lambda ag: ag.to_json(scope), self.assignmentGroups)),
-            'student_groups': list(map(lambda sg: sg.to_json(['submission']), self.studentGroups)),
+            'assignment_groups': list(map(lambda ag: ag.to_json(scope), self.assignment_groups)),
+            'student_groups': list(map(lambda sg: sg.to_json(['submission']), self.student_groups)),
         }
 
     def find_student_group(self, group_id):
-        for group in self.studentGroups:
+        for group in self.student_groups:
             if group.id == group_id:
                 return group
         return None
 
     def find_assignment_group(self, group_id):
-        for group in self.assignmentGroups:
+        for group in self.assignment_groups:
             if group.id == group_id:
                 return group
         return None
@@ -68,19 +68,26 @@ class CourseConfig:
 
     def find_assignment_group_by_name(self, group_name):
         print(group_name)
-        for group in self.assignmentGroups:
+        for group in self.assignment_groups:
             print("find_assignment_group_by_name", group_name, group)
             if group.name == group_name:
                 return group
         return None
 
-    def find_assignment(self, assigment_group_id, assignment_id):
-        assignmentGroup = self.find_assignment_group(assigment_group_id)
-        if not assignmentGroup:
+    def find_assignment_by_group(self, assigment_group_id, assignment_id):
+        assignment_group = self.find_assignment_group(assigment_group_id)
+        if not assignment_group:
             return None
-        for assigment in assignmentGroup.assignments:
+        for assigment in assignment_group.assignments:
             if assigment.id == assignment_id:
                 return assigment
+        return None
+
+    def find_assignment(self, assignment_id):
+        for assignment_group in self.assignment_groups:
+            for assignment in assignment_group.assignments:
+                 if assignment.id ==  assignment_id:
+                    return assignment
         return None
 
     def find_assignment_group_by_role(self, role_name):
@@ -102,7 +109,7 @@ class CourseConfig:
         return None
 
     def find_student(self, student_id):
-        for group in self.studentGroups:
+        for group in self.student_groups:
             for student in group.students:
                 if student.id == student_id:
                     return student
@@ -127,6 +134,6 @@ class CourseConfig:
         new_course_config.teachers = list(map(lambda t: Teacher.from_dict(t), data_dict['teachers']))
         new_course_config.perspectives = list(map(lambda p: Perspective.from_dict(p), data_dict['perspectives']))
         new_course_config.roles = list(map(lambda r: Role.from_dict(r), data_dict['roles']))
-        new_course_config.assignmentGroups = list(map(lambda g: AssignmentGroup.from_dict(g), data_dict['assignment_groups']))
-        new_course_config.studentGroups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['student_groups']))
+        new_course_config.assignment_groups = list(map(lambda g: AssignmentGroup.from_dict(g), data_dict['assignment_groups']))
+        new_course_config.student_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['student_groups']))
         return new_course_config

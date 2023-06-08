@@ -2,7 +2,7 @@ from canvasapi import Canvas
 import json
 from datetime import datetime
 
-from lib.config import API_URL, end_date, getDateTimeStr
+from lib.config import API_URL, get_date_time_str, get_date_time_obj
 from lib.file import read_course_config_start
 from model.Assignment import Assignment
 from model.AssignmentDate import AssignmentDate
@@ -47,12 +47,12 @@ for canvas_assignment_group in canvas_assignment_groups:
                     points_possible = 0
 
                 if overrides['lock_at']:
-                    assignment_date = overrides['lock_at']
+                    assignment_date = get_date_time_obj(overrides['lock_at'])
                 else:
                     if overrides['due_at']:
-                        assignment_date = overrides['due_at']
+                        assignment_date = get_date_time_obj(overrides['due_at'])
                     else:
-                        assignment_date = getDateTimeStr(end_date)
+                        assignment_date = course_config_start.end_date
                 if 'course_section_id' in overrides.keys():
                     section_id = overrides['course_section_id']
                 else:
@@ -67,12 +67,12 @@ for canvas_assignment_group in canvas_assignment_groups:
                 points_possible = 0
 
             if canvas_assignment['lock_at']:
-                assignment_date = canvas_assignment['lock_at']
+                assignment_date = get_date_time_obj(canvas_assignment['lock_at'])
             else:
                 if canvas_assignment['due_at']:
-                    assignment_date = canvas_assignment['due_at']
+                    assignment_date = get_date_time_obj(canvas_assignment['due_at'])
                 else:
-                    assignment_date = getDateTimeStr(end_date)
+                    assignment_date = course_config_start.end_date
             assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'],
                                     canvas_assignment['assignment_group_id'], 0,
                                     points_possible, assignment_date)
@@ -98,7 +98,7 @@ for canvas_group_category in canvas_group_categories:
     if canvas_group_category.name == course_config_start.projects_groep_name:
         canvas_groups = canvas_group_category.get_groups()
         for canvas_group in canvas_groups:
-            studentGroup = StudentGroup(canvas_group.id, canvas_group.name, 'teacher')
+            studentGroup = StudentGroup(canvas_group.id, canvas_group.name)
             course_config.studentGroups.append(studentGroup)
             print(canvas_group)
 

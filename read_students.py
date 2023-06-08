@@ -8,6 +8,7 @@ from model.AssignmentDate import AssignmentDate
 from model.Comment import Comment
 from model.Course import *
 from lib.config import actual_date, roles, API_URL
+from model.Student import Student
 
 course_config_start = read_course_config_start()
 course_config = read_course_config(course_config_start.config_file_name)

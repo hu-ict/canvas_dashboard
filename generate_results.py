@@ -1,15 +1,16 @@
 # Haalt de studenten en de projecten op. Maakt een JSON waarin de url's naar de daily wordt opgeslagen.
 from canvasapi import Canvas
 import json
-from lib.file import read_course_config_start, read_course
+from lib.file import read_start, read_course
 from model.AssignmentDate import AssignmentDate
 from model.Comment import Comment
 from model.Course import *
 from lib.config import actual_date, API_URL, NOT_GRADED
 from model.Submission import Submission
 
-course_config_start = read_course_config_start()
-course = read_course(course_config_start.course_file_name)
+
+def get_submitted_at(item):
+    return item[1].submitted_at
 
 
 def submissionBuilder(a_student, a_assignment, a_canvas_submission, a_assignment_date):
@@ -44,13 +45,8 @@ def submissionBuilder(a_student, a_assignment, a_canvas_submission, a_assignment
     if a_canvas_submission.submitted_at:
         submitted_at = get_date_time_obj(a_canvas_submission.submitted_at)
     else:
-        if a_assignment_date.lock_at:
-            submitted_at = get_date_time_obj(a_assignment_date.lock_at)
-        else:
-            if a_assignment_date.due_at:
-                submitted_at = get_date_time_obj(a_assignment_date.due_at)
-            else:
-                submitted_at = get_date_time_obj("2023-02-06T12:00:00Z")
+        l_assignment = course.find_assignment(a_assignment.id)
+        submitted_at = l_assignment.assignment_date
 
     # maak een submission en voeg de commentaren toe
     submission = Submission(a_canvas_submission.id, a_assignment.group_id, a_assignment.id, a_student.id,
@@ -69,22 +65,30 @@ def submissionBuilder(a_student, a_assignment, a_canvas_submission, a_assignment
         if this_perspective:
             this_perspective.submissions.append(submission)
 
+print("read_course_config_start()")
+course_config_start = read_start()
+print("read_course(course_config_start.course_file_name)")
+course = read_course(course_config_start.course_file_name)
 # Initialize a new Canvas object
 canvas = Canvas(API_URL, course_config_start.api_key)
 user = canvas.get_current_user()
 print(user.name)
 canvas_course = canvas.get_course(course_config_start.course_id)
+# print("Course(canvas_course.id, canvas_course.name, actual_date)")
 results = Course(canvas_course.id, canvas_course.name, actual_date)
 # kopieer de groepen en studenten vanuit de configuratie
-results.studentGroups = course.studentGroups
+# print("course.studentGroups")
+results.student_groups = course.student_groups
 
 # assignments to groups and roles
+# print("canvas_course.get_assignments(include=['overrides'])")
 canvas_assignments = canvas_course.get_assignments(include=['overrides'])
+# print("for canvas_assignment in canvas_assignments")
 for canvas_assignment in canvas_assignments:
     assignment_group = course.find_assignment_group(canvas_assignment.assignment_group_id)
     if assignment_group:
         # print("Processing G {0:8} - {1}".format(assignment_group.id, assignment_group.name))
-        assignment = course.find_assignment(assignment_group.id, canvas_assignment.id)
+        assignment = course.find_assignment_by_group(assignment_group.id, canvas_assignment.id)
         if assignment:
             print("Processing Assignment {0:6} - {1} {2}".format(assignment.id, assignment_group.name, assignment.name))
             if canvas_assignment.overrides:
@@ -97,15 +101,13 @@ for canvas_assignment in canvas_assignments:
                 student = results.find_student(canvas_submission.user_id)
                 if student:
                     submissionBuilder(student, assignment, canvas_submission, assignment_date)
+                # else:
+                #     print("Student not found", canvas_submission.user_id)
 
-
-def get_submitted_at(item):
-    return item[1].submitted_at
-
-for group in results.studentGroups:
-    for student in group.students:
-        for perspective in student.perspectives:
-            perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_at)
+# for group in results.studentGroups:
+#     for student in group.students:
+#         for perspective in student.perspectives:
+#             perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_at)
 
 with open(course_config_start.results_file_name, 'w') as f:
     dict_result = results.to_json(['assignment'])

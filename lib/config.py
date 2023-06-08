@@ -19,7 +19,7 @@ group_id_dict = {
     "TI": 62138,
 }
 
-peil_labels = ["halfweg", "eind"]
+peil_labels = ["Peilmoment halfweg", "Peilmoment eind", "Beoordeling eind"]
 
 hover_style=dict(
         bgcolor="white",
@@ -36,6 +36,15 @@ colors_bar = {
 }
 
 score_tabel = {
+    -9: "Puntenaftrek",
+    -8: "Puntenaftrek",
+    -7: "Puntenaftrek",
+    -6: "Puntenaftrek",
+    -5: "Puntenaftrek",
+    -4: "Puntenaftrek",
+    -3: "Puntenaftrek",
+    -2: "Puntenaftrek",
+    -1: "Puntenaftrek",
     0: "Geen",
     1: "In ontwikkeling",
     2: "Op niveau",
@@ -51,8 +60,15 @@ color_tabel={
     0: '#f25829',
     1: '#f2a529',
     2: '#85e043',
-    3: '#2bad4e'
+    3: '#2bad4e',
+    4: "#666666"
 }
+
+def get_marker_size(graded):
+    if graded:
+        return 10
+    else:
+        return 6
 
 roles = {"AI": "AI",
          "BIM": "BIM",

@@ -1,104 +1,47 @@
-from lib.config import template_path
-from lib.file import read_late_json, read_course, read_course_config_start, read_results
-from lib.translation_table import translation_table
-from string import Template
+from lib.build_totals import build_totals
+from lib.build_bootstrap import build_bootstrap
+from lib.build_late import build_late
+from lib.plot_totals import plot_totals
+from lib.file import read_course, read_start, read_results
 
-course_config_start = read_course_config_start()
+course_config_start = read_start()
 course = read_course(course_config_start.course_file_name)
 results = read_results(course_config_start.results_file_name)
 
-days_in_semester = (course_config_start.end_date - course_config_start.start_date).days
-semester_day = (results.actual_date - course_config_start.start_date).days
-print("Day in semester", semester_day, days_in_semester)
+actual_day = (results.actual_date - course_config_start.start_date).days
 
-index_path = template_path
+student_totals = {}
+# for perspective in course.perspectives:
+#     student_totals[perspective.name] = {}
+#     for teacher in course.
 
-# Het Bootstrap dashboard wordt hier opgebouwd
+student_totals = {
+    'student_count': 0,
+    'team': {'count': [], 'pending': {'BW': 0, 'MB': 0, 'KE': 0, 'TPM': 0, 'PVR': 0, 'MVD': 0, 'HVG': 0}, 'late': {'BW': 0, 'MB': 0, 'KE': 0, 'TPM': 0, 'PVR': 0, 'MVD': 0, 'HVG': 0}, 'to_late': {'BW': 0, 'MB': 0, 'KE': 0, 'TPM': 0, 'PVR': 0, 'MVD': 0, 'HVG': 0}},
+    'gilde': {'count': [], 'pending': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}, 'late': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}, 'to_late': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}},
+    'kennis': {'count': [], 'pending': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}, 'late': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}, 'to_late': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}},
+    'peil': {
+        'Peilmoment halfweg': {0: 0, 1: 0, 2: 0, 3: 0},
+        'Peilmoment eind': {0: 0, 1: 0, 2: 0, 3: 0},
+        'Beoordeling eind': {0: 0, 1: 0, 2: 0, 3: 0}
+    },
+    'late': {'count': []}
+}
 
-# Create a template that has placeholder for value of x
-with open(template_path+'template.html', mode='r', encoding="utf-8") as file_index_template:
-    string_index_html = file_index_template.read()
-    index_html_template = Template(string_index_html)
+submissions_late = {
+    'team': {'BW': [], 'MB': [], 'KE': [], 'TPM': [], 'PVR': [], 'MVD': [], 'HVG': []},
+    'gilde': {'AI': [], 'BIM': [], 'CSC': [], 'SD_B': [], 'SD_F': [], 'TI': []},
+    'kennis': {'AI': [], 'BIM': [], 'CSC': [], 'SD_B': [], 'SD_F': [], 'TI': []}
+}
 
-with open(template_path+'studentgroup.html', mode='r', encoding="utf-8") as file_group_template:
-    string_group_html = file_group_template.read()
-    group_html_template = Template(string_group_html)
+print("build_bootstrap(course_config_start, course, results)")
+build_bootstrap(course_config_start, course, results)
 
-with open(template_path+'student.html', mode='r', encoding="utf-8") as file_student_template:
-    string_student_html = file_student_template.read()
-    student_html_template = Template(string_student_html)
+print("build_totals(results, student_totals, submissions_late)")
+build_totals(results, student_totals, submissions_late)
 
-with open(template_path+'coach.html', mode='r', encoding="utf-8") as file_coach_template:
-    string_coach_html = file_coach_template.read()
-    coach_html_template = Template(string_coach_html)
+print("plot_totals(course_config_start, course, student_totals)")
+plot_totals(course_config_start, course, student_totals)
 
-# Substitute value of x in above template
-submission_count = 0
-not_graded_count = 0
-student_count = 0
-
-coaches = {}
-groups_html_string = ''
-for group in results.studentGroups:
-    students_html_string = ''
-    if len(group.teachers) > 0:
-        teacher_id = group.teachers[0]
-        teacher = course.find_teacher(teacher_id)
-        coaches[teacher.id] = teacher
-    else:
-        teacher = None
-
-    for student in group.students:
-        student_count += 1
-        role = student.get_role()
-        role_obj = course.get_role(role)
-        color = role_obj.btn_color
-        file_name = "./plotly/" + student.name.replace(" ", "%20") + ".html"
-        #       file_name = plot_path + student.name + ".html"
-        asci_file_name = file_name.translate(translation_table)
-        student_html_string = student_html_template.substitute(
-            {'btn_color': color, 'student_name': student.name, 'student_role': role_obj.name,
-             'student_file': asci_file_name})
-        students_html_string += student_html_string
-
-        for perspective in student.perspectives:
-            for submission in perspective.submissions:
-                submission_count += 1
-                if not submission.graded:
-                    not_graded_count += 1
-    if teacher:
-        group_html_string = group_html_template.substitute({'coach': teacher.initials, 'student_group_name': group.name, 'students': students_html_string})
-    else:
-        group_html_string = group_html_template.substitute({'coach': "Leeg", 'student_group_name': group.name, 'students': students_html_string})
-
-    groups_html_string += group_html_string
-
-
-def get_initials(item):
-    return item[1].initials
-
-
-coaches = dict(sorted(coaches.items(), key=lambda item: get_initials(item)))
-
-coaches_html_string = ''
-for coach in coaches.values():
-    coaches_html_string += coach_html_template.substitute({'coach_name': coach.name, 'coach_initials': coach.initials})
-
-actual_date_str = results.actual_date.strftime("%d-%m-%Y %H:%M")
-index_html_string = index_html_template.substitute({'course_name': course.name, 'aantal_studenten': student_count, 'aantal_teams': len(results.studentGroups),
-                                                    'submission_count': submission_count, 'not_graded_count': not_graded_count,
-                                                    'actual_date': actual_date_str, 'semester_day': semester_day,
-                                                    'percentage': str(semester_day/1.5)+"%",
-                                                    'coaches': coaches_html_string,
-                                                    'student_groups': groups_html_string})
-
-with open(index_path+'index.html', mode='w', encoding="utf-8") as file_index:
-    file_index.write(index_html_string)
-
-with open(template_path+'template_late.html', mode='r', encoding="utf-8") as file_late_template:
-    string_late_html = file_late_template.read()
-    late_html_template = Template(string_late_html)
-
-with open(template_path+'template_submission.html', mode='r', encoding="utf-8") as file_submission_template:
-    string_submission_html = file_submission_template.read()
-    submission_html_template = Template(string_submission_html)
+print("build_late(course_config_start.course_id, submissions_late)")
+build_late(course_config_start.course_id, submissions_late)
