@@ -62,7 +62,7 @@ def plot_totals(course_config_start, course, student_totals):
         col += 1
         values = []
         labels = []
-        colors = [color_tabel[0]]
+        colors = []
         for value in student_totals['peil'][peil_label].values():
             values.append(value)
         for key in student_totals['peil'][peil_label].keys():
