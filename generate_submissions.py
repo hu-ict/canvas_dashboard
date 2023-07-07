@@ -1,7 +1,7 @@
 # Haalt de studenten en de projecten op. Maakt een JSON waarin de url's naar de daily wordt opgeslagen.
 from canvasapi import Canvas
 import json
-from lib.file import read_start, read_course
+from lib.file import read_start, read_course, read_results
 from model.AssignmentDate import AssignmentDate
 from model.Comment import Comment
 from model.Course import *
@@ -64,7 +64,7 @@ def submissionBuilder(a_student, a_assignment, a_canvas_submission, a_assignment
     if l_perspective:
         this_perspective = student.get_perspective(l_perspective.name)
         if this_perspective:
-            this_perspective.submissions.append(submission)
+            this_perspective.put_submission(submission)
 
 
 print("read_course_config_start()")
@@ -77,10 +77,8 @@ user = canvas.get_current_user()
 print(user.name)
 canvas_course = canvas.get_course(course_config_start.course_id)
 # print("Course(canvas_course.id, canvas_course.name, actual_date)")
-results = Course(canvas_course.id, canvas_course.name, actual_date)
-# kopieer de groepen en studenten vanuit de configuratie
-# print("course.studentGroups")
-results.student_groups = course.student_groups
+results = read_results(course_config_start.results_file_name)
+results.actual_date = actual_date
 
 # assignments to groups and roles
 # print("canvas_course.get_assignments(include=['overrides'])")
@@ -91,6 +89,7 @@ for canvas_assignment in canvas_assignments:
     if assignment_group:
         # print("Processing G {0:8} - {1}".format(assignment_group.id, assignment_group.name))
         assignment = course.find_assignment_by_group(assignment_group.id, canvas_assignment.id)
+        # only assignments in assignment_groups are returned
         if assignment:
             print("Processing Assignment {0:6} - {1} {2}".format(assignment.id, assignment_group.name, assignment.name))
             if canvas_assignment.overrides:
@@ -98,14 +97,14 @@ for canvas_assignment in canvas_assignments:
                     assignment_date = AssignmentDate(override.id, override.due_at, override.lock_at)
             else:
                 assignment_date = AssignmentDate(canvas_assignment.id, canvas_assignment.due_at, canvas_assignment.lock_at)
-
-            canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments'])
-            for canvas_submission in canvas_submissions:
-                student = results.find_student(canvas_submission.user_id)
-                if student:
-                    submissionBuilder(student, assignment, canvas_submission, assignment_date)
-                # else:
-                #     print("Student not found", canvas_submission.user_id)
+            if (get_date_time_obj(get_date_time_str(actual_date)) - get_date_time_obj(assignment_date.date_str())).days < 14:
+                canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments'])
+                for canvas_submission in canvas_submissions:
+                    student = results.find_student(canvas_submission.user_id)
+                    if student:
+                        submissionBuilder(student, assignment, canvas_submission, assignment_date)
+                    # else:
+                    #     print("Student not found", canvas_submission.user_id)
 
 # for group in results.studentGroups:
 #     for student in group.students:

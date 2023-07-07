@@ -5,11 +5,9 @@ import plotly.graph_objs as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 from lib.config import plot_path, voortgang_tabel, date_to_day, peil_labels, colors_bar, hover_style, score_tabel, \
-    color_tabel, get_marker_size
+    color_tabel, get_marker_size, beoordeling_tabel
 from lib.file import read_start, read_course, read_results
-
 from lib.translation_table import translation_table
-from model.Assignment import Assignment
 
 traces = []
 start = read_start()
@@ -23,21 +21,24 @@ bins_bar = [0, 0.9, 1.9, 2.9, 3.9, 4.9]
 # Define bar properties
 specs = [[{'type': 'scatter', 'colspan': 2, "rowspan": 2}, None, {'type': 'scatter', 'colspan': 2, "rowspan": 2}, None],
          [None, None, None, None],
-         [{'type': 'scatter', "colspan": 2, "rowspan": 2}, None, {'type': 'bar', "rowspan": 2}, {'type': 'domain'}],
-         [None, None, None, {'type': 'domain'}]]
-titles = ["Team", "Kennis", "Gilde", "Perspectief", "Halfweg", "Eind"]  # , "Peilmomenten"
+         [{'type': 'scatter', "colspan": 2, "rowspan": 2}, None, {'type': 'domain'}, {'type': 'bar'}],
+         [None, None, {'type': 'domain'}, {'type': 'domain'}]]
+titles = ["Team", "Kennis", "Gilde", "Halfweg", "Peilmoment", "Ná sprint 7", "Beoordeling"]
 positions = {'team': {'row': 1, 'col': 1}, 'gilde': {'row': 3, 'col': 1}, 'kennis': {'row': 1, 'col': 3},
-             'peil': {'row': 3, 'col': 3}, 'halfweg': {'row': 3, 'col': 4}, 'eind': {'row': 4, 'col': 4}}
+             'peil': {'row': 3, 'col': 4}, 'halfweg': {'row': 3, 'col': 3}, 'eind': {'row': 4, 'col': 3},
+             'beoordeling': {'row': 4, 'col': 4}}
 
 print(colors_bar.keys())
 
 
-def calc_dev(iterations, a, b, c):
+def calc_dev(iterations, r, a, b, c):
     iteration_list = []
-    for x in range(iterations):
+    for x in range(iterations-r):
         y = a*x*x+b*x+c
         if y < 0:
             y = 0
+        iteration_list.append(y)
+    for x in range(r):
         iteration_list.append(y)
     return iteration_list
 
@@ -58,16 +59,16 @@ def peil_contruct(a_course):
 def plot_bandbreedte(a_row, a_col, a_fig, assignment_group):
     if assignment_group.total_points <= 0:
         return
-    x_time = calc_dev(days_in_semester-14, 0, 1, 0)
+    x_time = calc_dev(days_in_semester, 0, 0, 1, 0)
     # bereken bandbreedte
     if assignment_group.name == "TEAM":
-        band_lower = calc_dev(days_in_semester-14, 0.0012, 0.05, -1)
-        band_upper = calc_dev(days_in_semester-14, 0.001786, 0.05, 8)
+        band_lower = calc_dev(days_in_semester, 14, 0.0012, 0.05, -1)
+        band_upper = calc_dev(days_in_semester, 14, 0.001786, 0.05, 6)
     else:
         b = assignment_group.lower_points / (days_in_semester-14 - 30)
         c = - 30 * b
-        band_lower = calc_dev(days_in_semester-14, 0, b, c)
-        band_upper = calc_dev(days_in_semester-14, 0, b, c + assignment_group.upper_points - assignment_group.lower_points)
+        band_lower = calc_dev(days_in_semester, 14, 0, b, c)
+        band_upper = calc_dev(days_in_semester, 14, 0, b, c + assignment_group.upper_points - assignment_group.lower_points)
 
     a_fig.add_trace(
         go.Scatter(
@@ -186,7 +187,10 @@ def get_bar_hover(a_peilmoment):
     if a_peilmoment:
         if a_peilmoment.graded:
             score = a_peilmoment.score + 1
-        hover = a_peilmoment.assignment_name + " - " + voortgang_tabel[int(score-1)]
+        if "Beoordeling" in a_peilmoment.assignment_name:
+            hover = a_peilmoment.assignment_name + " - " + beoordeling_tabel[int(score - 1)]
+        else:
+            hover = a_peilmoment.assignment_name + " - " + voortgang_tabel[int(score-1)]
         for comment in a_peilmoment.comments:
             value = comment.author_name + " - " + comment.comment
             wrapper = textwrap.TextWrapper(width=75)
@@ -207,7 +211,7 @@ def plot_voortgang(a_row, a_col, a_fig, a_course, a_perspective):
         for assignment in peil_construction[peil]:
             perspective_str = get_bar_perspective(a_course, assignment)
             if perspective_str:
-                submission = a_perspective.get_submission(assignment.id)
+                submission = a_perspective.get_submission_by_assignment(assignment.id)
                 x_ax.append(peil)
                 score.append(get_bar_score(submission))
                 perspective.append(perspective_str)
@@ -330,10 +334,22 @@ def plot_student(a_course, a_student):
             plot_voortgang(row, col, fig, a_course, perspective)
             # Voortgang overall
             if a_student.get_peilmoment(247774):
-                plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig, a_student.get_peilmoment(247774).score + 0.5)
+                plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig,
+                           a_student.get_peilmoment(247774).score + 0.5)
             else:
                 plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig, 0.1)
-            plot_gauge(positions['eind']['row'], positions['eind']['col'], fig, 0.1)
+
+            if a_student.get_peilmoment(252847):
+                plot_gauge(positions['eind']['row'], positions['eind']['col'], fig,
+                           a_student.get_peilmoment(252847).score + 0.5)
+            else:
+                plot_gauge(positions['eind']['row'], positions['eind']['col'], fig, 0.1)
+
+            if a_student.get_peilmoment(253129):
+                plot_gauge(positions['beoordeling']['row'], positions['beoordeling']['col'], fig,
+                           a_student.get_peilmoment(253129).score + 0.5)
+            else:
+                plot_gauge(positions['beoordeling']['row'], positions['beoordeling']['col'], fig, 0.1)
         else:
             assigment_group = a_course.find_assignment_group(perspective.assignment_groups[0])
             plot_bandbreedte(row, col, fig, assigment_group)

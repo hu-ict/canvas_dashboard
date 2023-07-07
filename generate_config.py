@@ -66,6 +66,10 @@ for canvas_assignment_group in canvas_assignment_groups:
             else:
                 points_possible = 0
 
+            if canvas_assignment['unlock_at']:
+                unlock_date = canvas_assignment['unlock_at']
+            else:
+                unlock_date = course_config_start.start_date
             if canvas_assignment['lock_at']:
                 assignment_date = get_date_time_obj(canvas_assignment['lock_at'])
             else:
@@ -75,7 +79,7 @@ for canvas_assignment_group in canvas_assignment_groups:
                     assignment_date = course_config_start.end_date
             assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'],
                                     canvas_assignment['assignment_group_id'], 0,
-                                    points_possible, assignment_date)
+                                    points_possible, assignment_date, unlock_date)
             assignment_group.append_assignment(assignment)
 
     assignment_group.total_points = group_points_possible

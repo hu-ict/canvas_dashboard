@@ -10,10 +10,6 @@ results = read_results(course_config_start.results_file_name)
 
 actual_day = (results.actual_date - course_config_start.start_date).days
 
-student_totals = {}
-# for perspective in course.perspectives:
-#     student_totals[perspective.name] = {}
-#     for teacher in course.
 
 student_totals = {
     'student_count': 0,
@@ -21,9 +17,24 @@ student_totals = {
     'gilde': {'count': [], 'pending': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}, 'late': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}, 'to_late': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}},
     'kennis': {'count': [], 'pending': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}, 'late': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}, 'to_late': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}},
     'peil': {
-        'Peilmoment halfweg': {0: 0, 1: 0, 2: 0, 3: 0},
-        'Peilmoment eind': {0: 0, 1: 0, 2: 0, 3: 0},
-        'Beoordeling eind': {0: 0, 1: 0, 2: 0, 3: 0}
+        'Halfweg': {
+            'overall': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+            'team': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+            'gilde': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+            'kennis': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+        },
+        'Sprint 7': {
+            'overall': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+            'team': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+            'gilde': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+            'kennis': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+        },
+        'Beoordeling': {
+            'overall': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+            'team': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+            'gilde': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+            'kennis': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+        }
     },
     'late': {'count': []}
 }

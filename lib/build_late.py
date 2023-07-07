@@ -1,7 +1,8 @@
 from operator import itemgetter
 from string import Template
 
-from lib.config import template_path
+from lib.config import template_path, get_date_time_loc, get_date_time_obj
+
 
 def build_late(a_course_id, a_submissions_late):
     for l_perspective in a_submissions_late.keys():
@@ -57,7 +58,7 @@ def build_late(a_course_id, a_submissions_late):
             late_list_html_total_string = ''
             for late in late_list:
                 url = "https://canvas.hu.nl/courses/"+str(a_course_id)+"/gradebook/speed_grader?assignment_id="+str(late['assignment_id'])+"&student_id="+str(late['student_id'])
-                submission_html_string = submission_html_template.substitute({'submission_id': late['assignment_id'], 'assignment_name': late['assignment_name'], 'submission_date': late['submitted_at'], 'url': url})
+                submission_html_string = submission_html_template.substitute({'submission_id': late['assignment_id'], 'assignment_name': late['assignment_name'], 'submission_date': get_date_time_loc(get_date_time_obj(late['submitted_at'])), 'url': url})
                 late_list_html_total_string += submission_html_string
             late_list_html_string = late_list_html_template.substitute({'submissions': late_list_html_total_string})
             with open(template_path+"late_"+l_perspective+"_"+l_selector+".html", mode='w', encoding="utf-8") as file_late_list:

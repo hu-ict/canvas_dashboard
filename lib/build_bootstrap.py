@@ -68,6 +68,22 @@ def build_bootstrap(a_course_config_start, a_course, a_results):
 
         groups_html_string += group_html_string
 
+    # for role in a_course.roles:
+    #     for group in a_results.student_groups:
+    #         group_html_string = group_html_template.substitute(
+    #             {'coach': "Leeg", 'student_group_name': group.name, 'students': students_html_string})
+    #         for student in group.students:
+    #             if role.short in student.roles:
+    #                 role_obj = a_course.get_role(role)
+    #                 color = role_obj.btn_color
+    #                 file_name = "./plotly/" + student.name.replace(" ", "%20") + ".html"
+    #                 #       file_name = plot_path + student.name + ".html"
+    #                 asci_file_name = file_name.translate(translation_table)
+    #                 student_html_string = student_html_template.substitute(
+    #                     {'btn_color': color, 'student_name': student.name, 'student_role': role_obj.name,
+    #                      'student_file': asci_file_name})
+    #                 students_html_string += student_html_string
+
     def get_initials(item):
         return item[1].initials
 

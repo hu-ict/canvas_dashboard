@@ -31,7 +31,36 @@ def get_submitted_at(item):
 def count_student(a_student_totals, a_student):
     for l_perspective in a_student.perspectives:
         if l_perspective.name == "peil":
-            a_student_totals[l_perspective.name]["Peilmoment halfweg"][get_peil(l_perspective.submissions, ["halfweg", "Overall"])] += 1
+            peil = get_peil(l_perspective.submissions, ["halfweg", "Overall"])
+            a_student_totals[l_perspective.name]["Halfweg"]['overall'][peil] += 1
+            peil = get_peil(l_perspective.submissions, ["Sprint 7", "Overall"])
+            a_student_totals[l_perspective.name]["Sprint 7"]['overall'][peil] += 1
+            peil = get_peil(l_perspective.submissions, ["Beoordeling", "Overall"])
+            a_student_totals[l_perspective.name]["Beoordeling"]['overall'][peil] += 1
+
+            peil = get_peil(l_perspective.submissions, ["halfweg", "Kennis"])
+            a_student_totals[l_perspective.name]["Halfweg"]['kennis'][peil] += 1
+            peil = get_peil(l_perspective.submissions, ["Sprint 7", "Kennis"])
+            a_student_totals[l_perspective.name]["Sprint 7"]['kennis'][peil] += 1
+            peil = get_peil(l_perspective.submissions, ["Beoordeling", "Kennis"])
+            a_student_totals[l_perspective.name]["Beoordeling"]['kennis'][peil] += 1
+
+            peil = get_peil(l_perspective.submissions, ["halfweg", "Gilde"])
+            a_student_totals[l_perspective.name]["Halfweg"]['gilde'][peil] += 1
+            peil = get_peil(l_perspective.submissions, ["Sprint 7", "Gilde"])
+            a_student_totals[l_perspective.name]["Sprint 7"]['gilde'][peil] += 1
+            peil = get_peil(l_perspective.submissions, ["Beoordeling", "Gilde"])
+            a_student_totals[l_perspective.name]["Beoordeling"]['gilde'][peil] += 1
+
+            peil = get_peil(l_perspective.submissions, ["halfweg", "Team"])
+            a_student_totals[l_perspective.name]["Halfweg"]['team'][peil] += 1
+            peil = get_peil(l_perspective.submissions, ["Sprint 7", "Team"])
+            a_student_totals[l_perspective.name]["Sprint 7"]['team'][peil] += 1
+            peil = get_peil(l_perspective.submissions, ["Beoordeling", "Team"])
+            a_student_totals[l_perspective.name]["Beoordeling"]['team'][peil] += 1
+
+
+
         elif l_perspective.name == "kennis":
             add_total(a_student_totals[l_perspective.name]['count'], int(student_total(l_perspective.submissions)))
         else:
@@ -65,7 +94,8 @@ def build_totals(a_results, a_student_totals, a_submissions_late):
             count_student(a_student_totals, student)
             for perspective in student.perspectives:
                 for submission in perspective.submissions:
-                    check_for_late(a_student_totals, a_submissions_late, student, submission, perspective.name, a_results.actual_date)
+                    check_for_late(a_student_totals, a_submissions_late, student, submission,
+                                   perspective.name, a_results.actual_date)
 
 
 

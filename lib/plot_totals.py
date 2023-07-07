@@ -1,19 +1,28 @@
 import numpy as np
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-from lib.config import peil_labels, voortgang_tabel, color_tabel, hover_style, plot_path
+from lib.config import peil_labels, voortgang_tabel, color_tabel, hover_style, plot_path, beoordeling_tabel
+
 
 def plot_totals(course_config_start, course, student_totals):
-    titles = ["Team", "Gilde", 'Kennis', 'Team', 'Gilde', 'Kennis', 'Halfweg', 'Eind', 'Beoordeling', 'Vertraging']
+    titles = ["Team", "Gilde", 'Kennis', 'Team', 'Gilde', 'Kennis',
+              'Halfweg Overall', 'Sprint 7 Overall', 'Beoordeling Overall',
+              'Halfweg Team', 'Sprint 7 Team', 'Beoordeling Team',
+              'Halfweg Gilde', 'Sprint 7 Gilde', 'Beoordeling Gilde',
+              'Halfweg Kennis', 'Sprint 7 Kennis', 'Beoordeling Kennis',
+              'Vertraging']
     specs = [
         [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
         [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
         [{'type': 'domain'}, {'type': 'domain'}, {'type': 'domain'}],
+        [{'type': 'domain'}, {'type': 'domain'}, {'type': 'domain'}],
+        [{'type': 'domain'}, {'type': 'domain'}, {'type': 'domain'}],
+        [{'type': 'domain'}, {'type': 'domain'}, {'type': 'domain'}],
         [{'type': 'bar'}, None, None]
     ]
 
-    fig = make_subplots(rows=4, cols=3, specs=specs, subplot_titles=titles)
-    fig.update_layout(height=1400, width=1200, showlegend=False)
+    fig = make_subplots(rows=7, cols=3, specs=specs, subplot_titles=titles)
+    fig.update_layout(height=2400, width=1200, showlegend=False)
     data = go.Histogram(x=np.array(student_totals['team']['count']))
     fig.add_trace(data, 1, 1)
     data = go.Histogram(x=np.array(student_totals['gilde']['count']), marker=dict(color="#f6c23e"))
@@ -55,35 +64,44 @@ def plot_totals(course_config_start, course, student_totals):
             fig.add_trace(go.Bar(x=x_team, y=y_counts, name="To Late", marker=dict(color="#555555")), 2, col)
 
     data = go.Histogram(x=np.array(student_totals['late']['count']))
-    fig.add_trace(data, 4, 1)
+    fig.add_trace(data, 7, 1)
 
-    col = 0
-    for peil_label in peil_labels:
-        col += 1
-        values = []
-        labels = []
-        colors = []
-        for value in student_totals['peil'][peil_label].values():
-            values.append(value)
-        for key in student_totals['peil'][peil_label].keys():
-            labels.append(voortgang_tabel[key])
-        for color in color_tabel.values():
-            colors.append(color)
-        # print(labels)
-        # print(values)
-        # print(colors)
-        trace = go.Pie(
-            values=values,
-            labels=labels, marker_colors=colors,
-            direction='clockwise',
-            sort=False, hoverlabel=hover_style)
-        # data = [trace]
-        # fig = go.Figure(data=data)
+    row = 2
+    for l_perspective in ['overall', 'team', 'gilde', 'kennis']:
+        col = 0
+        row += 1
+        for peil_label in peil_labels:
+            col += 1
+            values = []
+            labels = []
+            colors = []
+            for value in student_totals['peil'][peil_label][l_perspective].values():
+                values.append(value)
+            print(peil_label)
+            if "Beoordeling" == peil_label:
+                print("-->",peil_label)
+                for key in student_totals['peil'][peil_label][l_perspective].keys():
+                    labels.append(beoordeling_tabel[key])
+            else:
+                for key in student_totals['peil'][peil_label][l_perspective].keys():
+                    labels.append(voortgang_tabel[key])
+            for color in color_tabel.values():
+                colors.append(color)
+            # print(labels)
+            # print(values)
+            # print(colors)
+            trace = go.Pie(
+                values=values,
+                labels=labels, marker_colors=colors,
+                direction='clockwise',
+                sort=False, hoverlabel=hover_style)
+            # data = [trace]
+            # fig = go.Figure(data=data)
 
-        fig.add_trace(
-            trace,
-            3, col)
-        fig.update_yaxes(title_text="Aantal", range=[0, 40], row=2, col=col)
+            fig.add_trace(
+                trace,
+                row, col)
+            # fig.update_yaxes(title_text="Aantal", range=[0, 40], row=row, col=col)
 
     file_name = plot_path + "totals" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")

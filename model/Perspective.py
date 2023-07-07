@@ -20,11 +20,24 @@ class Perspective:
             line += " s " + str(submission) + "\n"
         return line
 
-    def get_submission(self, assigment_id):
+    def get_submission_by_assignment(self, assigment_id):
         for submission in self.submissions:
             if submission.assignment_id == assigment_id:
                 return submission
         return None
+
+    def put_submission(self, a_submission):
+        index = -1
+        for i in range(len(self.submissions)):
+            if self.submissions[i].id == a_submission.id:
+                index = i
+                break
+        if index >= 0:
+            self.submissions[index] = a_submission
+        else:
+            self.submissions.append(a_submission)
+        return
+
 
     @staticmethod
     def from_dict(data_dict):

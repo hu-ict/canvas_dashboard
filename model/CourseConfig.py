@@ -5,6 +5,7 @@ from model.Section import Section
 from model.StudentGroup import StudentGroup
 from model.Teacher import Teacher
 
+
 class CourseConfig:
     def __init__(self, name):
         self.name = name
@@ -24,7 +25,7 @@ class CourseConfig:
         # for role in self.roles:
         #     line += str(role)
         for perspectives in self.perspectives:
-            line += str(perspectives)+"\n"
+            line += str(perspectives) + "\n"
         for assignment_group in self.assignment_groups:
             line += str(assignment_group)
         for student_group in self.student_groups:
@@ -86,7 +87,7 @@ class CourseConfig:
     def find_assignment(self, assignment_id):
         for assignment_group in self.assignment_groups:
             for assignment in assignment_group.assignments:
-                 if assignment.id ==  assignment_id:
+                if assignment.id == assignment_id:
                     return assignment
         return None
 
@@ -134,6 +135,7 @@ class CourseConfig:
         new_course_config.teachers = list(map(lambda t: Teacher.from_dict(t), data_dict['teachers']))
         new_course_config.perspectives = list(map(lambda p: Perspective.from_dict(p), data_dict['perspectives']))
         new_course_config.roles = list(map(lambda r: Role.from_dict(r), data_dict['roles']))
-        new_course_config.assignment_groups = list(map(lambda g: AssignmentGroup.from_dict(g), data_dict['assignment_groups']))
+        new_course_config.assignment_groups = list(
+            map(lambda g: AssignmentGroup.from_dict(g), data_dict['assignment_groups']))
         new_course_config.student_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['student_groups']))
         return new_course_config
