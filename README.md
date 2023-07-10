@@ -69,5 +69,11 @@ Hier worden de `projects` en `assignment_groups` aan de `teachers` gekoppeld.
 - `assignment_groups` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `perspective`.
 ## Stap 4
 Door het uitvoeren van het Python script `generate_course.py` wordt de json bestand `course_file_name` gemaakt. De configuratie voor de `course` is nu klaar. Wanneer de structuur van studenten en assigments niet wijzigd kunnen bij een snapshot stap 1 tm 4 overgeslagen worden.
-
-De volgende stap is de resultaten uitlezen uit Canvas. Er wordt intensief gebruik gemaakt van de Canvas-API.
+## Stap 5
+De volgende stap is de resultaten/submissions uitlezen uit Canvas. Er wordt intensief gebruik gemaakt van de Canvas-API. Hier zijn twee varianten beschikbaar:
+- `generate_results.py`
+- `generate_submissions.py`
+## Stap 6
+Genereer de visuals:
+- `generate_plotly.py`
+- `generate_dashboard.py`
