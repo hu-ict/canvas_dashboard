@@ -48,11 +48,26 @@ Verder worden de attributen aangemaakt:
 Dit bestand is ook weer een JSON-bestand met de naam `config_file_name` uit `start.json`
 ## Stap 3
 Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica.
+### Roles
+Vullen van de rollen
+```
+    {
+      "short": "AI",
+      "name": "AI - Engineer",
+      "btn_color": "btn-warning",
+      "sections": []
+    },
+```
 ### Secties
-Verwijder de niet relevante `secties`.
+- Verwijder de niet relevante `secties`.
+- Verrijk een sectie met de `role`
 ### Teachers
-Hier worden de projecten en assignment_groups aan de docenten gekoppeld. 
-- Projecten hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per docent.
-- assignment_groups hebben ook een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per docent.
+Hier worden de `projects` en `assignment_groups` aan de `teachers` gekoppeld. 
+- `projects` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`.
+- `assignment_groups` hebben ook een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`.
+### Perspectives
+- `assignment_groups` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `perspective`.
+## Stap 4
+Door het uitvoeren van het Python script `generate_course.py` wordt de json bestand `course_file_name` gemaakt. De configuratie voor de `course` is nu klaar. Wanneer de structuur van studenten en assigments niet wijzigd kunnen bij een snapshot stap 1 tm 4 overgeslagen worden.
 
 De volgende stap is de resultaten uitlezen uit Canvas. Er wordt intensief gebruik gemaakt van de Canvas-API.
