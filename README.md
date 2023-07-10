@@ -22,23 +22,15 @@ Hier worden drie attributen in JSON formaat opgegeven:
   "perspectives": [
     {
       "name": "team",
-      "submissions": [],
-      "assignment_groups": []
     },
     {
       "name": "gilde",
-      "submissions": [],
-      "assignment_groups": []
     },
     {
       "name": "kennis",
-      "submissions": [],
-      "assignment_groups": []
     },
     {
       "name": "peil",
-      "submissions": [],
-      "assignment_groups": []
     }
   ]
 
