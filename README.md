@@ -10,8 +10,38 @@ Hier worden drie attributen in JSON formaat opgegeven:
 ```json 
 {
   "api_key": "api_key from Canvas",
-  "course_id": 32666,
-  "config_file_name": "course_config_inno.json"
+  "course_id": 39872,
+  "projects_groep_name": "Project Groups",
+  "slb_groep_name": "SLB Groep",
+  "peil_perspective": "peil",
+  "config_file_name": "config_sep23.json",
+  "course_file_name": "course_sep23.json",
+  "results_file_name": "results_sep23.json",
+  "start_date": "2023-09-04T00:00:00Z",
+  "end_date": "2024-02-02T23:59:59Z",
+  "perspectives": [
+    {
+      "name": "team",
+      "submissions": [],
+      "assignment_groups": []
+    },
+    {
+      "name": "gilde",
+      "submissions": [],
+      "assignment_groups": []
+    },
+    {
+      "name": "kennis",
+      "submissions": [],
+      "assignment_groups": []
+    },
+    {
+      "name": "peil",
+      "submissions": [],
+      "assignment_groups": []
+    }
+  ]
+
 }
 ```
 De bestandsnaam is de output van het programma `generate_config.py`. De Canvas API wordt aangeroepen om de structuur van Canvas uit te lezen.
