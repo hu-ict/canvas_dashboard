@@ -38,9 +38,9 @@ Hier worden attributen in JSON formaat opgegeven:
 ```
 ## Stap 2
 Door het uitvoeren van het Python script `generate_config.py`. De Canvas API wordt aangeroepen om de structuur van Canvas uit te lezen.
+- Canvas secties (Sections)
 - Opdrachtgroepen (AssignmentGroups)
 - Projectgroepen 
-- Canvas secties (Sections)
 - Docenten (Users)
 Verder worden de attributen aangemaakt:
 - Perspectiven
@@ -48,6 +48,11 @@ Verder worden de attributen aangemaakt:
 Dit bestand is ook weer een JSON-bestand met de naam `config_file_name` uit `start.json`
 ## Stap 3
 Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica.
+### Secties
+- Verwijder de niet relevante `secties`.
+- Verrijk een sectie met de `role`, dit is de short name van de `role` uit de `roles` lijst in deze json.
+### Perspectives
+- `assignment_groups` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `perspective`.
 ### Roles
 Vullen van de rollen
 ```
@@ -55,18 +60,14 @@ Vullen van de rollen
       "short": "AI",
       "name": "AI - Engineer",
       "btn_color": "btn-warning",
-      "sections": []
+      "sections": [],
+      "assignment_groups": [62149]
     },
 ```
-### Secties
-- Verwijder de niet relevante `secties`.
-- Verrijk een sectie met de `role`
 ### Teachers
 Hier worden de `projects` en `assignment_groups` aan de `teachers` gekoppeld. 
 - `projects` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`.
 - `assignment_groups` hebben ook een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`.
-### Perspectives
-- `assignment_groups` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `perspective`.
 ## Stap 4
 Door het uitvoeren van het Python script `generate_course.py` wordt de json bestand `course_file_name` gemaakt. De configuratie voor de `course` is nu klaar. Wanneer de structuur van studenten en assigments niet wijzigd kunnen bij een snapshot stap 1 tm 4 overgeslagen worden.
 ## Stap 5
