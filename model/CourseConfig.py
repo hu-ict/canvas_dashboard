@@ -15,6 +15,7 @@ class CourseConfig:
         self.teachers = []
         self.assignment_groups = []
         self.student_groups = []
+        self.slb_groups = []
 
     def __str__(self):
         line = f'CourseConfig({self.name})\n'
@@ -41,6 +42,7 @@ class CourseConfig:
             'teachers': list(map(lambda t: t.to_json(), self.teachers)),
             'assignment_groups': list(map(lambda ag: ag.to_json(scope), self.assignment_groups)),
             'student_groups': list(map(lambda sg: sg.to_json(['submission']), self.student_groups)),
+            'slb_groups': list(map(lambda sg: sg.to_json(scope), self.slb_groups)),
         }
 
     def find_student_group(self, group_id):
@@ -75,6 +77,13 @@ class CourseConfig:
                 return group
         return None
 
+    def find_assignment_group_by_role(self, a_role):
+        print("find_assignment_group_by_role", a_role)
+        for role in self.roles:
+            if role.short == a_role:
+                return role.assignment_groups[0]
+        return None
+
     def find_assignment_by_group(self, assigment_group_id, assignment_id):
         assignment_group = self.find_assignment_group(assigment_group_id)
         if not assignment_group:
@@ -91,7 +100,7 @@ class CourseConfig:
                     return assignment
         return None
 
-    def find_assignment_group_by_role(self, role_name):
+    def find_assignment_group_by_role_name(self, role_name):
         for role in self.roles:
             if role.name == role_name:
                 return self.find_assignment_group(role.assignment_group_id)

@@ -97,7 +97,7 @@ for canvas_assignment in canvas_assignments:
                     assignment_date = AssignmentDate(override.id, override.due_at, override.lock_at)
             else:
                 assignment_date = AssignmentDate(canvas_assignment.id, canvas_assignment.due_at, canvas_assignment.lock_at)
-            if (get_date_time_obj(get_date_time_str(actual_date)) - get_date_time_obj(assignment_date.date_str())).days < 14:
+            if (get_date_time_obj(get_date_time_str(actual_date)) - get_date_time_obj(assignment_date.date_str())).days < 21:
                 canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments'])
                 for canvas_submission in canvas_submissions:
                     student = results.find_student(canvas_submission.user_id)

@@ -59,15 +59,13 @@ def count_student(a_student_totals, a_student):
             peil = get_peil(l_perspective.submissions, ["Beoordeling", "Team"])
             a_student_totals[l_perspective.name]["Beoordeling"]['team'][peil] += 1
 
-
-
         elif l_perspective.name == "kennis":
             add_total(a_student_totals[l_perspective.name]['count'], int(student_total(l_perspective.submissions)))
         else:
             add_total(a_student_totals[l_perspective.name]['count'], int(student_total(l_perspective.submissions)))
 
 
-def check_for_late(a_student_totals, a_submissions_late, a_student, a_submission, a_perspective, a_actual_date):
+def check_for_late(a_student_totals, a_submissions_pending, a_student, a_submission, a_perspective, a_actual_date):
     if not a_submission.graded:
         if a_student.coach_initials != "None":
             if a_perspective == 'team':
@@ -77,10 +75,10 @@ def check_for_late(a_student_totals, a_submissions_late, a_student, a_submission
         else:
             l_selector = a_student.get_role()
         late_days = (a_actual_date - a_submission.submitted_at).days
+        a_submissions_pending[a_perspective][l_selector].append(a_submission.to_json())
         if late_days <= 7:
             a_student_totals[a_perspective]['pending'][l_selector] += 1
         else:
-            a_submissions_late[a_perspective][l_selector].append(a_submission.to_json())
             if 7 < late_days <= 14:
                 a_student_totals[a_perspective]['late'][l_selector] += 1
             else:

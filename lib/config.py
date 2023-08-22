@@ -11,16 +11,17 @@ NOT_GRADED = "Nog niet beoordeeld."
 plot_path = "./dashboard - lokaal/plotly/"
 template_path = "./dashboard - lokaal/"
 
-group_id_dict = {
-    "AI": 62149,
-    "BIM": 62903,
-    "CSC": 61719,
-    "SD_B": 61367,
-    "SD_F": 62609,
-    "TI": 62138,
-}
+# group_id_dict_X = {
+#     "AI": 62149,
+#     "BIM": 62903,
+#     "CSC": 61719,
+#     "SD_B": 61367,
+#     "SD_F": 62609,
+#     "TI": 62138,
+# }
 
 peil_labels = ["Halfweg", "Sprint 7", "Beoordeling"]
+peil_levels = [-1, 0, 1, 2, 3]
 
 hover_style=dict(
         bgcolor="white",
@@ -41,6 +42,22 @@ score_tabel_team = {
     1: "Startend",
     2: "Samenwerkend",
     3: "Excellerend"
+}
+
+color_tabel = {
+    -1: '#aaaaaa',
+    0: '#f25829',
+    1: '#f2a529',
+    2: '#85e043',
+    3: '#2bad4e',
+    4: "#666666"
+}
+
+score_dict = {
+    0: {'niveau': 'Niet zichtbaar', 'voortgang': 'Geen voortgang', 'color': '#f25829'},
+    1: {'niveau': 'Startend', 'voortgang': 'Onvoldoende voortgang', 'color': '#85e043'},
+    2: {'niveau': 'Samenwerkend', 'voortgang': 'Voldoende voortgang', 'color': '#2bad4e'},
+    3: {'niveau': 'Excellerend', 'voortgang': 'Goede voortgang', 'color': '#666666'}
 }
 
 score_tabel = {
@@ -72,14 +89,6 @@ beoordeling_tabel = {
     2: "Op niveau",
     3: "Boven niveau"}
 
-color_tabel = {
-    -1: '#aaaaaa',
-    0: '#f25829',
-    1: '#f2a529',
-    2: '#85e043',
-    3: '#2bad4e',
-    4: "#666666"
-}
 
 def get_marker_size(graded):
     if graded:

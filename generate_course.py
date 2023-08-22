@@ -1,12 +1,12 @@
 import json
 from canvasapi import Canvas
-from lib.config import API_URL, actual_date, group_id_dict, DATE_TIME_STR
-from lib.file import read_course_config_start, read_config
+from lib.config import API_URL, actual_date, DATE_TIME_STR
+from lib.file import read_start, read_config
 from model.Course import Course
 from model.Perspective import Perspective
 from model.Student import Student
 
-course_config_start = read_course_config_start()
+course_config_start = read_start()
 config = read_config(course_config_start.config_file_name)
 print(config)
 
@@ -26,13 +26,16 @@ canvas = Canvas(API_URL, course_config_start.api_key)
 user = canvas.get_current_user()
 print(user.name)
 canvas_course = canvas.get_course(course_config_start.course_id)
+
 course = Course(canvas_course.id, canvas_course.name, actual_date.strftime(DATE_TIME_STR))
 users = canvas_course.get_users(enrollment_type=['student'])
-student_count = 0
+
+g_student_count = 0
+g_students = {}
 for user in users:
-    student_count += 1
+    g_student_count += 1
     student = Student(user.id, 0, user.name, 'None')
-    course.students[user.id] = student
+    g_students[user.id] = student
 
 # ophalen secties en roles
 course_sections = canvas_course.get_sections(include=['students'])
@@ -44,14 +47,17 @@ for course_section in course_sections:
             role = config.find_role_by_section(course_section.id)
             if role:
                 student_id = section_student["id"]
-                if course.students.get(student_id):
-                    course.students[student_id].roles.append(role)
+                if g_students.get(student_id):
+                    g_students[student_id].roles.append(role)
 
-for student in course.students.values():
+for student in g_students.values():
+    print(student)
     for perspective in config.perspectives:
+        print(perspective.assignment_groups)
         if len(perspective.assignment_groups) > 1:
             new_perspective = Perspective(perspective.name)
-            assignment_group_id = group_id_dict[student.roles[0]]
+            assignment_group_id = config.find_assignment_group_by_role(student.get_role())
+            print("==>", student.get_role(), assignment_group_id)
             new_perspective.assignment_groups.append(assignment_group_id)
             student.perspectives.append(new_perspective)
         else:
@@ -69,8 +75,8 @@ for canvas_group_category in canvas_group_categories:
             if studentGroup:
                 canvas_users = canvas_group.get_users()
                 for canvas_user in canvas_users:
-                    if course.students.get(canvas_user.id):
-                        student = course.students[canvas_user.id]
+                    if g_students.get(canvas_user.id):
+                        student = g_students[canvas_user.id]
                         student.group_id = studentGroup.id
                         if len(studentGroup.teachers) > 0:
                             student.coach_initials = config.find_teacher(studentGroup.teachers[0]).initials

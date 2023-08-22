@@ -61,15 +61,15 @@ def submissionBuilder(a_student, a_assignment, a_canvas_submission, a_assignment
 
     # voeg een submission toe aan een van de perspectieven
     l_perspective = course.find_perspective_by_assignment_group(submission.assignment_group_id)
+
     if l_perspective:
         this_perspective = student.get_perspective(l_perspective.name)
         if this_perspective:
             this_perspective.submissions.append(submission)
 
 
-print("read_course_config_start()")
+
 course_config_start = read_start()
-print("read_course(course_config_start.course_file_name)")
 course = read_course(course_config_start.course_file_name)
 # Initialize a new Canvas object
 canvas = Canvas(API_URL, course_config_start.api_key)
