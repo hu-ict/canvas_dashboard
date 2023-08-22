@@ -32,8 +32,33 @@ Hier worden attributen in JSON formaat opgegeven:
     {
       "name": "peil",
     }
+  ],
+  "roles": [
+    {
+      "short": "BIM",
+      "name": "Business Analist",
+      "btn_color": "btn-success",
+      "assignment_groups": []
+    },
+    {
+      "short": "CSC-C",
+      "name": "Cloud",
+      "btn_color": "btn-danger",
+      "assignment_groups": []
+    },
+    {
+      "short": "SD_B",
+      "name": "Back-end developer",
+      "btn_color": "btn-dark",
+      "assignment_groups": []
+    },
+    {
+      "short": "TI",
+      "name": "Embedded - Engineer",
+      "btn_color": "btn-info",
+      "assignment_groups": []
+    }
   ]
-
 }
 ```
 ## Stap 2
@@ -42,7 +67,7 @@ Door het uitvoeren van het Python script `generate_config.py`. De Canvas API wor
 - Opdrachtgroepen (AssignmentGroups)
 - Projectgroepen 
 - Docenten (Users)
-Verder worden de attributen aangemaakt:
+Verder worden de attributen aangemaakt (gekopieerd uit `start.json`):
 - Perspectiven
 - Rollen
 Dit bestand is ook weer een JSON-bestand met de naam `config_file_name` uit `start.json`
@@ -52,22 +77,29 @@ Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica
 - Verwijder de niet relevante `secties`.
 - Verrijk een sectie met de `role`, dit is de short name van de `role` uit de `roles` lijst in deze json.
 ### Perspectives
+- Verwijder de niet relevante `perspectives`.
 - `assignment_groups` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `perspective`.
 ### Roles
-Vullen van de rollen
+- Verwijder de niet relevante `roles`.
+Het id van de `assignment_groups` binnen de rollen vullen:
 ```
     {
       "short": "AI",
       "name": "AI - Engineer",
       "btn_color": "btn-warning",
-      "sections": [],
       "assignment_groups": [62149]
     },
 ```
 ### Teachers
+- Verwijder de niet relevante `teachers`.
 Hier worden de `projects` en `assignment_groups` aan de `teachers` gekoppeld. 
 - `projects` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`.
 - `assignment_groups` hebben ook een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`.
+### AssignmentGroups
+- Verwijder de niet relevante `assignment_groups`.
+- controlleer de `total_points`
+- vul de `lower_points` en de `upper_points` voor de bandbreedte (onder niveau en boven niveau)
+  `teachers`, `roles` en `assignments` wordt later automatisch gevuld, 
 ## Stap 4
 Door het uitvoeren van het Python script `generate_course.py` wordt de json bestand `course_file_name` gemaakt. De configuratie voor de `course` is nu klaar. Wanneer de structuur van studenten en assigments niet wijzigd kunnen bij een snapshot stap 1 tm 4 overgeslagen worden.
 ## Stap 5
