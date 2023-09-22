@@ -1,19 +1,18 @@
-from model.Submission import Submission
-
-
 class Perspective:
     def __init__(self, name):
         self.name = name
+        self.levels = []
         self.assignment_groups = []
 
     def to_json(self):
         return {
             'name': self.name,
+            'levels': self.levels,
             'assignment_groups': self.assignment_groups,
         }
 
     def __str__(self):
-        line = f' Perspective({self.name}, {self.assignment_groups})\n'
+        line = f' Perspective({self.name}, levels: {self.levels}, assignment_groeps: {self.assignment_groups})\n'
         return line
 
     # def get_submission_by_assignment(self, assigment_id):
@@ -39,4 +38,6 @@ class Perspective:
         new_perspective = Perspective(data_dict['name'])
         if 'assignment_groups' in data_dict.keys():
             new_perspective.assignment_groups = data_dict['assignment_groups']
+        if 'levels' in data_dict.keys():
+            new_perspective.levels = data_dict['levels']
         return new_perspective

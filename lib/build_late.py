@@ -1,7 +1,7 @@
 from operator import itemgetter
 from string import Template
 
-from lib.config import template_path, get_date_time_loc, get_date_time_obj
+from lib.config import template_path_general, get_date_time_loc, get_date_time_obj
 
 
 def build_late(a_course_id, a_submissions_late):
@@ -13,19 +13,19 @@ def build_late(a_course_id, a_submissions_late):
             # with open("late_"+l_perspective+"_"+l_selector+".json", 'w') as f:
             #     json.dump(late_list, f, indent=2)
 
-    with open(template_path+'template_late.html', mode='r', encoding="utf-8") as file_late_template:
+    with open(template_path_general+'template_late.html', mode='r', encoding="utf-8") as file_late_template:
         string_late_html = file_late_template.read()
         late_html_template = Template(string_late_html)
 
-    with open(template_path+'template_late_list.html', mode='r', encoding="utf-8") as file_late_list_template:
+    with open(template_path_general+'template_late_list.html', mode='r', encoding="utf-8") as file_late_list_template:
         string_late_list_html = file_late_list_template.read()
         late_list_html_template = Template(string_late_list_html)
 
-    with open(template_path+'template_submission.html', mode='r', encoding="utf-8") as file_submission_template:
+    with open(template_path_general+'template_submission.html', mode='r', encoding="utf-8") as file_submission_template:
         string_submission_html = file_submission_template.read()
         submission_html_template = Template(string_submission_html)
 
-    with open(template_path+'template_selector.html', mode='r', encoding="utf-8") as file_selector_template:
+    with open(template_path_general+'template_selector.html', mode='r', encoding="utf-8") as file_selector_template:
         string_selector_html = file_selector_template.read()
         selector_html_template = Template(string_selector_html)
 
@@ -47,7 +47,7 @@ def build_late(a_course_id, a_submissions_late):
 
     late_html_string = late_html_template.substitute({'team_buttons': team_html_string, 'gilde_buttons': gilde_html_string, 'kennis_buttons': kennis_html_string})
 
-    with open(template_path+'late.html', mode='w', encoding="utf-8") as file_late:
+    with open(template_path_general+'late.html', mode='w', encoding="utf-8") as file_late:
         file_late.write(late_html_string)
 
     for l_perspective in a_submissions_late.keys():
@@ -61,5 +61,5 @@ def build_late(a_course_id, a_submissions_late):
                 submission_html_string = submission_html_template.substitute({'submission_id': late['assignment_id'], 'assignment_name': late['assignment_name'], 'submission_date': get_date_time_loc(get_date_time_obj(late['submitted_at'])), 'url': url})
                 late_list_html_total_string += submission_html_string
             late_list_html_string = late_list_html_template.substitute({'submissions': late_list_html_total_string})
-            with open(template_path+"late_"+l_perspective+"_"+l_selector+".html", mode='w', encoding="utf-8") as file_late_list:
+            with open(template_path_general+"late_"+l_perspective+"_"+l_selector+".html", mode='w', encoding="utf-8") as file_late_list:
                 file_late_list.write(late_list_html_string)

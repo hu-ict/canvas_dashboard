@@ -33,7 +33,7 @@ class Student:
         return None
 
     def to_json(self, scope):
-        if "submission" in scope:
+        if "submissions" in scope:
             return {
                 'name': self.name,
                 'id': self.id,
@@ -48,11 +48,12 @@ class Student:
                 'id': self.id,
                 'group_id': self.group_id,
                 'coach_initials': self.coach_initials,
-                'roles': self.roles
+                'roles': self.roles,
+                'perspectives': []
             }
 
     def __str__(self):
-        line = f'Student({self.id}, {self.group_id}, {self.name}, {self.coach_initials}, {self.roles}'
+        line = f'Student({self.id}, {self.group_id}, {self.name}, {self.coach_initials}, {self.roles})\n'
         for perspective in self.perspectives:
             line += " p "+str(perspective)
         return line
@@ -61,5 +62,8 @@ class Student:
     def from_dict(data_dict):
         new_student = Student(data_dict['id'], data_dict['group_id'], data_dict['name'], data_dict['coach_initials'])
         new_student.roles = new_student.roles + data_dict['roles']
-        new_student.perspectives = list(map(lambda p: StudentPerspective.from_dict(p), data_dict['perspectives']))
+        if data_dict['perspectives']:
+            new_student.perspectives = list(map(lambda p: StudentPerspective.from_dict(p), data_dict['perspectives']))
+        else:
+            new_student.perspectives = []
         return new_student

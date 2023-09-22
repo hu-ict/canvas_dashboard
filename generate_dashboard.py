@@ -1,22 +1,34 @@
 from lib.build_totals import build_totals
-from lib.build_bootstrap import build_bootstrap
+from lib.build_bootstrap import build_bootstrap_general
 from lib.build_late import build_late
 from lib.config import peil_labels
 from lib.plot_totals import plot_totals
 from lib.file import read_course, read_start, read_results
 
+
+def get_gilde_count():
+    gilde_count = {}
+    for role in course.roles:
+        gilde_list[role.short] = []
+        gilde_count[role.short] = 0
+    return gilde_count
+
+
+def get_coaches_count():
+    team_coaches_count = {}
+    for teacher in course.teachers:
+        if len(teacher.projects) > 0:
+            team_coaches_list[teacher.initials] = []
+            team_coaches_count[teacher.initials] = 0
+    return team_coaches_count
+
+
 course_config_start = read_start()
 course = read_course(course_config_start.course_file_name)
 results = read_results(course_config_start.results_file_name)
-
 actual_day = (results.actual_date - course_config_start.start_date).days
-
 team_coaches_list = {}
-team_coaches_count = {}
-for teacher in course.teachers:
-    if len(teacher.projects) > 0:
-        team_coaches_list[teacher.initials] = []
-        team_coaches_count[teacher.initials] = 0
+gilde_list = {}
 
 peilen = {}
 for peil in peil_labels:
@@ -29,22 +41,21 @@ for peil in peil_labels:
 
 student_totals = {
     'student_count': 0,
-    'team': {'count': [], 'pending': team_coaches_count, 'late': team_coaches_count, 'to_late': team_coaches_count, 'list': team_coaches_list,},
-    'gilde': {'count': [], 'pending': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}, 'late': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}, 'to_late': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}},
-    'kennis': {'count': [], 'pending': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}, 'late': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}, 'to_late': {'AI': 0, 'BIM': 0, 'CSC': 0, 'SD_B': 0, 'SD_F': 0, 'TI': 0}},
+    'team': {'count': [], 'pending': get_coaches_count(), 'late': get_coaches_count(), 'to_late': get_coaches_count(), 'list': team_coaches_list,},
+    'gilde': {'count': [], 'pending': get_gilde_count(), 'late': get_gilde_count(), 'to_late': get_gilde_count()},
+    'kennis': {'count': [], 'pending': get_gilde_count(), 'late': get_gilde_count(), 'to_late': get_gilde_count()},
     'peil': peilen,
     'late': {'count': []}
 }
 
-print(student_totals)
 submissions_late = {
     'team': team_coaches_list,
-    'gilde': {'AI': [], 'BIM': [], 'CSC': [], 'SD_B': [], 'SD_F': [], 'TI': []},
-    'kennis': {'AI': [], 'BIM': [], 'CSC': [], 'SD_B': [], 'SD_F': [], 'TI': []}
+    'gilde': gilde_list,
+    'kennis': gilde_list
 }
 
 print("build_bootstrap(course_config_start, course, results)")
-build_bootstrap(course_config_start, course, results)
+build_bootstrap_general(course_config_start, course, results)
 
 print("build_totals(results, student_totals, submissions_late)")
 build_totals(results, student_totals, submissions_late)

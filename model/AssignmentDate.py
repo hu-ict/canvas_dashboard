@@ -19,7 +19,7 @@ class AssignmentDate:
             return self.due_at
         if self.lock_at:
             return self.lock_at
-        return "2023-02-06T00:00:00Z"
+        return "2023-09-04T00:00:00Z"
 
     def __str__(self):
         return f'AssigmentDate({self.id}, {self.due_at}, {self.lock_at})'

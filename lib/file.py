@@ -1,6 +1,6 @@
 import json
 
-from model.Course import Course
+from model.Result import Result
 from model.CourseConfig import CourseConfig
 from model.CourseConfigStart import CourseConfigStart
 from model.Student import Student
@@ -37,8 +37,8 @@ def read_results(result_file_name):
     print("read_result", result_file_name)
     with open(result_file_name, mode='r', encoding="utf-8") as file_result:
         data = json.load(file_result)
-        course = Course.from_dict(data)
-        return course
+        result = Result.from_dict(data)
+        return result
 
 
 # def read_late_json(late_file_name):

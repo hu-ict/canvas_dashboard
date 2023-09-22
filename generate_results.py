@@ -4,7 +4,7 @@ import json
 from lib.file import read_start, read_course
 from model.AssignmentDate import AssignmentDate
 from model.Comment import Comment
-from model.Course import *
+from model.Result import *
 from lib.config import actual_date, API_URL, NOT_GRADED
 from model.Submission import Submission
 
@@ -23,25 +23,18 @@ def submissionBuilder(a_student, a_assignment, a_canvas_submission, a_assignment
             # print("Grade", canvas_submission.grade, canvas_submission.score, canvas_submission.assignment_id)
             score = 0.5
         else:
-            #bijzondere constraints rond assignments
-            if a_assignment.group_id == 61367 and "*" not in a_assignment.name:
-                score = 1.0
-            elif "correctie" in a_assignment.name:
-                score = -round(a_canvas_submission.score, 2)
-            else:
-                score = round(a_canvas_submission.score, 2)
+            score = round(a_canvas_submission.score, 2)
         graded = True
     else:
         if not a_canvas_submission.submitted_at:
+            # no actual submission
             return
         else:
+            score = 0
             if not a_canvas_submission.grader_id:
-                score = 0
                 graded = False
-                local_comment = NOT_GRADED
             else:
                 graded = True
-                score = 0.0
 
     if a_canvas_submission.submitted_at:
         submitted_at = get_date_time_obj(a_canvas_submission.submitted_at)
@@ -50,22 +43,15 @@ def submissionBuilder(a_student, a_assignment, a_canvas_submission, a_assignment
         submitted_at = a_assignment.assignment_date
 
     # maak een submission en voeg de commentaren toe
-    submission = Submission(a_canvas_submission.id, a_assignment.group_id, a_assignment.id, a_student.id,
-                            a_assignment.name, submitted_at, graded, score)
+    l_submission = Submission(a_canvas_submission.id, a_assignment.group_id, a_assignment.id, a_student.id,
+                            a_assignment.name, submitted_at, graded, score, a_assignment.points)
     canvas_comments = a_canvas_submission.submission_comments
     if len(local_comment) > 0:
-        submission.comments.append(Comment(0, "Systeem", local_comment))
+        l_submission.comments.append(Comment(0, "", submitted_at, local_comment))
     for canvas_comment in canvas_comments:
-        submission.comments.append(
-            Comment(canvas_comment['author_id'], canvas_comment['author_name'], canvas_comment['comment']))
-
-    # voeg een submission toe aan een van de perspectieven
-    l_perspective = course.find_perspective_by_assignment_group(submission.assignment_group_id)
-
-    if l_perspective:
-        this_perspective = student.get_perspective(l_perspective.name)
-        if this_perspective:
-            this_perspective.submissions.append(submission)
+        l_submission.comments.append(
+            Comment(canvas_comment['author_id'], canvas_comment['author_name'], get_date_time_obj(canvas_comment['created_at']), canvas_comment['comment']))
+    return l_submission
 
 
 
@@ -77,10 +63,11 @@ user = canvas.get_current_user()
 print(user.name)
 canvas_course = canvas.get_course(course_config_start.course_id)
 # print("Course(canvas_course.id, canvas_course.name, actual_date)")
-results = Course(canvas_course.id, canvas_course.name, actual_date)
+results = Result(canvas_course.id, canvas_course.name, actual_date, 0, 0)
 # kopieer de groepen en studenten vanuit de configuratie
 # print("course.studentGroups")
-results.student_groups = course.student_groups
+results.students = course.students
+
 
 # assignments to groups and roles
 # print("canvas_course.get_assignments(include=['overrides'])")
@@ -93,6 +80,9 @@ for canvas_assignment in canvas_assignments:
         assignment = course.find_assignment_by_group(assignment_group.id, canvas_assignment.id)
         if assignment:
             print("Processing Assignment {0:6} - {1} {2}".format(assignment.id, assignment_group.name, assignment.name))
+            if assignment.unlock_date:
+                if assignment.unlock_date > results.actual_date:
+                    continue
             if canvas_assignment.overrides:
                 for override in canvas_assignment.overrides:
                     assignment_date = AssignmentDate(override.id, override.due_at, override.lock_at)
@@ -103,9 +93,17 @@ for canvas_assignment in canvas_assignments:
             for canvas_submission in canvas_submissions:
                 student = results.find_student(canvas_submission.user_id)
                 if student:
-                    submissionBuilder(student, assignment, canvas_submission, assignment_date)
-                # else:
-                #     print("Student not found", canvas_submission.user_id)
+                    # voeg een submission toe aan een van de perspectieven
+                    l_submission = submissionBuilder(student, assignment, canvas_submission, assignment_date)
+                    if l_submission:
+                        l_perspective = course.find_perspective_by_assignment_group(l_submission.assignment_group_id)
+                        if l_perspective:
+                            this_perspective = student.get_perspective(l_perspective.name)
+                            if this_perspective:
+                                this_perspective.submissions.append(l_submission)
+                                results.submission_count += 1
+                                if not l_submission.graded:
+                                    results.not_graded_count += 1
 
 # for group in results.studentGroups:
 #     for student in group.students:
@@ -113,5 +111,5 @@ for canvas_assignment in canvas_assignments:
 #             perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_at)
 
 with open(course_config_start.results_file_name, 'w') as f:
-    dict_result = results.to_json(['assignment'])
+    dict_result = results.to_json([])
     json.dump(dict_result, f, indent=2)

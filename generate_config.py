@@ -7,7 +7,7 @@ from lib.file import read_start
 from model.Assignment import Assignment
 from model.AssignmentDate import AssignmentDate
 from model.AssignmentGroup import AssignmentGroup
-from model.Course import Course
+from model.Result import Course
 from model.CourseConfig import CourseConfig
 from model.Role import Role
 from model.Section import Section

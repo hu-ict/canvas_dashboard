@@ -1,5 +1,6 @@
 from model.Submission import Submission
 
+
 class StudentPerspective:
     def __init__(self, name):
         self.name = name
