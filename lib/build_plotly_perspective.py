@@ -226,6 +226,7 @@ def remove_assignment(a_assignments, a_submission):
         if a_assignments[i].id == a_submission.assignment_id:
             del a_assignments[i]
             return a_assignments
+    return a_assignments
 
 
 def plot_perspective(a_row, a_col, a_fig, a_assignment_group, a_perspective, a_start_date, a_actual_day, a_days_in_semester):

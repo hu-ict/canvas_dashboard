@@ -5,9 +5,9 @@ from model.CourseConfig import CourseConfig
 from model.CourseConfigStart import CourseConfigStart
 from model.Student import Student
 from model.Submission import Submission
+from model.TeamsApi import TeamsApi
 
 start_file_name = "start.json"
-
 
 def read_start():
     print("read_start", start_file_name)
@@ -38,6 +38,13 @@ def read_results(result_file_name):
     with open(result_file_name, mode='r', encoding="utf-8") as file_result:
         data = json.load(file_result)
         result = Result.from_dict(data)
+        return result
+
+def read_msteams_api(msteams_api_file_name):
+    print("read msteams_api", msteams_api_file_name)
+    with open(msteams_api_file_name, mode='r', encoding="utf-8") as file_msteams_api:
+        data = json.load(file_msteams_api)
+        result = TeamsApi.from_dict(data)
         return result
 
 

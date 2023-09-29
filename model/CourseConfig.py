@@ -85,6 +85,19 @@ class CourseConfig:
                 return student
         return None
 
+    def find_student_by_name(self, student_name):
+        for student in self.students:
+            if student.name == student_name:
+                return student
+        return None
+
+    def remove_student_by_name(self, student_name):
+        for student in self.students:
+            if student.name == student_name:
+                self.students.remove(student)
+                return student.name
+        return None
+
     def find_teacher(self, teacher_id):
         for teacher in self.teachers:
             if teacher_id == teacher.id:

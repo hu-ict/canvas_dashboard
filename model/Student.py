@@ -3,11 +3,13 @@ from model.StudentPerspective import StudentPerspective
 from model.Submission import Submission
 
 class Student:
-    def __init__(self, student_id, group_id, name, coach_initials, roles=None):
-        self.id = student_id
-        self.group_id = group_id
-        self.name = name
-        self.coach_initials = coach_initials
+    def __init__(self, a_student_id, a_group_id, a_name, a_coach_initials, a_email, a_site):
+        self.id = a_student_id
+        self.group_id = a_group_id
+        self.name = a_name
+        self.coach_initials = a_coach_initials
+        self.email = a_email
+        self.site = a_site
         self.roles = []
         self.perspectives = []
 
@@ -39,6 +41,8 @@ class Student:
                 'id': self.id,
                 'group_id': self.group_id,
                 'coach_initials': self.coach_initials,
+                'email': self.email,
+                'site': self.site,
                 'roles': self.roles,
                 'perspectives': list(map(lambda p: p.to_json(), self.perspectives))
             }
@@ -48,19 +52,22 @@ class Student:
                 'id': self.id,
                 'group_id': self.group_id,
                 'coach_initials': self.coach_initials,
+                'email': self.email,
+                'site': self.site,
                 'roles': self.roles,
                 'perspectives': []
             }
 
     def __str__(self):
-        line = f'Student({self.id}, {self.group_id}, {self.name}, {self.coach_initials}, {self.roles})\n'
+        line = f'Student({self.id}, {self.group_id}, {self.name}, {self.coach_initials}, {self.email}, {self.roles})\n'
         for perspective in self.perspectives:
             line += " p "+str(perspective)
         return line
 
     @staticmethod
     def from_dict(data_dict):
-        new_student = Student(data_dict['id'], data_dict['group_id'], data_dict['name'], data_dict['coach_initials'])
+        new_student = Student(data_dict['id'], data_dict['group_id'], data_dict['name'], data_dict['coach_initials'],
+                              data_dict['email'], data_dict[ 'site'])
         new_student.roles = new_student.roles + data_dict['roles']
         if data_dict['perspectives']:
             new_student.perspectives = list(map(lambda p: StudentPerspective.from_dict(p), data_dict['perspectives']))
