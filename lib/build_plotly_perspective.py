@@ -1,7 +1,7 @@
 import textwrap
 
 from lib.config import get_marker_size, fraction_to_level, hover_style, date_to_day, score_dict, get_date_time_str, \
-    get_date_time_loc
+    get_date_time_loc, fraction_to_bin_level
 import plotly.graph_objs as go
 
 from model.Comment import Comment
@@ -117,8 +117,7 @@ def plot_open_assignments(a_row, a_col, a_fig, a_assignments, a_start_date, a_ac
     return
 
 
-
-def plot_bandbreedte(a_row, a_col, a_fig, assignment_group, a_actual_day, a_days_in_semester):
+def plot_bandbreedte(a_row, a_col, a_fig, assignment_group, a_actual_day, a_days_in_semester, a_actual_date):
     if assignment_group.total_points <= 0:
         return
     x_time = calc_dev(a_days_in_semester, 0, 0, 1, 0)
@@ -134,19 +133,19 @@ def plot_bandbreedte(a_row, a_col, a_fig, assignment_group, a_actual_day, a_days
 
     a_fig.add_trace(
         go.Scatter(
-            x=[a_actual_day,a_actual_day+2,a_actual_day+2,a_actual_day,a_actual_day],
-            y=[0,0,20,20,0],
+            x=[a_actual_day ,a_actual_day+2, a_actual_day+2, a_actual_day, a_actual_day],
+            y=[0, 0, assignment_group.total_points, assignment_group.total_points, 0],
             fill="toself",
             mode='lines',
             name='',
             hoverlabel=hover_style,
-            text='Dag van snapshot in semester',
+            text=f"Dag van snapshot in semester: {a_actual_day} [{a_actual_date}]",
             opacity=0
         ),
         row=a_row, col=a_col
     )
     a_fig.add_shape(
-        dict(type="rect", x0=a_actual_day, x1=a_actual_day+1, y0=0, y1=200,
+        dict(type="rect", x0=a_actual_day, x1=a_actual_day+1, y0=0, y1=assignment_group.total_points,
              fillcolor="#888888", line_color="#888888"
              ),
         row=a_row,
@@ -183,8 +182,12 @@ def plot_submissions(a_row, a_col, a_fig, a_perspective, a_start_date, a_days_in
         x_submission.append(date_to_day(a_start_date, submission.submitted_at))
         if submission.graded:
             cum_score += submission.score
-            y_colors.append(fraction_to_level(submission.score/submission.points)['color'])
-            hover = submission.assignment_name + "<br>" + fraction_to_level(submission.score/submission.points)['niveau']+" Score: " + str(submission.score)
+            if submission.points <= 1.1:
+                y_colors.append(fraction_to_bin_level(submission.score / submission.points)['color'])
+                hover = submission.assignment_name + "<br>" + fraction_to_bin_level(submission.score / submission.points)['niveau'] + " Score: " + str(submission.score)
+            else:
+                y_colors.append(fraction_to_level(submission.score/submission.points)['color'])
+                hover = submission.assignment_name + "<br>" + fraction_to_level(submission.score/submission.points)['niveau']+" Score: " + str(submission.score)
         else:
             y_colors.append(score_dict[-2]['color'])
             hover = submission.assignment_name + "<br>" + "Nog niet beoordeeld."
@@ -229,7 +232,7 @@ def remove_assignment(a_assignments, a_submission):
     return a_assignments
 
 
-def plot_perspective(a_row, a_col, a_fig, a_assignment_group, a_perspective, a_start_date, a_actual_day, a_days_in_semester):
+def plot_perspective(a_row, a_col, a_fig, a_assignment_group, a_perspective, a_start_date, a_actual_day, a_days_in_semester, a_actual_date):
     l_assignments = a_assignment_group.assignments[:]
     l_missed_submissions = []
     for l_submission in a_perspective.submissions:
@@ -238,7 +241,7 @@ def plot_perspective(a_row, a_col, a_fig, a_assignment_group, a_perspective, a_s
     #missed assignments
     for l_assignment in l_assignments:
         if date_to_day(a_start_date, l_assignment.assignment_date) < a_actual_day:
-            l_submission = Submission(0, l_assignment.group_id, l_assignment.id, 0, l_assignment.name, l_assignment.assignment_date,
+            l_submission = Submission(0, l_assignment.group_id, l_assignment.id, 0, l_assignment.name, l_assignment.assignment_date, l_assignment.assignment_date,
                        True, 0, l_assignment.points)
             l_submission.comments.append(Comment(0, "Systeem", l_assignment.assignment_date, "Niets ingeleverd voor de deadline"))
             l_missed_submissions.append(l_submission)
@@ -246,5 +249,5 @@ def plot_perspective(a_row, a_col, a_fig, a_assignment_group, a_perspective, a_s
 
     a_perspective.submissions = a_perspective.submissions + l_missed_submissions
     plot_open_assignments(a_row, a_col, a_fig, l_assignments, a_start_date, a_actual_day)
-    plot_bandbreedte(a_row, a_col, a_fig, a_assignment_group, a_actual_day, a_days_in_semester)
+    plot_bandbreedte(a_row, a_col, a_fig, a_assignment_group, a_actual_day, a_days_in_semester, a_actual_date)
     plot_submissions(a_row, a_col, a_fig, a_perspective, a_start_date, a_days_in_semester)

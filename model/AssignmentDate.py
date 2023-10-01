@@ -2,8 +2,7 @@ from lib.file import read_start
 
 
 class AssignmentDate:
-    def __init__(self, id, due_at, lock_at):
-        self.id = id
+    def __init__(self, due_at, lock_at):
         self.due_at = due_at
         self.lock_at = lock_at
 
@@ -22,8 +21,8 @@ class AssignmentDate:
         return "2023-09-04T00:00:00Z"
 
     def __str__(self):
-        return f'AssigmentDate({self.id}, {self.due_at}, {self.lock_at})'
+        return f'AssigmentDate({self.due_at}, {self.lock_at})'
 
     @staticmethod
     def from_dict(data_dict):
-        return AssignmentDate(data_dict['id'], data_dict['due_at'], data_dict['lock_at'])
+        return AssignmentDate(data_dict['due_at'], data_dict['lock_at'])

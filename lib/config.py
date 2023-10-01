@@ -30,6 +30,13 @@ score_dict = {
     3: {'niveau': 'Excellerend', 'voortgang': 'Goede voortgang', 'beoordeling': 'Boven niveau', 'color': '#2bad4e'}
 }
 
+score_bin_dict = {
+    -2:{'niveau': 'Leeg', 'voortgang': 'Nog niet bepaald', 'beoordeling': 'Nog niet beoordeeld', 'color': 'cornflowerblue'},
+    -1:{'niveau': 'Leeg', 'voortgang': 'Leeg', 'beoordeling': 'Onbekend', 'color': '#cccccc'},
+    0: {'niveau': 'Niet voldaan', 'voortgang': 'Onvoldoende voortgang', 'beoordeling': 'Onder niveau', 'color': '#f2a529'},
+    1: {'niveau': 'Voldaan', 'voortgang': 'Voldoende voortgang', 'beoordeling': 'Op niveau', 'color': '#85e043'}
+}
+
 colors_bar = {score_dict[-1]['voortgang']:score_dict[-1]['color'],
               score_dict[0]['voortgang']:score_dict[0]['color'],
               score_dict[1]['voortgang']:score_dict[1]['color'],
@@ -47,6 +54,17 @@ def fraction_to_level(a_fraction):
     else:
         return score_dict[3]
 
+def fraction_to_bin_level(a_fraction):
+    if a_fraction < 0.01:
+        return score_bin_dict[0]
+    elif a_fraction < 0.55:
+        return score_bin_dict[0]
+    elif a_fraction < 0.80:
+        return score_bin_dict[1]
+    else:
+        return score_bin_dict[1]
+
+
 def get_marker_size(graded):
     if graded:
         return 14
@@ -55,12 +73,16 @@ def get_marker_size(graded):
 
 
 def get_date_time_obj(date_time_str):
+    if len(date_time_str) == 0:
+        return None
     date_time_obj = datetime.strptime(date_time_str, DATE_TIME_STR)
     date_time_obj = date_time_obj.astimezone(timezone)
     return date_time_obj
 
 
 def get_date_time_str(a_date_time_obj):
+    if not a_date_time_obj:
+        return ""
     date_time_str = a_date_time_obj.strftime(DATE_TIME_STR)
     return date_time_str
 
@@ -74,3 +96,10 @@ def date_to_day(a_start_date, a_actual_date):
     if a_actual_date:
         return (a_actual_date - a_start_date).days
     return 1
+
+def get_assignment_date(due_at, lock_at, end_date):
+    if due_at:
+        return get_date_time_obj(due_at)
+    if lock_at:
+        return get_date_time_obj(lock_at)
+    return end_date

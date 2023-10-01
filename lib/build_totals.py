@@ -77,10 +77,10 @@ def check_for_late(a_student_totals, a_submissions_pending, a_student, a_submiss
         late_days = (a_actual_date - a_submission.submitted_at).days
 
         a_submissions_pending[a_perspective][l_selector].append(a_submission.to_json())
-        if late_days <= 6:
+        if late_days <= 7:
             a_student_totals[a_perspective]['pending'][l_selector] += 1
         else:
-            if 7 < late_days <= 13:
+            if 7 < late_days <= 14:
                 a_student_totals[a_perspective]['late'][l_selector] += 1
             else:
                 a_student_totals[a_perspective]['to_late'][l_selector] += 1
