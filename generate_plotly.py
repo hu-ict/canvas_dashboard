@@ -1,17 +1,14 @@
 import math
-import kaleido
 import textwrap
 import pandas as pd
 import plotly.graph_objs as go
-import plotly.express as px
 from plotly.subplots import make_subplots
 
 from lib.build_plotly_perspective import plot_perspective, plot_progress, find_submissions
-from lib.config import plot_path, date_to_day, peil_labels, hover_style, get_marker_size, score_dict, fraction_to_level, \
-    colors_bar, get_date_time_loc
+from lib.config import plot_path, date_to_day, peil_labels, hover_style, score_dict, colors_bar, get_date_time_loc
 from lib.file import read_start, read_course, read_results
 from lib.translation_table import translation_table
-from lib_peil import get_bar_score
+from lib.lib_peil import get_bar_score
 
 traces = []
 start = read_start()
@@ -19,9 +16,7 @@ g_course = read_course(start.course_file_name)
 g_results = read_results(start.results_file_name)
 
 g_days_in_semester = (start.end_date - start.start_date).days
-print("days_in_semester", g_days_in_semester)
 g_actual_day = (g_results.actual_date - start.start_date).days
-g_start_date = start.start_date
 
 
 bins_bar = [0, 0.9, 1.9, 2.9, 3.9, 4.9]
@@ -247,7 +242,7 @@ def plot_student(a_course, a_student, a_peil_construction):
             col = positions[perspective.name]['col']
             plot_progress(row, col, fig, a_peil_construction[perspective.name], start.start_date)
             assigment_group = a_course.find_assignment_group(perspective.assignment_groups[0])
-            plot_perspective(row, col, fig, assigment_group, perspective, g_start_date, g_actual_day, g_days_in_semester, get_date_time_loc(g_results.actual_date))
+            plot_perspective(row, col, fig, assigment_group, perspective, start.start_date, g_actual_day, g_days_in_semester, get_date_time_loc(g_results.actual_date))
 
     if a_student.get_peilmoment(247774):
         plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig,

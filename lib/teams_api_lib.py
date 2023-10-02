@@ -192,10 +192,7 @@ def upload_file_html(a_token, a_plot_path, a_name, a_channel):
         data = file_plotly.read()
     l_url = f"https://graph.microsoft.com/v1.0/sites/{a_channel}/drive/items/root:/{a_name}/{l_remote_file_name}.html:/content"
     response = requests.put(l_url, headers=l_headers, data=data)
-    if response.status_code == 200:
-        l_result = response.json()
-        print("200", l_result)
-    else:
+    if response.status_code != 200:
         print(f"Error {response.status_code} response: {response.json()}")
 
 
@@ -211,10 +208,7 @@ def upload_file_jpeg(a_token, a_plot_path, a_name, a_channel):
         data = file_plotly.read()
     l_url = f"https://graph.microsoft.com/v1.0/sites/{a_channel}/drive/items/root:/{a_name}/{l_remote_file_name}.jpeg:/content"
     response = requests.put(l_url, headers=l_headers, data=data)
-    if response.status_code == 200:
-        l_result = response.json()
-        print("200", l_result)
-    else:
+    if response.status_code != 200:
         print(f"Error {response.status_code} response: {response.json()}")
 
 

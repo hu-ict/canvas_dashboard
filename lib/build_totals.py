@@ -74,7 +74,7 @@ def check_for_late(a_student_totals, a_submissions_pending, a_student, a_submiss
                 l_selector = a_student.get_role()
         else:
             l_selector = a_student.get_role()
-        late_days = (a_actual_date - a_submission.submitted_at).days
+        late_days = (a_actual_date - a_submission.submitted_date).days
 
         a_submissions_pending[a_perspective][l_selector].append(a_submission.to_json())
         if late_days <= 7:

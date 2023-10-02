@@ -176,21 +176,21 @@ def plot_submissions(a_row, a_col, a_fig, a_perspective, a_start_date, a_days_in
     y_colors = [score_dict[-2]['color']]
     y_size = [get_marker_size(False)]
     cum_score = 0
-    l_submissions = sorted(a_perspective.submissions, key=lambda s: s.submitted_at)
+    l_submissions = sorted(a_perspective.submissions, key=lambda s: s.submitted_date)
     for submission in l_submissions:
         y_size.append(get_marker_size(submission.graded))
-        x_submission.append(date_to_day(a_start_date, submission.submitted_at))
+        x_submission.append(date_to_day(a_start_date, submission.submitted_date))
         if submission.graded:
             cum_score += submission.score
             if submission.points <= 1.1:
                 y_colors.append(fraction_to_bin_level(submission.score / submission.points)['color'])
-                hover = submission.assignment_name + "<br>" + fraction_to_bin_level(submission.score / submission.points)['niveau'] + " Score: " + str(submission.score)
+                hover = submission.assignment_name + "<br>" + fraction_to_bin_level(submission.score / submission.points)['niveau'] + " Score: " + str(submission.score) + " [" + get_date_time_loc(submission.submitted_date) + "]"
             else:
                 y_colors.append(fraction_to_level(submission.score/submission.points)['color'])
-                hover = submission.assignment_name + "<br>" + fraction_to_level(submission.score/submission.points)['niveau']+" Score: " + str(submission.score)
+                hover = submission.assignment_name + "<br>" + fraction_to_level(submission.score/submission.points)['niveau']+" Score: " + str(submission.score) + " [" + get_date_time_loc(submission.submitted_date) + "]"
         else:
             y_colors.append(score_dict[-2]['color'])
-            hover = submission.assignment_name + "<br>" + "Nog niet beoordeeld."
+            hover = submission.assignment_name + " [" + get_date_time_loc(submission.submitted_date) + "]" + "<br>" + "Nog niet beoordeeld."
         for comment in submission.comments:
             value = comment.author_name + " - " + comment.comment
             wrapper = textwrap.TextWrapper(width=75)

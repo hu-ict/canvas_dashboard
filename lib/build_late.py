@@ -9,7 +9,7 @@ def build_late(a_course_id, a_submissions_late):
     # print(l_perspective)
         for l_selector in a_submissions_late[l_perspective].keys():
             # print(l_selector)
-            late_list = sorted(a_submissions_late[l_perspective][l_selector], key=itemgetter('submitted_at'))
+            late_list = sorted(a_submissions_late[l_perspective][l_selector], key=itemgetter('submitted_date'))
             # with open("late_"+l_perspective+"_"+l_selector+".json", 'w') as f:
             #     json.dump(late_list, f, indent=2)
 
@@ -54,11 +54,11 @@ def build_late(a_course_id, a_submissions_late):
         # print(perspective)
         for l_selector in a_submissions_late[l_perspective]:
             late_list_temp = a_submissions_late[l_perspective][l_selector]
-            late_list = sorted(late_list_temp, key=itemgetter('submitted_at'))
+            late_list = sorted(late_list_temp, key=itemgetter('submitted_date'))
             late_list_html_total_string = ''
             for late in late_list:
                 url = "https://canvas.hu.nl/courses/"+str(a_course_id)+"/gradebook/speed_grader?assignment_id="+str(late['assignment_id'])+"&student_id="+str(late['student_id'])
-                submission_html_string = submission_html_template.substitute({'submission_id': late['assignment_id'], 'assignment_name': late['assignment_name'], 'submission_date': get_date_time_loc(get_date_time_obj(late['submitted_at'])), 'url': url})
+                submission_html_string = submission_html_template.substitute({'submission_id': late['assignment_id'], 'assignment_name': late['assignment_name'], 'submission_date': get_date_time_loc(get_date_time_obj(late['submitted_date'])), 'url': url})
                 late_list_html_total_string += submission_html_string
             late_list_html_string = late_list_html_template.substitute({'submissions': late_list_html_total_string})
             with open(template_path_general+"late_"+l_perspective+"_"+l_selector+".html", mode='w', encoding="utf-8") as file_late_list:

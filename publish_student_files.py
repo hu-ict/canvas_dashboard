@@ -7,9 +7,8 @@ course = read_course(start.course_file_name)
 msteams_api = read_msteams_api("msteams_api.json")
 
 for l_student in course.students:
-    print('HTML Student:', l_student.name)
+    print('HTML, JPEG Student:', l_student.name)
     upload_file_html(msteams_api.my_token, plot_path, l_student.name, l_student.site)
-    print('JPEG Student:', l_student.name)
     upload_file_jpeg(msteams_api.my_token, plot_path, l_student.name, l_student.site)
 
 

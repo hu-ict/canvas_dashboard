@@ -8,8 +8,8 @@ class TeamsApi:
 
     def to_json(self):
         return {
-            'tenant_id': self.tennant_id,
-            'tenant_name': self.tennant_name,
+            'tenant_id': self.tenant_id,
+            'tenant_name': self.tenant_name,
             'client_id': self.client_id,
             'gen_token': self.gen_token,
             'my_token': self.my_token

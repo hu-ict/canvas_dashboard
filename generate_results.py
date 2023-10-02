@@ -30,24 +30,26 @@ def submission_builder(a_student, a_assignment, a_canvas_submission, a_assignmen
             graded = True
         else:
             graded = False
-    if a_canvas_submission.submitted_at:
-        submitted_at = get_date_time_obj(a_canvas_submission.submitted_at)
-    else:
-        submitted_at = None
     # maak een submission en voeg de commentaren toe
     canvas_comments = a_canvas_submission.submission_comments
-    if not a_canvas_submission.submitted_at and len(canvas_comments) == 0:
+    if not a_canvas_submission.submitted_at and len(canvas_comments) == 0 and not graded:
         return None
     else:
         l_submission = Submission(a_canvas_submission.id, a_assignment.group_id, a_assignment.id, a_student.id,
-                                  a_assignment.name, a_assignment_date, submitted_at, graded, score,
+                                  a_assignment.name, a_assignment_date, None, graded, score,
                                   a_assignment.points)
         for canvas_comment in canvas_comments:
             l_submission.comments.append(
                     Comment(canvas_comment['author_id'], canvas_comment['author_name'],
                     get_date_time_obj(canvas_comment['created_at']), canvas_comment['comment']))
-        if not submitted_at:
-            l_submission.submitted_at = l_submission.comments[0].date
+        #bepaal de date/time van het datapunt
+        if a_canvas_submission.submitted_at:
+            l_submission.submitted_date = get_date_time_obj(a_canvas_submission.submitted_at)
+        else:
+            if len(l_submission.comments) > 0:
+                l_submission.submitted_date = l_submission.comments[0].date
+            else:
+                l_submission.submitted_date = a_assignment_date
         return l_submission
 
 

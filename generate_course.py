@@ -63,10 +63,6 @@ for user in users:
     student = Student(user.id, 0, user.name, 'None', user.login_id, "")
     config.students.append(student)
 
-# Ophalen canvas_pages
-# pages = canvas_course.get_pages()
-# for page in pages:
-#     print(f"{page.published:1};{page.title};{page.url}")
 
 # Ophalen Secties en Roles
 course_sections = canvas_course.get_sections(include=['students'])
