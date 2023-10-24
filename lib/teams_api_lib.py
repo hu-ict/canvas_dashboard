@@ -6,6 +6,7 @@ import io
 
 
 def get_access_token(a_tenant_id, a_client_id):
+    print("get_access_token", a_tenant_id, a_client_id)
     redirect_uri = "https://localhost"
 
     captured_output = io.StringIO()
@@ -43,7 +44,7 @@ def get_me_for_check(a_token):
         print(l_result['displayName'])
         return(l_result['displayName'])
     else:
-        print(f"Response: {response.json()}")
+        print(f"Response {url}: {response.json()}")
         return None
 
 
@@ -135,15 +136,17 @@ def get_sites(a_token, a_config, a_query):
         values = result['value']
         print("Aantal sites:",len(values))
         for value in values:
+
             # "INNO - Sep23 - Studenten - Kyrill Westdorp"
             l_display_name = value['displayName']
+            print("DisplayName:", l_display_name)
             l_display_name_split = l_display_name.split(' - ')
             if len(l_display_name_split) > 3:
                 l_student_name = l_display_name_split[3]
-                print(l_display_name, l_student_name)
+                print("Student:", l_student_name)
                 l_student = a_config.find_student_by_name(l_student_name)
                 if l_student:
-                    print(l_student.name, value['id'])
+                    print("Site:", value['id'])
                     l_student.site = value['id']
                 else:
                     print("Student from channel name not found", l_student_name)

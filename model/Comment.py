@@ -1,4 +1,4 @@
-from lib.config import get_date_time_obj, get_date_time_str
+from lib.lib_date import get_date_time_obj, get_date_time_str
 
 
 class Comment:

@@ -1,6 +1,5 @@
 import textwrap
-
-from lib.config import peil_labels, score_dict
+from lib.lib_plotly import peil_labels, score_dict
 
 
 def peil_contruct(a_course, a_peil_perspective):
@@ -43,7 +42,7 @@ def get_peil_hover(a_peilmoment):
         if a_peilmoment.graded:
             score = a_peilmoment.score + 1
         if "Beoordeling" in a_peilmoment.assignment_name:
-            hover = a_peilmoment.assignment_name + " - " + score_dict[int(score - 1)]['beoordeling']
+            hover = a_peilmoment.assignment_name + " - " + score_dict[int(score - 1)]["beoordeling"]
         else:
             hover = a_peilmoment.assignment_name + " - " + score_dict[int(score - 1)]["voortgang"]
         for comment in a_peilmoment.comments:

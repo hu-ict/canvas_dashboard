@@ -8,7 +8,7 @@ start = read_start()
 course = read_course(start.course_file_name)
 msteams_api = read_msteams_api("msteams_api.json")
 
-if get_me_for_check(msteams_api.gen_token) is not None:
+if get_me_for_check(msteams_api.gen_token) is None:
     token = get_access_token(msteams_api.tenant_id, msteams_api.client_id)
     print(token)
     msteams_api.gen_token = token
@@ -30,4 +30,7 @@ for l_team_id in g_team_ids:
         else:
             print("Student not found:", l_channel)
 
+with open(start.course_file_name, 'w') as f:
+    dict_result = course.to_json(["assignment"])
+    json.dump(dict_result, f, indent=2)
 

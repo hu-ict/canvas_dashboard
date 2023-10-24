@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from lib.config import get_date_time_str, get_date_time_obj
+from lib.lib_date import get_date_time_str, get_date_time_obj
 from model.Student import Student
 from model.StudentGroup import StudentGroup
 
@@ -8,8 +8,8 @@ from model.StudentGroup import StudentGroup
 class Result:
     def __init__(self, pid, name, actual_date, submission_count, not_graded_count):
         # self.students = {}
-        self.name = name
         self.id = pid
+        self.name = name
         self.actual_date = get_date_time_obj(get_date_time_str(actual_date))
         self.submission_count = submission_count
         self.not_graded_count = not_graded_count
@@ -24,8 +24,8 @@ class Result:
 
     def to_json(self, scope):
         return {
-            'name': self.name,
             'id': self.id,
+            'name': self.name,
             'actual_date': get_date_time_str(self.actual_date),
             'submission_count': self.submission_count,
             'not_graded_count': self.not_graded_count,

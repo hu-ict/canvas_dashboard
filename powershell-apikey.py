@@ -4,7 +4,7 @@ import json
 import requests
 
 from lib.file import read_msteams_api, read_course, read_start
-from lib.teams_api_lib import get_me_for_check, get_access_token
+from lib.teams_api_lib import get_me_for_check, get_access_token, get_sites
 
 """
 Module om een MStoken op te halen bij Microsoft

@@ -1,15 +1,15 @@
 from operator import itemgetter
 from string import Template
 
-from lib.config import template_path_general, get_date_time_loc, get_date_time_obj
+from lib.lib_date import get_date_time_loc, get_date_time_obj
+from lib.lib_plotly import template_path_general
 
 
-def build_late(a_course_id, a_submissions_late):
-    for l_perspective in a_submissions_late.keys():
-    # print(l_perspective)
-        for l_selector in a_submissions_late[l_perspective].keys():
+def build_late(a_course_id, a_student_totals):
+    for l_perspective in a_student_totals['perspectives'].keys():
+        for l_selector in a_student_totals['perspectives'][l_perspective]['list'].keys():
             # print(l_selector)
-            late_list = sorted(a_submissions_late[l_perspective][l_selector], key=itemgetter('submitted_date'))
+            late_list = sorted(a_student_totals['perspectives'][l_perspective]['list'][l_selector], key=itemgetter('submitted_date'))
             # with open("late_"+l_perspective+"_"+l_selector+".json", 'w') as f:
             #     json.dump(late_list, f, indent=2)
 
@@ -30,18 +30,18 @@ def build_late(a_course_id, a_submissions_late):
         selector_html_template = Template(string_selector_html)
 
     team_html_string = ""
-    for selector in a_submissions_late["team"].keys():
+    for selector in a_student_totals['perspectives']["team"]['list'].keys():
         # print(selector)
         team_html_string += selector_html_template.substitute(
             {'selector_file': "late_"+"team"+"_"+selector+".html", 'selector': selector})
 
     gilde_html_string = ""
-    for selector in a_submissions_late["gilde"].keys():
+    for selector in a_student_totals['perspectives']["gilde"]['list'].keys():
         gilde_html_string += selector_html_template.substitute(
             {'selector_file': "late_"+"gilde"+"_"+selector+".html", 'selector': selector})
 
     kennis_html_string = ""
-    for selector in a_submissions_late["kennis"].keys():
+    for selector in a_student_totals['perspectives']["kennis"]['list'].keys():
         kennis_html_string += selector_html_template.substitute(
             {'selector_file': "late_"+"kennis"+"_"+selector+".html", 'selector': selector})
 
@@ -50,10 +50,10 @@ def build_late(a_course_id, a_submissions_late):
     with open(template_path_general+'late.html', mode='w', encoding="utf-8") as file_late:
         file_late.write(late_html_string)
 
-    for l_perspective in a_submissions_late.keys():
+    for l_perspective in a_student_totals['perspectives'].keys():
         # print(perspective)
-        for l_selector in a_submissions_late[l_perspective]:
-            late_list_temp = a_submissions_late[l_perspective][l_selector]
+        for l_selector in a_student_totals['perspectives'][l_perspective]['list']:
+            late_list_temp = a_student_totals['perspectives'][l_perspective]['list'][l_selector]
             late_list = sorted(late_list_temp, key=itemgetter('submitted_date'))
             late_list_html_total_string = ''
             for late in late_list:

@@ -1,116 +1,120 @@
 # Haalt de studenten en de projecten op. Maakt een JSON waarin de url's naar de daily wordt opgeslagen.
 from canvasapi import Canvas
 import json
-from lib.file import read_start, read_course, read_results
+
+from lib.build_totals import get_actual_progress
+from lib.file import read_start, read_course, read_results, read_progress
+from lib.lib_submission import submission_builder, NO_SUBMISSION, remove_assignment, get_sum_score
 from model.AssignmentDate import AssignmentDate
+from lib.lib_date import API_URL, date_to_day, get_assignment_date, get_actual_date
 from model.Comment import Comment
-from model.Result import *
-from lib.config import actual_date, API_URL, NOT_GRADED
+from model.ProgressDay import ProgressDay
 from model.Submission import Submission
 
 
-def get_submitted_at(item):
-    return item[1].submitted_at
-
-
-def submissionBuilder(a_student, a_assignment, a_canvas_submission, a_assignment_date):
-    local_comment = ""
-    if a_canvas_submission.score is not None:
-        if a_canvas_submission.grade == 'complete':
-            # print("Grade", canvas_submission.grade, canvas_submission.score, canvas_submission.assignment_id)
-            score = 1.0
-        elif a_canvas_submission.grade == 'incomplete':
-            # print("Grade", canvas_submission.grade, canvas_submission.score, canvas_submission.assignment_id)
-            score = 0.5
-        else:
-            #bijzondere constraints rond assignments
-            if a_assignment.group_id == 61367 and "*" not in a_assignment.name:
-                score = 1.0
-            elif "correctie" in a_assignment.name:
-                score = -round(a_canvas_submission.score, 2)
-            else:
-                score = round(a_canvas_submission.score, 2)
-        graded = True
-    else:
-        if not a_canvas_submission.submitted_at:
-            return
-        else:
-            if not a_canvas_submission.grader_id:
-                score = 0
-                graded = False
-                local_comment = NOT_GRADED
-            else:
-                graded = True
-                score = 0.0
-
-    if a_canvas_submission.submitted_at:
-        submitted_at = get_date_time_obj(a_canvas_submission.submitted_at)
-    else:
-        # l_assignment = course.find_assignment(a_assignment.id)
-        submitted_at = a_assignment.assignment_date
-
-    # maak een submission en voeg de commentaren toe
-    submission = Submission(a_canvas_submission.id, a_assignment.group_id, a_assignment.id, a_student.id,
-                            a_assignment.name, submitted_at, graded, score)
-    canvas_comments = a_canvas_submission.submission_comments
-    if len(local_comment) > 0:
-        submission.comments.append(Comment(0, "Systeem", local_comment))
-    for canvas_comment in canvas_comments:
-        submission.comments.append(
-            Comment(canvas_comment['author_id'], canvas_comment['author_name'], canvas_comment['comment']))
-
-    # voeg een submission toe aan een van de perspectieven
-    l_perspective = course.find_perspective_by_assignment_group(submission.assignment_group_id)
-    if l_perspective:
-        this_perspective = student.get_perspective(l_perspective.name)
-        if this_perspective:
-            this_perspective.put_submission(submission)
-
-
-print("read_course_config_start()")
-course_config_start = read_start()
-print("read_course(course_config_start.course_file_name)")
-course = read_course(course_config_start.course_file_name)
+g_actual_date = get_actual_date()
+print("read_start()")
+start = read_start()
+print("read_course(start.course_file_name)")
+course = read_course(start.course_file_name)
 # Initialize a new Canvas object
-canvas = Canvas(API_URL, course_config_start.api_key)
+canvas = Canvas(API_URL, start.api_key)
 user = canvas.get_current_user()
 print(user.name)
-canvas_course = canvas.get_course(course_config_start.course_id)
-# print("Course(canvas_course.id, canvas_course.name, actual_date)")
-results = read_results(course_config_start.results_file_name)
-results.actual_date = actual_date
+canvas_course = canvas.get_course(start.course_id)
+
+results = read_results(start.results_file_name)
+results.actual_date = g_actual_date
+g_actual_day = (results.actual_date - start.start_date).days
 
 # assignments to groups and roles
 # print("canvas_course.get_assignments(include=['overrides'])")
 canvas_assignments = canvas_course.get_assignments(include=['overrides'])
-# print("for canvas_assignment in canvas_assignments")
 for canvas_assignment in canvas_assignments:
+    if canvas_assignment.id == "273700":
+        #Roll Call Attendance
+        break
     assignment_group = course.find_assignment_group(canvas_assignment.assignment_group_id)
-    if assignment_group:
+    if assignment_group is not None:
         # print("Processing G {0:8} - {1}".format(assignment_group.id, assignment_group.name))
         assignment = course.find_assignment_by_group(assignment_group.id, canvas_assignment.id)
-        # only assignments in assignment_groups are returned
-        if assignment:
+        if assignment is not None:
             print("Processing Assignment {0:6} - {1} {2}".format(assignment.id, assignment_group.name, assignment.name))
+            if (results.actual_date - assignment.assignment_date).days > 10:
+                # deadline langer dan twee weken geleden. Alle feedback is gegeven.
+                continue
+            if assignment.unlock_date:
+                if assignment.unlock_date > results.actual_date:
+                    if assignment.id != 267540:
+                        continue
             if canvas_assignment.overrides:
                 for override in canvas_assignment.overrides:
-                    assignment_date = AssignmentDate(override.id, override.due_at, override.lock_at)
+                    assignment_date = get_assignment_date(override.due_at, override.lock_at, start.end_date)
             else:
-                assignment_date = AssignmentDate(canvas_assignment.id, canvas_assignment.due_at, canvas_assignment.lock_at)
-            if (get_date_time_obj(get_date_time_str(actual_date)) - get_date_time_obj(assignment_date.date_str())).days < 14:
-                canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments'])
-                for canvas_submission in canvas_submissions:
-                    student = results.find_student(canvas_submission.user_id)
-                    if student:
-                        submissionBuilder(student, assignment, canvas_submission, assignment_date)
-                    # else:
-                    #     print("Student not found", canvas_submission.user_id)
+                assignment_date = get_assignment_date(canvas_assignment.due_at, canvas_assignment.lock_at, start.end_date)
 
-# for group in results.studentGroups:
-#     for student in group.students:
-#         for perspective in student.perspectives:
-#             perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_at)
+            canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments'])
+            for canvas_submission in canvas_submissions:
+                student = results.find_student(canvas_submission.user_id)
+                if student is not None:
+                    # voeg een submission toe aan een van de perspectieven
+                    l_submission = submission_builder(student, assignment, canvas_submission, assignment_date)
+                    if l_submission is not None:
+                        # zoek bij welk perspectief de Submission hoort
+                        l_perspective = course.find_perspective_by_assignment_group(l_submission.assignment_group_id)
+                        if l_perspective is not None:
+                            # haal het student perspectief op
+                            this_perspective = student.get_perspective(l_perspective.name)
+                            if this_perspective is not None:
+                                # voeg de Submission aan het perspectief toe
+                                this_perspective.put_submission(l_submission)
+                                results.submission_count += 1
+                                if not l_submission.graded:
+                                    results.not_graded_count += 1
 
-with open(course_config_start.results_file_name, 'w') as f:
-    dict_result = results.to_json(['assignment'])
+progress_history = read_progress("progress.json")
+progress_day = ProgressDay(g_actual_day)
+
+for student in results.students:
+    for perspective in student.perspectives:
+        # Perspective aanvullen met missed Assignments
+        if len(perspective.assignment_groups) == 1:
+            l_assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
+            l_assignments = l_assignment_group.assignments[:]
+
+            # remove already submitted
+            for l_submission in perspective.submissions:
+                l_assignments = remove_assignment(l_assignments, l_submission)
+            # open assignments
+            for l_assignment in l_assignments:
+                if date_to_day(start.start_date, l_assignment.assignment_date) < g_actual_day:
+                    l_submission = Submission(0, l_assignment.group_id, l_assignment.id, 0, l_assignment.name,
+                                              l_assignment.assignment_date, l_assignment.assignment_date,
+                                              True, 0, l_assignment.points)
+                    l_submission.comments.append(Comment(0, "Systeem", l_assignment.assignment_date, NO_SUBMISSION))
+                    # missed assignment
+                    perspective.submissions.append(l_submission)
+
+
+# bepaal de voortgang
+for student in results.students:
+    for perspective in student.perspectives:
+        perspective.sum_score, perspective.last_score = get_sum_score(perspective, start.start_date)
+        if len(perspective.assignment_groups) == 1:
+            # bepaal voortgang per perspective
+            perspective.progress = course.find_assignment_group(perspective.assignment_groups[0]).bandwidth.get_progress(perspective.last_score, perspective.sum_score)
+    # bepaal de totaal voortgang
+    progress = get_actual_progress(student.perspectives)
+    student.progress = progress
+    progress_day.progress[str(progress)] += 1
+
+progress_history.append_day(progress_day)
+with open("progress.json", 'w') as f:
+    dict_result = progress_history.to_json()
     json.dump(dict_result, f, indent=2)
+
+with open(start.results_file_name, 'w') as f:
+    dict_result = results.to_json([])
+    json.dump(dict_result, f, indent=2)
+
+print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")

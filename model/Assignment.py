@@ -1,4 +1,4 @@
-from lib.config import get_date_time_obj, get_date_time_str
+from lib.lib_date import get_date_time_obj, get_date_time_str
 
 
 class Assignment:
@@ -20,7 +20,7 @@ class Assignment:
             'section_id': self.section_id,
             'unlock_date': get_date_time_str(self.unlock_date),
             'assignment_date': get_date_time_str(self.assignment_date),
-            'points': self.points
+            'points': int(self.points)
         }
 
     def __str__(self):

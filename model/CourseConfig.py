@@ -8,9 +8,10 @@ from model.Teacher import Teacher
 
 
 class CourseConfig:
-    def __init__(self, name, student_count):
+    def __init__(self, name, student_count, days_in_semester):
         self.name = name
         self.student_count = student_count
+        self.days_in_semester = days_in_semester
         self.sections = []
         self.perspectives = []
         self.roles = []
@@ -44,6 +45,7 @@ class CourseConfig:
         return {
             'name': self.name,
             'student_count': self.student_count,
+            'days_in_semester': self.days_in_semester,
             'sections': list(map(lambda s: s.to_json(), self.sections)),
             'perspectives': list(map(lambda p: p.to_json(), self.perspectives)),
             'roles': list(map(lambda r: r.to_json([]), self.roles)),
@@ -172,7 +174,7 @@ class CourseConfig:
 
     @staticmethod
     def from_dict(data_dict):
-        new_course_config = CourseConfig(data_dict['name'], data_dict['student_count'])
+        new_course_config = CourseConfig(data_dict['name'], data_dict['student_count'], data_dict['days_in_semester'])
         new_course_config.sections = list(map(lambda s: Section.from_dict(s), data_dict['sections']))
         new_course_config.teachers = list(map(lambda t: Teacher.from_dict(t), data_dict['teachers']))
         new_course_config.perspectives = list(map(lambda p: Perspective.from_dict(p), data_dict['perspectives']))

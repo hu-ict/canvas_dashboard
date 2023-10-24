@@ -1,4 +1,4 @@
-from lib.config import get_date_time_obj, get_date_time_str
+from lib.lib_date import get_date_time_obj, get_date_time_str
 from model.Comment import Comment
 
 class Submission:
@@ -28,8 +28,8 @@ class Submission:
             'assignment_date': get_date_time_str(self.assignment_date),
             'submitted_date': get_date_time_str(self.submitted_date),
             'graded': self.graded,
-            'score': self.score,
-            'points': self.points,
+            'score': int(self.score),
+            'points': int(self.points),
             'comments': list(map(lambda c: c.to_json(), self.comments)),
         }
 

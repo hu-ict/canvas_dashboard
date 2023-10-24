@@ -12,7 +12,7 @@ class Perspective:
         }
 
     def __str__(self):
-        line = f' Perspective({self.name}, levels: {self.levels}, assignment_groeps: {self.assignment_groups})\n'
+        line = f' Perspective({self.name}, assignment_groeps: {self.assignment_groups})\n'
         return line
 
     # def get_submission_by_assignment(self, assigment_id):

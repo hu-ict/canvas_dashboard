@@ -1,5 +1,6 @@
 import json
 
+from model.ProgressHistory import ProgressHistory
 from model.Result import Result
 from model.CourseConfig import CourseConfig
 from model.CourseConfigStart import CourseConfigStart
@@ -39,6 +40,15 @@ def read_results(result_file_name):
         data = json.load(file_result)
         result = Result.from_dict(data)
         return result
+
+
+def read_progress(progress_file_name):
+    # print("read_progress", progress_file_name)
+    with open(progress_file_name, mode='r', encoding="utf-8") as file_progress:
+        data = json.load(file_progress)
+        progress = ProgressHistory.from_dict(data)
+        return progress
+
 
 def read_msteams_api(msteams_api_file_name):
     print("read msteams_api", msteams_api_file_name)

@@ -1,4 +1,4 @@
-from lib.config import get_date_time_obj
+from lib.lib_date import get_date_time_obj, get_date_time_str
 from model.Perspective import Perspective
 from model.Role import Role
 
@@ -12,7 +12,7 @@ class CourseConfigStart:
         self.projects_groep_name = projects_groep_name
         self.slb_groep_name = slb_groep_name
         self.peil_perspective = peil_perspective
-        self.start_date = start_date
+        self.start_date = get_date_time_obj(get_date_time_str(start_date))
         self.end_date = end_date
         self.config_file_name = config_file_name
         self.course_file_name = course_file_name

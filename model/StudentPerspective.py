@@ -2,14 +2,20 @@ from model.Submission import Submission
 
 
 class StudentPerspective:
-    def __init__(self, name):
+    def __init__(self, name, progress, sum_score, last_score):
         self.name = name
+        self.progress = progress
+        self.sum_score = sum_score
+        self.last_score = last_score
         self.assignment_groups = []
         self.submissions = []
 
     def to_json(self):
         return {
             'name': self.name,
+            'progress': self.progress,
+            'sum_score': self.sum_score,
+            'last_score': self.last_score,
             'assignment_groups': self.assignment_groups,
             'submissions': list(map(lambda s: s.to_json(), self.submissions))
         }
@@ -33,16 +39,21 @@ class StudentPerspective:
                 index = i
                 break
         if index >= 0:
+            # Als de Submission bestaat wordt deze overschreven met de nieuwe versie
             self.submissions[index] = a_submission
         else:
+            # Als de Submission niet bestaat, dan wordt deze aan de lijst toegevoegd
             self.submissions.append(a_submission)
         return
 
     @staticmethod
     def from_dict(data_dict):
-        new_perspective = StudentPerspective(data_dict['name'])
+        if 'last_score' in data_dict.keys():
+            new = StudentPerspective(data_dict['name'], data_dict['progress'], data_dict['sum_score'], data_dict['last_score'])
+        else:
+            new = StudentPerspective(data_dict['name'], 0, 0, 0)
         if 'assignment_groups' in data_dict.keys():
-            new_perspective.assignment_groups = data_dict['assignment_groups']
+            new.assignment_groups = data_dict['assignment_groups']
         if 'submissions' in data_dict.keys():
-            new_perspective.submissions = list(map(lambda s: Submission.from_dict(s), data_dict['submissions']))
-        return new_perspective
+            new.submissions = list(map(lambda s: Submission.from_dict(s), data_dict['submissions']))
+        return new

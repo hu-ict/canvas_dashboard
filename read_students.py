@@ -7,7 +7,7 @@ from lib.file import read_course_config, read_course_config_start
 from model.AssignmentDate import AssignmentDate
 from model.Comment import Comment
 from model.Result import *
-from lib.config import actual_date, roles, API_URL
+from lib.lib_date import actual_date, roles, API_URL
 from model.Student import Student
 
 course_config_start = read_course_config_start()
