@@ -6,14 +6,13 @@ from model.StudentGroup import StudentGroup
 
 
 class Result:
-    def __init__(self, pid, name, actual_date, submission_count, not_graded_count):
+    def __init__(self, course_id, name, actual_date, submission_count, not_graded_count):
         # self.students = {}
-        self.id = pid
+        self.id = course_id
         self.name = name
         self.actual_date = get_date_time_obj(get_date_time_str(actual_date))
         self.submission_count = submission_count
         self.not_graded_count = not_graded_count
-
         self.students = []
 
     def __str__(self):

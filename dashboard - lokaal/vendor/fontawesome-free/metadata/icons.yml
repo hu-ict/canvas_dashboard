@@ -18524,7 +18524,7 @@ tag:
   search:
     terms:
       - discount
-      - label
+      - perspective
       - price
       - shopping
   styles:
@@ -18540,7 +18540,7 @@ tags:
   search:
     terms:
       - discount
-      - label
+      - perspective
       - price
       - shopping
   styles:
@@ -20421,7 +20421,7 @@ user-tag:
     terms:
       - avatar
       - discount
-      - label
+      - perspective
       - person
       - role
       - special

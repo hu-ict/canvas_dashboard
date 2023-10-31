@@ -5,7 +5,7 @@ from lib.lib_date import get_date_time_loc, get_date_time_obj
 from lib.lib_plotly import template_path_general
 
 
-def build_late(a_course_id, a_student_totals):
+def build_late(a_result, a_student_totals):
     for l_perspective in a_student_totals['perspectives'].keys():
         for l_selector in a_student_totals['perspectives'][l_perspective]['list'].keys():
             # print(l_selector)
@@ -56,9 +56,10 @@ def build_late(a_course_id, a_student_totals):
             late_list_temp = a_student_totals['perspectives'][l_perspective]['list'][l_selector]
             late_list = sorted(late_list_temp, key=itemgetter('submitted_date'))
             late_list_html_total_string = ''
-            for late in late_list:
-                url = "https://canvas.hu.nl/courses/"+str(a_course_id)+"/gradebook/speed_grader?assignment_id="+str(late['assignment_id'])+"&student_id="+str(late['student_id'])
-                submission_html_string = submission_html_template.substitute({'submission_id': late['assignment_id'], 'assignment_name': late['assignment_name'], 'submission_date': get_date_time_loc(get_date_time_obj(late['submitted_date'])), 'url': url})
+            for l_submission in late_list:
+                l_student_name = a_result.find_student(l_submission['student_id']).name
+                url = "https://canvas.hu.nl/courses/"+str(a_result.id)+"/gradebook/speed_grader?assignment_id="+str(l_submission['assignment_id'])+"&student_id="+str(l_submission['student_id'])
+                submission_html_string = submission_html_template.substitute({'submission_id': l_submission['id'], 'student_name': l_student_name, 'assignment_name': l_submission['assignment_name'], 'submission_date': get_date_time_loc(get_date_time_obj(l_submission['submitted_date'])), 'url': url})
                 late_list_html_total_string += submission_html_string
             late_list_html_string = late_list_html_template.substitute({'submissions': late_list_html_total_string})
             with open(template_path_general+"late_"+l_perspective+"_"+l_selector+".html", mode='w', encoding="utf-8") as file_late_list:

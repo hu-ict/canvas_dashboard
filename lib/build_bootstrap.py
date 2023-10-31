@@ -18,7 +18,7 @@ def build_bootstrap_project(a_course, a_results, a_templates):
 
         # print(group.name)
         for student in group.students:
-            role = student.get_role()
+            role = student.role
             role_obj = a_course.get_role(role)
             color = role_obj.btn_color
             file_name = "./plotly/" + student.name.replace(" ", "%20") + ".html"
@@ -53,7 +53,7 @@ def build_bootstrap_slb(a_course, a_templates):
         students_html_string = ''
         for student in group.students:
             # print("--", student.name)
-            role = student.get_role()
+            role = student.role
             role_obj = a_course.get_role(role)
             color = role_obj.btn_color
             file_name = "./plotly/" + student.name.replace(" ", "%20") + ".html"

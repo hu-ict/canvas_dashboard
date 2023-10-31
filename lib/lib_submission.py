@@ -4,6 +4,8 @@ from model.Submission import Submission
 
 NOT_GRADED = "Nog niet beoordeeld."
 NO_SUBMISSION = "Niets ingeleverd voor de deadline"
+NO_DATA = "Geen data"
+
 
 def get_sum_score(a_perspective, a_start_date):
     l_sum_score = 0

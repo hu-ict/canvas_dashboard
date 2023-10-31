@@ -1,19 +1,19 @@
 from model.AssignmentGroup import AssignmentGroup
-from model.Perspective import Perspective
 from model.Role import Role
 from model.Section import Section
 from model.Student import Student
 from model.StudentGroup import StudentGroup
 from model.Teacher import Teacher
+from model.perspective.Perspectives import Perspectives
 
 
 class CourseConfig:
-    def __init__(self, name, student_count, days_in_semester):
+    def __init__(self, name, student_count, days_in_semester, perspectives):
         self.name = name
         self.student_count = student_count
         self.days_in_semester = days_in_semester
         self.sections = []
-        self.perspectives = []
+        self.perspectives = perspectives
         self.roles = []
         self.teachers = []
         self.assignment_groups = []
@@ -29,8 +29,7 @@ class CourseConfig:
             line += str(teacher)
         for role in self.roles:
             line += str(role)
-        for perspectives in self.perspectives:
-            line += str(perspectives) + "\n"
+        line += str(self.perspectives)
         for assignment_group in self.assignment_groups:
             line += str(assignment_group)
         for student_group in self.student_groups:
@@ -47,7 +46,7 @@ class CourseConfig:
             'student_count': self.student_count,
             'days_in_semester': self.days_in_semester,
             'sections': list(map(lambda s: s.to_json(), self.sections)),
-            'perspectives': list(map(lambda p: p.to_json(), self.perspectives)),
+            'perspectives': self.perspectives.to_json(),
             'roles': list(map(lambda r: r.to_json([]), self.roles)),
             'teachers': list(map(lambda t: t.to_json(), self.teachers)),
             'assignment_groups': list(map(lambda ag: ag.to_json(scope), self.assignment_groups)),
@@ -112,16 +111,16 @@ class CourseConfig:
                 return section
         return None
 
-    def find_perspective_by_name(self, name):
-        for perspective in self.perspectives:
-            if name == perspective.name:
-                return perspective
-        return None
+    # def find_perspective_by_name(self, name):
+    #     for perspective in self.perspectives:
+    #         if name == perspective.name:
+    #             return perspective
+    #     return None
 
     def find_perspective_by_assignment_group(self, group_id):
-        for perspective in self.perspectives:
-            if group_id in perspective.assignment_groups:
-                return perspective
+        for perspective in self.perspectives.perspectives:
+            if group_id in self.perspectives.perspectives[perspective].assignment_groups:
+                return self.perspectives.perspectives[perspective]
         return None
 
     def find_assignment_group_by_name(self, group_name):
@@ -174,10 +173,10 @@ class CourseConfig:
 
     @staticmethod
     def from_dict(data_dict):
-        new_course_config = CourseConfig(data_dict['name'], data_dict['student_count'], data_dict['days_in_semester'])
+        new_course_config = CourseConfig(data_dict['name'], data_dict['student_count'], data_dict['days_in_semester'], {})
         new_course_config.sections = list(map(lambda s: Section.from_dict(s), data_dict['sections']))
         new_course_config.teachers = list(map(lambda t: Teacher.from_dict(t), data_dict['teachers']))
-        new_course_config.perspectives = list(map(lambda p: Perspective.from_dict(p), data_dict['perspectives']))
+        new_course_config.perspectives = Perspectives.from_dict(data_dict['perspectives'])
         new_course_config.roles = list(map(lambda r: Role.from_dict(r), data_dict['roles']))
         new_course_config.assignment_groups = list(
             map(lambda g: AssignmentGroup.from_dict(g), data_dict['assignment_groups']))

@@ -216,7 +216,7 @@ for (var model in convert) {
 		}
 
 		if (convert[model].labels.length !== convert[model].channels) {
-			throw new Error('channel and label counts mismatch: ' + model);
+			throw new Error('channel and perspective counts mismatch: ' + model);
 		}
 
 		var channels = convert[model].channels;
@@ -5432,7 +5432,7 @@ core_defaults._set('doughnut', {
 				var value = ': ' + data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
 
 				if (helpers$1.isArray(dataLabel)) {
-					// show value on first line of multiline label
+					// show value on first line of multiline perspective
 					// need to clone because we are changing the value
 					dataLabel = dataLabel.slice();
 					dataLabel[0] += value;
@@ -6859,7 +6859,7 @@ var core_interaction = {
 		},
 
 		/**
-		 * @function Chart.Interaction.modes.label
+		 * @function Chart.Interaction.modes.perspective
 		 * @deprecated since version 2.4.0
 		 * @todo remove at version 3
 		 * @private
@@ -11040,7 +11040,7 @@ var core_ticks = {
 		 * Formatter for value labels
 		 * @method Chart.Ticks.formatters.values
 		 * @param value the value to display
-		 * @return {string|string[]} the label to display
+		 * @return {string|string[]} the perspective to display
 		 */
 		values: function(value) {
 			return helpers$1.isArray(value) ? value : '' + value;
@@ -11129,12 +11129,12 @@ core_defaults._set('scale', {
 		borderDashOffset: 0.0
 	},
 
-	// scale label
+	// scale perspective
 	scaleLabel: {
 		// display property
 		display: false,
 
-		// actual label
+		// actual perspective
 		labelString: '',
 
 		// top/bottom padding
@@ -11144,7 +11144,7 @@ core_defaults._set('scale', {
 		}
 	},
 
-	// label settings
+	// perspective settings
 	ticks: {
 		beginAtZero: false,
 		minRotation: 0,
@@ -11444,7 +11444,7 @@ var Scale = core_element.extend({
 	},
 
 	/**
-	 * Returns the scale tick objects ({label, major})
+	 * Returns the scale tick objects ({perspective, major})
 	 * @since 2.7
 	 */
 	getTicks: function() {
@@ -11553,7 +11553,7 @@ var Scale = core_element.extend({
 		me._ticks = ticks;
 
 		// Compute tick rotation and fit using a sampled subset of labels
-		// We generally don't need to compute the size of every single label for determining scale size
+		// We generally don't need to compute the size of every single perspective for determining scale size
 		samplingEnabled = sampleSize < ticks.length;
 		labels = me._convertTicksToLabels(samplingEnabled ? sample(ticks, sampleSize) : ticks);
 
@@ -11625,7 +11625,7 @@ var Scale = core_element.extend({
 	},
 	setDimensions: function() {
 		var me = this;
-		// Set the unconstrained dimension before label rotation
+		// Set the unconstrained dimension before perspective rotation
 		if (me.isHorizontal()) {
 			// Reset position before calculating rotation
 			me.width = me.maxWidth;
@@ -11712,11 +11712,11 @@ var Scale = core_element.extend({
 		maxLabelHeight = labelSizes.highest.height - labelSizes.highest.offset;
 
 		// Estimate the width of each grid based on the canvas width, the maximum
-		// label width and the number of tick intervals
+		// perspective width and the number of tick intervals
 		maxWidth = Math.min(me.maxWidth, me.chart.width - maxLabelWidth);
 		tickWidth = options.offset ? me.maxWidth / numTicks : maxWidth / (numTicks - 1);
 
-		// Allow 3 pixels x2 padding either side for label readability
+		// Allow 3 pixels x2 padding either side for perspective readability
 		if (maxLabelWidth + 6 > tickWidth) {
 			tickWidth = maxWidth / (numTicks - (options.offset ? 0.5 : 1));
 			maxHeight = me.maxHeight - getTickMarkLength(options.gridLines)
@@ -12094,7 +12094,7 @@ var Scale = core_element.extend({
 		var me = this;
 		var optionTicks = me.options.ticks;
 
-		// Calculate space needed by label in axis direction.
+		// Calculate space needed by perspective in axis direction.
 		var rot = helpers$1.toRadians(me.labelRotation);
 		var cos = Math.abs(Math.cos(rot));
 		var sin = Math.abs(Math.sin(rot));
@@ -13135,7 +13135,7 @@ function generateTicks$1(generationOptions, dataRange) {
 var defaultConfig$2 = {
 	position: 'left',
 
-	// label settings
+	// perspective settings
 	ticks: {
 		callback: core_ticks.formatters.logarithmic
 	}
@@ -13318,7 +13318,7 @@ var scale_logarithmic = core_scale.extend({
 		core_scale.prototype.convertTicksToLabels.call(this);
 	},
 
-	// Get the correct tooltip label
+	// Get the correct tooltip perspective
 	getLabelForIndex: function(index, datasetIndex) {
 		return this._getScaleLabel(this.chart.data.datasets[datasetIndex].data[index]);
 	},
@@ -13409,18 +13409,18 @@ var defaultConfig$3 = {
 		circular: false
 	},
 
-	// label settings
+	// perspective settings
 	ticks: {
-		// Boolean - Show a backdrop to the scale label
+		// Boolean - Show a backdrop to the scale perspective
 		showLabelBackdrop: true,
 
-		// String - The colour of the label backdrop
+		// String - The colour of the perspective backdrop
 		backdropColor: 'rgba(255,255,255,0.75)',
 
-		// Number - The backdrop padding above & below the label in pixels
+		// Number - The backdrop padding above & below the perspective in pixels
 		backdropPaddingY: 2,
 
-		// Number - The backdrop padding to the side of the label in pixels
+		// Number - The backdrop padding to the side of the perspective in pixels
 		backdropPaddingX: 2,
 
 		callback: core_ticks.formatters.linear
@@ -13430,7 +13430,7 @@ var defaultConfig$3 = {
 		// Boolean - if true, show point labels
 		display: true,
 
-		// Number - Point label font size in pixels
+		// Number - Point perspective font size in pixels
 		fontSize: 10,
 
 		// Function - Used to convert point labels
@@ -13611,7 +13611,7 @@ function drawPointLabels(scale) {
 	ctx.textBaseline = 'middle';
 
 	for (var i = scale.chart.data.labels.length - 1; i >= 0; i--) {
-		// Extra pixels out for some label spacing
+		// Extra pixels out for some perspective spacing
 		var extra = (i === 0 ? tickBackdropHeight / 2 : 0);
 		var pointLabelPosition = scale.getPointPosition(i, outerDistance + extra + 5);
 
@@ -13675,7 +13675,7 @@ var scale_radialLinear = scale_linearbase.extend({
 	setDimensions: function() {
 		var me = this;
 
-		// Set the unconstrained dimension before label rotation
+		// Set the unconstrained dimension before perspective rotation
 		me.width = me.maxWidth;
 		me.height = me.maxHeight;
 		me.paddingTop = getTickBackdropHeight(me.options) / 2;
@@ -14665,7 +14665,7 @@ var scale_time = core_scale.extend({
 	},
 
 	/**
-	 * Crude approximation of what the label width might be
+	 * Crude approximation of what the perspective width might be
 	 * @private
 	 */
 	getLabelWidth: function(label) {
@@ -15236,8 +15236,8 @@ core_defaults._set('global', {
 
 /**
  * Helper function to get the box width based on the usePointStyle option
- * @param {object} labelopts - the label options on the legend
- * @param {number} fontSize - the label font size
+ * @param {object} labelopts - the perspective options on the legend
+ * @param {number} fontSize - the perspective font size
  * @return {number} width of the color box area
  */
 function getBoxWidth(labelOpts, fontSize) {
@@ -15308,7 +15308,7 @@ var Legend = core_element.extend({
 	beforeSetDimensions: noop$1,
 	setDimensions: function() {
 		var me = this;
-		// Set the unconstrained dimension before label rotation
+		// Set the unconstrained dimension before perspective rotation
 		if (me.isHorizontal()) {
 			// Reset position before calculating rotation
 			me.width = me.maxWidth;
@@ -15629,7 +15629,7 @@ var Legend = core_element.extend({
 			hitboxes[i].left = rtlHelper.leftForLtr(realX, hitboxes[i].width);
 			hitboxes[i].top = y;
 
-			// Fill the actual label
+			// Fill the actual perspective
 			fillText(realX, y, legendItem, textWidth);
 
 			if (isHorizontal) {
@@ -15837,7 +15837,7 @@ var Title = core_element.extend({
 	beforeSetDimensions: noop$2,
 	setDimensions: function() {
 		var me = this;
-		// Set the unconstrained dimension before label rotation
+		// Set the unconstrained dimension before perspective rotation
 		if (me.isHorizontal()) {
 			// Reset position before calculating rotation
 			me.width = me.maxWidth;

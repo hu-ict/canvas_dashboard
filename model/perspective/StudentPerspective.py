@@ -48,6 +48,7 @@ class StudentPerspective:
 
     @staticmethod
     def from_dict(data_dict):
+        # print("StudentPerspective.from_dict", data_dict)
         if 'last_score' in data_dict.keys():
             new = StudentPerspective(data_dict['name'], data_dict['progress'], data_dict['sum_score'], data_dict['last_score'])
         else:

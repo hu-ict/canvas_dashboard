@@ -3,6 +3,7 @@ from model.Statistics import Statistics
 from model.Student import *
 from model.StudentGroup import StudentGroup
 
+
 class Students:
     def __init__(self):
         self.students = {}

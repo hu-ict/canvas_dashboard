@@ -7,8 +7,6 @@ from lib.lib_plotly import peil_labels, score_dict, colors_bar, plot_path
 from lib.file import read_start, read_course, read_results
 from lib.translation_table import translation_table
 
-
-print(score_dict['voortgang'][-1], score_dict['voortgang'][-1]['color'])
 traces = []
 start = read_start()
 course = read_course(start.course_file_name)
@@ -44,11 +42,11 @@ positions = {'team': {'row': 1, 'col': 1},
 
 def peil_contruct(a_course):
     l_peilingen = {}
-    for perspective in a_course.perspectives:
+    for perspective in a_course.perspectives.perspectives:
         # peil is niet echt een perspective
-        if perspective.name != 'peil':
-            l_peilingen[perspective.name] = []
-    peil_perspective = a_course.find_perspective_by_name(start.peil_perspective)
+        if perspective != 'peil':
+            l_peilingen[perspective] = []
+    peil_perspective = a_course.perspectives.perspectives[start.peil_perspective]
     assignment_group = a_course.find_assignment_group(peil_perspective.assignment_groups[0])
     for assignment in assignment_group.assignments:
         #zoek de juiste Assignment
@@ -106,7 +104,8 @@ def plot_gauge(a_row, a_col, a_fig, a_peil):
 def plot_student(a_course, a_student, a_peil_construction):
     fig = make_subplots(rows=4, cols=6, subplot_titles=titles, specs=specs, vertical_spacing=0.15, horizontal_spacing=0.08)
     fig.update_layout(height=1000, width=1200, showlegend=False)
-    for perspective in a_student.perspectives:
+    for perspective in a_student.perspectives.perspectives:
+        perspective = a_student.perspectives.perspectives[perspective]
         if perspective.name in a_peil_construction:
             row = positions[perspective.name]['row']
             col = positions[perspective.name]['col']
@@ -143,10 +142,10 @@ def plot_student(a_course, a_student, a_peil_construction):
     fig.write_image(asci_file_name)
 
 peil_construction = peil_contruct(course)
-for perspective in peil_construction:
-    print("Perspective", perspective)
-    for peil in peil_construction[perspective]:
-        print("Peil", peil["assignment"].name, "Submission", peil["submission"])
+# for perspective in peil_construction:
+#     print("Perspective", perspective)
+#     for peil in peil_construction[perspective]:
+#         print("Peil", peil["assignment"].name, "Submission", peil["submission"])
 
 count = 0
 for student in results.students:

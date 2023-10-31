@@ -1,18 +1,23 @@
 import json
-
-from lib.build_totals import build_totals, get_actual_progress
+from lib.build_totals import build_totals
 from lib.build_bootstrap import build_bootstrap_general
 from lib.build_late import build_late
 from lib.lib_plotly import peil_labels
 from lib.plot_totals import plot_totals
 from lib.file import read_course, read_start, read_results, read_progress
-from model.ProgressDay import ProgressDay
 
 
 def init_roles_list():
     role_list = {}
     for role in course.roles:
         role_list[role.short] = []
+    return role_list
+
+
+def init_roles_dict():
+    role_list = {}
+    for role in course.roles:
+        role_list[role.short] = {}
     return role_list
 
 
@@ -30,12 +35,21 @@ def init_coaches_count():
             team_count[teacher.initials] = 0
     return team_count
 
+
 def init_coaches_list():
     team_list = {}
     for teacher in course.teachers:
         if len(teacher.projects) > 0:
             team_list[teacher.initials] = []
     return team_list
+
+def init_coaches_dict():
+    team_list = {}
+    for teacher in course.teachers:
+        if len(teacher.projects) > 0:
+            team_list[teacher.initials] = {}
+    return team_list
+
 
 start = read_start()
 course = read_course(start.course_file_name)
@@ -62,17 +76,20 @@ student_totals = {
     'late': {'count': []}
 }
 
+gilde = init_roles_dict()
+team = init_coaches_dict()
+
 print("build_bootstrap(course_config_start, course, results)")
 build_bootstrap_general(start, course, results)
 
 print("build_totals(results, student_totals, submissions_late)")
-build_totals(results, student_totals)
+build_totals(results, student_totals, gilde, team)
 with open("dump.json", 'w') as f:
     # dict_result = json.dumps(student_totals, indent = 4)
     json.dump(student_totals, f, indent=2)
 
 print("plot_totals(course_config_start, course, student_totals)")
-plot_totals(start, course, student_totals, read_progress("progress.json"))
+plot_totals(start, course, student_totals, read_progress("progress_sep23.json"), gilde, team)
 
 print("build_late(course_config_start.course_id, submissions_late)")
-build_late(start.course_id, student_totals)
+build_late(results, student_totals)

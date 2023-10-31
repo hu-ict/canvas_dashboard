@@ -124,7 +124,7 @@ def get_team_channels(a_token, a_team_id):
         return None
 
 
-def get_sites(a_token, a_config, a_query):
+def get_sites(a_token, a_course, a_query):
     url = f"https://graph.microsoft.com/v1.0/sites?search={a_query}"
     headers = {
         "Authorization": "Bearer " + a_token,
@@ -144,7 +144,7 @@ def get_sites(a_token, a_config, a_query):
             if len(l_display_name_split) > 3:
                 l_student_name = l_display_name_split[3]
                 print("Student:", l_student_name)
-                l_student = a_config.find_student_by_name(l_student_name)
+                l_student = a_course.find_student_by_name(l_student_name)
                 if l_student:
                     print("Site:", value['id'])
                     l_student.site = value['id']
@@ -152,7 +152,7 @@ def get_sites(a_token, a_config, a_query):
                     print("Student from channel name not found", l_student_name)
             else:
                 print("DisplayName doesn't contain a student name")
-        return a_config
+        return a_course
     else:
         print(f"Error getting token: {response.json()}")
         return None

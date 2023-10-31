@@ -1,5 +1,6 @@
 import textwrap
 from lib.lib_plotly import peil_labels, score_dict
+from lib.lib_submission import NO_DATA
 
 
 def peil_contruct(a_course, a_peil_perspective):
@@ -37,7 +38,7 @@ def get_bar_score(a_peilmoment):
 
 def get_peil_hover(a_peilmoment):
     score = 0.1
-    hover = "Geen data"
+    hover = NO_DATA
     if a_peilmoment:
         if a_peilmoment.graded:
             score = a_peilmoment.score + 1

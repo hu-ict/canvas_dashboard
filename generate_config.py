@@ -15,8 +15,8 @@ canvas = Canvas(API_URL, start.api_key)
 user = canvas.get_current_user()
 print(user.name)
 canvas_course = canvas.get_course(start.course_id)
-course_config = CourseConfig(canvas_course.name)
-course_config.days_in_semester = (start.end_date - start.start_date).days
+course_config = CourseConfig(canvas_course.name, 0, (start.end_date - start.start_date).days, start.perspectives)
+
 
 # ophalen secties
 course_sections = canvas_course.get_sections()
@@ -30,7 +30,7 @@ canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignm
 for canvas_assignment_group in canvas_assignment_groups:
     print("assignment_group", canvas_assignment_group)
     group_points_possible = 0
-    assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name, [], [], 0, 0, 0)
+    assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name, [], [], 0, 0, 0, None)
     for canvas_assignment in canvas_assignment_group.assignments:
         if canvas_assignment['overrides']:
             for overrides in canvas_assignment['overrides']:

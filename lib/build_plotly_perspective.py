@@ -4,12 +4,12 @@ from lib.lib_date import date_to_day, get_date_time_loc
 from lib.lib_plotly import get_marker_size, fraction_to_level, hover_style, score_dict, fraction_to_bin_level, score_bin_dict
 import plotly.graph_objs as go
 
-from lib.lib_submission import NOT_GRADED
+from lib.lib_submission import NOT_GRADED, NO_DATA
 
 
 def get_hover(a_peil_submissions):
     score = 0.1
-    hover = "Geen data"
+    hover = NO_DATA
     if a_peil_submissions:
         if a_peil_submissions.graded:
             score = a_peil_submissions.score + 1
@@ -174,6 +174,8 @@ def plot_submissions(a_row, a_col, a_fig, a_perspective, a_start_date, a_days_in
             if l_day > l_last_graded_day:
                 l_last_graded_day = l_day
             cum_score += submission.score
+            if submission.points == 0:
+                submission.points = 1
             if submission.points <= 1.1:
                 y_colors.append(score_bin_dict[a_perspective.name][fraction_to_bin_level(submission.score / submission.points)]['color'])
                 l_hover += "<br><b>" + score_bin_dict[a_perspective.name][fraction_to_bin_level(submission.score / submission.points)]['niveau'] + "</b>, score: " + str(submission.score) + " [" + get_date_time_loc(submission.submitted_date) + "]"

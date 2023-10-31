@@ -59,7 +59,7 @@ for canvas_assignment in canvas_assignments:
                     if l_submission is not None:
                         l_perspective = course.find_perspective_by_assignment_group(l_submission.assignment_group_id)
                         if l_perspective:
-                            this_perspective = student.get_perspective(l_perspective.name)
+                            this_perspective = student.perspectives.perspectives[l_perspective.name]
                             if this_perspective:
                                 this_perspective.submissions.append(l_submission)
                                 results.submission_count += 1
@@ -71,44 +71,12 @@ for canvas_assignment in canvas_assignments:
 #         for perspective in student.perspectives:
 #             perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_at)
 
-# Grab assignment with ID of 1234
-# for assignment_group in course.assignment_groups:
-#     for assignment in assignment_group.assignments:
-#         print(assignment.name)
-#         canvas_assignment = canvas_course.get_assignment(assignment.id, include=['overrides'])
-#         print("Processing Assignment {0:6} - {1} {2}".format(assignment.id, assignment_group.name, assignment.name))
-#         if assignment.unlock_date:
-#             if assignment.unlock_date > results.actual_date:
-#                 if assignment.id != 267540:
-#                     continue
-#         if canvas_assignment.overrides:
-#             for override in canvas_assignment.overrides:
-#                 assignment_date = get_assignment_date(override.due_at, override.lock_at, course_config_start.end_date)
-#         else:
-#             assignment_date = get_assignment_date(canvas_assignment.due_at, canvas_assignment.lock_at,
-#                                                   course_config_start.end_date)
-#
-#         canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments'])
-#         for canvas_submission in canvas_submissions:
-#             student = results.find_student(canvas_submission.user_id)
-#             if student is not None:
-#                 # voeg een submission toe aan een van de perspectieven
-#                 l_submission = submission_builder(student, assignment, canvas_submission, assignment_date)
-#                 if l_submission is not None:
-#                     l_perspective = course.find_perspective_by_assignment_group(l_submission.assignment_group_id)
-#                     if l_perspective:
-#                         this_perspective = student.get_perspective(l_perspective.name)
-#                         if this_perspective:
-#                             this_perspective.submissions.append(l_submission)
-#                             results.submission_count += 1
-#                             if not l_submission.graded:
-#                                 results.not_graded_count += 1
-
-progress_history = read_progress("progress.json")
+progress_history = read_progress(start.progress_file_name)
 progress_day = ProgressDay(g_actual_day)
 
 for student in results.students:
-    for perspective in student.perspectives:
+    for perspective in student.perspectives.perspectives:
+        perspective = student.perspectives.perspectives[perspective]
         # Perspective aanvullen met missed Assignments
         if len(perspective.assignment_groups) == 1:
             l_assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
@@ -129,7 +97,8 @@ for student in results.students:
 
 # bepaal de voortgang
 for student in results.students:
-    for perspective in student.perspectives:
+    for perspective in student.perspectives.perspectives:
+        perspective = student.perspectives.perspectives[perspective]
         perspective.sum_score, perspective.last_score = get_sum_score(perspective, start.start_date)
         if len(perspective.assignment_groups) == 1:
             # bepaal voortgang per perspective
@@ -140,7 +109,7 @@ for student in results.students:
     progress_day.progress[str(progress)] += 1
 
 progress_history.append_day(progress_day)
-with open("progress.json", 'w') as f:
+with open(start.progress_file_name, 'w') as f:
     dict_result = progress_history.to_json()
     json.dump(dict_result, f, indent=2)
 

@@ -4226,7 +4226,7 @@
 				'id': ! features.f ? tableId+'_filter' : null,
 				'class': classes.sFilter
 			} )
-			.append( $('<label/>' ).append( str ) );
+			.append( $('<perspective/>' ).append( str ) );
 	
 		var searchFn = function() {
 			/* Update all other filter input elements for the new display */
@@ -4874,7 +4874,7 @@
 			);
 		}
 	
-		var div = $('<div><label/></div>').addClass( classes.sLength );
+		var div = $('<div><perspective/></div>').addClass( classes.sLength );
 		if ( ! settings.aanFeatures.l ) {
 			div[0].id = tableId+'_length';
 		}
@@ -6644,7 +6644,7 @@
 	 *  @param {object} oSettings dataTables settings object
 	 *  @param {string} sStore Name of the array storage for the callbacks in oSettings
 	 *  @param {function} fn Function to be called back
-	 *  @param {string} sName Identifying name for the callback (i.e. a label)
+	 *  @param {string} sName Identifying name for the callback (i.e. a perspective)
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnCallbackReg( oSettings, sStore, fn, sName )
@@ -11343,7 +11343,7 @@
 			 */
 			"oAria": {
 				/**
-				 * ARIA label that is added to the table headers when the column may be
+				 * ARIA perspective that is added to the table headers when the column may be
 				 * sorted ascending by activing the column (click or return when focused).
 				 * Note that the column header is prefixed to this string.
 				 *  @type string
@@ -11366,7 +11366,7 @@
 				"sSortAscending": ": activate to sort column ascending",
 	
 				/**
-				 * ARIA label that is added to the table headers when the column may be
+				 * ARIA perspective that is added to the table headers when the column may be
 				 * sorted descending by activing the column (click or return when focused).
 				 * Note that the column header is prefixed to this string.
 				 *  @type string

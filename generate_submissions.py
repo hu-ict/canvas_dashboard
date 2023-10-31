@@ -72,7 +72,7 @@ for canvas_assignment in canvas_assignments:
                                 if not l_submission.graded:
                                     results.not_graded_count += 1
 
-progress_history = read_progress("progress.json")
+progress_history = read_progress("progress_sep23.json")
 progress_day = ProgressDay(g_actual_day)
 
 for student in results.students:
@@ -109,7 +109,7 @@ for student in results.students:
     progress_day.progress[str(progress)] += 1
 
 progress_history.append_day(progress_day)
-with open("progress.json", 'w') as f:
+with open("progress_sep23.json", 'w') as f:
     dict_result = progress_history.to_json()
     json.dump(dict_result, f, indent=2)
 
