@@ -43,6 +43,7 @@ def init_coaches_list():
             team_list[teacher.initials] = []
     return team_list
 
+
 def init_coaches_dict():
     team_list = {}
     for teacher in course.teachers:
@@ -54,15 +55,15 @@ def init_coaches_dict():
 start = read_start()
 course = read_course(start.course_file_name)
 results = read_results(start.results_file_name)
-actual_day = (results.actual_date - start.start_date).days
+actual_day = (results.actual_date - course.start_date).days
 
 peilen = {}
 for peil in peil_labels:
     peilen[peil] = {
-            'overall': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
-            'team': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
-            'gilde': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
-            'kennis': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+            'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+            'team': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+            'gilde': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+            'kennis': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
         }
 
 student_totals = {
@@ -79,17 +80,17 @@ student_totals = {
 gilde = init_roles_dict()
 team = init_coaches_dict()
 
-print("build_bootstrap(course_config_start, course, results)")
-build_bootstrap_general(start, course, results)
+print("build_bootstrap(course, results)")
+build_bootstrap_general(course, results)
 
-print("build_totals(results, student_totals, submissions_late)")
-build_totals(results, student_totals, gilde, team)
+print("build_totals(course, results, student_totals, gilde, team)")
+build_totals(course, results, student_totals, gilde, team)
 with open("dump.json", 'w') as f:
     # dict_result = json.dumps(student_totals, indent = 4)
     json.dump(student_totals, f, indent=2)
 
-print("plot_totals(course_config_start, course, student_totals)")
-plot_totals(start, course, student_totals, read_progress("progress_sep23.json"), gilde, team)
+print("plot_totals(course, student_totals, read_progress('''progress_sep23.json'''), gilde, team)")
+plot_totals(course, student_totals, read_progress("progress_sep23.json"), gilde, team)
 
-print("build_late(course_config_start.course_id, submissions_late)")
+print("build_late(results, student_totals)")
 build_late(results, student_totals)

@@ -8,8 +8,7 @@ def student_total(a_perspective):
 def get_actual_progress(a_perspectives):
     l_sum = 0
     l_progress = 5
-    for l_perspective in a_perspectives.perspectives:
-        l_perspective = a_perspectives.perspectives[l_perspective]
+    for l_perspective in a_perspectives.values():
         if l_perspective.name == 'peil':
             pass
         else:
@@ -51,13 +50,12 @@ def get_submitted_at(item):
     return item.submitted_at
 
 
-def count_student(a_student_totals, a_student):
+def count_student(a_course, a_student_totals, a_student):
     peil = get_actual_progress(a_student.perspectives)
     # print(a_student.name, peil)
     a_student_totals['peil']["Actueel"]['overall'][peil] += 1
-    for l_perspective in a_student.perspectives.perspectives:
-        l_perspective = a_student.perspectives.perspectives[l_perspective]
-        if l_perspective.name == "peil":
+    for l_perspective in a_student.perspectives.values():
+        if l_perspective.name == a_course.progress_perspective:
             peil = get_progress(l_perspective.submissions, ["halfweg", "Overall"])
             a_student_totals[l_perspective.name]["Sprint 4"]['overall'][peil] += 1
             peil = get_progress(l_perspective.submissions, ["Sprint 7", "Overall"])
@@ -90,11 +88,10 @@ def check_for_late(a_student_totals, a_student, a_submission, a_perspective, a_a
         add_total(a_student_totals['late']['count'], late_days)
 
 
-def build_totals(a_results, a_student_totals, a_gilde, a_team):
+def build_totals(a_course, a_results, a_student_totals, a_gilde, a_team):
     for l_student in a_results.students:
-        count_student(a_student_totals, l_student)
-        for l_perspective in l_student.perspectives.perspectives:
-            l_perspective = l_student.perspectives.perspectives[l_perspective]
+        count_student(a_course, a_student_totals, l_student)
+        for l_perspective in l_student.perspectives.values():
             if l_perspective.name == "gilde":
                 for l_submission in l_perspective.submissions:
                     if int(l_submission.score) in a_gilde[l_student.role]:

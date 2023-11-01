@@ -6,7 +6,6 @@ from lib.file import read_start, read_config
 from model.Assignment import Assignment
 from model.Student import Student
 from model.perspective.StudentPerspective import StudentPerspective
-from model.perspective.StudentPerspectives import StudentPerspectives
 
 
 def get_dates(input):
@@ -39,8 +38,6 @@ def link_teachers():
 start = read_start()
 config = read_config(start.config_file_name)
 print("Config", config)
-
-
 # Initialize a new Canvas object
 canvas = Canvas(API_URL, start.api_key)
 user = canvas.get_current_user()
@@ -86,19 +83,19 @@ config.student_count = len(config.students)
 # Perspectives toevoegen aan Students
 print("Toevoegen Perspectives aan Student")
 for student in config.students:
-    student.perspectives = StudentPerspectives()
-    for perspective_key in config.perspectives.perspectives:
-        print(perspective_key)
-        if len(config.perspectives.perspectives[perspective_key].assignment_groups) > 1:
+    student.perspectives = {}
+    for perspective in config.perspectives.values():
+        print(perspective)
+        if len(perspective.assignment_groups) > 1:
             # meerdere assignment_group: kennis
-            student.perspectives.perspectives[perspective_key] = StudentPerspective(perspective_key, 0, 0, 0)
+            student.perspectives[perspective.name] = StudentPerspective(perspective.name, 0, 0, 0)
             assignment_group_id = config.find_assignment_group_by_role(student.role)
-            student.perspectives.perspectives[perspective_key].assignment_groups.append(assignment_group_id)
-        elif len(config.perspectives.perspectives[perspective_key].assignment_groups) == 1:
+            student.perspectives[perspective.name].assignment_groups.append(assignment_group_id)
+        elif len(perspective.assignment_groups) == 1:
             # één assignment_group: team, gilde en peil
-            student.perspectives.perspectives[perspective_key] = StudentPerspective(perspective_key, 0, 0, 0)
-            assignment_group_id = config.perspectives.perspectives[perspective_key].assignment_groups[0]
-            student.perspectives.perspectives[perspective_key].assignment_groups.append(assignment_group_id)
+            student.perspectives[perspective.name] = StudentPerspective(perspective.name, 0, 0, 0)
+            assignment_group_id = config.perspectives[perspective.name].assignment_groups[0]
+            student.perspectives[perspective.name].assignment_groups.append(assignment_group_id)
         else:
             print("ERROR: geen assignment_group for perspective")
 

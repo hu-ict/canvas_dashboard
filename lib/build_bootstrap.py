@@ -1,7 +1,7 @@
 from string import Template
 
 from lib.build_totals import get_actual_progress
-from lib.lib_plotly import score_voortgang_dict, template_path_general
+from lib.lib_plotly import template_path_general
 from lib.translation_table import translation_table
 
 
@@ -26,7 +26,7 @@ def build_bootstrap_project(a_course, a_results, a_templates):
             asci_file_name = file_name.translate(translation_table)
             l_student = a_results.find_student(student.id)
             l_progress = get_actual_progress(l_student.perspectives)
-            l_progress_color = score_voortgang_dict[l_progress]['color']
+            l_progress_color = a_course.perspectives['peil'].levels[str(l_progress)].color
 
 
             student_html_string = a_templates['student'].substitute(
@@ -60,7 +60,7 @@ def build_bootstrap_slb(a_course, a_templates):
             #       file_name = plot_path + student.name + ".html"
             asci_file_name = file_name.translate(translation_table)
             l_progress = get_actual_progress(student.perspectives)
-            l_progress_color = score_voortgang_dict[l_progress]['color']
+            l_progress_color = a_course.perspectives[a_course.progress_perspective].levels[str(l_progress)].color
             student_html_string = a_templates['student'].substitute(
                 {'btn_color': color, 'progress_color': l_progress_color, 'student_name': student.name, 'student_role': role_obj.name,
                  'student_file': asci_file_name})
@@ -107,8 +107,8 @@ def get_initials(item):
     return item[1].initials
 
 
-def build_bootstrap_general(a_course_config_start, a_course, a_results):
-    l_semester_day = (a_results.actual_date - a_course_config_start.start_date).days
+def build_bootstrap_general(a_course, a_results):
+    l_semester_day = (a_results.actual_date - a_course.start_date).days
     l_templates = load_templates()
 
     l_coaches = {}

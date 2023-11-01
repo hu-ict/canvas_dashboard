@@ -3,10 +3,10 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import numpy as np
 
-from lib.lib_plotly import peil_levels, score_dict, hover_style, peil_labels, plot_path
+from lib.lib_plotly import peil_levels, hover_style, peil_labels, plot_path
 
 
-def plot_actuals(a_fig, a_progress_history):
+def plot_actuals(a_fig, a_progress_history, a_course):
     for level in peil_levels:
         y_counts = []
         x_labels = []
@@ -14,14 +14,14 @@ def plot_actuals(a_fig, a_progress_history):
         for day in a_progress_history.days:
             x_labels.append(day.day)
             y_counts.append(day.progress[str(level)])
-            y_hover.append("Dag: "+str(day.day) + ", " + score_dict['voortgang'][level]['niveau'] + ", aantal: " + str(day.progress[str(level)]))
+            y_hover.append("Dag: "+str(day.day) + ", " + a_course.perspectives["peil"].levels[str(level)].label + ", aantal: " + str(day.progress[str(level)]))
         a_fig.add_trace(go.Bar(x=x_labels, y=y_counts,
-                               name=score_dict['voortgang'][level]['niveau'],
+                               name=a_course.perspectives["peil"].levels[str(level)].label,
                                hoverinfo="text",
                                hovertext=y_hover,
                                hoverlabel=hover_style,
                                text=y_counts,
-                               marker=dict(color=score_dict['voortgang'][level]['color'])), 2, 2)
+                               marker=dict(color=a_course.perspectives["peil"].levels[str(level)].color)), 2, 2)
     a_fig.update_yaxes(title_text="Aantal", range=[0, 100], row=2, col=2)
 
 
@@ -80,7 +80,7 @@ def plot_team(a_fig, a_totals):
     a_fig.update_xaxes(title_text="Punten", range=[0, 9], row=3, col=2)
 
 
-def plot_peilingen(a_fig, student_totals):
+def plot_peilingen(a_fig, student_totals, a_course):
     l_perspective = "overall"
     for level in peil_levels:
         y_counts = []
@@ -88,21 +88,20 @@ def plot_peilingen(a_fig, student_totals):
         y_hover = []
         for label in peil_labels:
             x_labels.append(label)
-            y_counts.append(student_totals['peil'][label][l_perspective][level])
-            y_hover.append(label+" "+score_dict['voortgang'][level]['niveau']+" "+str(student_totals['peil'][label][l_perspective][level]))
+            y_counts.append(student_totals[a_course.progress_perspective][label][l_perspective][level])
+            y_hover.append(label+" "+a_course.perspectives[a_course.progress_perspective].levels[str(level)].label+" "+str(student_totals[a_course.progress_perspective][label][l_perspective][level]))
         a_fig.add_trace(go.Bar(x=x_labels, y=y_counts,
-                               name=score_dict['voortgang'][level]['niveau'],
+                               name=a_course.perspectives[a_course.progress_perspective].levels[str(level)].label,
                                hoverinfo="text",
                                hovertext=y_hover,
                                hoverlabel=hover_style,
                                text=y_counts,
-                               marker=dict(color=score_dict['voortgang'][level]['color'])), 2, 1)
+                               marker=dict(color=a_course.perspectives["peil"].levels[str(level)].color)), 2, 1)
 
     a_fig.update_yaxes(title_text="Aantal", range=[0, 100], row=2, col=1)
 
 
-
-def plot_totals(course_config_start, course, student_totals, progress_history, gilde, team):
+def plot_totals(course, student_totals, progress_history, gilde, team):
     titles = ['Team', 'Gilde','Kennis',
               'Overall', 'Dagelijkse voortgang', 'Vertraging',
               'Gilde', 'Team', ''
@@ -131,8 +130,8 @@ def plot_totals(course_config_start, course, student_totals, progress_history, g
     )
 
     col = 0
-    for l_perspective in course.perspectives.perspectives:
-        if l_perspective != course_config_start.peil_perspective:
+    for l_perspective in course.perspectives:
+        if l_perspective != course.progress_perspective:
             col += 1
             x_team = list(student_totals['perspectives'][l_perspective]['pending'].keys())
             y_counts = list(student_totals['perspectives'][l_perspective]['pending'].values())
@@ -146,8 +145,8 @@ def plot_totals(course_config_start, course, student_totals, progress_history, g
 
     data = go.Histogram(x=np.array(student_totals['late']['count']))
     fig.add_trace(data, 2, 3)
-    plot_peilingen(fig, student_totals)
-    plot_actuals(fig, progress_history)
+    plot_peilingen(fig, student_totals, course)
+    plot_actuals(fig, progress_history, course)
     plot_gilde(fig, gilde)
     plot_team(fig, team)
     file_name = plot_path + "totals" + ".html"

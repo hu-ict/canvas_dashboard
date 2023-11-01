@@ -13,6 +13,6 @@ class Level:
         return f'Level({self.label}, {self.color})'
 
     @staticmethod
-    def from_dict(key, data_dict):
+    def from_dict(data_dict):
         return Level(data_dict['label'], data_dict['color'])
 

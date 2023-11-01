@@ -4,8 +4,6 @@ from model.ProgressHistory import ProgressHistory
 from model.Result import Result
 from model.CourseConfig import CourseConfig
 from model.CourseConfigStart import CourseConfigStart
-from model.Student import Student
-from model.Submission import Submission
 from model.TeamsApi import TeamsApi
 from model.perspective.Perspectives import Perspectives
 
@@ -15,8 +13,8 @@ def read_start():
     print("read_start", start_file_name)
     with open(start_file_name, mode='r', encoding="utf-8") as file_config_start:
         data = json.load(file_config_start)
-        course_config_start = CourseConfigStart.from_dict(data)
-        return course_config_start
+        start = CourseConfigStart.from_dict(data)
+        return start
 
 
 def read_levels(labels_file_name):
@@ -31,8 +29,8 @@ def read_config(config_file_name):
     print("read_config", config_file_name)
     with open(config_file_name, mode='r', encoding="utf-8") as course_config_file:
         data = json.load(course_config_file)
-        course_config = CourseConfig.from_dict(data)
-        return course_config
+        config = CourseConfig.from_dict(data)
+        return config
 
 
 def read_course(course_file_name):

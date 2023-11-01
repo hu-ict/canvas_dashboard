@@ -1,7 +1,7 @@
 class ProgressDay:
     def __init__(self, day):
         self.day = day
-        self.progress = {"-1": 0, "0": 0, "1": 0, "2": 0, "3": 0}
+        self.progress = {"-2": 0, "-1": 0, "0": 0, "1": 0, "2": 0, "3": 0}
 
     def to_json(self):
         return {
@@ -16,5 +16,7 @@ class ProgressDay:
     def from_dict(data_dict):
         new = ProgressDay(data_dict['day'])
         new.progress = data_dict['progress']
+        if "-2" not in new.progress.keys():
+            new.progress["-2"] = 0
         return new
 

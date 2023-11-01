@@ -3,7 +3,7 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 from lib.build_plotly_perspective import plot_perspective, find_submissions
 from lib.lib_date import get_date_time_loc
-from lib.lib_plotly import peil_labels, score_dict, colors_bar, plot_path
+from lib.lib_plotly import peil_labels, plot_path, get_color_bar
 from lib.file import read_start, read_course, read_results
 from lib.translation_table import translation_table
 
@@ -42,12 +42,12 @@ positions = {'team': {'row': 1, 'col': 1},
 
 def peil_contruct(a_course):
     l_peilingen = {}
-    for perspective in a_course.perspectives.perspectives:
+    for perspective in a_course.perspectives.values():
         # peil is niet echt een perspective
-        if perspective != 'peil':
-            l_peilingen[perspective] = []
-    peil_perspective = a_course.perspectives.perspectives[start.peil_perspective]
-    assignment_group = a_course.find_assignment_group(peil_perspective.assignment_groups[0])
+        if perspective.name != a_course.progress_perspective:
+            l_peilingen[perspective.name] = []
+    progress_perspective = a_course.perspectives[start.progress_perspective]
+    assignment_group = a_course.find_assignment_group(progress_perspective.assignment_groups[0])
     for assignment in assignment_group.assignments:
         #zoek de juiste Assignment
         for peil_label in peil_labels:
@@ -59,8 +59,9 @@ def peil_contruct(a_course):
     return l_peilingen
 
 
-def plot_gauge(a_row, a_col, a_fig, a_peil):
+def plot_gauge(a_row, a_col, a_fig, a_peil, a_course):
     # plotting de gauge
+    colors_bar = get_color_bar(a_course)
     plot_bgcolor = "#fff"
     quadrant_colors = list(colors_bar.values())[1:]
     n_quadrants = len(quadrant_colors)
@@ -101,36 +102,32 @@ def plot_gauge(a_row, a_col, a_fig, a_peil):
     a_fig.add_trace(gauge, a_row, a_col)
 
 
-def plot_student(a_course, a_student, a_peil_construction):
+def plot_student(a_course, a_student, a_actual_date, a_peil_construction):
     fig = make_subplots(rows=4, cols=6, subplot_titles=titles, specs=specs, vertical_spacing=0.15, horizontal_spacing=0.08)
     fig.update_layout(height=1000, width=1200, showlegend=False)
-    for perspective in a_student.perspectives.perspectives:
-        perspective = a_student.perspectives.perspectives[perspective]
+    for perspective in a_student.perspectives.values():
         if perspective.name in a_peil_construction:
             row = positions[perspective.name]['row']
             col = positions[perspective.name]['col']
-            #slechts één assgignment_group
-            assigment_group = a_course.find_assignment_group(perspective.assignment_groups[0])
-            plot_perspective(row, col, fig, assigment_group, perspective, a_peil_construction,
-                             start.start_date, g_actual_day, a_course.days_in_semester,
-                             get_date_time_loc(results.actual_date))
+            plot_perspective(row, col, fig, a_course, perspective, a_peil_construction,
+                             g_actual_day, get_date_time_loc(a_actual_date))
 
     #Peil overall drie peilmomenten
     if a_student.get_peilmoment(247774):
         plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig,
                    a_student.get_peilmoment(247774).score + 0.5)
     else:
-        plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig, 0.1)
+        plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig, 0.1, a_course)
     if a_student.get_peilmoment(252847):
         plot_gauge(positions['eind']['row'], positions['eind']['col'], fig,
                    a_student.get_peilmoment(252847).score + 0.5)
     else:
-        plot_gauge(positions['eind']['row'], positions['eind']['col'], fig, 0.1)
+        plot_gauge(positions['eind']['row'], positions['eind']['col'], fig, 0.1, a_course)
     if a_student.get_peilmoment(253129):
         plot_gauge(positions['beoordeling']['row'], positions['beoordeling']['col'], fig,
                    a_student.get_peilmoment(253129).score + 0.5)
     else:
-        plot_gauge(positions['beoordeling']['row'], positions['beoordeling']['col'], fig, 0.1)
+        plot_gauge(positions['beoordeling']['row'], positions['beoordeling']['col'], fig, 0.1, a_course)
 
     file_name = plot_path + a_student.name
     asci_file_name = file_name.translate(translation_table)
@@ -151,5 +148,5 @@ count = 0
 for student in results.students:
     l_peil_construction = find_submissions(student, peil_construction.copy())
     print(student.name)
-    plot_student(course, student, l_peil_construction)
+    plot_student(course, student, results.actual_date, peil_construction)
 

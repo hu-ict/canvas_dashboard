@@ -59,7 +59,7 @@ for canvas_assignment in canvas_assignments:
                     if l_submission is not None:
                         l_perspective = course.find_perspective_by_assignment_group(l_submission.assignment_group_id)
                         if l_perspective:
-                            this_perspective = student.perspectives.perspectives[l_perspective.name]
+                            this_perspective = student.perspectives[l_perspective.name]
                             if this_perspective:
                                 this_perspective.submissions.append(l_submission)
                                 results.submission_count += 1
@@ -75,8 +75,7 @@ progress_history = read_progress(start.progress_file_name)
 progress_day = ProgressDay(g_actual_day)
 
 for student in results.students:
-    for perspective in student.perspectives.perspectives:
-        perspective = student.perspectives.perspectives[perspective]
+    for perspective in student.perspectives.values():
         # Perspective aanvullen met missed Assignments
         if len(perspective.assignment_groups) == 1:
             l_assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
@@ -97,8 +96,7 @@ for student in results.students:
 
 # bepaal de voortgang
 for student in results.students:
-    for perspective in student.perspectives.perspectives:
-        perspective = student.perspectives.perspectives[perspective]
+    for perspective in student.perspectives.values():
         perspective.sum_score, perspective.last_score = get_sum_score(perspective, start.start_date)
         if len(perspective.assignment_groups) == 1:
             # bepaal voortgang per perspective

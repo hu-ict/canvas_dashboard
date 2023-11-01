@@ -1,19 +1,27 @@
+from lib.lib_date import get_date_time_obj, get_date_time_str
 from model.AssignmentGroup import AssignmentGroup
 from model.Role import Role
 from model.Section import Section
 from model.Student import Student
 from model.StudentGroup import StudentGroup
 from model.Teacher import Teacher
+from model.perspective.Level import Level
+from model.perspective.Perspective import Perspective
 from model.perspective.Perspectives import Perspectives
 
 
 class CourseConfig:
-    def __init__(self, name, student_count, days_in_semester, perspectives):
+    def __init__(self, canvas_course_id, name, progress_perspective, start_date, end_date, days_in_semester, student_count):
         self.name = name
+        self.canvas_course_id = canvas_course_id
         self.student_count = student_count
         self.days_in_semester = days_in_semester
+        self.start_date = get_date_time_obj(get_date_time_str(start_date))
+        self.end_date = end_date
+        self.progress_perspective = progress_perspective
         self.sections = []
-        self.perspectives = perspectives
+        self.perspectives = {}
+        self.judgement = {}
         self.roles = []
         self.teachers = []
         self.assignment_groups = []
@@ -41,19 +49,29 @@ class CourseConfig:
         return line
 
     def to_json(self, scope):
-        return {
+        dict_result = {
             'name': self.name,
+            'canvas_course_id': self.canvas_course_id,
             'student_count': self.student_count,
             'days_in_semester': self.days_in_semester,
+            'start_date': get_date_time_str(self.start_date),
+            'end_date': get_date_time_str(self.end_date),
+            'progress_perspective': self.progress_perspective,
             'sections': list(map(lambda s: s.to_json(), self.sections)),
-            'perspectives': self.perspectives.to_json(),
+            'perspectives': {},
+            'judgement': {},
             'roles': list(map(lambda r: r.to_json([]), self.roles)),
             'teachers': list(map(lambda t: t.to_json(), self.teachers)),
             'assignment_groups': list(map(lambda ag: ag.to_json(scope), self.assignment_groups)),
             'student_groups': list(map(lambda sg: sg.to_json([]), self.student_groups)),
             'slb_groups': list(map(lambda sg: sg.to_json([]), self.slb_groups)),
-            'students': list(map(lambda sg: sg.to_json('submissions'), self.students)),
+            'students': list(map(lambda s: s.to_json('submissions'), self.students)),
         }
+        for key in self.perspectives:
+            dict_result['perspectives'][key] = self.perspectives[key].to_json()
+        for key in self.judgement:
+            dict_result['judgement'][key] = self.judgement[key].to_json()
+        return dict_result
 
     def find_student_group(self, group_id):
         for group in self.student_groups:
@@ -118,9 +136,9 @@ class CourseConfig:
     #     return None
 
     def find_perspective_by_assignment_group(self, group_id):
-        for perspective in self.perspectives.perspectives:
-            if group_id in self.perspectives.perspectives[perspective].assignment_groups:
-                return self.perspectives.perspectives[perspective]
+        for perspective in self.perspectives.values():
+            if group_id in perspective.assignment_groups:
+                return perspective
         return None
 
     def find_assignment_group_by_name(self, group_name):
@@ -173,14 +191,28 @@ class CourseConfig:
 
     @staticmethod
     def from_dict(data_dict):
-        new_course_config = CourseConfig(data_dict['name'], data_dict['student_count'], data_dict['days_in_semester'], {})
-        new_course_config.sections = list(map(lambda s: Section.from_dict(s), data_dict['sections']))
-        new_course_config.teachers = list(map(lambda t: Teacher.from_dict(t), data_dict['teachers']))
-        new_course_config.perspectives = Perspectives.from_dict(data_dict['perspectives'])
-        new_course_config.roles = list(map(lambda r: Role.from_dict(r), data_dict['roles']))
-        new_course_config.assignment_groups = list(
+        new = CourseConfig(
+            data_dict['canvas_course_id'],
+            data_dict['name'],
+            data_dict['progress_perspective'],
+            get_date_time_obj(data_dict['start_date']),
+            get_date_time_obj(data_dict['end_date']),
+            data_dict['days_in_semester'],
+            data_dict['student_count'])
+        new.sections = list(map(lambda s: Section.from_dict(s), data_dict['sections']))
+        new.teachers = list(map(lambda t: Teacher.from_dict(t), data_dict['teachers']))
+        new.perspectives = {}
+        new.judgement = {}
+        new.roles = list(map(lambda r: Role.from_dict(r), data_dict['roles']))
+        new.assignment_groups = list(
             map(lambda g: AssignmentGroup.from_dict(g), data_dict['assignment_groups']))
-        new_course_config.student_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['student_groups']))
-        new_course_config.slb_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['slb_groups']))
-        new_course_config.students = list(map(lambda s: Student.from_dict(s), data_dict['students']))
-        return new_course_config
+        new.student_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['student_groups']))
+        new.slb_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['slb_groups']))
+        new.students = list(map(lambda s: Student.from_dict(s), data_dict['students']))
+        if 'perspectives' in data_dict.keys():
+            for key in data_dict['perspectives'].keys():
+                new.perspectives[key] = Perspective.from_dict(data_dict['perspectives'][key])
+        if 'judgement' in data_dict.keys():
+            for key in data_dict['judgement'].keys():
+                new.judgement[key] = Level.from_dict(data_dict['judgement'][key])
+        return new

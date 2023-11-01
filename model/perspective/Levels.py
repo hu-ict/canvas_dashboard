@@ -16,5 +16,5 @@ class Levels:
     def from_dict(data_dict):
         new = Levels()
         for key in data_dict.keys():
-            new.levels[key] = Level.from_dict(key, data_dict[key])
+            new.levels[key] = Level.from_dict(data_dict[key])
         return new
