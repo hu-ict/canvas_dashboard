@@ -1,17 +1,17 @@
 from lib.lib_date import get_date_time_obj, get_date_time_str
-from model.Perspective import Perspective
 from model.Role import Role
 from model.perspective.Level import Level
+from model.perspective.Perspective import Perspective
 from model.perspective.Perspectives import Perspectives
 
 
 class CourseConfigStart:
-    def __init__(self, course_id, projects_groep_name, slb_groep_name, progress_perspective, start_date, end_date, config_file_name, course_file_name, results_file_name, progress_file_name, api_key):
+    def __init__(self, course_id, projects_groep_name, slb_groep_name, progress_perspective, start_date, end_date, config_file_name, course_file_name, results_file_name, progress_file_name, api_key, a_grade_levels):
         self.course_id = course_id
         self.api_key = api_key
         self.perspectives = {}
         self.roles = []
-        self.judgement = {}
+        self.grade_levels = a_grade_levels
         self.projects_groep_name = projects_groep_name
         self.slb_groep_name = slb_groep_name
         self.progress_perspective = progress_perspective
@@ -35,13 +35,11 @@ class CourseConfigStart:
                                 get_date_time_obj(data_dict['end_date']),
                                 data_dict['config_file_name'], data_dict['course_file_name'],
                                 data_dict['results_file_name'], data_dict['progress_file_name'],
-                                data_dict['api_key'])
+                                data_dict['api_key'],
+                                data_dict['grade_levels'])
         if data_dict['perspectives']:
             for key in data_dict['perspectives'].keys():
                 new.perspectives[key] = Perspective.from_dict(data_dict['perspectives'][key])
-        if data_dict['judgement']:
-            for key in data_dict['judgement'].keys():
-                new.judgement[key] = Level.from_dict(data_dict['judgement'][key])
         new.roles = list(map(lambda r: Role.from_dict(r), data_dict['roles']))
         return new
 

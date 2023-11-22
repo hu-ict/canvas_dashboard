@@ -1,5 +1,6 @@
 from model.perspective.StudentPerspective import StudentPerspective
 
+
 class StudentPerspectives:
     def __init__(self):
         self.perspectives = {}

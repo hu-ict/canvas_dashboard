@@ -11,7 +11,7 @@ from model.perspective.Perspectives import Perspectives
 
 
 class CourseConfig:
-    def __init__(self, canvas_course_id, name, progress_perspective, start_date, end_date, days_in_semester, student_count):
+    def __init__(self, canvas_course_id, name, progress_perspective, start_date, end_date, days_in_semester, student_count, a_grade_levels):
         self.name = name
         self.canvas_course_id = canvas_course_id
         self.student_count = student_count
@@ -21,7 +21,7 @@ class CourseConfig:
         self.progress_perspective = progress_perspective
         self.sections = []
         self.perspectives = {}
-        self.judgement = {}
+        self.grade_levels = a_grade_levels
         self.roles = []
         self.teachers = []
         self.assignment_groups = []
@@ -59,7 +59,7 @@ class CourseConfig:
             'progress_perspective': self.progress_perspective,
             'sections': list(map(lambda s: s.to_json(), self.sections)),
             'perspectives': {},
-            'judgement': {},
+            'grade_levels': self.grade_levels,
             'roles': list(map(lambda r: r.to_json([]), self.roles)),
             'teachers': list(map(lambda t: t.to_json(), self.teachers)),
             'assignment_groups': list(map(lambda ag: ag.to_json(scope), self.assignment_groups)),
@@ -69,8 +69,6 @@ class CourseConfig:
         }
         for key in self.perspectives:
             dict_result['perspectives'][key] = self.perspectives[key].to_json()
-        for key in self.judgement:
-            dict_result['judgement'][key] = self.judgement[key].to_json()
         return dict_result
 
     def find_student_group(self, group_id):
@@ -198,7 +196,8 @@ class CourseConfig:
             get_date_time_obj(data_dict['start_date']),
             get_date_time_obj(data_dict['end_date']),
             data_dict['days_in_semester'],
-            data_dict['student_count'])
+            data_dict['student_count'],
+            data_dict['grade_levels'])
         new.sections = list(map(lambda s: Section.from_dict(s), data_dict['sections']))
         new.teachers = list(map(lambda t: Teacher.from_dict(t), data_dict['teachers']))
         new.perspectives = {}
@@ -212,7 +211,4 @@ class CourseConfig:
         if 'perspectives' in data_dict.keys():
             for key in data_dict['perspectives'].keys():
                 new.perspectives[key] = Perspective.from_dict(data_dict['perspectives'][key])
-        if 'judgement' in data_dict.keys():
-            for key in data_dict['judgement'].keys():
-                new.judgement[key] = Level.from_dict(data_dict['judgement'][key])
         return new

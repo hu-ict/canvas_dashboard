@@ -1,5 +1,4 @@
-from lib.file import read_start, read_course, read_msteams_api
-from lib.lib_plotly import plot_path
+from lib.file import read_start, read_course, read_msteams_api, plot_path
 from lib.teams_api_lib import upload_file_html, upload_file_jpeg
 
 start = read_start()

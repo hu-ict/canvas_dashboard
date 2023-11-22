@@ -28,7 +28,7 @@ class Submission:
             'assignment_date': get_date_time_str(self.assignment_date),
             'submitted_date': get_date_time_str(self.submitted_date),
             'graded': self.graded,
-            'score': int(self.score),
+            'score': int(self.score*10)/10,
             'points': int(self.points),
             'comments': list(map(lambda c: c.to_json(), self.comments)),
         }

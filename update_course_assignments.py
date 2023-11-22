@@ -1,11 +1,9 @@
 import json
 from canvasapi import Canvas
 from lib.lib_bandwidth import bandwidth_builder
-from lib.lib_date import API_URL, actual_date, DATE_TIME_STR, get_date_time_obj
-from lib.file import read_start, read_config, read_course
+from lib.lib_date import API_URL, get_date_time_obj
+from lib.file import read_start, read_course
 from model.Assignment import Assignment
-from model.Perspective import Perspective
-from model.Student import Student
 
 
 def get_dates(input):

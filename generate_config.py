@@ -1,6 +1,6 @@
 from canvasapi import Canvas
 import json
-from lib.lib_date import API_URL, get_date_time_str, get_date_time_obj
+from lib.lib_date import API_URL, get_date_time_obj
 from lib.file import read_start
 from model.Assignment import Assignment
 from model.AssignmentGroup import AssignmentGroup
@@ -15,7 +15,7 @@ canvas = Canvas(API_URL, start.api_key)
 user = canvas.get_current_user()
 print(user.name)
 canvas_course = canvas.get_course(start.course_id)
-course_config = CourseConfig(canvas_course.name, 0, (start.end_date - start.start_date).days, start.perspectives)
+course_config = CourseConfig(start.course_id, canvas_course.name, start.progress_perspective, start.start_date, start.end_date, (start.end_date - start.start_date).days, 0, start.grade_levels)
 
 
 # ophalen secties
@@ -23,12 +23,15 @@ course_sections = canvas_course.get_sections()
 for course_section in course_sections:
     new_section = Section(course_section.id, course_section.name, "role")
     course_config.sections.append(new_section)
+    if start.projects_groep_name == "SECTIONS":
+        new_student_group = StudentGroup(new_section.id, new_section.name)
+        course_config.student_groups.append(new_student_group)
     print("course_section", new_section)
+
 
 # ophalen assignments_groups and score
 canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignments', 'overrides'])
 for canvas_assignment_group in canvas_assignment_groups:
-    print("assignment_group", canvas_assignment_group)
     group_points_possible = 0
     assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name, [], [], 0, 0, 0, None)
     for canvas_assignment in canvas_assignment_group.assignments:
@@ -85,7 +88,7 @@ for canvas_assignment_group in canvas_assignment_groups:
             # assignment_group.append_assignment(assignment)
 
     assignment_group.total_points = group_points_possible
-    print("assignment_group", canvas_assignment_group, group_points_possible)
+    print("assignment_group", canvas_assignment_group, "points", group_points_possible)
     course_config.assignment_groups.append(assignment_group)
 
 # ophalen Teachers

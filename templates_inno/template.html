@@ -12,13 +12,13 @@
     <title>Dashboard - $course_name</title>
 
     <!-- Custom fonts for this template-->
-    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="./vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
 
     <!-- Custom styles for this template-->
-    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="./css/sb-admin-2.min.css" rel="stylesheet">
     <script>
         function setDetailName(name, role) {
             document.getElementById("detail_name").innerHTML = name+' - '+role;
@@ -48,16 +48,19 @@
 
         function setCoach(coach_initials) {
             console.info("Coach! "+coach_initials);
-            const boxes = document.getElementsByClassName("coach");
-            console.info("Boxes: "+boxes.length);
-            for (i = boxes.length - 1; i >= 0; --i) {
-                console.info("check "+ boxes[i].className)
-                if (boxes[i].className != "card shadow mb-4 coach "+coach_initials) {
-                    console.info("remove "+boxes[i].className)
+            const leer_team = document.getElementsByClassName("coach");
+            console.info("Boxes: "+leer_team.length);
+            for (i = leer_team.length - 1; i >= 0; --i) {
+                console.info("check "+ leer_team[i].className)
+                console.info(leer_team[i].style.visibility)
+                if (leer_team[i].className.includes(coach_initials)) {
     // whenever we run splice, the array gets reindexed
     // so we will skip over an index
     //                 boxes.splice(i, 1);
-                    boxes[i].remove()
+    //                leer_team[i].remove()
+                    leer_team[i].style.display = "flex";
+                } else {
+                    leer_team[i].style.display = "none";
                 }
             }
         }
@@ -86,7 +89,14 @@
                             <div class="col-lg-4">
                                         <a onclick="setDetailName('', '')"
                                             target="iframe_a"
-                                            href="plotly/totals.html"
+                                            href="late.html"
+                                            class="btn btn-outline-dark btn-sm">
+                                            <span class="icon text-white-50"><i class="fas fa-flag"></i></span>
+                                            <span class="text">Openstaande opleveringen</span>
+                                        </a>
+                                        <a onclick="setDetailName('', '')"
+                                            target="iframe_a"
+                                            href="./plotly/totals.html"
                                             class="btn btn-outline-dark btn-sm">
                                             <span class="icon text-white-50"><i class="fas fa-flag"></i></span>
                                             <span class="text">Overzicht totalen</span>
@@ -187,11 +197,9 @@
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                $coaches
                                             </div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800"></div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-comments fa-2x text-gray-300"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -249,21 +257,21 @@
     </a>
 
     <!-- Bootstrap core JavaScript-->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="./vendor/jquery/jquery.min.js"></script>
+    <script src="./vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
     <!-- Core plugin JavaScript-->
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="./vendor/jquery-easing/jquery.easing.min.js"></script>
 
     <!-- Custom scripts for all pages-->
-    <script src="js/sb-admin-2.min.js"></script>
+    <script src="./js/sb-admin-2.min.js"></script>
 
     <!-- Page level plugins -->
-    <script src="vendor/chart.js/Chart.min.js"></script>
+    <script src="./vendor/chart.js/Chart.min.js"></script>
 
     <!-- Page level custom scripts -->
-    <script src="js/demo/chart-area-demo.js"></script>
-    <script src="js/demo/chart-pie-demo.js"></script>
+    <script src="./js/demo/chart-area-demo.js"></script>
+    <script src="./js/demo/chart-pie-demo.js"></script>
 
 </body>
 

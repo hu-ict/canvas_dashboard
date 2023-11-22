@@ -7,12 +7,37 @@ NO_SUBMISSION = "Niets ingeleverd voor de deadline"
 NO_DATA = "Geen data"
 
 
-def get_sum_score(a_perspective, a_start_date):
+def get_sum_score(a_submissions, a_start_date):
     l_sum_score = 0
     l_last_score = 0
-    for submission in a_perspective.submissions:
+    for submission in a_submissions:
         if submission.graded:
             l_sum_score += submission.score
+            if l_last_score < date_to_day(a_start_date, submission.submitted_date):
+                l_last_score = date_to_day(a_start_date, submission.submitted_date)
+    return l_sum_score, l_last_score
+
+
+def count_graded(results):
+    l_graded = 0
+    l_not_graded = 0
+    for student in results.students:
+        for perspective in student.perspectives.values():
+            for submission in perspective.submissions:
+                if submission.graded:
+                    l_graded += 1
+                else:
+                    l_not_graded += 1
+    return l_graded+l_not_graded, l_not_graded
+
+
+def get_sum_score_print(a_submissions, a_start_date):
+    l_sum_score = 0
+    l_last_score = 0
+    for submission in a_submissions:
+        if submission.graded:
+            l_sum_score += submission.score
+            print(submission.assignment_name, submission.score, l_sum_score)
             if l_last_score < date_to_day(a_start_date, submission.submitted_date):
                 l_last_score = date_to_day(a_start_date, submission.submitted_date)
     return l_sum_score, l_last_score
@@ -31,17 +56,19 @@ def remove_assignment(a_assignments, a_submission):
 
 
 def submission_builder(a_student, a_assignment, a_canvas_submission, a_assignment_date):
-    if a_canvas_submission.score:
+    if a_canvas_submission.grade:
+        # print("--", a_assignment.name, a_assignment.points, a_canvas_submission.grade, a_canvas_submission.score)
         if a_canvas_submission.grade.isnumeric():
             score = float(a_canvas_submission.grade)
         elif a_canvas_submission.grade == 'complete':
             score = 1.0
         elif a_canvas_submission.grade == 'incomplete':
-            score = 0.5
+            score = 0.0
         else:
             score = round(a_canvas_submission.score, 2)
         graded = True
     else:
+        # print("--", a_assignment.name, a_assignment.points, a_canvas_submission.grade, "score = 0")
         score = 0
         if a_canvas_submission.grader_id:
             graded = True

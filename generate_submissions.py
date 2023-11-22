@@ -4,7 +4,7 @@ import json
 
 from lib.build_totals import get_actual_progress
 from lib.file import read_start, read_course, read_results, read_progress
-from lib.lib_submission import submission_builder, NO_SUBMISSION, remove_assignment, get_sum_score
+from lib.lib_submission import submission_builder, NO_SUBMISSION, remove_assignment, get_sum_score, count_graded
 from model.AssignmentDate import AssignmentDate
 from lib.lib_date import API_URL, date_to_day, get_assignment_date, get_actual_date
 from model.Comment import Comment
@@ -46,6 +46,7 @@ for canvas_assignment in canvas_assignments:
             if assignment.unlock_date:
                 if assignment.unlock_date > results.actual_date:
                     if assignment.id != 267540:
+                        # praktijktoets Foundation
                         continue
             if canvas_assignment.overrides:
                 for override in canvas_assignment.overrides:
@@ -57,7 +58,7 @@ for canvas_assignment in canvas_assignments:
             for canvas_submission in canvas_submissions:
                 student = results.find_student(canvas_submission.user_id)
                 if student is not None:
-                    # voeg een submission toe aan een van de perspectieven
+                    # maak een Submission
                     l_submission = submission_builder(student, assignment, canvas_submission, assignment_date)
                     if l_submission is not None:
                         # zoek bij welk perspectief de Submission hoort
@@ -66,13 +67,10 @@ for canvas_assignment in canvas_assignments:
                             # haal het student perspectief op
                             this_perspective = student.perspectives[l_perspective.name]
                             if this_perspective is not None:
-                                # voeg de Submission aan het perspectief toe
+                                # voeg of vervang de Submission aan het perspectief toe
                                 this_perspective.put_submission(l_submission)
-                                results.submission_count += 1
-                                if not l_submission.graded:
-                                    results.not_graded_count += 1
 
-progress_history = read_progress("progress_sep23.json")
+progress_history = read_progress(start.progress_file_name)
 progress_day = ProgressDay(g_actual_day)
 
 for student in results.students:
@@ -99,22 +97,33 @@ for student in results.students:
 # bepaal de voortgang
 for student in results.students:
     for perspective in student.perspectives.values():
-        perspective.sum_score, perspective.last_score = get_sum_score(perspective, start.start_date)
+        perspective.sum_score, perspective.last_score = get_sum_score(perspective.submissions, start.start_date)
         if len(perspective.assignment_groups) == 1:
-            # bepaal voortgang per perspective
-            perspective.progress = course.find_assignment_group(perspective.assignment_groups[0]).bandwidth.get_progress(perspective.last_score, perspective.sum_score)
+            assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
+            if assignment_group is not None:
+                if assignment_group.bandwidth is not None:
+                    # bepaal voortgang per perspective
+                    #     print("perspective", perspective.name, assignment_group.name)
+                    perspective.progress = assignment_group.bandwidth.get_progress(perspective.last_score, perspective.sum_score)
+                else:
+                    # Niet te bepalen
+                    perspective.progress = -1
+            else:
+                print("Could not find assignment_group with id", perspective.assignment_groups[0])
     # bepaal de totaal voortgang
     progress = get_actual_progress(student.perspectives)
     student.progress = progress
     progress_day.progress[str(progress)] += 1
 
-progress_history.append_day(progress_day)
-with open("progress_sep23.json", 'w') as f:
-    dict_result = progress_history.to_json()
-    json.dump(dict_result, f, indent=2)
+results.submission_count, results.not_graded_count = count_graded(results)
 
 with open(start.results_file_name, 'w') as f:
     dict_result = results.to_json([])
+    json.dump(dict_result, f, indent=2)
+
+progress_history.append_day(progress_day)
+with open(start.progress_file_name, 'w') as f:
+    dict_result = progress_history.to_json()
     json.dump(dict_result, f, indent=2)
 
 print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")

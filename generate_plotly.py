@@ -3,44 +3,70 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 from lib.build_plotly_perspective import plot_perspective, find_submissions
 from lib.lib_date import get_date_time_loc
-from lib.lib_plotly import peil_labels, plot_path, get_color_bar
-from lib.file import read_start, read_course, read_results
+from lib.lib_plotly import peil_labels, get_color_bar
+from lib.file import read_start, read_course, read_results, read_labels_colors, plot_path, tennant
 from lib.translation_table import translation_table
 
 traces = []
 start = read_start()
 course = read_course(start.course_file_name)
 results = read_results(start.results_file_name)
-g_actual_day = (results.actual_date - start.start_date).days
+labels_colors = read_labels_colors("labels_colors.json")
 
+g_actual_day = (results.actual_date - start.start_date).days
+if g_actual_day > course.days_in_semester:
+    course.days_in_semester = g_actual_day + 1
 
 bins_bar = [0, 0.9, 1.9, 2.9, 3.9, 4.9]
 # Define bar properties
-specs = [
-            [
-                {'type': 'scatter', 'colspan': 3, "rowspan": 2}, None, None, {'type': 'scatter', 'colspan': 3, "rowspan": 2}, None, None
-            ],
-            [
-                None, None, None, None, None, None,
-            ],
-            [
-                {'type': 'scatter', "colspan": 3, "rowspan": 2}, None, None, {'type': 'domain'}, {'type': 'domain'}, {'type': 'domain'}
-            ],
-            [
-                None, None, None, None, None, None,
-            ]
-]
 
-titles = ["Team", "Kennis", "Gilde", "Halfweg", "Ná sprint 7", "Beoordeling"]
-positions = {'team': {'row': 1, 'col': 1},
-             'gilde': {'row': 3, 'col': 1},
-             'kennis': {'row': 1, 'col': 4},
-             'halfweg': {'row': 3, 'col': 4},
-             'eind': {'row': 3, 'col': 5},
-             'beoordeling': {'row': 3, 'col': 6}}
+if tennant == "prop":
+    titles = ["Finals", "Toets", "Project"]
+    positions = {'final': {'row': 1, 'col': 1},
+                 'toets': {'row': 1, 'col': 4},
+                 'project': {'row': 2, 'col': 1}
+                 }
+    specs = [
+        [
+            {'type': 'scatter', 'colspan': 3}, None, None, {'type': 'scatter', 'colspan': 3}, None, None
+        ],
+        [
+            {'type': 'scatter', "colspan": 3}, None, None, {'type': 'scatter', "colspan": 3}, None, None
+        ]
+    ]
+elif tennant == "inno":
+    titles = ["Team", "Kennis", "Gilde", "Halfweg", "Ná sprint 7", "Eindbeoordeling"]
+    positions = {'team': {'row': 1, 'col': 1},
+                 'gilde': {'row': 2, 'col': 1},
+                 'kennis': {'row': 1, 'col': 4},
+                 'halfweg': {'row': 2, 'col': 4},
+                 'eind': {'row': 2, 'col': 5},
+                 'beoordeling': {'row': 2, 'col': 6}}
+    specs = [
+        [
+            {'type': 'scatter', 'colspan': 3}, None, None,
+            {'type': 'scatter', 'colspan': 3}, None, None
+        ],
+        [
+            {'type': 'scatter', "colspan": 3}, None, None, {'type': 'domain'}, {'type': 'domain'}, {'type': 'domain'}
+        ]
+    ]
+else:
+    titles = ["Kennis", "Project"]
+    positions = {'kennis': {'row': 1, 'col': 1},
+                 'project': {'row': 1, 'col': 4}
+                 }
+    specs = [
+        [
+            {'type': 'scatter', 'colspan': 3}, None, None, {'type': 'scatter', 'colspan': 3}, None, None
+        ],
+        [
+            {'type': 'scatter', "colspan": 3}, None, None, {'type': 'scatter', "colspan": 3}, None, None
+        ]
+    ]
 
 
-def peil_contruct(a_course):
+def peil_construct(a_course):
     l_peilingen = {}
     for perspective in a_course.perspectives.values():
         # peil is niet echt een perspective
@@ -59,10 +85,10 @@ def peil_contruct(a_course):
     return l_peilingen
 
 
-def plot_gauge(a_row, a_col, a_fig, a_peil, a_course):
+def plot_gauge(a_row, a_col, a_fig, a_peil, a_course, a_labels_colors):
     # plotting de gauge
-    colors_bar = get_color_bar(a_course)
-    plot_bgcolor = "#fff"
+    colors_bar = get_color_bar(a_course, a_labels_colors)
+    plot_bgcolor = "#eee"
     quadrant_colors = list(colors_bar.values())[1:]
     n_quadrants = len(quadrant_colors)
     total_reference_moments = 4
@@ -73,9 +99,10 @@ def plot_gauge(a_row, a_col, a_fig, a_peil, a_course):
         range(0, math.ceil(total_reference_moments + total_reference_moments / n_quadrants),
               math.ceil(total_reference_moments / n_quadrants)))
 
-    gauge = go.Indicator(
+    l_gauge = go.Indicator(
         mode="gauge",
         value=a_peil,
+
         delta={
             'reference': 0,
             'increasing': {
@@ -89,6 +116,7 @@ def plot_gauge(a_row, a_col, a_fig, a_peil, a_course):
                 'range': [None, total_reference_moments],
                 'dtick': math.ceil(total_reference_moments / n_quadrants)
             },
+
             'bar': {'color': "#555555", 'thickness': 0.3},
             'bgcolor': plot_bgcolor,
             'steps': [
@@ -99,54 +127,57 @@ def plot_gauge(a_row, a_col, a_fig, a_peil, a_course):
                 'line': {'color': "#555555", 'width': 12},
                 'thickness': 0.6,
                 'value': a_peil}})
-    a_fig.add_trace(gauge, a_row, a_col)
+    a_fig.add_trace(l_gauge, a_row, a_col)
 
 
 def plot_student(a_course, a_student, a_actual_date, a_peil_construction):
-    fig = make_subplots(rows=4, cols=6, subplot_titles=titles, specs=specs, vertical_spacing=0.15, horizontal_spacing=0.08)
+    fig = make_subplots(rows=2, cols=6, subplot_titles=titles, specs=specs, vertical_spacing=0.15, horizontal_spacing=0.08)
     fig.update_layout(height=1000, width=1200, showlegend=False)
     for perspective in a_student.perspectives.values():
         if perspective.name in a_peil_construction:
             row = positions[perspective.name]['row']
             col = positions[perspective.name]['col']
             plot_perspective(row, col, fig, a_course, perspective, a_peil_construction,
-                             g_actual_day, get_date_time_loc(a_actual_date))
+                             g_actual_day, get_date_time_loc(a_actual_date), labels_colors)
 
-    #Peil overall drie peilmomenten
-    if a_student.get_peilmoment(247774):
-        plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig,
-                   a_student.get_peilmoment(247774).score + 0.5)
-    else:
-        plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig, 0.1, a_course)
-    if a_student.get_peilmoment(252847):
-        plot_gauge(positions['eind']['row'], positions['eind']['col'], fig,
-                   a_student.get_peilmoment(252847).score + 0.5)
-    else:
-        plot_gauge(positions['eind']['row'], positions['eind']['col'], fig, 0.1, a_course)
-    if a_student.get_peilmoment(253129):
-        plot_gauge(positions['beoordeling']['row'], positions['beoordeling']['col'], fig,
-                   a_student.get_peilmoment(253129).score + 0.5)
-    else:
-        plot_gauge(positions['beoordeling']['row'], positions['beoordeling']['col'], fig, 0.1, a_course)
+    if tennant == "inno":
+        # Peil overall drie peilmomenten
+        if a_student.get_peilmoment(261031):
+            plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig,
+               a_student.get_peilmoment(261031).score + 0.5, a_course, labels_colors)
+        else:
+            plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig, 0.1, a_course, labels_colors)
+        if a_student.get_peilmoment(252847):
+            plot_gauge(positions['eind']['row'], positions['eind']['col'], fig,
+                       a_student.get_peilmoment(252847).score + 0.5)
+        else:
+            plot_gauge(positions['eind']['row'], positions['eind']['col'], fig, 0.1, a_course, labels_colors)
+        if a_student.get_peilmoment(253129):
+            plot_gauge(positions['beoordeling']['row'], positions['beoordeling']['col'], fig,
+                       a_student.get_peilmoment(253129).score + 0.5)
+        else:
+            plot_gauge(positions['beoordeling']['row'], positions['beoordeling']['col'], fig, 0.1, a_course, labels_colors)
 
     file_name = plot_path + a_student.name
     asci_file_name = file_name.translate(translation_table)
     fig.write_html(asci_file_name + ".html", include_plotlyjs="cdn")
     fig.write_image(asci_file_name + ".jpeg")
-    volg_nr = str(g_actual_day).zfill(3)
-    file_name = "./time_lap/" + a_student.name + "_" + volg_nr + ".jpeg"
-    asci_file_name = file_name.translate(translation_table)
-    fig.write_image(asci_file_name)
+    if tennant == "inno":
+        volg_nr = str(g_actual_day).zfill(3)
+        file_name = "./time_lap/" + a_student.name + "_" + volg_nr + ".jpeg"
+        asci_file_name = file_name.translate(translation_table)
+        fig.write_image(asci_file_name)
 
-peil_construction = peil_contruct(course)
-# for perspective in peil_construction:
-#     print("Perspective", perspective)
-#     for peil in peil_construction[perspective]:
-#         print("Peil", peil["assignment"].name, "Submission", peil["submission"])
+
+# PROP
+peil_construction = peil_construct(course)
+# print(peil_construction)
+# peil_construction = None
 
 count = 0
 for student in results.students:
-    l_peil_construction = find_submissions(student, peil_construction.copy())
+    l_peil_construction = find_submissions(student, peil_construction)
+    # print(l_peil_construction)
     print(student.name)
-    plot_student(course, student, results.actual_date, peil_construction)
+    plot_student(course, student, results.actual_date, l_peil_construction)
 

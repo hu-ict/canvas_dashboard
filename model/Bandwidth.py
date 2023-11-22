@@ -43,15 +43,25 @@ class Bandwidth:
     def get_progress(self, day, score):
         if score == 0 or day == 0:
             return 0
-        if score < self.points[int(day)].lower:
-            return 1
-        elif score < self.points[int(day)].upper:
-            return 2
-        else:
-            return 3
+        try:
+            if score < self.points[int(day)].lower:
+                return 1
+            elif score < self.points[int(day)].upper:
+                return 2
+            else:
+                return 3
+        except IndexError:
+            if score < self.points[len(self.points)-1].lower:
+                return 1
+            elif score < self.points[len(self.points)-1].upper:
+                return 2
+            else:
+                return 3
 
     @staticmethod
     def from_dict(data_dict):
+        if data_dict is None:
+            return None
         new = Bandwidth()
         new.days = data_dict['days']
         new.lowers = data_dict['lowers']
