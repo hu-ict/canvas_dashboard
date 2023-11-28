@@ -1,11 +1,14 @@
 # canvas_dashboard
-## Inleiding
+# Inleiding
 Deze Python modules genereren een set van statische html-pagina's op basis van gegevens uit Canvas. De basis zijn de Canvas opdrachten (Assignments).
 # De workflow
 Er wordt gebruik gemaakt van verschillende stappen om dat het dashboard te komen.
+![Activity Diagram](dashboard.png)
 ## Stap 1
-start met:
-`start.json`
+## Stap 2
+Om een nieuwe course omgeving te maken:
+- run het Python script `generate_start.py`
+
 Hier worden attributen in JSON formaat opgegeven:
 ```json 
 {

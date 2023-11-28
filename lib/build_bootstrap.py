@@ -1,19 +1,21 @@
 from string import Template
 
 from lib.build_totals import get_actual_progress
-from lib.file import template_path, html_path
 from lib.translation_table import translation_table
 
 
-def build_bootstrap_project(a_course, a_results, a_templates, a_labels_colors):
+def build_bootstrap_project(a_instances, a_start, a_course, a_results, a_templates, a_labels_colors):
     # coaches = {}
     groups_html_string = ''
     for group in a_course.student_groups:
         students_html_string = ''
+        coaches_string = ""
         if len(group.teachers) > 0:
             coaches = ""
             for coach in group.teachers:
-                coaches += " "+a_course.find_teacher(coach).initials
+                teacher = a_course.find_teacher(coach)
+                coaches += " "+teacher.initials
+                coaches_string += ", "+teacher.name
         else:
             coaches = None
 
@@ -26,8 +28,12 @@ def build_bootstrap_project(a_course, a_results, a_templates, a_labels_colors):
             #       file_name = plot_path + student.name + ".html"
             asci_file_name = file_name.translate(translation_table)
             l_student = a_results.find_student(student.id)
-            l_progress = get_actual_progress(l_student.perspectives)
-            l_progress_color = a_labels_colors.level_series[a_course.perspectives[a_course.progress_perspective].levels].levels[str(l_progress)].color
+            if l_student != None:
+                l_progress = get_actual_progress(l_student.perspectives)
+            else:
+                print("Student not found", student.name)
+
+            l_progress_color = a_labels_colors.level_series[a_start.progress_levels].levels[str(l_progress)].color
 
 
             student_html_string = a_templates['student'].substitute(
@@ -37,17 +43,17 @@ def build_bootstrap_project(a_course, a_results, a_templates, a_labels_colors):
 
         if coaches:
             group_html_string = a_templates['group'].substitute(
-                {'coaches': coaches, 'student_group_name': group.name, 'students': students_html_string})
+                {'coaches': coaches, 'student_group_name': group.name+coaches_string, 'students': students_html_string})
         else:
             group_html_string = a_templates['group'].substitute(
-                {'coaches': "Leeg", 'student_group_name': group.name, 'students': students_html_string})
+                {'coaches': "Leeg", 'student_group_name': group.name+coaches_string, 'students': students_html_string})
 
         groups_html_string += group_html_string
 
     return groups_html_string
 
 
-def build_bootstrap_slb(a_course, a_templates, a_labels_colors):
+def build_bootstrap_slb(a_start, a_course, a_templates, a_labels_colors):
     l_groups_html_string = ''
     for group in a_course.slb_groups:
         # print("-", group.name)
@@ -61,7 +67,7 @@ def build_bootstrap_slb(a_course, a_templates, a_labels_colors):
             #       file_name = plot_path + student.name + ".html"
             asci_file_name = file_name.translate(translation_table)
             l_progress = get_actual_progress(student.perspectives)
-            l_progress_color = a_labels_colors.level_series[a_course.perspectives[a_course.progress_perspective].levels].levels[str(l_progress)].color
+            l_progress_color = a_labels_colors.level_series[a_start.progress_levels].levels[str(l_progress)].color
             student_html_string = a_templates['student'].substitute(
                 {'btn_color': color, 'progress_color': l_progress_color, 'student_name': student.name, 'student_role': role_obj.name,
                  'student_file': asci_file_name})
@@ -75,7 +81,7 @@ def build_bootstrap_slb(a_course, a_templates, a_labels_colors):
     return l_groups_html_string
 
 
-def load_templates():
+def load_templates(template_path):
     templates = {}
     # Create a template that has placeholder for value of x
     with open(template_path + 'template_slb.html', mode='r', encoding="utf-8") as file_slb_template:
@@ -108,11 +114,11 @@ def get_initials(item):
     return item[1].initials
 
 
-def build_bootstrap_general(a_course, a_results, a_coaches, a_labels_colors):
-    l_semester_day = (a_results.actual_date - a_course.start_date).days
-    l_templates = load_templates()
+def build_bootstrap_general(a_instances, a_start, a_course, a_results, a_coaches, a_labels_colors):
+    l_semester_day = (a_results.actual_date - a_start.start_date).days
+    l_templates = load_templates(a_start.template_path)
 
-    groups_html_string = build_bootstrap_project(a_course, a_results, l_templates, a_labels_colors)
+    groups_html_string = build_bootstrap_project(a_instances, a_start, a_course, a_results, l_templates, a_labels_colors)
     coaches_html_string = ''
     students_html_string = ''
 
@@ -135,10 +141,10 @@ def build_bootstrap_general(a_course, a_results, a_coaches, a_labels_colors):
          'coaches': coaches_html_string,
          'student_groups': groups_html_string})
 
-    with open(html_path + 'index.html', mode='w', encoding="utf-8") as file_index:
+    with open(a_instances.get_html_path() + 'index.html', mode='w', encoding="utf-8") as file_index:
         file_index.write(index_html_string)
 
-    groups_html_string = build_bootstrap_slb(a_course, l_templates, a_labels_colors)
+    groups_html_string = build_bootstrap_slb(a_start, a_course, l_templates, a_labels_colors)
     roles_html_string = ""
     for role in a_course.roles:
         roles_html_string += l_templates['role'].substitute(
@@ -153,5 +159,5 @@ def build_bootstrap_general(a_course, a_results, a_coaches, a_labels_colors):
          'roles': roles_html_string,
          'student_groups': groups_html_string})
 
-    with open(html_path + 'index_slb.html', mode='w', encoding="utf-8") as file_index:
+    with open(a_instances.get_html_path() + 'index_slb.html', mode='w', encoding="utf-8") as file_index:
         file_index.write(slb_html_string)

@@ -2,7 +2,7 @@ import json
 from canvasapi import Canvas
 from lib.lib_bandwidth import bandwidth_builder
 from lib.lib_date import API_URL, get_date_time_obj, date_to_day
-from lib.file import read_start, read_config
+from lib.file import read_start, read_config, read_course_instance
 from model.Assignment import Assignment
 from model.Student import Student
 from model.perspective.StudentPerspective import StudentPerspective
@@ -35,21 +35,17 @@ def link_teachers():
             if assignmentGroup:
                 assignmentGroup.teachers.append(teacher.id)
 
-
-start = read_start()
+instances = read_course_instance()
+print(instances.current_instance)
+start = read_start(instances.get_start_file_name())
 config = read_config(start.config_file_name)
 print("Config", config)
 # Initialize a new Canvas object
 canvas = Canvas(API_URL, start.api_key)
 user = canvas.get_current_user()
 print(user.name)
-
-canvas_course = canvas.get_course(start.course_id)
-
+canvas_course = canvas.get_course(start.canvas_course_id)
 link_teachers()
-
-# course = Course(canvas_course.id, canvas_course.name, actual_date.strftime(DATE_TIME_STR))
-
 # Ophalen Students
 print("Ophalen studenten")
 users = canvas_course.get_users(enrollment_type=['student'])
@@ -100,6 +96,7 @@ for student in config.students:
 config.student_count = len(config.students)
 
 # Perspectives toevoegen aan Students
+
 print("Toevoegen Perspectives aan Student")
 for student in config.students:
     student.perspectives = {}
@@ -157,6 +154,7 @@ canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignm
 for canvas_assignment_group in canvas_assignment_groups:
     # use only relevant assignment_groups
     assignment_group = config.find_assignment_group(canvas_assignment_group.id)
+    print("assignment_group", assignment_group)
     if assignment_group:
         print("assignment_group", canvas_assignment_group)
         group_points_possible = 0
@@ -209,7 +207,7 @@ for canvas_assignment_group in canvas_assignment_groups:
 for assignment_group in config.assignment_groups:
     assignment_group.assignments = sorted(assignment_group.assignments, key=lambda a: a.assignment_day)
 
-    if assignment_group.upper_points == 0:
+    if assignment_group.strategy == "NONE":
         assignment_group.bandwidth = None
     else:
         assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)

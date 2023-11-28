@@ -10,8 +10,8 @@ class Perspective:
     def to_json(self):
         dict_result = {
             'name': self.name,
-            'assignment_groups': self.assignment_groups,
-            'levels': self.levels
+            'levels': self.levels,
+            'assignment_groups': self.assignment_groups
         }
         return dict_result
 

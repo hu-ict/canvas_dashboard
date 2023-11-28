@@ -11,17 +11,12 @@ from model.perspective.Perspectives import Perspectives
 
 
 class CourseConfig:
-    def __init__(self, canvas_course_id, name, progress_perspective, start_date, end_date, days_in_semester, student_count, a_grade_levels):
+    def __init__(self, name, days_in_semester, student_count):
         self.name = name
-        self.canvas_course_id = canvas_course_id
         self.student_count = student_count
         self.days_in_semester = days_in_semester
-        self.start_date = get_date_time_obj(get_date_time_str(start_date))
-        self.end_date = end_date
-        self.progress_perspective = progress_perspective
         self.sections = []
         self.perspectives = {}
-        self.grade_levels = a_grade_levels
         self.roles = []
         self.teachers = []
         self.assignment_groups = []
@@ -51,15 +46,10 @@ class CourseConfig:
     def to_json(self, scope):
         dict_result = {
             'name': self.name,
-            'canvas_course_id': self.canvas_course_id,
             'student_count': self.student_count,
             'days_in_semester': self.days_in_semester,
-            'start_date': get_date_time_str(self.start_date),
-            'end_date': get_date_time_str(self.end_date),
-            'progress_perspective': self.progress_perspective,
             'sections': list(map(lambda s: s.to_json(), self.sections)),
             'perspectives': {},
-            'grade_levels': self.grade_levels,
             'roles': list(map(lambda r: r.to_json([]), self.roles)),
             'teachers': list(map(lambda t: t.to_json(), self.teachers)),
             'assignment_groups': list(map(lambda ag: ag.to_json(scope), self.assignment_groups)),
@@ -173,7 +163,7 @@ class CourseConfig:
         for role in self.roles:
             if role.short == role_short:
                 return role
-        return Role()
+        return None
 
     def find_role_by_section(self, section_id):
         for section in self.sections:
@@ -190,14 +180,9 @@ class CourseConfig:
     @staticmethod
     def from_dict(data_dict):
         new = CourseConfig(
-            data_dict['canvas_course_id'],
             data_dict['name'],
-            data_dict['progress_perspective'],
-            get_date_time_obj(data_dict['start_date']),
-            get_date_time_obj(data_dict['end_date']),
             data_dict['days_in_semester'],
-            data_dict['student_count'],
-            data_dict['grade_levels'])
+            data_dict['student_count'])
         new.sections = list(map(lambda s: Section.from_dict(s), data_dict['sections']))
         new.teachers = list(map(lambda t: Teacher.from_dict(t), data_dict['teachers']))
         new.perspectives = {}

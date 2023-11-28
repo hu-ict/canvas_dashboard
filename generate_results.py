@@ -3,8 +3,8 @@ from canvasapi import Canvas
 import json
 
 from lib.build_totals import get_actual_progress
-from lib.file import read_start, read_course, read_progress
-from lib.lib_submission import submission_builder, NO_SUBMISSION, remove_assignment, get_sum_score, get_sum_score_print
+from lib.file import read_start, read_course, read_progress, read_course_instance
+from lib.lib_submission import submission_builder, NO_SUBMISSION, remove_assignment, bepaal_voortgang, count_graded
 from model.Comment import Comment
 from model.ProgressDay import ProgressDay
 from model.Result import *
@@ -14,7 +14,9 @@ from model.Submission import Submission
 
 g_actual_date = get_actual_date()
 
-start = read_start()
+instances = read_course_instance()
+print("Instance:", instances.current_instance)
+start = read_start(instances.get_start_file_name())
 course = read_course(start.course_file_name)
 progress_history = read_progress(start.progress_file_name)
 
@@ -22,18 +24,18 @@ progress_history = read_progress(start.progress_file_name)
 canvas = Canvas(API_URL, start.api_key)
 user = canvas.get_current_user()
 print(user.name)
-canvas_course = canvas.get_course(start.course_id)
+canvas_course = canvas.get_course(start.canvas_course_id)
 
-results = Result(start.course_id, course.name, g_actual_date, 0, 0)
+results = Result(start.canvas_course_id, course.name, g_actual_date, 0, 0)
 g_actual_day = (results.actual_date - start.start_date).days
 results.students = course.students
 
 # print("canvas_course.get_assignments(include=['overrides'])")
 canvas_assignments = canvas_course.get_assignments(include=['overrides'])
 for canvas_assignment in canvas_assignments:
-    if "Roll Call" in canvas_assignment.name:
-        #Roll Call Attendance
-        continue
+    # if "Roll Call" in canvas_assignment.name:
+    #     #Roll Call Attendance
+    #     continue
     assignment_group = course.find_assignment_group(canvas_assignment.assignment_group_id)
     if assignment_group is not None:
         # print("Processing G {0:8} - {1}".format(assignment_group.id, assignment_group.name))
@@ -99,32 +101,15 @@ for student in results.students:
                     perspective.submissions.append(l_submission)
 
 
-# bepaal de voortgang
-for student in results.students:
-    for perspective in student.perspectives.values():
-        perspective.sum_score, perspective.last_score = get_sum_score(perspective.submissions, start.start_date)
-        if len(perspective.assignment_groups) == 1:
-            assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
-            if assignment_group is not None:
-                if assignment_group.bandwidth is not None:
-                    # bepaal voortgang per perspective
-                    #     print("perspective", perspective.name, assignment_group.name)
-                    perspective.progress = assignment_group.bandwidth.get_progress(perspective.last_score, perspective.sum_score)
-                else:
-                    # Niet te bepalen
-                    perspective.progress = -1
-            else:
-                print("Could not find assignment_group with id", perspective.assignment_groups[0])
-    # bepaal de totaal voortgang
-    progress = get_actual_progress(student.perspectives)
-    student.progress = progress
-    progress_day.progress[str(progress)] += 1
+bepaal_voortgang(start, course, results, progress_day)
+progress_history.append_day(progress_day)
+results.submission_count, results.not_graded_count = count_graded(results)
 
 with open(start.results_file_name, 'w') as f:
     dict_result = results.to_json([])
     json.dump(dict_result, f, indent=2)
 
-progress_history.append_day(progress_day)
+
 with open(start.progress_file_name, 'w') as f:
     dict_result = progress_history.to_json()
     json.dump(dict_result, f, indent=2)

@@ -4,7 +4,7 @@ from lib.build_bootstrap import build_bootstrap_general
 from lib.build_late import build_late
 from lib.lib_plotly import peil_labels
 from lib.plot_totals import plot_totals
-from lib.file import read_course, read_start, read_results, read_progress, read_labels_colors, tennant
+from lib.file import read_course, read_start, read_results, read_progress, read_labels_colors, read_course_instance
 
 
 def init_sections_count():
@@ -83,21 +83,26 @@ def init_coaches_dict(a_course):
     return l_coaches
 
 
-start = read_start()
+instances = read_course_instance()
+print("Instance:", instances.current_instance)
+start = read_start(instances.get_start_file_name())
+
 course = read_course(start.course_file_name)
 results = read_results(start.results_file_name)
 labels_colors = read_labels_colors("labels_colors.json")
-actual_day = (results.actual_date - course.start_date).days
+actual_day = (results.actual_date - start.start_date).days
 
+# if start.progress_perspective:
 peilen = {}
 for peil in peil_labels:
     peilen[peil] = {
-            'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
-            'team': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
-            'gilde': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
-            'kennis': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
-        }
-if tennant == "inno":
+        'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+        'team': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+        'gilde': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+        'kennis': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+    }
+
+if instances.is_instance_of("inno_courses"):
     student_totals = {
         'student_count': 0,
         'perspectives': {
@@ -111,32 +116,31 @@ if tennant == "inno":
 else:
     student_totals = {
         'student_count': 0,
-        'perspectives': {
-            'final': {'count': [], 'pending': init_sections_count(), 'late': init_sections_count(), 'to_late': init_sections_count(), 'list': init_sections_list()},
-            'toets': {'count': [], 'pending': init_sections_count(), 'late': init_sections_count(), 'to_late': init_sections_count(), 'list': init_sections_list()},
-            'project': {'count': [], 'pending': init_sections_count(), 'late': init_sections_count(), 'to_late': init_sections_count(), 'list': init_sections_list()}
-        },
+        'perspectives': {},
         'peil': peilen,
         'late': {'count': []}
     }
+    for perspective in course.perspectives:
+        if start.progress_perspective is None or perspective != start.progress_perspective:
+            student_totals['perspectives'][perspective] = {'count': [], 'pending': init_sections_count(), 'late': init_sections_count(), 'to_late': init_sections_count(), 'list': init_sections_list()}
 
 gilde = init_roles_dict()
 team_coaches = init_coaches_dict(course)
 
-print("build_bootstrap(course, results)")
-build_bootstrap_general(course, results, team_coaches, labels_colors)
+print("build_bootstrap_general(start, course, results, team_coaches, labels_colors)")
+build_bootstrap_general(instances, start, course, results, team_coaches, labels_colors)
 
-print("build_totals(course, results, student_totals, gilde, team)")
-build_totals(course, results, student_totals, gilde, team_coaches)
+print("build_totals(start, course, results, student_totals, gilde, team_coaches)")
+build_totals(instances, start, course, results, student_totals, gilde, team_coaches)
 # with open("dump.json", 'w') as f:
 #     # dict_result = json.dumps(student_totals, indent = 4)
 #     json.dump(student_totals, f, indent=2)
 
-if tennant == "inno":
+if instances.is_instance_of("inno_courses"):
     # with open("dump.json", 'w') as f:
     #     # dict_result = json.dumps(student_totals, indent = 4)
     #     json.dump(student_totals, f, indent=2)
-    print("build_late(results, student_totals)")
-    build_late(results, student_totals)
+    print("build_late(start, results, student_totals)")
+    build_late(start, results, student_totals)
 
-plot_totals(course, student_totals, read_progress(start.progress_file_name), gilde, team_coaches, labels_colors)
+plot_totals(instances, start, course, student_totals, read_progress(start.progress_file_name), labels_colors)

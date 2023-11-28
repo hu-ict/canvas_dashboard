@@ -15,6 +15,12 @@ def get_date_time_obj(date_time_str):
     date_time_obj = date_time_obj.astimezone(timezone)
     return date_time_obj
 
+def get_date_time_obj_loc(date_time_str):
+    if len(date_time_str) == 0:
+        return None
+    date_time_obj = datetime.strptime(date_time_str, DATE_TIME_LOC)
+    date_time_obj = date_time_obj.astimezone(timezone)
+    return date_time_obj
 
 def get_date_time_str(a_date_time_obj):
     if not a_date_time_obj:

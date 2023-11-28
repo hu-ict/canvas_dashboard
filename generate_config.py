@@ -1,7 +1,7 @@
 from canvasapi import Canvas
 import json
-from lib.lib_date import API_URL, get_date_time_obj
-from lib.file import read_start
+from lib.lib_date import API_URL, get_date_time_obj, date_to_day
+from lib.file import read_start, project_path
 from model.Assignment import Assignment
 from model.AssignmentGroup import AssignmentGroup
 from model.CourseConfig import CourseConfig
@@ -14,8 +14,8 @@ start = read_start()
 canvas = Canvas(API_URL, start.api_key)
 user = canvas.get_current_user()
 print(user.name)
-canvas_course = canvas.get_course(start.course_id)
-course_config = CourseConfig(start.course_id, canvas_course.name, start.progress_perspective, start.start_date, start.end_date, (start.end_date - start.start_date).days, 0, start.grade_levels)
+canvas_course = canvas.get_course(start.canvas_course_id)
+course_config = CourseConfig(canvas_course.name, (start.end_date - start.start_date).days, 0)
 
 
 # ophalen secties
@@ -33,7 +33,7 @@ for course_section in course_sections:
 canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignments', 'overrides'])
 for canvas_assignment_group in canvas_assignment_groups:
     group_points_possible = 0
-    assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name, [], [], 0, 0, 0, None)
+    assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name, [], [], "LINEAIR", 0, 0, 0, None)
     for canvas_assignment in canvas_assignment_group.assignments:
         if canvas_assignment['overrides']:
             for overrides in canvas_assignment['overrides']:
@@ -58,7 +58,7 @@ for canvas_assignment_group in canvas_assignment_groups:
                     section_id = overrides['course_section_id']
                 else:
                     section_id = 0
-                assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'], canvas_assignment['assignment_group_id'], section_id, points_possible, assignment_date, unlock_date)
+                assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'], canvas_assignment['assignment_group_id'], section_id, points_possible, assignment_date, unlock_date, date_to_day(start.start_date, assignment_date))
                 # assignment_group.append_assignment(assignment)
         else:
             if canvas_assignment['points_possible']:
@@ -84,11 +84,10 @@ for canvas_assignment_group in canvas_assignment_groups:
                 unlock_date = start.start_date
             assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'],
                                     canvas_assignment['assignment_group_id'], 0,
-                                    points_possible, assignment_date, unlock_date)
+                                    points_possible, assignment_date, unlock_date, date_to_day(start.start_date, assignment_date))
             # assignment_group.append_assignment(assignment)
-
     assignment_group.total_points = group_points_possible
-    print("assignment_group", canvas_assignment_group, "points", group_points_possible)
+    print("assignment_group_2", canvas_assignment_group, "points", group_points_possible, assignment_group.strategy)
     course_config.assignment_groups.append(assignment_group)
 
 # ophalen Teachers

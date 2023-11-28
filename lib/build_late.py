@@ -1,11 +1,9 @@
 from operator import itemgetter
 from string import Template
-
 from lib.lib_date import get_date_time_loc, get_date_time_obj
-from lib.file import template_path, html_path
 
 
-def build_late(a_result, a_student_totals):
+def build_late(a_start, a_result, a_student_totals):
     for l_perspective in a_student_totals['perspectives'].keys():
         for l_selector in a_student_totals['perspectives'][l_perspective]['list'].keys():
             # print(l_selector)
@@ -13,19 +11,19 @@ def build_late(a_result, a_student_totals):
             # with open("late_"+l_perspective+"_"+l_selector+".json", 'w') as f:
             #     json.dump(late_list, f, indent=2)
 
-    with open(template_path+'template_late.html', mode='r', encoding="utf-8") as file_late_template:
+    with open(a_start.template_path+'template_late.html', mode='r', encoding="utf-8") as file_late_template:
         string_late_html = file_late_template.read()
         late_html_template = Template(string_late_html)
 
-    with open(template_path+'template_late_list.html', mode='r', encoding="utf-8") as file_late_list_template:
+    with open(a_start.template_path+'template_late_list.html', mode='r', encoding="utf-8") as file_late_list_template:
         string_late_list_html = file_late_list_template.read()
         late_list_html_template = Template(string_late_list_html)
 
-    with open(template_path+'template_submission.html', mode='r', encoding="utf-8") as file_submission_template:
+    with open(a_start.template_path+'template_submission.html', mode='r', encoding="utf-8") as file_submission_template:
         string_submission_html = file_submission_template.read()
         submission_html_template = Template(string_submission_html)
 
-    with open(template_path+'template_selector.html', mode='r', encoding="utf-8") as file_selector_template:
+    with open(a_start.template_path+'template_selector.html', mode='r', encoding="utf-8") as file_selector_template:
         string_selector_html = file_selector_template.read()
         selector_html_template = Template(string_selector_html)
 

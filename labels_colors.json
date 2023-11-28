@@ -1,0 +1,142 @@
+{
+  "samen": {
+    "-2": {
+      "label": "Leeg",
+      "color": "cornflowerblue"
+    },
+    "-1": {
+      "label": "Leeg",
+      "color": "#cccccc"
+    },
+    "0": {
+      "label": "Niet zichtbaar",
+      "color": "#EDF8F0"
+    },
+    "1": {
+      "label": "Startend",
+      "color": "#B8E3C4"
+    },
+    "2": {
+      "label": "Samenwerkend",
+      "color": "#85e043"
+    },
+    "3": {
+      "label": "Excellerend",
+      "color": "#2bad4e"
+    }
+  },
+  "niveau": {
+    "-2": {
+      "label": "Leeg",
+      "color": "cornflowerblue"
+    },
+    "-1": {
+      "label": "Leeg",
+      "color": "#cccccc"
+    },
+    "0": {
+      "label": "Niet zichtbaar",
+      "color": "#f25829"
+    },
+    "1": {
+      "label": "Onder niveau",
+      "color": "#f2a529"
+    },
+    "2": {
+      "label": "Op niveau",
+      "color": "#85e043"
+    },
+    "3": {
+      "label": "Boven niveau",
+      "color": "#2bad4e"
+    }
+  },
+  "bin": {
+    "-2": {
+      "label": "Leeg",
+      "color": "cornflowerblue"
+    },
+    "-1": {
+      "label": "Leeg",
+      "color": "#cccccc"
+    },
+    "0": {
+      "label": "Niet voldaan",
+      "color": "#f25829"
+    },
+    "1": {
+      "label": "Voldaan",
+      "color": "#85e043"
+    }
+  },
+  "attendance": {
+    "-1": {
+      "label": "Niet zichtbaar",
+      "color": "#EDF8F0"
+    },
+    "0": {
+      "label": "Niet aanwezig",
+      "color": "#B8E3C4"
+    },
+    "1": {
+      "label": "Te laat",
+      "color": "#85e043"
+    },
+    "2": {
+      "label": "Aanwezig",
+      "color": "#2bad4e"
+    }
+  },
+  "progress": {
+    "-2": {
+      "label": "Leeg",
+      "color": "cornflowerblue"
+    },
+    "-1": {
+      "label": "Voortgang niet bepaald",
+      "color": "#aaaaaa"
+    },
+    "0": {
+      "label": "Voortgang niet zichtbaar",
+      "color": "#f25829"
+    },
+    "1": {
+      "label": "Onvoldoende voortgang",
+      "color": "#f2a529"
+    },
+    "2": {
+      "label": "Voldoende voortgang",
+      "color": "#85e043"
+    },
+    "3": {
+      "label": "Goede voortgang",
+      "color": "#2bad4e"
+    }
+  },
+  "grade": {
+    "-2": {
+      "label": "Nog niet beoordeeld",
+      "color": "cornflowerblue"
+    },
+    "-1": {
+      "label": "Niet bepaald",
+      "color": "#cccccc"
+    },
+    "0": {
+      "label": "Niet zichtbaar",
+      "color": "#f25829"
+    },
+    "1": {
+      "label": "Onder niveau",
+      "color": "#f2a529"
+    },
+    "2": {
+      "label": "Op niveau",
+      "color": "#85e043"
+    },
+    "3": {
+      "label": "Boven niveau",
+      "color": "#2bad4e"
+    }
+  }
+}

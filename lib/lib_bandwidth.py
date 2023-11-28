@@ -1,4 +1,8 @@
+import numpy as np
+from scipy.interpolate import interp1d
 from model.Bandwidth import Bandwidth, Point
+import plotly.express as px
+import plotly.graph_objs as go
 
 
 def calc_dev(iterations, r, a, b, c):
@@ -12,56 +16,68 @@ def calc_dev(iterations, r, a, b, c):
         iteration_list.append(y)
     return iteration_list
 
+
+def calc_interp(x1, y1, x2, y2, x):
+    return (y2-y1)/(x2-x1)*x
+
+
+def find_between(serie, x):
+    if x > serie[len(serie)-1]['day']:
+        return serie[-1]["day"], serie[-1]["sum"], x, serie[-1]["sum"]
+    for i in range(1, len(serie)):
+        if serie[i - 1]["day"] <= x <= serie[i]["day"]:
+            return serie[i - 1]["day"], serie[i - 1]["sum"], serie[i]["day"], serie[i]["sum"]
+
+
 def bandwidth_builder(assignment_group, a_days_in_semester):
     points = []
     x_reparatie_periode = 14
     y_start = assignment_group.total_points/35
     x_time = calc_dev(a_days_in_semester, 0, 0, 1, 0)
     # bereken bandbreedte
-    if assignment_group.name == "TEAM":
+    if assignment_group.strategy == "EXPONENTIAL":
         band_lower = calc_dev(a_days_in_semester, x_reparatie_periode, 0.00161, 0.1, 0)
         band_upper = calc_dev(a_days_in_semester, x_reparatie_periode, 0.00223, 0.1, y_start*4)
-    elif assignment_group.name == "CSC - Cloud" or assignment_group.name == "SD-Backend":
+    elif assignment_group.name == "CSC - Cloud":
         b = (assignment_group.lower_points + y_start + 18) / (a_days_in_semester - x_reparatie_periode)
         band_lower = calc_dev(a_days_in_semester, x_reparatie_periode, 0, b, - y_start - 18)
         b = (assignment_group.upper_points - y_start) / (a_days_in_semester - x_reparatie_periode)
         band_upper = calc_dev(a_days_in_semester, x_reparatie_periode, 0, b, y_start)
-    elif assignment_group.id == 69428 or assignment_group.id == 71093 or assignment_group.id == 69429:
+    elif assignment_group.strategy == "CONSTANT":
         # propedeuse perspectieven
         c = assignment_group.lower_points
         band_lower = calc_dev(a_days_in_semester, x_reparatie_periode, 0, 0, c)
         c = assignment_group.upper_points
         band_upper = calc_dev(a_days_in_semester, x_reparatie_periode, 0, 0, c)
-    elif assignment_group.name == "TI - Embedded":
-        raw_serie = []
+    elif assignment_group.strategy == "ATTENDANCE":
+        # propedeuse perspectieven
+        c = assignment_group.lower_points
+        band_lower = calc_dev(a_days_in_semester, x_reparatie_periode, 0, 0, c)
+        c = assignment_group.upper_points
+        band_upper = calc_dev(a_days_in_semester, x_reparatie_periode, 0, 0, c)
+    elif assignment_group.strategy == "POINTS":
+        serie = [{"day": 0, "sum": 0}]
         total_points = 0
         last_day = 0
+        lower_fraction = 0.55
+        upper_fraction = 0.8
         for assignment in assignment_group.assignments:
             total_points += assignment.points
-            raw_serie.append({"day": assignment.assignment_day-last_day, "sum": total_points})
-            last_day = assignment.assignment_day
+            serie.append({"day": assignment.assignment_day, "sum": total_points})
         band_lower = []
-        c = 0
-        lower_percentage = 0.55
-        for raw in raw_serie:
-            print(raw)
-            if raw["day"] == 0:
-                pass
-            else:
-                b = raw["sum"]*lower_percentage/raw["day"]
-                band_lower += calc_dev(raw["day"], 0, 0, b, c)
-                c = raw["sum"]*lower_percentage
-            print(band_lower)
-
-        b = (assignment_group.upper_points - y_start) / (a_days_in_semester - x_reparatie_periode)
-        band_upper = calc_dev(a_days_in_semester, x_reparatie_periode, 0, b, y_start)
-
+        band_upper = []
+        for x in x_time:
+            x1, y1, x2, y2 = find_between(serie, x)
+            y = calc_interp(x1, y1, x2, y2, x-x1)+y1
+            band_lower.append(y*lower_fraction)
+            band_upper.append(y*upper_fraction)
     else:
         b = (assignment_group.lower_points + y_start) / (a_days_in_semester - x_reparatie_periode)
         band_lower = calc_dev(a_days_in_semester, x_reparatie_periode, 0, b, -y_start)
         b = (assignment_group.upper_points - y_start) / (a_days_in_semester - x_reparatie_periode)
         band_upper = calc_dev(a_days_in_semester, x_reparatie_periode, 0, b, y_start)
 
+    print(len(x_time), len(band_lower), len(band_upper))
     for i in range(len(x_time)):
         points.append(Point(x_time[i], band_lower[i], band_upper[i]))
     new = Bandwidth()

@@ -1,0 +1,17 @@
+{
+  "current_instance": "sep23_prop_a",
+  "course_categories": {
+    "inno_courses": [
+      "sep23_inno",
+      "berend",
+      "karin"
+    ],
+    "prop_courses": [
+      "sep23_prop_a",
+      "nov23_prop_b"
+    ],
+    "other_courses": []
+  }
+}
+
+

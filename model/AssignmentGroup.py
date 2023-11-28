@@ -3,11 +3,12 @@ from model.Bandwidth import Bandwidth
 
 
 class AssignmentGroup:
-    def __init__(self, id, name, teachers, role, total_points, lower_points, upper_points, bandwidth):
+    def __init__(self, id, name, teachers, role, strategy, total_points, lower_points, upper_points, bandwidth):
         self.id = id
         self.name = name
         self.teachers = teachers
         self.role = role
+        self.strategy = strategy
         self.total_points = total_points
         self.lower_points = lower_points
         self.upper_points = upper_points
@@ -22,6 +23,7 @@ class AssignmentGroup:
                 'id': self.id,
                 'teachers': self.teachers,
                 'role': self.role,
+                'strategy' : self.strategy,
                 'total_points': self.total_points,
                 'lower_points': self.lower_points,
                 'upper_points': self.upper_points,
@@ -34,6 +36,7 @@ class AssignmentGroup:
                 'id': self.id,
                 'teachers': self.teachers,
                 'role': self.role,
+                'strategy' : self.strategy,
                 'total_points': self.total_points,
                 'lower_points': self.lower_points,
                 'upper_points': self.upper_points,
@@ -59,7 +62,7 @@ class AssignmentGroup:
             self.assignments.append(a_assignment)
 
     def __str__(self):
-        line = f'AssigmentGroup({self.id}, {self.name}, {self.teachers}, {self.role}, {self.total_points}, {self.lower_points}, {self.upper_points})\n'
+        line = f'AssigmentGroup({self.id}, {self.name}, {self.teachers}, {self.role}, strategy={self.strategy}, points={self.total_points}, {self.lower_points}, {self.upper_points})\n'
         for assignment in self.assignments:
             line += str(assignment)
         return line
@@ -70,6 +73,6 @@ class AssignmentGroup:
             new_bandwidth = Bandwidth.from_dict(data_dict['bandwidth'])
         else:
             new_bandwidth = None
-        new_assignment_group = AssignmentGroup(data_dict['id'], data_dict['name'], data_dict['teachers'], data_dict['role'], data_dict['total_points'], data_dict['lower_points'], data_dict['upper_points'], new_bandwidth)
+        new_assignment_group = AssignmentGroup(data_dict['id'], data_dict['name'], data_dict['teachers'], data_dict['role'], data_dict['strategy'], data_dict['total_points'], data_dict['lower_points'], data_dict['upper_points'], new_bandwidth)
         new_assignment_group.assignments = list(map(lambda a: Assignment.from_dict(a), data_dict['assignments']))
         return new_assignment_group

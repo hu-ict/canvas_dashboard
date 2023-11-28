@@ -1,39 +1,30 @@
+import csv
 import json
 import os
 
+from model.CourseInstances import CourseInstances
 from model.ProgressHistory import ProgressHistory
 from model.Result import Result
 from model.CourseConfig import CourseConfig
-from model.CourseConfigStart import CourseConfigStart
+from model.Start import Start
+from model.Submission import Submission
 from model.TeamsApi import TeamsApi
 from model.perspective.LevelSeries import LevelSeries
 
-tennant = "prop"
 
-if tennant == "inno":
-    start_file_name1 = "start_inno.json"
-    plot_path = ".//dashboard - lokaal//plotly//"
-    html_path = ".//dashboard - lokaal//"
-    template_path = ".//templates_inno//"
-    target_path = "C://Users//berend.wilkens//OneDrive - Stichting Hogeschool Utrecht//General//dashboard//"
-    target_slb_path = "C://Users//berend.wilkens//Stichting Hogeschool Utrecht//INNO - SLB - General//INNO dashboard - SLB//"
-elif tennant == "prop":
-    start_file_name1 = "start_prop.json"
-    plot_path = ".//dashboard - prop//plotly//"
-    html_path = ".//dashboard - prop//"
-    template_path = ".//templates_prop//"
-    target_path = "C://Users//berend.wilkens//Stichting Hogeschool Utrecht//(EXT) Propedeuse blok A 2023-2024 (docenten) - General//dashboard - prop//"
-    target_slb_path = None
-else:
-    start_file_name1 = "start_bims3.json"
-    plot_path = ".//dashboard - bims3//plotly//"
-    html_path = ".//dashboard - bims3//"
+def read_course_instance():
+    print("read_start", "course_instances.json")
+    with open("course_instances.json", mode='r', encoding="utf-8") as file_course_instances:
+        data = json.load(file_course_instances)
+        course_instances = CourseInstances.from_dict(data)
+        return course_instances
 
-def read_start():
-    print("read_start", start_file_name1)
-    with open(start_file_name1, mode='r', encoding="utf-8") as file_config_start:
-        data = json.load(file_config_start)
-        start = CourseConfigStart.from_dict(data)
+
+def read_start(start_file_name):
+    print("read_start", start_file_name)
+    with open(start_file_name, mode='r', encoding="utf-8") as file_start:
+        data = json.load(file_start)
+        start = Start.from_dict(data)
         return start
 
 

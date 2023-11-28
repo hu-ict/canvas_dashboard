@@ -1,5 +1,3 @@
-from lib.file import tennant
-
 peil_labels = ["Actueel", "Sprint 4", "Sprint 7", "Beoordeling"]
 peil_levels = [-2, -1, 0, 1, 2, 3]
 peil_history = {}
@@ -16,22 +14,22 @@ score_binair_dict = {
     0: {'niveau': 'Niet voldaan', 'color': '#f2a529'},
     1: {'niveau': 'Voldaan', 'color': '#85e043'}
 }
+def get_score_bin_dict(course_instances):
+    if course_instances.is_instance_of('prop_courses'):
+        return {"project": score_binair_dict, "final": score_binair_dict, "toets": score_binair_dict}
+    elif course_instances.is_instance_of('inno_courses'):
+        return {"kennis": score_binair_dict}
+    else:
+        return {"project": score_binair_dict, "kennis": score_binair_dict}
 
-if tennant == "prop":
-    score_bin_dict = {"project": score_binair_dict, "final": score_binair_dict, "toets": score_binair_dict}
-elif tennant == "inno":
-    score_bin_dict = {"kennis": score_binair_dict}
-else:
-    score_bin_dict = {"project": score_binair_dict, "kennis": score_binair_dict}
 
-
-def get_color_bar(a_course, a_labels_colors):
+def get_color_bar(a_start, a_course, a_labels_colors):
     colors_bar = {}
-    colors_bar["-1"] = a_labels_colors.level_series[a_course.perspectives[a_course.progress_perspective].levels].levels["-1"].color
-    colors_bar["0"] = a_labels_colors.level_series[a_course.perspectives[a_course.progress_perspective].levels].levels["0"].color
-    colors_bar["1"] = a_labels_colors.level_series[a_course.perspectives[a_course.progress_perspective].levels].levels["1"].color
-    colors_bar["2"] = a_labels_colors.level_series[a_course.perspectives[a_course.progress_perspective].levels].levels["2"].color
-    colors_bar["3"] = a_labels_colors.level_series[a_course.perspectives[a_course.progress_perspective].levels].levels["3"].color
+    colors_bar["-1"] = a_labels_colors.level_series[a_course.perspectives[a_start.progress_perspective].levels].levels["-1"].color
+    colors_bar["0"] = a_labels_colors.level_series[a_course.perspectives[a_start.progress_perspective].levels].levels["0"].color
+    colors_bar["1"] = a_labels_colors.level_series[a_course.perspectives[a_start.progress_perspective].levels].levels["1"].color
+    colors_bar["2"] = a_labels_colors.level_series[a_course.perspectives[a_start.progress_perspective].levels].levels["2"].color
+    colors_bar["3"] = a_labels_colors.level_series[a_course.perspectives[a_start.progress_perspective].levels].levels["3"].color
     return colors_bar
 
 
