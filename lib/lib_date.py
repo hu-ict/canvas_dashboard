@@ -4,6 +4,7 @@ import pytz
 API_URL = "https://canvas.hu.nl/"
 DATE_TIME_STR = '%Y-%m-%dT%H:%M:%SZ'
 DATE_TIME_LOC = '%d-%m-%Y'
+DATE_TIME_ALT = '%Y-%m-%d'
 ALT_DATE_TIME_STR = '%Y-%m-%dT%H:%M:%S.%f%z'
 timezone = pytz.timezone("Europe/Amsterdam")
 
@@ -19,6 +20,13 @@ def get_date_time_obj_loc(date_time_str):
     if len(date_time_str) == 0:
         return None
     date_time_obj = datetime.strptime(date_time_str, DATE_TIME_LOC)
+    date_time_obj = date_time_obj.astimezone(timezone)
+    return date_time_obj
+
+def get_date_time_obj_alt(date_time_str):
+    if len(date_time_str) == 0:
+        return None
+    date_time_obj = datetime.strptime(date_time_str, DATE_TIME_ALT)
     date_time_obj = date_time_obj.astimezone(timezone)
     return date_time_obj
 

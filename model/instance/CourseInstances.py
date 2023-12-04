@@ -1,15 +1,20 @@
-from model.CourseCategory import CourseCatergory
-
+from model.instance.Event import Event
+from model.instance.Instance import Instance
+from model.instance.CourseCategory import CourseCatergory
 
 class CourseInstances:
     def __init__(self, current_instance):
         self.current_instance = current_instance
         self.course_categories = {}
+        self.instances = {}
+        self.events = {}
 
     def to_json(self):
         dict_result = {
             'current_instance': self.current_instance,
-            'course_categories': {}
+            'course_categories': {},
+            'instances': {},
+            'events': {}
         }
         for key in self.course_categories:
             dict_result['course_categories'][key] = self.course_categories[key].to_json()
@@ -18,7 +23,11 @@ class CourseInstances:
     def __str__(self):
         line = f'CourseInstances({self.current_instance})\n'
         for key in self.course_categories.keys():
-            line += f'({self.course_categories[key]})\n'
+            line += f'{self.course_categories[key]}'
+        for key in self.instances.keys():
+            line += f'{self.instances[key]}'
+        for key in self.events.keys():
+            line += f'{self.events[key]}'
         return line
 
     def get_project_path(self):
@@ -34,7 +43,17 @@ class CourseInstances:
         return self.get_project_path() + "start_" + self.current_instance + ".json"
 
     def is_instance_of(self, category):
-        return self.current_instance in self.course_categories[category].course_instances
+        for key in self.instances.keys():
+            if self.current_instance == key:
+                if self.instances[key].category == category:
+                    return True
+        return False
+
+    def is_instance(self, a_instance):
+        for key in self.course_categories.keys():
+            if a_instance in self.course_categories[key].course_instances:
+                return True
+        return False
 
     @staticmethod
     def from_dict(data_dict):
@@ -43,4 +62,8 @@ class CourseInstances:
         for key in data_dict["course_categories"].keys():
             # print(key, data_dict["course_categories"][key])
             new.course_categories[key] = CourseCatergory.from_dict(key, data_dict["course_categories"][key])
+        for key in data_dict["instances"].keys():
+            new.instances[key] = Instance.from_dict(key, data_dict["instances"][key])
+        for key in data_dict["events"].keys():
+            new.events[key] = Event.from_dict(key, data_dict["events"][key])
         return new

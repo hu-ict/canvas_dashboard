@@ -95,7 +95,7 @@ def check_for_late(a_instances, a_course, a_student_totals, a_student, a_submiss
         add_total(a_student_totals['late']['count'], late_days)
 
 
-def build_totals(a_instances, a_start, a_course, a_results, a_student_totals, a_gilde, a_coaches):
+def build_totals(a_instances, a_start, a_course, a_results, a_student_totals):
     for l_student in a_results.students:
         count_student(a_start, a_course, a_student_totals, l_student)
         for l_perspective in l_student.perspectives.values():

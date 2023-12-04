@@ -11,11 +11,11 @@ class CourseCatergory:
         return dict_result
 
     def __str__(self):
-        line = f'CourseCatergory({self.category}, {self.course_instances})'
+        line = f' CourseCatergory({self.category}, {self.course_instances})\n'
         return line
 
     @staticmethod
     def from_dict(key, data_dict):
         # print("CourseCatergory", key, data_dict)
-        new = CourseCatergory(key, data_dict)
+        new = CourseCatergory(key, data_dict['course_instances'])
         return new

@@ -6,7 +6,7 @@ from model.perspective.Perspective import Perspective
 class Start:
     def __init__(self, canvas_course_id, projects_groep_name, slb_groep_name, progress_perspective, start_date,
                  end_date, template_path, target_path, target_slb_path, config_file_name, course_file_name,
-                 results_file_name, progress_file_name, attendance_report, api_key, a_grade_levels, a_progress_levels):
+                 results_file_name, progress_file_name, workload_file_name, attendance_report, api_key, a_grade_levels, a_progress_levels):
         self.canvas_course_id = canvas_course_id
         self.api_key = api_key
         self.perspectives = {}
@@ -25,6 +25,7 @@ class Start:
         self.course_file_name = course_file_name
         self.results_file_name = results_file_name
         self.progress_file_name = progress_file_name
+        self.workload_file_name = workload_file_name
         self.attendance_report = attendance_report
 
     def __str__(self):
@@ -36,7 +37,6 @@ class Start:
             'canvas_course_id': self.canvas_course_id,
             'grade_levels': self.grade_levels,
             'progress_levels': self.progress_levels,
-
             'projects_groep_name': self.projects_groep_name,
             "slb_groep_name": self.slb_groep_name,
             'start_date': get_date_time_str(self.start_date),
@@ -49,6 +49,7 @@ class Start:
             'course_file_name': self.course_file_name,
             'results_file_name': self.results_file_name,
             'progress_file_name': self.progress_file_name,
+            'workload_file_name': self.workload_file_name,
             'attendance_report': self.attendance_report,
             'perspectives': {},
             'roles': []
@@ -69,7 +70,7 @@ class Start:
                     get_date_time_obj(data_dict['end_date']),
                     data_dict['template_path'], data_dict['target_path'], data_dict['target_slb_path'],
                     data_dict['config_file_name'], data_dict['course_file_name'],
-                    data_dict['results_file_name'], data_dict['progress_file_name'],
+                    data_dict['results_file_name'], data_dict['progress_file_name'], data_dict['workload_file_name'],
                     data_dict['attendance_report'],
                     data_dict['api_key'],
                     data_dict['grade_levels'],

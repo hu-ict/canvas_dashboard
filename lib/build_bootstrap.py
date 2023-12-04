@@ -32,10 +32,7 @@ def build_bootstrap_project(a_instances, a_start, a_course, a_results, a_templat
                 l_progress = get_actual_progress(l_student.perspectives)
             else:
                 print("Student not found", student.name)
-
             l_progress_color = a_labels_colors.level_series[a_start.progress_levels].levels[str(l_progress)].color
-
-
             student_html_string = a_templates['student'].substitute(
                 {'btn_color': color, 'progress_color': l_progress_color, 'student_name': student.name, 'student_role': role_obj.name,
                  'student_file': asci_file_name})
@@ -53,7 +50,7 @@ def build_bootstrap_project(a_instances, a_start, a_course, a_results, a_templat
     return groups_html_string
 
 
-def build_bootstrap_slb(a_start, a_course, a_templates, a_labels_colors):
+def build_bootstrap_slb(a_instances, a_start, a_course, a_results, a_templates, a_labels_colors):
     l_groups_html_string = ''
     for group in a_course.slb_groups:
         # print("-", group.name)
@@ -66,7 +63,11 @@ def build_bootstrap_slb(a_start, a_course, a_templates, a_labels_colors):
             file_name = "./plotly/" + student.name.replace(" ", "%20") + ".html"
             #       file_name = plot_path + student.name + ".html"
             asci_file_name = file_name.translate(translation_table)
-            l_progress = get_actual_progress(student.perspectives)
+            l_student = a_results.find_student(student.id)
+            if l_student != None:
+                l_progress = get_actual_progress(l_student.perspectives)
+            else:
+                print("Student not found", student.name)
             l_progress_color = a_labels_colors.level_series[a_start.progress_levels].levels[str(l_progress)].color
             student_html_string = a_templates['student'].substitute(
                 {'btn_color': color, 'progress_color': l_progress_color, 'student_name': student.name, 'student_role': role_obj.name,
@@ -130,13 +131,13 @@ def build_bootstrap_general(a_instances, a_start, a_course, a_results, a_coaches
     for role in a_course.roles:
         roles_html_string += l_templates['role'].substitute(
             {'button': role.btn_color, 'role': role.short})
-
+    percentage = str(l_semester_day / a_course.days_in_semester * 100) + "%"
     actual_date_str = a_results.actual_date.strftime("%d-%m-%Y %H:%M")
     index_html_string = l_templates['index'].substitute(
         {'course_name': a_course.name, 'aantal_studenten': a_course.student_count, 'aantal_teams': len(a_course.student_groups),
          'submission_count': a_results.submission_count, 'not_graded_count': a_results.not_graded_count,
          'actual_date': actual_date_str, 'semester_day': l_semester_day,
-         'percentage': str(l_semester_day / a_course.days_in_semester * 100) + "%",
+         'percentage': percentage,
          'roles': roles_html_string,
          'coaches': coaches_html_string,
          'student_groups': groups_html_string})
@@ -144,18 +145,17 @@ def build_bootstrap_general(a_instances, a_start, a_course, a_results, a_coaches
     with open(a_instances.get_html_path() + 'index.html', mode='w', encoding="utf-8") as file_index:
         file_index.write(index_html_string)
 
-    groups_html_string = build_bootstrap_slb(a_start, a_course, l_templates, a_labels_colors)
+    groups_html_string = build_bootstrap_slb(a_instances, a_start, a_course, a_results, l_templates, a_labels_colors)
     roles_html_string = ""
     for role in a_course.roles:
         roles_html_string += l_templates['role'].substitute(
             {'button': role.btn_color, 'role': role.short})
 
-    actual_date_str = a_results.actual_date.strftime("%d-%m-%Y %H:%M")
     slb_html_string = l_templates['slb'].substitute(
         {'course_name': a_course.name, 'aantal_studenten': a_course.student_count, 'aantal_teams': len(a_course.student_groups),
          'submission_count': a_results.submission_count, 'not_graded_count': a_results.not_graded_count,
          'actual_date': actual_date_str, 'semester_day': l_semester_day,
-         'percentage': str(l_semester_day / 1.5) + "%",
+         'percentage': percentage,
          'roles': roles_html_string,
          'student_groups': groups_html_string})
 

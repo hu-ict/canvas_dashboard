@@ -2,13 +2,14 @@ import csv
 import json
 import os
 
-from model.CourseInstances import CourseInstances
 from model.ProgressHistory import ProgressHistory
 from model.Result import Result
 from model.CourseConfig import CourseConfig
 from model.Start import Start
 from model.Submission import Submission
 from model.TeamsApi import TeamsApi
+from model.WorkloadHistory import WorkloadHistory
+from model.instance.CourseInstances import CourseInstances
 from model.perspective.LevelSeries import LevelSeries
 
 
@@ -73,6 +74,21 @@ def read_progress(progress_file_name):
             dict_result = progress_history.to_json()
             json.dump(dict_result, file_progress, indent=2)
         return progress_history
+
+
+def read_workload(workload_file_name):
+    print("read_workload", workload_file_name)
+    if os.path.isfile(workload_file_name):
+        with open(workload_file_name, mode='r', encoding="utf-8") as file_workload:
+            data = json.load(file_workload)
+            workload_history = WorkloadHistory.from_dict(data)
+            return workload_history
+    else:
+        workload_history = WorkloadHistory()
+        with open(workload_file_name, 'w') as file_workload:
+            dict_result = workload_history.to_json()
+            json.dump(dict_result, file_workload, indent=2)
+        return workload_history
 
 
 def read_msteams_api(msteams_api_file_name):

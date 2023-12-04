@@ -1,17 +1,151 @@
 {
-  "current_instance": "sep23_prop_a",
+  "current_instance": "sep23_inno",
   "course_categories": {
-    "inno_courses": [
-      "sep23_inno",
-      "berend",
-      "karin"
-    ],
-    "prop_courses": [
-      "sep23_prop_a",
-      "nov23_prop_b"
-    ],
-    "other_courses": []
+    "inno_courses": {
+      "category": "inno_courses",
+      "course_instances": [
+        "sep23_inno"
+      ]
+    },
+    "prop_courses": {
+      "category": "prop_courses",
+      "course_instances": [
+        "sep23_prop_a",
+        "nov23_prop_b"
+      ]
+    },
+    "other_courses": {
+      "category": "other_courses",
+      "course_instances": [
+        "wilkens"
+      ]
+    }
+  },
+  "instances": {
+    "sep23_inno": {
+      "name": "sep23_inno",
+      "category": "inno_courses",
+      "listen": {
+        "course_update_event": {
+          "name": "course_update_event",
+          "run": [
+            "update_course.py",
+            "generate_results.py",
+            "generate_dashboard.py",
+            "generate_plotly.py",
+            "publish_dashboard.py",
+            "publish_student_files.py"
+          ]
+        },
+        "results_create_event": {
+          "name": "results_create_event",
+          "run": [
+            "generate_results.py",
+            "generate_dashboard.py",
+            "generate_plotly.py",
+            "publish_dashboard.py",
+            "publish_student_files.py"
+          ]
+        },
+        "results_update_event": {
+          "name": "results_update_event",
+          "run": [
+            "generate_submissions.py",
+            "generate_dashboard.py",
+            "generate_plotly.py",
+            "publish_dashboard.py",
+            "publish_student_files.py"
+          ]
+        }
+      }
+    },
+    "sep23_prop_a": {
+      "name": "sep23_prop_a",
+      "category": "prop_courses",
+      "listen": {
+        "course_update_event": {
+          "name": "course_update_event",
+          "run": [
+            "update_course.py",
+            "generate_results.py",
+            "generate_attendances.py",
+            "generate_dashboard.py",
+            "generate_plotly.py",
+            "publish_dashboard.py"
+          ]
+        },
+        "results_create_event": {
+          "name": "results_create_event",
+          "run": [
+            "generate_results.py",
+            "generate_attendances.py",
+            "generate_dashboard.py",
+            "generate_plotly.py",
+            "publish_dashboard.py"
+          ]
+        },
+        "results_update_event": {
+          "name": "results_update_event",
+          "run": [
+            "generate_submissions.py",
+            "generate_attendance.py",
+            "generate_dashboard.py",
+            "generate_plotly.py",
+            "publish_dashboard.py"
+          ]
+        }
+      }
+    },
+    "nov23_prop_b": {
+      "name": "nov23_prop_b",
+      "category": "prop_courses",
+      "listen": {
+        "course_update_event": {
+          "name": "course_update_event",
+          "run": [
+            "update_course.py",
+            "generate_results.py",
+            "generate_attendance.py",
+            "generate_dashboard.py",
+            "generate_plotly.py",
+            "publish_dashboard.py"
+          ]
+        },
+        "results_create_event": {
+          "name": "results_create_event",
+          "run": [
+            "generate_results.py",
+            "generate_attendance.py",
+            "generate_dashboard.py",
+            "generate_plotly.py",
+            "publish_dashboard.py"
+          ]
+        },
+        "results_update_event": {
+          "name": "results_update_event",
+          "run": [
+            "generate_submissions.py",
+            "generate_attendance.py",
+            "generate_dashboard.py",
+            "generate_plotly.py",
+            "publish_dashboard.py"
+          ]
+        }
+      }
+    }
+  },
+  "events": {
+    "course_update_event": {
+      "name": "course_update_event",
+      "trigger": "TIME"
+    },
+    "results_create_event": {
+      "name": "results_create_event",
+      "trigger": "TIME"
+    },
+    "results_update_event": {
+      "name": "results_update_event",
+      "trigger": "TIME"
+    }
   }
 }
-
-

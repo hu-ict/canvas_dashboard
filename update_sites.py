@@ -1,9 +1,13 @@
 import json
+import sys
 
-from lib.file import read_start, read_course, read_msteams_api
+from lib.file import read_start, read_course, read_msteams_api, read_course_instance
+from lib.lib_date import get_actual_date
 from lib.teams_api_lib import get_sites, get_me_for_check, get_access_token
 
-start = read_start()
+instances = read_course_instance()
+print("Instance:", instances.current_instance)
+start = read_start(instances.get_start_file_name())
 course = read_course(start.course_file_name)
 msteams_api = read_msteams_api("msteams_api.json")
 
@@ -16,8 +20,26 @@ msteams_api = read_msteams_api("msteams_api.json")
 #         dict_result = msteams_api.to_json()
 #         json.dump(dict_result, f, indent=2)
 
-get_sites(msteams_api.my_token, course, "INNO")
+def main(instance_name):
+    g_actual_date = get_actual_date()
+    instances = read_course_instance()
+    if len(instance_name) > 0:
+        instances.current_instance = instance_name
+    print("Instance:", instances.current_instance)
+    if instances.current_instance != "sep23_inno":
+        print("No student channels defined for this course")
+        return
+    get_sites(msteams_api.my_token, course, "INNO")
 
-with open(start.course_file_name, 'w') as f:
-    dict_result = course.to_json(["assignment"])
-    json.dump(dict_result, f, indent=2)
+    with open(start.course_file_name, 'w') as f:
+        dict_result = course.to_json(["assignment"])
+        json.dump(dict_result, f, indent=2)
+
+    print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        main(sys.argv[1])
+    else:
+        main("")

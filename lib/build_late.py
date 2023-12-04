@@ -3,7 +3,7 @@ from string import Template
 from lib.lib_date import get_date_time_loc, get_date_time_obj
 
 
-def build_late(a_start, a_result, a_student_totals):
+def build_late_list(a_instances, a_start, a_result, a_student_totals):
     for l_perspective in a_student_totals['perspectives'].keys():
         for l_selector in a_student_totals['perspectives'][l_perspective]['list'].keys():
             # print(l_selector)
@@ -45,7 +45,7 @@ def build_late(a_start, a_result, a_student_totals):
 
     late_html_string = late_html_template.substitute({'team_buttons': team_html_string, 'gilde_buttons': gilde_html_string, 'kennis_buttons': kennis_html_string})
 
-    with open(html_path+'late.html', mode='w', encoding="utf-8") as file_late:
+    with open(a_instances.get_html_path()+'late.html', mode='w', encoding="utf-8") as file_late:
         file_late.write(late_html_string)
 
     for l_perspective in a_student_totals['perspectives'].keys():
@@ -60,5 +60,5 @@ def build_late(a_start, a_result, a_student_totals):
                 submission_html_string = submission_html_template.substitute({'submission_id': l_submission['id'], 'student_name': l_student_name, 'assignment_name': l_submission['assignment_name'], 'submission_date': get_date_time_loc(get_date_time_obj(l_submission['submitted_date'])), 'url': url})
                 late_list_html_total_string += submission_html_string
             late_list_html_string = late_list_html_template.substitute({'submissions': late_list_html_total_string})
-            with open(html_path+"late_"+l_perspective+"_"+l_selector+".html", mode='w', encoding="utf-8") as file_late_list:
+            with open(a_instances.get_html_path()+"late_"+l_perspective+"_"+l_selector+".html", mode='w', encoding="utf-8") as file_late_list:
                 file_late_list.write(late_list_html_string)
