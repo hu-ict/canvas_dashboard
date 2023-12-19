@@ -5,15 +5,36 @@ def student_total(a_perspective):
     return cum_score
 
 
-def get_actual_progress(a_perspectives):
+def get_overall_progress(a_perspectives):
     boven = 7
     for l_perspective in a_perspectives.values():
         if l_perspective.name == 'team':
             boven = 8
     l_progress = []
     for l_perspective in a_perspectives.values():
-        if l_perspective.name != "peil" and l_perspective.name != "aanwezig":
+        if l_perspective.name == "peil":
+            pass
+        elif l_perspective.name == "project":
+            pass
+        elif l_perspective.progress == -1:
+            pass
+        else:
             l_progress.append(l_perspective.progress)
+    if len(l_progress) == 2:
+        if l_progress[0] >= 2 and l_progress[1] >= 2:
+            if sum(l_progress) >= 5:
+                # boven niveau
+                return 3
+            else:
+                # op niveau
+                return 2
+        else:
+            # minimaal onder niveau
+            if l_progress[0] <= 0 and l_progress[1] <= 0:
+                # geen activiteit in semester ná deadlines
+                return 0
+            else:
+                return 1
     if len(l_progress) == 3:
         if l_progress[0] >= 2 and l_progress[1] >= 2 and l_progress[2] >= 2:
             if sum(l_progress) >= boven:
@@ -22,19 +43,15 @@ def get_actual_progress(a_perspectives):
             else:
                 # op niveau
                 return 2
-        elif l_progress[0] <= 1 or l_progress[1] <= 1 or l_progress[2] <= 1:
+        else:
             # minimaal onder niveau
-            if l_progress[0] == -1 and l_progress[1] == -1 and l_progress[2] == -1:
-                # niet te bepalen
-                return -1
-            elif l_progress[0] <= 0 and l_progress[1] <= 0 and l_progress[2] <= 0:
+            if l_progress[0] == 0 and l_progress[1] == 0 and l_progress[2] == 0:
                 # geen activiteit in semester ná deadlines
                 return 0
             else:
                 return 1
-        else:
-            return -2
     return -1
+
 
 def get_progress(a_perspective, a_query):
     for l_submission in a_perspective:
@@ -56,7 +73,7 @@ def get_submitted_at(item):
 
 
 def count_student(a_start, a_course, a_student_totals, a_student):
-    peil = get_actual_progress(a_student.perspectives)
+    peil = a_student.progress
     # print(a_student.name, peil)
     a_student_totals['peil']['Actueel']['overall'][peil] += 1
     for l_perspective in a_student.perspectives.values():

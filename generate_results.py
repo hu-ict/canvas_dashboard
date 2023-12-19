@@ -4,9 +4,9 @@ import sys
 from canvasapi import Canvas
 import json
 
-from lib.build_totals import get_actual_progress
 from lib.file import read_start, read_course, read_progress, read_course_instance
-from lib.lib_submission import submission_builder, NO_SUBMISSION, remove_assignment, bepaal_voortgang, count_graded
+from lib.lib_submission import submission_builder, NO_SUBMISSION, remove_assignment, bepaal_voortgang, count_graded, \
+    add_missed_assignments
 from model.Comment import Comment
 from model.ProgressDay import ProgressDay
 from model.Result import *
@@ -21,8 +21,6 @@ def main(instance_name):
     print("Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
     course = read_course(start.course_file_name)
-    progress_history = read_progress(start.progress_file_name)
-
     # Initialize a new Canvas object
     canvas = Canvas(API_URL, start.api_key)
     user = canvas.get_current_user()
@@ -74,44 +72,18 @@ def main(instance_name):
         else:
             print("Could not find assignment_group with canvas_assignment_group_id", canvas_assignment.assignment_group_id)
 
-    # for group in results.studentGroups:
-    #     for student in group.students:
-    #         for perspective in student.perspectives:
-    #             perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_at)
-
-    progress_day = ProgressDay(results.actual_day)
-
     for student in results.students:
         for perspective in student.perspectives.values():
             # Perspective aanvullen met missed Assignments
-            if len(perspective.assignment_groups) == 1:
-                l_assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
-                if l_assignment_group is None:
-                    break
-                l_assignments = l_assignment_group.assignments[:]
+            add_missed_assignments(start, course, results, perspective)
+    for student in results.students:
+        for perspective in student.perspectives.values():
+            perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_date)
 
-                # remove already submitted
-                for l_submission in perspective.submissions:
-                    l_assignments = remove_assignment(l_assignments, l_submission)
-                # open assignments
-                for l_assignment in l_assignments:
-                    if date_to_day(start.start_date, l_assignment.assignment_date) < results.actual_day:
-                        l_submission = Submission(0, l_assignment.group_id, l_assignment.id, 0, l_assignment.name,
-                                                  l_assignment.assignment_date, l_assignment.assignment_date,
-                                                  True, 0, l_assignment.points)
-                        l_submission.comments.append(Comment(0, "Systeem", l_assignment.assignment_date, NO_SUBMISSION))
-                        perspective.submissions.append(l_submission)
-
-    bepaal_voortgang(start, course, results, progress_day)
-    progress_history.append_day(progress_day)
     results.submission_count, results.not_graded_count = count_graded(results)
 
     with open(start.results_file_name, 'w') as f:
         dict_result = results.to_json([])
-        json.dump(dict_result, f, indent=2)
-
-    with open(start.progress_file_name, 'w') as f:
-        dict_result = progress_history.to_json()
         json.dump(dict_result, f, indent=2)
 
     print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")

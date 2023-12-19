@@ -2,7 +2,7 @@ from lib.lib_date import get_date_time_obj, get_date_time_str
 from model.Comment import Comment
 
 class Submission:
-    def __init__(self, submission_id, assignment_group_id, assignment_id, student_id, assignment_name, assignment_date, submitted_date, graded, score, points):
+    def __init__(self, submission_id, assignment_group_id, assignment_id, student_id, assignment_name, assignment_date, submitted_date, graded, score, points, flow):
         self.id = submission_id
         self.assignment_group_id = assignment_group_id
         self.assignment_name = assignment_name
@@ -13,6 +13,7 @@ class Submission:
         self.graded = graded
         self.score = score
         self.points = points
+        self.flow = flow
         self.comments = []
 
     def toJson(self):
@@ -30,6 +31,7 @@ class Submission:
             'graded': self.graded,
             'score': int(self.score*10)/10,
             'points': int(self.points),
+            'flow': int(self.flow*100)/100,
             'comments': list(map(lambda c: c.to_json(), self.comments)),
         }
 
@@ -38,7 +40,8 @@ class Submission:
 
     @staticmethod
     def from_dict(data_dict):
-        new_submission = Submission(data_dict['id'], data_dict['assignment_group_id'], data_dict['assignment_id'], data_dict['student_id'], data_dict['assignment_name'], get_date_time_obj(data_dict['assignment_date']), get_date_time_obj(data_dict['submitted_date']), data_dict['graded'], data_dict['score'], data_dict['points'])
+        new_submission = Submission(data_dict['id'], data_dict['assignment_group_id'], data_dict['assignment_id'], data_dict['student_id'], data_dict['assignment_name'],
+                                    get_date_time_obj(data_dict['assignment_date']), get_date_time_obj(data_dict['submitted_date']), data_dict['graded'], data_dict['score'], data_dict['points'], data_dict['flow'])
         new_submission.comments = list(map(lambda c: Comment.from_dict(c), data_dict['comments']))
         return new_submission
 

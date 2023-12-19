@@ -1,5 +1,5 @@
 {
-  "current_instance": "sep23_inno",
+  "current_instance": "nov23_prop_b",
   "course_categories": {
     "inno_courses": {
       "category": "inno_courses",
@@ -30,7 +30,9 @@
           "name": "course_update_event",
           "run": [
             "update_course.py",
+            "generate_bandwidth.py",
             "generate_results.py",
+            "generate_progress.py",
             "generate_dashboard.py",
             "generate_plotly.py",
             "publish_dashboard.py",
@@ -41,6 +43,7 @@
           "name": "results_create_event",
           "run": [
             "generate_results.py",
+            "generate_progress.py",
             "generate_dashboard.py",
             "generate_plotly.py",
             "publish_dashboard.py",
@@ -51,6 +54,7 @@
           "name": "results_update_event",
           "run": [
             "generate_submissions.py",
+            "generate_progress.py",
             "generate_dashboard.py",
             "generate_plotly.py",
             "publish_dashboard.py",
@@ -104,8 +108,10 @@
           "name": "course_update_event",
           "run": [
             "update_course.py",
+            "generate_bandwidth.py",
             "generate_results.py",
             "generate_attendance.py",
+            "generate_progress.py",
             "generate_dashboard.py",
             "generate_plotly.py",
             "publish_dashboard.py"
@@ -116,6 +122,7 @@
           "run": [
             "generate_results.py",
             "generate_attendance.py",
+            "generate_progress.py",
             "generate_dashboard.py",
             "generate_plotly.py",
             "publish_dashboard.py"
@@ -126,6 +133,7 @@
           "run": [
             "generate_submissions.py",
             "generate_attendance.py",
+            "generate_progress.py",
             "generate_dashboard.py",
             "generate_plotly.py",
             "publish_dashboard.py"

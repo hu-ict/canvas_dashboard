@@ -1,6 +1,5 @@
 from string import Template
 
-from lib.build_totals import get_actual_progress
 from lib.translation_table import translation_table
 
 
@@ -29,7 +28,7 @@ def build_bootstrap_project(a_instances, a_start, a_course, a_results, a_templat
             asci_file_name = file_name.translate(translation_table)
             l_student = a_results.find_student(student.id)
             if l_student != None:
-                l_progress = get_actual_progress(l_student.perspectives)
+                l_progress = l_student.progress
             else:
                 print("Student not found", student.name)
             l_progress_color = a_labels_colors.level_series[a_start.progress_levels].levels[str(l_progress)].color
@@ -65,7 +64,7 @@ def build_bootstrap_slb(a_instances, a_start, a_course, a_results, a_templates, 
             asci_file_name = file_name.translate(translation_table)
             l_student = a_results.find_student(student.id)
             if l_student != None:
-                l_progress = get_actual_progress(l_student.perspectives)
+                l_progress = l_student.progress
             else:
                 print("Student not found", student.name)
             l_progress_color = a_labels_colors.level_series[a_start.progress_levels].levels[str(l_progress)].color

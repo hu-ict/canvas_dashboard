@@ -190,14 +190,17 @@ def plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
         if submission.graded:
             if l_day > l_last_graded_day:
                 l_last_graded_day = l_day
-            cum_score += submission.score
+            if a_perspective.name == "aanwezig":
+                cum_score = submission.flow
+            else:
+                cum_score += submission.score
             if submission.points == 0:
                 submission.points = 1
             if submission.points <= 1.1:
                 y_colors.append(score_bin_dict[a_perspective.name][fraction_to_bin_level(submission.score / submission.points)]['color'])
                 l_hover += "<br><b>" + score_bin_dict[a_perspective.name][fraction_to_bin_level(submission.score / submission.points)]['niveau'] + "</b>, score: " + str(submission.score) + " [" + get_date_time_loc(submission.submitted_date) + "]"
-            elif submission.assignment_name == "Attendance":
-                # print(submission.score, submission.points)
+            elif a_perspective.name == "aanwezig":
+                # print(submission.flow, submission.score, submission.points)
                 y_colors.append(a_labels_colors.level_series[a_course.perspectives[a_perspective.name].levels].levels[str(int(submission.score))].color)
                 l_label = a_labels_colors.level_series[a_course.perspectives[a_perspective.name].levels].levels[str(int(submission.score))].label
                 l_hover += "<br><b>" + l_label + "</b>, score: " + str(submission.score) + " [" + str(submission.points) + "]" + " - " + get_date_time_loc(submission.submitted_date)

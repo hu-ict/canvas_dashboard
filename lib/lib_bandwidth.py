@@ -22,11 +22,15 @@ def calc_interp(x1, y1, x2, y2, x):
 
 
 def find_between(serie, x):
-    if x > serie[len(serie)-1]['day']:
-        return serie[-1]["day"], serie[-1]["sum"], x, serie[-1]["sum"]
-    for i in range(1, len(serie)):
-        if serie[i - 1]["day"] <= x <= serie[i]["day"]:
-            return serie[i - 1]["day"], serie[i - 1]["sum"], serie[i]["day"], serie[i]["sum"]
+    max_day = max(serie)
+    if x > serie[max_day]['day']:
+        #de dag is later dan de laatste dag
+        return serie[max_day]["day"], serie[max_day]["sum"], x, serie[max_day]["sum"]
+    last_day = 0
+    for day in serie:
+        if serie[last_day]["day"] <= x <= serie[day]["day"]:
+            return serie[last_day]["day"], serie[last_day]["sum"], serie[day]["day"], serie[day]["sum"]
+        last_day = day
 
 
 def bandwidth_builder(assignment_group, a_days_in_semester):
@@ -56,22 +60,40 @@ def bandwidth_builder(assignment_group, a_days_in_semester):
         c = assignment_group.upper_points
         band_upper = calc_dev(a_days_in_semester, x_reparatie_periode, 0, 0, c)
     elif assignment_group.strategy == "POINTS":
-        serie = [{"day": 0, "sum": 0}]
+        serie = {0: {"day": 0, "sum": 0}}
         total_points = 0
-        last_day = 0
-        lower_fraction = 0.55
-        upper_fraction = 0.8
+        y = 0
+        lower_fraction = assignment_group.lower_points/assignment_group.total_points
+        upper_fraction = assignment_group.upper_points/assignment_group.total_points
         for assignment in assignment_group.assignments:
             total_points += assignment.points
-            serie.append({"day": assignment.assignment_day, "sum": total_points})
+            serie[assignment.assignment_day] = {"day": assignment.assignment_day, "sum": total_points}
         band_lower = []
         band_upper = []
         for x in x_time:
             x1, y1, x2, y2 = find_between(serie, x)
-            y = calc_interp(x1, y1, x2, y2, x-x1)+y1
-            band_lower.append(y*lower_fraction)
-            band_upper.append(y*upper_fraction)
+            if (x2-x1) != 0:
+                y = calc_interp(x1, y1, x2, y2, x-x1)+y1
+            band_lower.append(y * lower_fraction)
+            band_upper.append(y * upper_fraction)
+    elif assignment_group.strategy == "FIXED":
+        serie = {0: {"day": 0, "sum": 0}}
+        total_points = 0
+        y = 0
+        lower_fraction = assignment_group.lower_points/assignment_group.total_points
+        for assignment in assignment_group.assignments:
+            total_points += assignment.points
+            serie[assignment.assignment_day] = {"day": assignment.assignment_day+7, "sum": total_points}
+        print(serie.items())
+        band_lower = []
+        band_upper = []
+        for x in x_time:
+            x1, y1, x2, y2 = find_between(serie, x)
+            band_lower.append(y1)
+            band_upper.append(assignment_group.upper_points)
+
     else:
+        #assignment_group.strategy == "LINEAIR"
         b = (assignment_group.lower_points + y_start) / (a_days_in_semester - x_reparatie_periode)
         band_lower = calc_dev(a_days_in_semester, x_reparatie_periode, 0, b, -y_start)
         b = (assignment_group.upper_points - y_start) / (a_days_in_semester - x_reparatie_periode)
@@ -79,7 +101,8 @@ def bandwidth_builder(assignment_group, a_days_in_semester):
 
     print(len(x_time), len(band_lower), len(band_upper))
     for i in range(len(x_time)):
-        points.append(Point(x_time[i], band_lower[i], band_upper[i]))
+        if i < len(band_lower):
+            points.append(Point(x_time[i], band_lower[i], band_upper[i]))
     new = Bandwidth()
     new.days = x_time
     new.lowers = band_lower

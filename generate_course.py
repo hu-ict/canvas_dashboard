@@ -210,13 +210,13 @@ def main(instance_name):
             print(assignment_group.name, assignment_group.total_points, group_points_possible)
             # assignment_group.total_points = group_points_possible
 
-    for assignment_group in config.assignment_groups:
-        assignment_group.assignments = sorted(assignment_group.assignments, key=lambda a: a.assignment_day)
-
-        if assignment_group.strategy == "NONE":
-            assignment_group.bandwidth = None
-        else:
-            assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
+    # for assignment_group in config.assignment_groups:
+    #     assignment_group.assignments = sorted(assignment_group.assignments, key=lambda a: a.assignment_day)
+    #
+    #     if assignment_group.strategy == "NONE":
+    #         assignment_group.bandwidth = None
+    #     else:
+    #         assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
 
     with open(start.course_file_name, 'w') as f:
         dict_result = config.to_json(["assignment"])

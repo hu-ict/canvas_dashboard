@@ -1,4 +1,3 @@
-from lib.build_totals import get_actual_progress
 from lib.lib_date import get_date_time_obj, date_to_day
 from model.Comment import Comment
 from model.Submission import Submission
@@ -82,7 +81,7 @@ def submission_builder(a_student, a_assignment, a_canvas_submission, a_assignmen
     else:
         l_submission = Submission(a_canvas_submission.id, a_assignment.group_id, a_assignment.id, a_student.id,
                                   a_assignment.name, a_assignment_date, None, graded, score,
-                                  a_assignment.points)
+                                  a_assignment.points, 0)
         for canvas_comment in canvas_comments:
             l_submission.comments.append(
                     Comment(canvas_comment['author_id'], canvas_comment['author_name'],
@@ -98,25 +97,50 @@ def submission_builder(a_student, a_assignment, a_canvas_submission, a_assignmen
         return l_submission
 
 
-def bepaal_voortgang(start, course, results, progress_day):
+def bepaal_voortgang(start, course, results, perspective):
     # bepaal de voortgang
-    for student in results.students:
-        for perspective in student.perspectives.values():
-            perspective.sum_score, perspective.last_score = get_sum_score(perspective.submissions, start.start_date)
-            if len(perspective.assignment_groups) == 1:
-                assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
-                if assignment_group is not None:
-                    if assignment_group.bandwidth is not None and perspective.last_score != 0:
-                        # bepaal voortgang per perspective
-                        #     print("perspective", perspective.name, assignment_group.name)
-                        perspective.progress = assignment_group.bandwidth.get_progress(perspective.last_score,
-                                                                                       perspective.sum_score)
-                    else:
-                        # Niet te bepalen
-                        perspective.progress = -1
-                else:
-                    print("Could not find assignment_group with id", perspective.assignment_groups[0])
-        # bepaal de totaal voortgang
-        progress = get_actual_progress(student.perspectives)
-        student.progress = progress
-        progress_day.progress[str(progress)] += 1
+    perspective.sum_score, perspective.last_score = get_sum_score(perspective.submissions, start.start_date)
+    if len(perspective.assignment_groups) == 1:
+        assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
+        if assignment_group is not None:
+            if assignment_group.bandwidth is not None and perspective.last_score != 0:
+                # bepaal voortgang per perspective
+                #     print("perspective", perspective.name, assignment_group.name)
+                perspective.progress = assignment_group.bandwidth.get_progress(assignment_group.strategy,
+                                                                               results.actual_day,
+                                                                               perspective.last_score,
+                                                                               perspective.sum_score)
+            else:
+                # Niet te bepalen
+                perspective.progress = -1
+        else:
+            print("Could not find assignment_group with id", perspective.assignment_groups[0])
+    elif len(perspective.assignment_groups) > 1:
+        print("Perspective has more then one assignment_groups attached", perspective.name, perspective.assignment_groups)
+    else:
+        print("Perspective has no assignment_groups attached", perspective.name, perspective.assignment_groups)
+
+
+def add_missed_assignments(start, course, results, perspective):
+    if len(perspective.assignment_groups) == 1:
+        l_assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
+        if l_assignment_group is None:
+            return
+        l_assignments = l_assignment_group.assignments[:]
+        # remove already submitted
+        for l_submission in perspective.submissions:
+            l_assignments = remove_assignment(l_assignments, l_submission)
+        # open assignments
+        for l_assignment in l_assignments:
+            if date_to_day(start.start_date, l_assignment.assignment_date) < results.actual_day:
+                l_submission = Submission(0, l_assignment.group_id, l_assignment.id, 0, l_assignment.name,
+                                          l_assignment.assignment_date, l_assignment.assignment_date,
+                                          True, 0, l_assignment.points, 0)
+                l_submission.comments.append(Comment(0, "Systeem", l_assignment.assignment_date, NO_SUBMISSION))
+                perspective.submissions.append(l_submission)
+    elif len(perspective.assignment_groups) > 1:
+        print("Perspective has more then one assignment_groups attached", perspective.name,
+              perspective.assignment_groups)
+    else:
+        print("Perspective has no assignment_groups attached", perspective.name, perspective.assignment_groups)
+

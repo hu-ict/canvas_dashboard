@@ -44,7 +44,7 @@ def plot_workload_history(a_fig, a_row, a_col, a_workload_history, a_start, a_co
         "over_week": "#e74a3b",
         "over_14": "#555555"
     }
-    for aspect in ["week", "over_week", "over_14"]:
+    for aspect in ["over_14", "over_week", "week"]:
         y = []
         y_hover = []
         for day in a_workload_history.days:
@@ -150,8 +150,8 @@ def plot_totals(a_instances, a_start, a_course, student_totals, a_progress_histo
     plot_workload_history(fig, 2, 2, a_workload_history, a_start, a_course, a_labels_colors)
     data = go.Histogram(x=np.array(student_totals['late']['count']))
     fig.add_trace(data, 2, 3)
-    # if start.progress_perspective:
-    #     plot_peilingen(fig, 2, 2, student_totals, start, course, a_labels_colors)
+    # if a_start.progress_perspective:
+    #     plot_peilingen(fig, 2, 3, student_totals, a_start, a_course, a_labels_colors)
 
     file_name = a_instances.get_plot_path() + "totals" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")

@@ -5,14 +5,10 @@ import sys
 from canvasapi import Canvas
 import json
 
-from lib.build_totals import get_actual_progress
-from lib.file import read_start, read_course, read_progress, read_results, read_course_instance
-from lib.lib_submission import submission_builder, NO_SUBMISSION, remove_assignment, bepaal_voortgang, count_graded
-from model.Comment import Comment
-from model.ProgressDay import ProgressDay
-from model.Result import *
-from lib.lib_date import get_actual_date, API_URL, get_assignment_date, date_to_day, get_date_time_obj_loc, \
-    get_date_time_obj_alt
+from lib.file import read_start, read_course, read_results, read_course_instance
+from lib.lib_plotly import attendance_to_level
+
+from lib.lib_date import get_actual_date, get_date_time_obj_alt
 from model.Submission import Submission
 
 def read_attendance(attendance_file_name):
@@ -28,7 +24,7 @@ def read_attendance(attendance_file_name):
             else:
                 score = 1
             l_date = get_date_time_obj_alt(item["Class Date"])
-            l_submission = Submission(0, 72500, 0, item["Student ID"], "Attendance", l_date, l_date, True, score, 2)
+            l_submission = Submission(0, 72500, 0, item["Student ID"], "Attendance", l_date, l_date, True, score, 2, 0)
             appendances.append(l_submission)
     return appendances
 
@@ -53,6 +49,16 @@ def main(instance_name):
             else:
                 not_found.add(attendance.student_id)
                 # print("Student niet gevonden", attendance.student_id)
+        for student in results.students:
+            for perspective in student.perspectives.values():
+                if perspective.name == "aanwezig":
+                    flow_total = 0
+                    flow_count = 0
+                    for submission in perspective.submissions:
+                        flow_total += submission.score
+                        flow_count += 1
+                        submission.flow = flow_total / flow_count * 100 / 2
+                    perspective.progress = attendance_to_level(submission.flow/100)
 
         print("Students not found", not_found)
         with open(start.results_file_name, 'w') as f:

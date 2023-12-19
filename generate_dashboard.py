@@ -138,9 +138,9 @@ def main(instance_name):
     build_bootstrap_general(instances, start, course, results, team_coaches, labels_colors)
     print("build_totals(start, course, results, student_totals, gilde, team_coaches)")
     build_totals(instances, start, course, results, student_totals)
-    with open("dump.json", 'w') as f:
-        # dict_result = json.dumps(student_totals, indent = 4)
-        json.dump(student_totals, f, indent=2)
+    # with open("dump.json", 'w') as f:
+    #     # dict_result = json.dumps(student_totals, indent = 4)
+    #     json.dump(student_totals, f, indent=2)
 
     if instances.is_instance_of("inno_courses"):
         # with open("dump.json", 'w') as f:

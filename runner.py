@@ -34,11 +34,16 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:
-        main("sep23_prop_a")
+        main("")
         # main("")
-    str1 = str((get_actual_date() - l_actual_date).seconds // 60) + ":" + str((get_actual_date() - l_actual_date).seconds % 60)
-    print("Time running:", str1, "(m:ss)")
-    print("Time running:", (get_actual_date() - l_actual_date).seconds, "seconds")
+
+    seconds = (get_actual_date() - l_actual_date).seconds
+    sec = seconds % 60
+    min = seconds // 60
+
+    print(f"Time running: {min}:{sec:02d} (m:ss)".format(min, sec))
+    print("Time running:", seconds, "seconds")
+    print("Date running:", get_actual_date())
 
 
 

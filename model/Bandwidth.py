@@ -40,10 +40,16 @@ class Bandwidth:
             line += str(point)
         return line
 
-    def get_progress(self, day, score):
-        if score == 0 or day == 0:
+    def get_progress(self, strategy, this_day, day, score):
+        if day == 0:
+            return -1
+        elif score == 0:
             return 0
+        else:
+            pass
         try:
+            if strategy == "FIXED":
+                day = this_day
             if score < self.points[int(day)].lower:
                 return 1
             elif score < self.points[int(day)].upper:

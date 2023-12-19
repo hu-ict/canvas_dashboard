@@ -44,6 +44,17 @@ def fraction_to_level(a_fraction):
         return 3
 
 
+def attendance_to_level(a_fraction):
+    if a_fraction < 0.10:
+        return 0
+    elif a_fraction < 0.75:
+        return 1
+    elif a_fraction < 0.95:
+        return 2
+    else:
+        return 3
+
+
 def fraction_to_bin_level(a_fraction):
     if a_fraction < 0.5:
         return 0
