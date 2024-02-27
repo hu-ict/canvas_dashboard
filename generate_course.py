@@ -65,8 +65,6 @@ def main(instance_name):
             student_count += 1
             # if student_count > 100:
             #     break
-
-
     # Ophalen Secties en Roles
     print("Ophalen student secties uit Canvas deze koppelen aan Role ")
     course_sections = canvas_course.get_sections(include=['students'])
@@ -102,8 +100,6 @@ def main(instance_name):
     config.student_count = len(config.students)
 
     # Perspectives toevoegen aan Students
-
-    print("Toevoegen Perspectives aan Student")
     for student in config.students:
         student.perspectives = {}
         for perspective in config.perspectives.values():
@@ -196,7 +192,10 @@ def main(instance_name):
                             section_id = overrides['course_section_id']
                         else:
                             section_id = 0
-                        assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'], canvas_assignment['assignment_group_id'], section_id, points_possible, assignment_date, unlock_date, date_to_day(start.start_date, assignment_date))
+                        assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'], canvas_assignment['assignment_group_id'],
+                                                section_id, canvas_assignment['grading_type'], canvas_assignment['grading_standard_id'],
+                                                points_possible, assignment_date,
+                                                unlock_date, date_to_day(start.start_date, assignment_date))
                         print("OVERRIDE", assignment)
                         assignment_group.append_assignment(assignment)
                 else:
@@ -204,6 +203,7 @@ def main(instance_name):
                     section_id = 0
                     assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'],
                                         canvas_assignment['assignment_group_id'], section_id,
+                                        canvas_assignment['grading_type'], canvas_assignment['grading_standard_id'],
                                         points_possible, assignment_date, unlock_date, date_to_day(start.start_date, assignment_date))
                     print(assignment)
                     assignment_group.append_assignment(assignment)
@@ -222,7 +222,9 @@ def main(instance_name):
         dict_result = config.to_json(["assignment"])
         json.dump(dict_result, f, indent=2)
 
+
 if __name__ == "__main__":
+    print("generate_course.py")
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:

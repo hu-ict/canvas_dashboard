@@ -1,12 +1,9 @@
 import sys
 from canvasapi import Canvas
 import json
-from lib.file import read_start, read_course, read_results, read_progress, read_course_instance
-from lib.lib_submission import submission_builder, NO_SUBMISSION, remove_assignment, get_sum_score, count_graded, \
-    bepaal_voortgang, add_missed_assignments
-from lib.lib_date import API_URL, date_to_day, get_assignment_date, get_actual_date
-from model.Comment import Comment
-from model.Submission import Submission
+from lib.file import read_start, read_course, read_results, read_course_instance
+from lib.lib_submission import submission_builder, count_graded, add_missed_assignments
+from lib.lib_date import API_URL, get_assignment_date, get_actual_date
 
 
 def main(instance_name):
@@ -22,8 +19,13 @@ def main(instance_name):
     print("Canvas username:", canvas.get_current_user())
     canvas_course = canvas.get_course(start.canvas_course_id)
     results = read_results(start.results_file_name)
-    results.actual_date = g_actual_date
-    results.actual_day = (results.actual_date - start.start_date).days
+
+    if g_actual_date > start.end_date:
+        results.actual_date = start.end_date
+        results.actual_day = (results.actual_date - start.start_date).days
+    else:
+        results.actual_date = g_actual_date
+        results.actual_day = (results.actual_date - start.start_date).days
     canvas_assignments = canvas_course.get_assignments(include=['overrides'])
     for canvas_assignment in canvas_assignments:
         if canvas_assignment.id == "273700":
@@ -82,6 +84,7 @@ def main(instance_name):
 
 
 if __name__ == "__main__":
+    print("generate_submissions.py")
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:

@@ -3,7 +3,7 @@ from lib.build_totals import get_overall_progress
 import json
 from lib.file import read_start, read_course, read_progress, read_results, read_course_instance
 from lib.lib_date import get_actual_date
-from lib.lib_submission import bepaal_voortgang
+from lib.lib_submission import get_progress
 from model.ProgressDay import ProgressDay
 
 
@@ -21,7 +21,7 @@ def main(instance_name):
 
     for student in results.students:
         for perspective in student.perspectives.values():
-            bepaal_voortgang(start, course, results, perspective)
+            get_progress(start, course, results, perspective)
     # bepaal de totaal voortgang
     for student in results.students:
         progress = get_overall_progress(student.perspectives)
@@ -41,6 +41,7 @@ def main(instance_name):
 
 
 if __name__ == "__main__":
+    print("generate_progress.py")
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:

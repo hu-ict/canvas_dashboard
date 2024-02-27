@@ -14,17 +14,24 @@ class Student:
         self.role = a_role
         self.perspectives = {}
 
-    # def get_perspective(self, name):
-    #     for perspective in self.perspectives:
-    #         if perspective.name == name:
-    #             return perspective
-    #     return None
+    def get_perspective(self, name):
+        for perspective in self.perspectives:
+            if perspective.name == name:
+                return perspective
+        return None
 
     def get_peilmoment(self, assigment_id):
         for peilmoment in self.perspectives["peil"].submissions:
             if peilmoment.assignment_id == assigment_id:
                 return peilmoment
         return None
+
+    def get_judgement(self, perspective_name):
+        for peilmoment in self.perspectives["peil"].submissions:
+            if perspective_name in peilmoment.assignment_name.lower() and "beoordeling" in peilmoment.assignment_name.lower():
+                return int(peilmoment.score)
+        return None
+
 
     def to_json(self, scope):
         dict_result = {

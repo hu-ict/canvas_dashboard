@@ -11,24 +11,25 @@ def main(instance_name):
         instances.current_instance = instance_name
     print("Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
-    config = read_course(start.course_file_name)
+    course = read_course(start.course_file_name)
 
-    for assignment_group in config.assignment_groups:
+    for assignment_group in course.assignment_groups:
         assignment_group.assignments = sorted(assignment_group.assignments, key=lambda a: a.assignment_day)
 
         if assignment_group.strategy == "NONE":
             assignment_group.bandwidth = None
         else:
-            assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
+            assignment_group.bandwidth = bandwidth_builder(assignment_group, course.days_in_semester)
 
     with open(start.course_file_name, 'w') as f:
-        dict_result = config.to_json(["assignment"])
+        dict_result = course.to_json(["assignment"])
         json.dump(dict_result, f, indent=2)
 
     print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":
+    print("generate_bandwidth.py")
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:

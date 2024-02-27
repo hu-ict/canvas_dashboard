@@ -28,7 +28,7 @@ project_path = instances.get_project_path()
 course_instance = instances.current_instance
 start_file_name = instances.get_start_file_name()
 
-start = Start(0, "Project Groups", "", "", get_date_time_obj("2023-09-03T00:00:00Z"), get_date_time_obj("2024-02-02T23:59:59Z"),
+start = Start(0, "Project Groups", "", "", "aanwezig", get_date_time_obj("2023-09-03T00:00:00Z"), get_date_time_obj("2024-02-02T23:59:59Z"),
               project_path +"templates//", "onedrive", "onedrive",
               project_path +"config_" + course_instance + ".json", project_path + "course_" + course_instance + ".json",
               project_path +"result_" + course_instance + ".json", project_path + "progress_" + course_instance + ".json", project_path + "workload_" + course_instance + ".json", project_path + "attendance_report.csv",

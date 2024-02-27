@@ -107,16 +107,25 @@ def plot_peilingen(a_fig, a_row, a_col, student_totals, a_start, a_course, a_lab
 def plot_totals(a_instances, a_start, a_course, student_totals, a_progress_history, a_workload_history, a_labels_colors):
     if a_instances.is_instance_of("inno_courses"):
         titles = ['Team', 'Gilde','Kennis',
-                  'Dagelijkse voortgang studenten', 'Dagelijkse workload docenten', 'Vertraging']
+                  'Dagelijkse voortgang <b>studenten</b>', 'Dagelijkse workload <b>docenten</b>', 'Vertraging',
+                  'Peilingen']
+        specs = [
+            [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
+            [{'type': 'bar'}, {'type': 'xy'}, {'type': 'bar'}],
+            [{'type': 'bar'}, None, None]
+        ]
+        fig = make_subplots(rows=3, cols=3, specs=specs, subplot_titles=titles)
+        fig.update_layout(height=1200, width=1200, showlegend=False)
     else:
         titles = ['Project', 'Finals', 'Toets',
                   'Dagelijkse voortgang <b>studenten</b>', 'Dagelijkse workload <b>docenten</b>', 'Vertraging']
 
-    specs = [
-        [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
-        [{'type': 'bar'}, {'type': 'xy'}, {'type': 'bar'}]
-    ]
-    fig = make_subplots(rows=2, cols=3, specs=specs, subplot_titles=titles)
+        specs = [
+            [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
+            [{'type': 'bar'}, {'type': 'xy'}, {'type': 'bar'}]
+        ]
+        fig = make_subplots(rows=2, cols=3, specs=specs, subplot_titles=titles)
+        fig.update_layout(height=800, width=1200, showlegend=False)
     fig.update_layout(
         title_text='Reviews',  # title of plot
         xaxis_title_text='Pending',  # xaxis perspective
@@ -129,7 +138,6 @@ def plot_totals(a_instances, a_start, a_course, student_totals, a_progress_histo
         bargroupgap=0.1,  # gap between bars of the same location coordinates
         barmode='stack'
     )
-    fig.update_layout(height=800, width=1200, showlegend=False)
 
     col = 0
     for l_perspective in a_course.perspectives:
@@ -150,8 +158,8 @@ def plot_totals(a_instances, a_start, a_course, student_totals, a_progress_histo
     plot_workload_history(fig, 2, 2, a_workload_history, a_start, a_course, a_labels_colors)
     data = go.Histogram(x=np.array(student_totals['late']['count']))
     fig.add_trace(data, 2, 3)
-    # if a_start.progress_perspective:
-    #     plot_peilingen(fig, 2, 3, student_totals, a_start, a_course, a_labels_colors)
+    if a_instances.is_instance_of("inno_courses"):
+        plot_peilingen(fig, 3, 1, student_totals, a_start, a_course, a_labels_colors)
 
     file_name = a_instances.get_plot_path() + "totals" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")

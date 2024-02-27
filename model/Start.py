@@ -4,9 +4,11 @@ from model.perspective.Perspective import Perspective
 
 
 class Start:
-    def __init__(self, canvas_course_id, projects_groep_name, slb_groep_name, progress_perspective, start_date,
+    def __init__(self, canvas_course_id, projects_groep_name, slb_groep_name,
+                 progress_perspective, attendance_perspective, start_date,
                  end_date, template_path, target_path, target_slb_path, config_file_name, course_file_name,
-                 results_file_name, progress_file_name, workload_file_name, attendance_report, api_key, a_grade_levels, a_progress_levels):
+                 results_file_name, progress_file_name, workload_file_name, attendance_report,
+                 api_key, a_grade_levels, a_progress_levels):
         self.canvas_course_id = canvas_course_id
         self.api_key = api_key
         self.perspectives = {}
@@ -16,6 +18,7 @@ class Start:
         self.projects_groep_name = projects_groep_name
         self.slb_groep_name = slb_groep_name
         self.progress_perspective = progress_perspective
+        self.attendance_perspective = attendance_perspective
         self.start_date = start_date
         self.end_date = end_date
         self.template_path = template_path
@@ -29,7 +32,7 @@ class Start:
         self.attendance_report = attendance_report
 
     def __str__(self):
-        return f'Start({self.canvas_course_id}, {self.projects_groep_name}, {self.slb_groep_name}, {self.progress_perspective},  {self.start_date}, {self.end_date}, {self.config_file_name}, {self.course_file_name}, {self.results_file_name}, {self.progress_file_name}, {self.api_key})\n'
+        return f'Start({self.canvas_course_id}, {self.projects_groep_name}, {self.slb_groep_name}, {self.progress_perspective}, {self.attendance_perspective},  {self.start_date}, {self.end_date}, {self.config_file_name}, {self.course_file_name}, {self.results_file_name}, {self.progress_file_name}, {self.api_key})\n'
 
     def to_json(self, scope):
         dict_result = {
@@ -42,6 +45,7 @@ class Start:
             'start_date': get_date_time_str(self.start_date),
             'end_date': get_date_time_str(self.end_date),
             'progress_perspective': self.progress_perspective,
+            'attendance_perspective': self.attendance_perspective,
             'template_path': self.template_path,
             'target_path': self.target_path,
             'target_slb_path': self.target_slb_path,
@@ -66,6 +70,7 @@ class Start:
                     data_dict['projects_groep_name'],
                     data_dict['slb_groep_name'],
                     data_dict['progress_perspective'],
+                    data_dict['attendance_perspective'],
                     get_date_time_obj(data_dict['start_date']),
                     get_date_time_obj(data_dict['end_date']),
                     data_dict['template_path'], data_dict['target_path'], data_dict['target_slb_path'],
@@ -79,4 +84,5 @@ class Start:
             for key in data_dict['perspectives'].keys():
                 new.perspectives[key] = Perspective.from_dict(data_dict['perspectives'][key])
         new.roles = list(map(lambda r: Role.from_dict(r), data_dict['roles']))
+        print(new)
         return new

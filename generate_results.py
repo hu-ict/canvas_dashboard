@@ -1,17 +1,11 @@
-# Haalt de studenten en de projecten op. Maakt een JSON waarin de url's naar de daily wordt opgeslagen.
 import sys
-
 from canvasapi import Canvas
 import json
-
-from lib.file import read_start, read_course, read_progress, read_course_instance
-from lib.lib_submission import submission_builder, NO_SUBMISSION, remove_assignment, bepaal_voortgang, count_graded, \
-    add_missed_assignments
-from model.Comment import Comment
-from model.ProgressDay import ProgressDay
+from lib.file import read_start, read_course, read_course_instance
+from lib.lib_submission import submission_builder, count_graded, add_missed_assignments
 from model.Result import *
-from lib.lib_date import get_actual_date, API_URL, get_assignment_date, date_to_day
-from model.Submission import Submission
+from lib.lib_date import get_actual_date, API_URL, get_assignment_date
+
 
 def main(instance_name):
     g_actual_date = get_actual_date()
@@ -26,8 +20,11 @@ def main(instance_name):
     user = canvas.get_current_user()
     print(user.name)
     canvas_course = canvas.get_course(start.canvas_course_id)
+    if g_actual_date > start.end_date:
+        results = Result(start.canvas_course_id, course.name, start.end_date, (start.end_date - start.start_date).days, 0, 0)
+    else:
+        results = Result(start.canvas_course_id, course.name, g_actual_date, (g_actual_date - start.start_date).days, 0, 0)
 
-    results = Result(start.canvas_course_id, course.name, g_actual_date, (g_actual_date - start.start_date).days, 0, 0)
     results.students = course.students
 
     # print("canvas_course.get_assignments(include=['overrides'])")
@@ -44,8 +41,7 @@ def main(instance_name):
                 print("Processing Assignment {0:6} - {1} {2}".format(assignment.id, assignment_group.name, assignment.name))
                 if assignment.unlock_date:
                     if assignment.unlock_date > results.actual_date:
-                        if assignment.id != 267540:
-                            continue
+                        continue
                 if canvas_assignment.overrides:
                     for override in canvas_assignment.overrides:
                         assignment_date = get_assignment_date(override.due_at, override.lock_at, start.end_date)
@@ -76,6 +72,7 @@ def main(instance_name):
         for perspective in student.perspectives.values():
             # Perspective aanvullen met missed Assignments
             add_missed_assignments(start, course, results, perspective)
+
     for student in results.students:
         for perspective in student.perspectives.values():
             perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_date)
@@ -89,6 +86,7 @@ def main(instance_name):
     print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 
 if __name__ == "__main__":
+    print("generate_results.py")
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:

@@ -88,6 +88,7 @@ def init_coaches_dict(a_course):
     return l_coaches
 
 
+
 def main(instance_name):
     g_actual_date = get_actual_date()
     instances = read_course_instance()
@@ -133,14 +134,15 @@ def main(instance_name):
                 student_totals['perspectives'][perspective] = {'count': [], 'pending': init_sections_count(course), 'late': init_sections_count(course), 'to_late': init_sections_count(course), 'list': init_sections_list(course)}
 
     team_coaches = init_coaches_dict(course)
+    print(team_coaches)
+    # with open("dump.json", 'w') as f:
+    #     dict_result = json.dumps(student_totals, indent = 4)
+    #     json.dump(student_totals, f, indent=2)
 
     print("build_bootstrap_general(start, course, results, team_coaches, labels_colors)")
     build_bootstrap_general(instances, start, course, results, team_coaches, labels_colors)
     print("build_totals(start, course, results, student_totals, gilde, team_coaches)")
     build_totals(instances, start, course, results, student_totals)
-    # with open("dump.json", 'w') as f:
-    #     # dict_result = json.dumps(student_totals, indent = 4)
-    #     json.dump(student_totals, f, indent=2)
 
     if instances.is_instance_of("inno_courses"):
         # with open("dump.json", 'w') as f:
@@ -158,12 +160,12 @@ def main(instance_name):
         dict_result = workload_history.to_json()
         json.dump(dict_result, f, indent=2)
 
-    print("plot_totals(instances, start, course, student_totals, read_progress(start.progress_file_name), workload_history, labels_colors)")
     plot_totals(instances, start, course, student_totals, read_progress(start.progress_file_name), workload_history, labels_colors)
     print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":
+    print("generate_dashboard.py")
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:

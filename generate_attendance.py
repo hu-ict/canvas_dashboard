@@ -1,13 +1,8 @@
 # Haalt de studenten en de projecten op. Maakt een JSON waarin de url's naar de daily wordt opgeslagen.
 import csv
 import sys
-
-from canvasapi import Canvas
 import json
-
-from lib.file import read_start, read_course, read_results, read_course_instance
-from lib.lib_plotly import attendance_to_level
-
+from lib.file import read_start, read_results, read_course_instance
 from lib.lib_date import get_actual_date, get_date_time_obj_alt
 from model.Submission import Submission
 
@@ -35,31 +30,19 @@ def main(instance_name):
         instances.current_instance = instance_name
     print("Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
-    if start.attendance_report is not None:
-        course = read_course(start.course_file_name)
+    if start.attendance_report is not None or start.attendance_perspective is not None:
         results = read_results(start.results_file_name)
         attendances = read_attendance(start.attendance_report)
         not_found = set()
         for student in results.students:
-            student.perspectives["aanwezig"].submissions = []
+            student.perspectives[start.attendance_perspective].submissions = []
         for attendance in attendances:
             student = results.find_student(int(attendance.student_id))
             if student:
-                student.perspectives["aanwezig"].submissions.append(attendance)
+                student.perspectives[start.attendance_perspective].submissions.append(attendance)
             else:
                 not_found.add(attendance.student_id)
                 # print("Student niet gevonden", attendance.student_id)
-        for student in results.students:
-            for perspective in student.perspectives.values():
-                if perspective.name == "aanwezig":
-                    flow_total = 0
-                    flow_count = 0
-                    for submission in perspective.submissions:
-                        flow_total += submission.score
-                        flow_count += 1
-                        submission.flow = flow_total / flow_count * 100 / 2
-                    perspective.progress = attendance_to_level(submission.flow/100)
-
         print("Students not found", not_found)
         with open(start.results_file_name, 'w') as f:
             dict_result = results.to_json([])
@@ -67,11 +50,7 @@ def main(instance_name):
     else:
         print("No attendance")
 
-    # with open(start.progress_file_name, 'w') as f:
-    #     dict_result = progress_history.to_json()
-    #     json.dump(dict_result, f, indent=2)
-
-    print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
+    print("Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

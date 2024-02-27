@@ -50,9 +50,11 @@ class Bandwidth:
         try:
             if strategy == "FIXED":
                 day = this_day
-            if score < self.points[int(day)].lower:
+            if type(day) == str:
+                day = int(day)
+            if score < self.points[day].lower:
                 return 1
-            elif score < self.points[int(day)].upper:
+            elif score < self.points[day].upper:
                 return 2
             else:
                 return 3
@@ -63,6 +65,32 @@ class Bandwidth:
                 return 2
             else:
                 return 3
+
+    def get_progress_range(self, day, score):
+        if day == 0:
+            return -1
+        elif score == 0:
+            return 0
+        else:
+            pass
+        try:
+            if type(day) == str:
+                day = int(day)
+            width = self.points[day].upper - self.points[day].lower
+            if score < self.points[day].lower:
+                return score / self.points[day].lower * 3/10
+            elif score < self.points[day].upper:
+                return 0.3 + (score - self.points[day].lower) / width * 4/10
+            else:
+                return 0.7 + (score - self.points[day].upper) / width * 3/10
+        except IndexError:
+            if score < self.points[len(self.points)-1].lower:
+                return 1
+            elif score < self.points[len(self.points)-1].upper:
+                return 2
+            else:
+                return 3
+
 
     @staticmethod
     def from_dict(data_dict):

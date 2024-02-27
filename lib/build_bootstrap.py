@@ -17,7 +17,7 @@ def build_bootstrap_project(a_instances, a_start, a_course, a_results, a_templat
                 coaches_string += ", "+teacher.name
         else:
             coaches = None
-
+        print(coaches_string)
         # print(group.name)
         for student in group.students:
             role = student.role

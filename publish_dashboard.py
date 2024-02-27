@@ -15,10 +15,10 @@ def main(instance_name):
     print("Copy files to OneDrive docenten")
     if instances.is_instance_of("inno_courses"):
         file_names = ["index.html", "late.html",
-                      "late_gilde_BIM.html", "late_gilde_CSC_C.html", "late_gilde_SD_B.html", "late_gilde_TI.html",
-                      "late_kennis_BIM.html", "late_kennis_CSC_C.html", "late_kennis_SD_B.html", "late_kennis_TI.html",
-                      "late_team_BW.html", "late_team_DD.html", "late_team_HVG.html", "late_team_KE.html",
-                      "late_team_RH.html"]
+                      "late_gilde_BIM.html", "late_gilde_CSC_S.html", "late_gilde_SD_B.html", "late_gilde_SD_F.html", "late_gilde_AI.html",
+                      "late_kennis_BIM.html", "late_kennis_CSC_S.html", "late_kennis_SD_B.html", "late_kennis_SD_F.html", "late_kennis_AI.html",
+                      "late_team_BW.html", "late_team_DD.html", "late_team_MVD.html", "late_team_KE.html",
+                      "late_team_RH.html", "late_team_TPM.html"]
     else:
         file_names = ["index.html"]
     for file_name in file_names:

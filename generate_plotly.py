@@ -25,7 +25,6 @@ def main(instance_name):
     if results.actual_day > course.days_in_semester:
         course.days_in_semester = results.actual_day + 1
 
-    bins_bar = [0, 0.9, 1.9, 2.9, 3.9, 4.9]
     # Define bar properties
 
     if instances.is_instance_of('prop_courses'):
@@ -146,23 +145,24 @@ def main(instance_name):
         fig.update_layout(height=1000, width=1200, showlegend=False)
         for perspective in a_student.perspectives.values():
             if perspective.name != a_start.progress_perspective:
+                #alleen gewone perspectieven
                 row = positions[perspective.name]['row']
                 col = positions[perspective.name]['col']
                 plot_perspective(row, col, fig, a_instances, a_start, a_course, perspective, a_peil_construction,
-                                 results.actual_day, get_date_time_loc(a_actual_date), labels_colors)
+                              results.actual_day, get_date_time_loc(a_actual_date), labels_colors)
 
         if a_instances.is_instance_of('inno_courses'):
             # Peil overall drie peilmomenten
-            if a_student.get_peilmoment(261031):
-                plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig, a_student.get_peilmoment(261031).score + 0.5, a_start, a_course, labels_colors)
+            if a_student.get_peilmoment(295180):
+                plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig, a_student.get_peilmoment(295180).score + 0.5, a_start, a_course, labels_colors)
             else:
                 plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig, 0.1, a_start, a_course, labels_colors)
-            if a_student.get_peilmoment(252847):
-                plot_gauge(positions['eind']['row'], positions['eind']['col'], fig, a_student.get_peilmoment(252847).score + 0.5, a_start, a_course, labels_colors)
+            if a_student.get_peilmoment(295184):
+                plot_gauge(positions['eind']['row'], positions['eind']['col'], fig, a_student.get_peilmoment(295184).score + 0.5, a_start, a_course, labels_colors)
             else:
                 plot_gauge(positions['eind']['row'], positions['eind']['col'], fig, 0.1, a_start, a_course, labels_colors)
-            if a_student.get_peilmoment(253129):
-                plot_gauge(positions['beoordeling']['row'], positions['beoordeling']['col'], fig, a_student.get_peilmoment(253129).score + 0.5, a_start, a_course, labels_colors)
+            if a_student.get_peilmoment(295108):
+                plot_gauge(positions['beoordeling']['row'], positions['beoordeling']['col'], fig, a_student.get_peilmoment(295108).score + 0.5, a_start, a_course, labels_colors)
             else:
                 plot_gauge(positions['beoordeling']['row'], positions['beoordeling']['col'], fig, 0.1, a_start, a_course, labels_colors)
 
@@ -170,7 +170,7 @@ def main(instance_name):
         asci_file_name = file_name.translate(translation_table)
         fig.write_html(asci_file_name + ".html", include_plotlyjs="cdn")
         fig.write_image(asci_file_name + ".jpeg")
-        if a_instances.current_instance == "sep23_inno":
+        if a_instances.current_instance == "feb24_inno":
             volg_nr = str(results.actual_day).zfill(3)
             file_name = "./time_lap/" + a_student.name + "_" + volg_nr + ".jpeg"
             asci_file_name = file_name.translate(translation_table)
@@ -193,6 +193,7 @@ def main(instance_name):
 
 
 if __name__ == "__main__":
+    print("generate_plotly.py")
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:

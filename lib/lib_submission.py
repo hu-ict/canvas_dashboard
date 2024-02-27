@@ -28,7 +28,7 @@ def count_graded(results):
                     l_graded += 1
                 else:
                     l_not_graded += 1
-    return l_graded+l_not_graded, l_not_graded
+    return l_graded + l_not_graded, l_not_graded
 
 
 def get_sum_score_print(a_submissions, a_start_date):
@@ -57,7 +57,8 @@ def remove_assignment(a_assignments, a_submission):
 
 def submission_builder(a_student, a_assignment, a_canvas_submission, a_assignment_date):
     if a_canvas_submission.grade:
-        # print("--", a_assignment.name, a_assignment.points, a_canvas_submission.grade, a_canvas_submission.score)
+        print("--", a_assignment.name, a_assignment.points, a_assignment.grading_type, a_assignment.grading_standard_id,
+              a_canvas_submission.grade, a_canvas_submission.score)
         if a_canvas_submission.grade.isnumeric():
             score = float(a_canvas_submission.grade)
         elif a_canvas_submission.grade == 'complete':
@@ -84,9 +85,9 @@ def submission_builder(a_student, a_assignment, a_canvas_submission, a_assignmen
                                   a_assignment.points, 0)
         for canvas_comment in canvas_comments:
             l_submission.comments.append(
-                    Comment(canvas_comment['author_id'], canvas_comment['author_name'],
-                    get_date_time_obj(canvas_comment['created_at']), canvas_comment['comment']))
-        #bepaal de date/time van het datapunt
+                Comment(canvas_comment['author_id'], canvas_comment['author_name'],
+                        get_date_time_obj(canvas_comment['created_at']), canvas_comment['comment']))
+        # bepaal de date/time van het datapunt
         if a_canvas_submission.submitted_at:
             l_submission.submitted_date = get_date_time_obj(a_canvas_submission.submitted_at)
         else:
@@ -97,31 +98,61 @@ def submission_builder(a_student, a_assignment, a_canvas_submission, a_assignmen
         return l_submission
 
 
-def bepaal_voortgang(start, course, results, perspective):
+def get_progress(start, course, results, perspective):
     # bepaal de voortgang
-    perspective.sum_score, perspective.last_score = get_sum_score(perspective.submissions, start.start_date)
     if len(perspective.assignment_groups) == 1:
         assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
         if assignment_group is not None:
-            if assignment_group.bandwidth is not None and perspective.last_score != 0:
-                # bepaal voortgang per perspective
-                #     print("perspective", perspective.name, assignment_group.name)
+            if perspective.name == start.attendance_perspective:
+                perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_date)
+                total_score = 0
+                total_count = 0
+                for submission in perspective.submissions:
+                    perspective.last_score = date_to_day(start.start_date, submission.submitted_date)
+                    total_score += submission.score
+                    total_count += 1
+                    submission.flow = total_score / total_count * 100 / 2
+                    # print(submission.flow)
+                    perspective.sum_score = total_score
                 perspective.progress = assignment_group.bandwidth.get_progress(assignment_group.strategy,
                                                                                results.actual_day,
                                                                                perspective.last_score,
-                                                                               perspective.sum_score)
+                                                                               total_score / total_count * 100 / 2)
+            elif assignment_group.bandwidth is not None:
+                perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_date)
+                total_score = 0
+                total_count = 0
+                for submission in perspective.submissions:
+                    if submission.graded:
+                        perspective.last_score = date_to_day(start.start_date, submission.submitted_date)
+                        total_score += submission.score
+                        total_count += 1
+                        submission.flow = assignment_group.bandwidth.get_progress_range(perspective.last_score, total_score)
+                        # print(submission.flow)
+                        perspective.sum_score = total_score
+                        print("Graded")
+                    else:
+                        print("Not graded")
+                if perspective.last_score != 0:
+                    perspective.progress = assignment_group.bandwidth.get_progress(assignment_group.strategy,
+                                                                                   results.actual_day,
+                                                                                   perspective.last_score,
+                                                                                   perspective.sum_score)
             else:
                 # Niet te bepalen
                 perspective.progress = -1
         else:
             print("Could not find assignment_group with id", perspective.assignment_groups[0])
     elif len(perspective.assignment_groups) > 1:
-        print("Perspective has more then one assignment_groups attached", perspective.name, perspective.assignment_groups)
+        print("Perspective has more then one assignment_groups attached", perspective.name,
+              perspective.assignment_groups)
     else:
         print("Perspective has no assignment_groups attached", perspective.name, perspective.assignment_groups)
 
 
 def add_missed_assignments(start, course, results, perspective):
+    if perspective.name == start.attendance_perspective:
+        return
     if len(perspective.assignment_groups) == 1:
         l_assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
         if l_assignment_group is None:
@@ -143,4 +174,3 @@ def add_missed_assignments(start, course, results, perspective):
               perspective.assignment_groups)
     else:
         print("Perspective has no assignment_groups attached", perspective.name, perspective.assignment_groups)
-

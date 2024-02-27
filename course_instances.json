@@ -1,10 +1,11 @@
 {
-  "current_instance": "nov23_prop_b",
+  "current_instance": "feb24_inno",
   "course_categories": {
     "inno_courses": {
       "category": "inno_courses",
       "course_instances": [
-        "sep23_inno"
+        "sep23_inno",
+        "feb24_inno"
       ]
     },
     "prop_courses": {
@@ -29,7 +30,7 @@
         "course_update_event": {
           "name": "course_update_event",
           "run": [
-            "update_course.py",
+            "update_course_assignments.py",
             "generate_bandwidth.py",
             "generate_results.py",
             "generate_progress.py",
@@ -59,6 +60,109 @@
             "generate_plotly.py",
             "publish_dashboard.py",
             "publish_student_files.py"
+          ]
+        }
+      }
+    },
+    "sep23_inno_test": {
+      "name": "sep23_inno_test",
+      "category": "inno_courses",
+      "listen": {
+        "course_create_event": {
+          "name": "course_create_event",
+          "run": [
+            "generate_course.py",
+            "generate_bandwidth.py",
+            "generate_results.py",
+            "generate_progress.py",
+            "generate_dashboard.py",
+            "generate_plotly.py"
+          ]
+        },
+        "course_update_event": {
+          "name": "course_update_event",
+          "run": [
+            "update_course_assignments.py",
+            "generate_bandwidth.py",
+            "generate_results.py",
+            "generate_progress.py",
+            "generate_dashboard.py",
+            "generate_plotly.py",
+            "publish_dashboard.py",
+            "publish_student_files.py"
+          ]
+        },
+        "results_create_event": {
+          "name": "results_create_event",
+          "run": [
+            "generate_results.py",
+            "generate_progress.py",
+            "generate_dashboard.py",
+            "generate_plotly.py",
+            "publish_dashboard.py",
+            "publish_student_files.py"
+          ]
+        },
+        "results_update_event": {
+          "name": "results_update_event",
+          "run": [
+            "generate_submissions.py",
+            "generate_progress.py",
+            "generate_dashboard.py",
+            "generate_plotly.py",
+            "publish_dashboard.py",
+            "publish_student_files.py"
+          ]
+        }
+      }
+    },
+    "feb24_inno": {
+      "name": "feb24_inno",
+      "category": "inno_courses",
+      "listen": {
+        "course_create_event": {
+          "name": "course_create_event",
+          "run": [
+            "generate_course.py",
+            "generate_bandwidth.py",
+            "generate_results.py",
+            "generate_progress.py",
+            "generate_dashboard.py",
+            "generate_plotly.py",
+            "publish_dashboard.py"
+          ]
+        },
+        "course_update_event": {
+          "name": "course_update_event",
+          "run": [
+            "update_course.py",
+            "generate_bandwidth.py",
+            "generate_results.py",
+            "generate_progress.py",
+            "generate_dashboard.py",
+            "generate_plotly.py",
+            "publish_dashboard.py",
+            "publish_student_files.py"
+          ]
+        },
+        "results_create_event": {
+          "name": "results_create_event",
+          "run": [
+            "generate_results.py",
+            "generate_progress.py",
+            "generate_dashboard.py",
+            "generate_plotly.py",
+            "publish_dashboard.py"
+          ]
+        },
+        "results_update_event": {
+          "name": "results_update_event",
+          "run": [
+            "generate_submissions.py",
+            "generate_progress.py",
+            "generate_dashboard.py",
+            "generate_plotly.py",
+            "publish_dashboard.py"
           ]
         }
       }
@@ -143,6 +247,10 @@
     }
   },
   "events": {
+    "course_create_event": {
+      "name": "course_create_event",
+      "trigger": "TIME"
+    },
     "course_update_event": {
       "name": "course_update_event",
       "trigger": "TIME"

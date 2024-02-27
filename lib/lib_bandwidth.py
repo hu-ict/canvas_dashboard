@@ -36,17 +36,14 @@ def find_between(serie, x):
 def bandwidth_builder(assignment_group, a_days_in_semester):
     points = []
     x_reparatie_periode = 14
-    y_start = assignment_group.total_points/35
+    y_start = assignment_group.upper_points/25
     x_time = calc_dev(a_days_in_semester, 0, 0, 1, 0)
     # bereken bandbreedte
     if assignment_group.strategy == "EXPONENTIAL":
-        band_lower = calc_dev(a_days_in_semester, x_reparatie_periode, 0.00161, 0.1, 0)
-        band_upper = calc_dev(a_days_in_semester, x_reparatie_periode, 0.00223, 0.1, y_start*4)
-    elif assignment_group.name == "CSC - Cloud":
-        b = (assignment_group.lower_points + y_start + 18) / (a_days_in_semester - x_reparatie_periode)
-        band_lower = calc_dev(a_days_in_semester, x_reparatie_periode, 0, b, - y_start - 18)
-        b = (assignment_group.upper_points - y_start) / (a_days_in_semester - x_reparatie_periode)
-        band_upper = calc_dev(a_days_in_semester, x_reparatie_periode, 0, b, y_start)
+        lower_a = 0.000053 * assignment_group.lower_points
+        upper_a = 0.000053 * (assignment_group.upper_points - y_start*3)
+        band_lower = calc_dev(a_days_in_semester, x_reparatie_periode, lower_a, 0.00, 0)
+        band_upper = calc_dev(a_days_in_semester, x_reparatie_periode, upper_a, 0.00, y_start*3)
     elif assignment_group.strategy == "CONSTANT":
         # propedeuse perspectieven
         c = assignment_group.lower_points
