@@ -1,10 +1,12 @@
 import json
-from lib.file import read_start, read_course, read_msteams_api
-from lib.teams_api_lib import get_team_channels, get_me_for_check, get_access_token, add_member_to_team, add_member_to_channel
+from lib.file import read_start, read_course, read_msteams_api, read_course_instance
+from lib.teams_api_lib import get_team_channels, get_me_for_check, get_access_token, add_member_to_team, \
+    add_member_to_channel, create_channel
+
 RedirectURI = "https://localhost"
 
-g_team_ids = ["b7cf78ae-8c6f-460d-a47a-d4bc2b8b2f18", "2d570ef0-7a51-489e-a2e3-681440e67d08", "82e424d3-5baa-4ba2-b2f8-85b3659a150e", "a282ec15-7540-4c3b-bb3c-26b2f38377c7"]
-start = read_start()
+instances = read_course_instance()
+start = read_start(instances.get_start_file_name())
 course = read_course(start.course_file_name)
 msteams_api = read_msteams_api("msteams_api.json")
 
@@ -17,18 +19,16 @@ if get_me_for_check(msteams_api.gen_token) is None:
         json.dump(dict_result, f, indent=2)
 
 print(len(course.students))
-for l_team_id in g_team_ids:
-    l_channels = get_team_channels(msteams_api.gen_token, l_team_id)
-    for l_channel in l_channels:
-        l_channel_id = l_channels[l_channel]
-        l_student = course.find_student_by_name(l_channel)
-        if l_student is not None:
-            print(l_team_id, l_student.email)
-            add_member_to_team(msteams_api.gen_token, l_team_id, l_student.email)
-            print(l_channel_id, l_student.email)
-            add_member_to_channel(msteams_api.gen_token, l_team_id, l_channel_id, l_student.email)
-        else:
-            print("Student not found:", l_channel)
+student_number = 1
+for student in course.students:
+    team_id = teams[student_number % len(teams)]
+    print(team_id, student.email)
+    channel_id = create_channel(msteams_api.gen_token, team_id, student.name)
+    if channel_id:
+        print(channel_id, student.email)
+        add_member_to_team(msteams_api.gen_token, team_id, student.email)
+        add_member_to_channel(msteams_api.gen_token, team_id, channel_id, student.email)
+    student_number += 1
 
 with open(start.course_file_name, 'w') as f:
     dict_result = course.to_json(["assignment"])

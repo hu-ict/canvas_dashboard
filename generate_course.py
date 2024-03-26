@@ -6,20 +6,22 @@ from lib.lib_bandwidth import bandwidth_builder
 from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
 from lib.file import read_start, read_config, read_course_instance
 from model.Assignment import Assignment
+from model.Criterion import Criterion
+from model.Rating import Rating
 from model.Student import Student
 from model.perspective.StudentPerspective import StudentPerspective
 
 
 def get_dates(start, input):
-    if input['due_at']:
-        assignment_date = get_date_time_obj(input['due_at'])
+    if input.due_at:
+        assignment_date = get_date_time_obj(input.due_at)
     else:
-        if input['lock_at']:
-            assignment_date = get_date_time_obj(input['lock_at'])
+        if input.lock_at:
+            assignment_date = get_date_time_obj(input.lock_at)
         else:
             assignment_date = start.end_date
-    if input['unlock_at']:
-        unlock_date = get_date_time_obj(input['unlock_at'])
+    if input.unlock_at:
+        unlock_date = get_date_time_obj(input.unlock_at)
     else:
         unlock_date = start.start_date
     return unlock_date, assignment_date
@@ -42,40 +44,36 @@ def main(instance_name):
     instances = read_course_instance()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    print("Instance:", instances.current_instance)
+    print("C01 -", "Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
     config = read_config(start.config_file_name)
-    print("Config", config)
+    print("C02 -", "Config", config)
     # Initialize a new Canvas object
     canvas = Canvas(API_URL, start.api_key)
     user = canvas.get_current_user()
-    print(user.name)
+    print("C03 -", user.name)
     canvas_course = canvas.get_course(start.canvas_course_id)
     link_teachers(config)
     # Ophalen Students
-    print("Ophalen studenten")
+    print("C04 -", "Ophalen studenten")
     users = canvas_course.get_users(enrollment_type=['student'])
     config.students = []
     student_count = 0
     for user in users:
         if hasattr(user, 'login_id'):
-            print("-", user.name, user.login_id)
+            print("C11 -", user.name, user.login_id)
             student = Student(user.id, 0, user.name, user.sortable_name, 'None', "", user.login_id, "", 0)
             config.students.append(student)
             student_count += 1
             # if student_count > 100:
             #     break
     # Ophalen Secties en Roles
-    print("Ophalen student secties uit Canvas deze koppelen aan Role ")
-    course_sections = canvas_course.get_sections(include=['students'])
-    for course_section in course_sections:
+    print("C05 -", "Ophalen student secties uit Canvas deze koppelen aan Role ")
+    canvas_sections = canvas_course.get_sections(include=['students'])
+    for course_section in canvas_sections:
         # use only relevant sections
         section = config.find_section(course_section.id)
         if section:
-            # print("course_section", section)
-            if start.projects_groep_name == "SECTIONS":
-                studentGroup = config.find_student_group(course_section.id)
-
             course_section_students = course_section.students
             if course_section_students:
                 for section_student in course_section_students:
@@ -83,17 +81,14 @@ def main(instance_name):
                     student = config.find_student(student_id)
                     if student:
                         student.role = section.role
-                        if start.projects_groep_name == "SECTIONS":
-                            if studentGroup:
-                                student.group_id = studentGroup.id
-                                if len(studentGroup.teachers) > 0:
-                                    student.coach_initials = config.find_teacher(studentGroup.teachers[0]).initials
-                                studentGroup.students.append(student)
+                    else:
+                        print("C21 -", "Student not found", section_student["id"])
+            else:
+                print("C22 -", "No students in section", course_section.name)
+        else:
+            print("C23 -", "Section not found", course_section.name)
 
-    for student_group in config.student_groups:
-        student_group.students = sorted(student_group.students, key=lambda s: s.sortable_name)
-
-    print("Opschonen studenten zonder Role")
+    print("C07 -", "Opschonen studenten zonder Role")
     for student in config.students:
         if len(student.role) == 0:
             config.students.remove(student)
@@ -114,101 +109,119 @@ def main(instance_name):
                 assignment_group_id = config.perspectives[perspective.name].assignment_groups[0]
                 student.perspectives[perspective.name].assignment_groups.append(assignment_group_id)
             else:
-                print("ERROR: geen assignment_group for perspective")
+                print("C31 - ERROR: geen assignment_group for perspective")
 
-    if start.projects_groep_name != "SECTIONS" or start.slb_groep_name is not None:
-        # Students en StudentGroups koppelen
-        canvas_group_categories = canvas_course.get_group_categories()
 
-        for canvas_group_category in canvas_group_categories:
-            print(canvas_group_category)
-            # ophalen projectgroepen
-            if start.projects_groep_name != "SECTIONS" and canvas_group_category.name == start.projects_groep_name:
-                canvas_groups = canvas_group_category.get_groups()
-                for canvas_group in canvas_groups:
-                    print(canvas_group)
-                    studentGroup = config.find_student_group(canvas_group.id)
-                    if studentGroup:
-                        canvas_users = canvas_group.get_users()
-                        for canvas_user in canvas_users:
-                            student = config.find_student(canvas_user.id)
-                            if student:
-                                student.group_id = studentGroup.id
-                                if len(studentGroup.teachers) > 0:
-                                    student.coach = studentGroup.teachers[0]
-                                studentGroup.students.append(student)
-            # ophalen slb-groepen
-            if start.slb_groep_name is not None and canvas_group_category.name == start.slb_groep_name:
-                canvas_groups = canvas_group_category.get_groups()
-                for canvas_group in canvas_groups:
-                    print(canvas_group)
-                    slb_group = config.find_slb_group(canvas_group.id)
-                    if slb_group:
-                        canvas_users = canvas_group.get_users()
-                        for canvas_user in canvas_users:
-                            student = config.find_student(canvas_user.id)
-                            if student:
-                                slb_group.students.append(student)
+    # Students en StudentGroups koppelen
+    canvas_group_categories = canvas_course.get_group_categories()
 
+    for canvas_group_category in canvas_group_categories:
+        print("C41 -", canvas_group_category)
+        # ophalen projectgroepen
+        if canvas_group_category.name == start.projects_groep_name:
+            canvas_groups = canvas_group_category.get_groups()
+            for canvas_group in canvas_groups:
+                print("C42 -", canvas_group)
+                studentGroup = config.find_student_group(canvas_group.id)
+                if studentGroup:
+                    canvas_users = canvas_group.get_users()
+                    for canvas_user in canvas_users:
+                        student = config.find_student(canvas_user.id)
+                        if student:
+                            student.group_id = studentGroup.id
+                            if len(studentGroup.teachers) > 0:
+                                student.coach = studentGroup.teachers[0]
+                            studentGroup.students.append(student)
+                        else:
+                            print("C43 - Student in Canvas project group not found", canvas_user.id)
+        # ophalen slb-groepen
+        if start.slb_groep_name is not None and canvas_group_category.name == start.slb_groep_name:
+            canvas_groups = canvas_group_category.get_groups()
+            for canvas_group in canvas_groups:
+                print("C45 -", canvas_group)
+                slb_group = config.find_slb_group(canvas_group.id)
+                if slb_group:
+                    canvas_users = canvas_group.get_users()
+                    for canvas_user in canvas_users:
+                        student = config.find_student(canvas_user.id)
+                        if student:
+                            slb_group.students.append(student)
+                        else:
+                            print("C46 - Student in Canvas slb group not found", canvas_user.id)
+
+        for role in config.roles:
+            students = config.find_students_by_role(role.short)
+            role.students = students
 
     # Ophalen Assignments bij de AssignmentsGroups
     canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignments', 'overrides', 'online_quiz'])
     for canvas_assignment_group in canvas_assignment_groups:
         # use only relevant assignment_groups
         assignment_group = config.find_assignment_group(canvas_assignment_group.id)
-        print("assignment_group", assignment_group)
+        print("C61 -", "assignment_group", canvas_assignment_group.id)
         if assignment_group:
-            print("assignment_group", canvas_assignment_group)
+            print("C62 -", "assignment_group", assignment_group.name, assignment_group.strategy)
             group_points_possible = 0
-            for canvas_assignment in canvas_assignment_group.assignments:
-                print(canvas_assignment['name'], canvas_assignment["grading_type"], canvas_assignment['points_possible'], canvas_assignment['grading_standard_id'])
-                if canvas_assignment["grading_type"] == "points":
-                    if canvas_assignment['points_possible']:
-                        group_points_possible += canvas_assignment['points_possible']
-                        points_possible = canvas_assignment['points_possible']
-                elif canvas_assignment["grading_type"] == "pass_fail":
+            for c_assignment in canvas_assignment_group.assignments:
+                canvas_assignment = canvas_course.get_assignment(c_assignment['id'], include=['overrides', 'online_quiz'])
+                print("C63 -", canvas_assignment.name, "grading_type:", canvas_assignment.grading_type, "grading_standard_id:", canvas_assignment.grading_standard_id)
+                if canvas_assignment.grading_type == "points":
+                    if canvas_assignment.points_possible:
+                        group_points_possible += canvas_assignment.points_possible
+                        points_possible = canvas_assignment.points_possible
+                    print("C64 - points, points_possible", points_possible)
+                elif canvas_assignment.grading_type == "pass_fail":
                     # voldaan/niet voldaan
                     # if canvas_assignment['submission_types']:
                     points_possible = 1
                     group_points_possible += points_possible
-                    # print('submission_types', canvas_assignment['submission_types'])
-                elif canvas_assignment["grading_type"] == 'letter_grade':
-                    points_possible = int(canvas_assignment['points_possible'])
+                    print("C65 - , points_possible 1")
+                elif canvas_assignment.grading_type == 'letter_grade':
+                    points_possible = int(canvas_assignment.points_possible)
                     group_points_possible += points_possible
+                    print("C66 - letter_grade, points_possible", points_possible)
                 else:
-                    print("AFGEWEZEN", canvas_assignment['name'], canvas_assignment["grading_type"],
-                          canvas_assignment['points_possible'])
+                    print("C67 -", "AFGEWEZEN grading_type", canvas_assignment.name, canvas_assignment.grading_type,
+                          canvas_assignment.points_possible)
                     continue
-                # print("-->", canvas_assignment['name'], canvas_assignment["grading_type"])
-
-                # l_submission_types = canvas_assignment['submission_types']
-                # print(l_submission_types)
-                # if 'external_tool' in l_submission_types:
-                #     print(canvas_assignment['quiz_id'])
-                if canvas_assignment['overrides']:
-                    for overrides in canvas_assignment['overrides']:
+                if canvas_assignment.overrides:
+                    for overrides in canvas_assignment.overrides:
                         unlock_date, assignment_date = get_dates(start, overrides)
-                        if 'course_section_id' in overrides.keys():
-                            section_id = overrides['course_section_id']
-                        else:
+                        try:
+                            section_id = overrides.course_section_id
+                        except:
                             section_id = 0
-                        assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'], canvas_assignment['assignment_group_id'],
-                                                section_id, canvas_assignment['grading_type'], canvas_assignment['grading_standard_id'],
-                                                points_possible, assignment_date,
-                                                unlock_date, date_to_day(start.start_date, assignment_date))
-                        print("OVERRIDE", assignment)
-                        assignment_group.append_assignment(assignment)
                 else:
                     unlock_date, assignment_date = get_dates(start, canvas_assignment)
                     section_id = 0
-                    assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'],
-                                        canvas_assignment['assignment_group_id'], section_id,
-                                        canvas_assignment['grading_type'], canvas_assignment['grading_standard_id'],
-                                        points_possible, assignment_date, unlock_date, date_to_day(start.start_date, assignment_date))
-                    print(assignment)
-                    assignment_group.append_assignment(assignment)
-            print(assignment_group.name, assignment_group.total_points, group_points_possible)
+
+                assignment = Assignment(canvas_assignment.id, canvas_assignment.name,
+                                        canvas_assignment.assignment_group_id, section_id,
+                                        canvas_assignment.grading_type, canvas_assignment.grading_standard_id,
+                                        points_possible, assignment_date,
+                                        unlock_date, date_to_day(start.start_date, assignment_date))
+                # print(assignment)
+                assignment_group.append_assignment(assignment)
+                try:
+                    print("C74 -", canvas_assignment)
+                    assignment_points = 0
+                    for canvas_criterium in canvas_assignment.rubric:
+                        criterion = Criterion(canvas_criterium['id'], canvas_criterium['points'], canvas_criterium['description'])
+                        assignment_points += criterion.points
+                        assignment.rubrics.append(criterion)
+                        for canvas_rating in canvas_criterium['ratings']:
+                            criterion.ratings.append(Rating(canvas_rating['id'], canvas_rating['points'], canvas_rating['description']))
+                    if assignment.points > 0 and assignment.points != assignment_points:
+                        print("C75 - FOUT", assignment.name, "assignment points", assignment.points, " points from rubrics", assignment_points)
+                    else:
+                        assignment.points = assignment_points
+                        print("C76 -", assignment.name, "points", assignment.points, "criteria aantal", len(assignment.rubrics))
+                except:
+                    print("C77 - Geen rubric", canvas_assignment.name)
+            print("C78 -", assignment_group.name, "total_points", assignment_group.total_points, "sum_points", group_points_possible)
             # assignment_group.total_points = group_points_possible
+        else:
+            print("C79 -", "assignment_group not found", canvas_assignment_group.id)
 
     # for assignment_group in config.assignment_groups:
     #     assignment_group.assignments = sorted(assignment_group.assignments, key=lambda a: a.assignment_day)
@@ -217,6 +230,13 @@ def main(instance_name):
     #         assignment_group.bandwidth = None
     #     else:
     #         assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
+
+    for student_group in config.student_groups:
+        student_group.students = sorted(student_group.students, key=lambda s: s.sortable_name)
+
+    for role in config.roles:
+        role.students = sorted(role.students, key=lambda s: s.sortable_name)
+
 
     with open(start.course_file_name, 'w') as f:
         dict_result = config.to_json(["assignment"])

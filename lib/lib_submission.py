@@ -1,5 +1,6 @@
 from lib.lib_date import get_date_time_obj, date_to_day
 from model.Comment import Comment
+from model.CriteriumScore import CriteriumScore
 from model.Submission import Submission
 
 NOT_GRADED = "Nog niet beoordeeld."
@@ -55,18 +56,30 @@ def remove_assignment(a_assignments, a_submission):
     return a_assignments
 
 
-def submission_builder(a_student, a_assignment, a_canvas_submission, a_assignment_date):
+def get_rubric_score(rubrics_assessment):
+    submission_score = 0.00
+    criterium_scores = []
+    if rubrics_assessment:
+        # try:
+            for canvas_criterium in rubrics_assessment:
+                # print(canvas_criterium)
+                id = canvas_criterium[0]
+                try:
+                    points = canvas_criterium[1]['points']
+                    submission_score += points
+                except:
+                    print(
+                        f"R41 Fout in criterium_score criterium {canvas_criterium} canvas_submission {rubrics_assessment}")
+                criterium_score = CriteriumScore(id, canvas_criterium[1]['rating_id'], points,
+                                                 canvas_criterium[1]['comments'])
+                criterium_scores.append(criterium_score)
+        # except:
+        #     print(f"R42 Fout in bepalen rubric_score {rubrics_assessment}")
+    return criterium_scores, round(submission_score, 2)
+
+
+def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_submission):
     if a_canvas_submission.grade:
-        print("--", a_assignment.name, a_assignment.points, a_assignment.grading_type, a_assignment.grading_standard_id,
-              a_canvas_submission.grade, a_canvas_submission.score)
-        if a_canvas_submission.grade.isnumeric():
-            score = float(a_canvas_submission.grade)
-        elif a_canvas_submission.grade == 'complete':
-            score = 1.0
-        elif a_canvas_submission.grade == 'incomplete':
-            score = 0.0
-        else:
-            score = round(a_canvas_submission.score, 2)
         graded = True
     else:
         # print("--", a_assignment.name, a_assignment.points, a_canvas_submission.grade, "score = 0")
@@ -75,26 +88,66 @@ def submission_builder(a_student, a_assignment, a_canvas_submission, a_assignmen
             graded = True
         else:
             graded = False
+
+    try:
+        rubrics_assessment = a_canvas_submission.rubric_assessment.items()
+        if len(rubrics_assessment) > 0:
+            graded = True
+    except:
+        rubrics_assessment = None
+
     # maak een submission en voeg de commentaren toe
     canvas_comments = a_canvas_submission.submission_comments
     if not a_canvas_submission.submitted_at and len(canvas_comments) == 0 and not graded:
         return None
     else:
+        # 'pass_fail', 'percent', 'letter_grade', 'gpa_scale', 'points'
+        rubrics_scores = []
+        if a_assignment.grading_type == "letter_grade":
+            rubrics_scores, score = get_rubric_score(rubrics_assessment)
+        elif a_assignment.grading_type == "pass_fail":
+            if a_canvas_submission.grade == 'complete':
+                score = 1.0
+            elif a_canvas_submission.grade == 'incomplete':
+                score = 0.0
+        elif a_assignment.grading_type == "points":
+            if graded:
+                submission_score = round(a_canvas_submission.score, 2)
+                rubrics_scores, rubric_score = get_rubric_score(rubrics_assessment)
+                if submission_score != rubric_score:
+                    if rubric_score > 0:
+                        score = rubric_score
+                    else:
+                        score = submission_score
+                else:
+                    score = submission_score
+            else:
+                score = 0.00
+        else:
+            print(f"Unknown grading_type {a_assignment.grading_type} for assignment {a_assignment.name}")
+
         l_submission = Submission(a_canvas_submission.id, a_assignment.group_id, a_assignment.id, a_student.id,
-                                  a_assignment.name, a_assignment_date, None, graded, score,
+                                  a_assignment.name, a_assignment.assignment_date, None, None, graded, a_canvas_submission.grader_id, score,
                                   a_assignment.points, 0)
+        l_submission.rubrics = rubrics_scores
         for canvas_comment in canvas_comments:
             l_submission.comments.append(
                 Comment(canvas_comment['author_id'], canvas_comment['author_name'],
                         get_date_time_obj(canvas_comment['created_at']), canvas_comment['comment']))
+        # for criterium in a_canvas_submission.rubric_assessment.items():
+        #     print("criterium:", criterium)
+            # print("Geen rubrics score voor", a_assignment.name)
         # bepaal de date/time van het datapunt
         if a_canvas_submission.submitted_at:
             l_submission.submitted_date = get_date_time_obj(a_canvas_submission.submitted_at)
+            l_submission.submitted_day = date_to_day(a_start.start_date, l_submission.submitted_date)
         else:
             if len(l_submission.comments) > 0:
                 l_submission.submitted_date = l_submission.comments[0].date
+                l_submission.submitted_day = date_to_day(a_start.start_date, l_submission.submitted_date)
             else:
-                l_submission.submitted_date = a_assignment_date
+                l_submission.submitted_date = a_assignment.assignment_date
+                l_submission.submitted_day = date_to_day(a_start.start_date, l_submission.submitted_date)
         return l_submission
 
 
@@ -119,25 +172,36 @@ def get_progress(start, course, results, perspective):
                                                                                perspective.last_score,
                                                                                total_score / total_count * 100 / 2)
             elif assignment_group.bandwidth is not None:
-                perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_date)
-                total_score = 0
-                total_count = 0
-                for submission in perspective.submissions:
-                    if submission.graded:
-                        perspective.last_score = date_to_day(start.start_date, submission.submitted_date)
-                        total_score += submission.score
-                        total_count += 1
-                        submission.flow = assignment_group.bandwidth.get_progress_range(perspective.last_score, total_score)
-                        # print(submission.flow)
-                        perspective.sum_score = total_score
-                        print("Graded")
+                if len(perspective.submissions) > 0:
+                    perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_date)
+                    total_score = 0
+                    total_count = 0
+                    for submission in perspective.submissions:
+                        if submission.graded:
+                            perspective.last_score = date_to_day(start.start_date, submission.submitted_date)
+                            total_score += submission.score
+                            total_count += 1
+                            submission.flow = assignment_group.bandwidth.get_progress_range(perspective.last_score, total_score)
+                            # print(submission.flow)
+                            perspective.sum_score = total_score
+                            # print("Graded")
+                        else:
+                            pass
+                            # print("Not graded")
+                    if total_count == 0:
+                        # Niet te bepalen
+                        perspective.progress = -1
+                    elif perspective.last_score != 0:
+                        perspective.progress = assignment_group.bandwidth.get_progress(assignment_group.strategy,
+                                                                                       results.actual_day,
+                                                                                       perspective.last_score,
+                                                                                       perspective.sum_score)
                     else:
-                        print("Not graded")
-                if perspective.last_score != 0:
-                    perspective.progress = assignment_group.bandwidth.get_progress(assignment_group.strategy,
-                                                                                   results.actual_day,
-                                                                                   perspective.last_score,
-                                                                                   perspective.sum_score)
+                        # Niet te bepalen
+                        perspective.progress = -1
+                else:
+                    # Niet te bepalen
+                    perspective.progress = -1
             else:
                 # Niet te bepalen
                 perspective.progress = -1
@@ -166,7 +230,8 @@ def add_missed_assignments(start, course, results, perspective):
             if date_to_day(start.start_date, l_assignment.assignment_date) < results.actual_day:
                 l_submission = Submission(0, l_assignment.group_id, l_assignment.id, 0, l_assignment.name,
                                           l_assignment.assignment_date, l_assignment.assignment_date,
-                                          True, 0, l_assignment.points, 0)
+                                          date_to_day(start.start_date, l_assignment.assignment_date),
+                                          True, 0, 0, l_assignment.points, 0)
                 l_submission.comments.append(Comment(0, "Systeem", l_assignment.assignment_date, NO_SUBMISSION))
                 perspective.submissions.append(l_submission)
     elif len(perspective.assignment_groups) > 1:

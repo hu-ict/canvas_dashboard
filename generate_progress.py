@@ -30,7 +30,7 @@ def main(instance_name):
     progress_history.append_day(progress_day)
 
     with open(start.results_file_name, 'w') as f:
-        dict_result = results.to_json([])
+        dict_result = results.to_json(['perspectives'])
         json.dump(dict_result, f, indent=2)
 
     with open(start.progress_file_name, 'w') as f:

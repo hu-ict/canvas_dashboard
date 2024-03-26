@@ -4,7 +4,7 @@ from lib.lib_date import get_actual_date
 from model.observer.observer_pattern import ConcreteEvent, ConcreteObserver
 
 
-def main(instance_name):
+def main(instance_name, a_event):
     print("Only instance:", instance_name)
     course_instances = read_course_instance()
     # print(course_instances.current_instance)
@@ -25,14 +25,14 @@ def main(instance_name):
                 events[trigger].attach(observer)
 
     # for event in course_instances.events.keys():
-    events["course_create_event"].notify()
+    events[a_event].notify()
 
 if __name__ == "__main__":
     l_actual_date = get_actual_date()
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:
-        main("feb24_inno")
+        main("feb24_inno", "results_create_event")
         # main("")
 
     seconds = (get_actual_date() - l_actual_date).seconds

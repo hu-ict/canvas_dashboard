@@ -66,7 +66,11 @@ def main(instance_name):
                         section_id = overrides['course_section_id']
                     else:
                         section_id = 0
-                    assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'], canvas_assignment['assignment_group_id'], section_id, points_possible, assignment_date, unlock_date, date_to_day(start.start_date, assignment_date))
+                    assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'],
+                                            canvas_assignment['assignment_group_id'], section_id,
+                                            canvas_assignment['grading_type'],
+                                            canvas_assignment['grading_standard_id'],
+                                            points_possible, assignment_date, unlock_date, date_to_day(start.start_date, assignment_date))
                     # assignment_group.append_assignment(assignment)
             else:
                 if canvas_assignment['points_possible']:
@@ -90,9 +94,16 @@ def main(instance_name):
                     unlock_date = get_date_time_obj(canvas_assignment['unlock_at'])
                 else:
                     unlock_date = start.start_date
-                assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'],
-                                        canvas_assignment['assignment_group_id'], 0,
-                                        points_possible, assignment_date, unlock_date, date_to_day(start.start_date, assignment_date))
+                assignment = Assignment(canvas_assignment['id'],
+                                        canvas_assignment['name'],
+                                        canvas_assignment['assignment_group_id'],
+                                        0,
+                                        canvas_assignment['grading_type'],
+                                        canvas_assignment['grading_standard_id'],
+                                        points_possible,
+                                        assignment_date,
+                                        unlock_date,
+                                        date_to_day(start.start_date, assignment_date))
                 # assignment_group.append_assignment(assignment)
         assignment_group.total_points = group_points_possible
         print("assignment_group_2", canvas_assignment_group, "points", group_points_possible, assignment_group.strategy)

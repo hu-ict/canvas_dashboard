@@ -104,21 +104,41 @@ def plot_peilingen(a_fig, a_row, a_col, student_totals, a_start, a_course, a_lab
     a_fig.update_yaxes(title_text="Aantal", range=[0, y_axis], row=a_row, col=a_col)
 
 
-def plot_totals(a_instances, a_start, a_course, student_totals, a_progress_history, a_workload_history, a_labels_colors):
-    if a_instances.is_instance_of("inno_courses"):
+def plot_voortgang(a_instances, a_start, a_course, student_totals, a_progress_history, a_labels_colors):
+    titles = ['Dagelijkse voortgang <b>studenten</b>', 'Peilingen']
+    specs = [
+        [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}]
+    ]
+    fig = make_subplots(rows=1, cols=3, specs=specs, subplot_titles=titles, vertical_spacing=0.08, horizontal_spacing=0.08)
+    fig.update_layout(height=400, width=1200, showlegend=False)
+    fig.update_layout(
+        title_text='Voortgang',  # title of plot
+        xaxis_title_text='Dag in semester',  # xaxis perspective
+        yaxis_title_text='Aantal',  # yaxis perspective
+        # yaxis9_title_text='Aantal',  # yaxis perspective
+        bargap=0.2,  # gap between bars of adjacent location coordinates
+        bargroupgap=0.1,  # gap between bars of the same location coordinates
+        barmode='stack'
+    )
+    plot_progress_history(fig, 1, 1, a_progress_history, a_start, a_course, a_labels_colors)
+    if a_instances.is_instance_of("inno_courses_new"):
+        plot_peilingen(fig, 1, 2, student_totals, a_start, a_course, a_labels_colors)
+    file_name = a_instances.get_plot_path() + "totals_voortgang" + ".html"
+    fig.write_html(file_name, include_plotlyjs="cdn")
+
+def plot_werkvoorraad(a_instances, a_start, a_course, student_totals, a_workload_history, a_labels_colors):
+    if a_instances.is_instance_of("inno_courses") or a_instances.is_instance_of("inno_courses_new"):
         titles = ['Team', 'Gilde','Kennis',
-                  'Dagelijkse voortgang <b>studenten</b>', 'Dagelijkse workload <b>docenten</b>', 'Vertraging',
-                  'Peilingen']
+                  'Dagelijkse werkvoorraad <b>docenten</b>', 'Vertraging']
         specs = [
             [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
-            [{'type': 'bar'}, {'type': 'xy'}, {'type': 'bar'}],
-            [{'type': 'bar'}, None, None]
+            [{'type': 'bar'}, {'type': 'xy'}, {'type': 'bar'}]
         ]
-        fig = make_subplots(rows=3, cols=3, specs=specs, subplot_titles=titles)
-        fig.update_layout(height=1200, width=1200, showlegend=False)
+        fig = make_subplots(rows=2, cols=3, specs=specs, subplot_titles=titles, vertical_spacing=0.14, horizontal_spacing=0.08)
+        fig.update_layout(height=700, width=1200, showlegend=False)
     else:
         titles = ['Project', 'Finals', 'Toets',
-                  'Dagelijkse voortgang <b>studenten</b>', 'Dagelijkse workload <b>docenten</b>', 'Vertraging']
+                  'Dagelijkse werkvoorraad <b>docenten</b>', 'Vertraging']
 
         specs = [
             [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
@@ -127,12 +147,14 @@ def plot_totals(a_instances, a_start, a_course, student_totals, a_progress_histo
         fig = make_subplots(rows=2, cols=3, specs=specs, subplot_titles=titles)
         fig.update_layout(height=800, width=1200, showlegend=False)
     fig.update_layout(
-        title_text='Reviews',  # title of plot
+        title_text='Werkvoorraad',  # title of plot
         xaxis_title_text='Pending',  # xaxis perspective
         xaxis2_title_text='Pending',  # xaxis perspective
         xaxis3_title_text='Pending',  # xaxis perspective
         yaxis_title_text='Aantal',  # yaxis perspective
         yaxis4_title_text='Aantal',  # yaxis perspective
+        xaxis4_title_text='dag in semester',  # xaxis perspective
+
         # yaxis9_title_text='Aantal',  # yaxis perspective
         bargap=0.2,  # gap between bars of adjacent location coordinates
         bargroupgap=0.1,  # gap between bars of the same location coordinates
@@ -153,14 +175,8 @@ def plot_totals(a_instances, a_start, a_course, student_totals, a_progress_histo
             x_team = list(student_totals['perspectives'][l_perspective]['to_late'].keys())
             y_counts = list(student_totals['perspectives'][l_perspective]['to_late'].values())
             fig.add_trace(go.Bar(x=x_team, y=y_counts, name="To Late", marker=dict(color="#555555")), 1, col)
-
-    plot_progress_history(fig, 2, 1, a_progress_history, a_start, a_course, a_labels_colors)
-    plot_workload_history(fig, 2, 2, a_workload_history, a_start, a_course, a_labels_colors)
+    plot_workload_history(fig, 2, 1, a_workload_history, a_start, a_course, a_labels_colors)
     data = go.Histogram(x=np.array(student_totals['late']['count']))
-    fig.add_trace(data, 2, 3)
-    if a_instances.is_instance_of("inno_courses"):
-        plot_peilingen(fig, 3, 1, student_totals, a_start, a_course, a_labels_colors)
-
-    file_name = a_instances.get_plot_path() + "totals" + ".html"
+    fig.add_trace(data, 2, 2)
+    file_name = a_instances.get_plot_path() + "totals_werkvoorraad" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")
-

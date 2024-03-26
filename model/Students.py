@@ -10,7 +10,7 @@ class Students:
 
     def to_json(self, scope):
         return {
-            'students': list(map(lambda s: s.to_json(["submission"]), self.students)),
+            'students': list(map(lambda s: s.to_json(scope), self.students)),
         }
 
     @staticmethod

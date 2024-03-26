@@ -30,7 +30,7 @@ class Result:
             'actual_day': self.actual_day,
             'submission_count': self.submission_count,
             'not_graded_count': self.not_graded_count,
-            'students': list(map(lambda g: g.to_json(['submissions']), self.students)),
+            'students': list(map(lambda g: g.to_json(scope), self.students)),
         }
 
     def find_student(self, student_id):

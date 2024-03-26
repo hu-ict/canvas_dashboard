@@ -82,7 +82,11 @@ class Bandwidth:
             elif score < self.points[day].upper:
                 return 0.3 + (score - self.points[day].lower) / width * 4/10
             else:
-                return 0.7 + (score - self.points[day].upper) / width * 3/10
+                flow = 0.7 + (score - self.points[day].upper) / width * 3/10
+                if flow > 0.97:
+                    # anders lopen de datapunten de schaal en het plaatje uit.
+                    return 0.97
+                return flow
         except IndexError:
             if score < self.points[len(self.points)-1].lower:
                 return 1

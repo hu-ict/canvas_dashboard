@@ -6,7 +6,7 @@ from lib.build_bootstrap import build_bootstrap_general
 from lib.build_late import build_late_list
 from lib.lib_date import get_actual_date
 from lib.lib_plotly import peil_labels
-from lib.plot_totals import plot_totals
+from lib.plot_totals import plot_werkvoorraad, plot_voortgang
 from lib.file import read_course, read_start, read_results, read_progress, read_labels_colors, read_course_instance, \
     read_workload
 from model.WorkloadDay import WorkloadDay
@@ -111,7 +111,7 @@ def main(instance_name):
             'kennis': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
         }
 
-    if instances.is_instance_of("inno_courses"):
+    if instances.is_instance_of("inno_courses") or instances.is_instance_of("inno_courses_new"):
         student_totals = {
             'student_count': 0,
             'perspectives': {
@@ -134,17 +134,17 @@ def main(instance_name):
                 student_totals['perspectives'][perspective] = {'count': [], 'pending': init_sections_count(course), 'late': init_sections_count(course), 'to_late': init_sections_count(course), 'list': init_sections_list(course)}
 
     team_coaches = init_coaches_dict(course)
-    print(team_coaches)
     # with open("dump.json", 'w') as f:
     #     dict_result = json.dumps(student_totals, indent = 4)
     #     json.dump(student_totals, f, indent=2)
 
-    print("build_bootstrap_general(start, course, results, team_coaches, labels_colors)")
-    build_bootstrap_general(instances, start, course, results, team_coaches, labels_colors)
+    print(student_totals)
     print("build_totals(start, course, results, student_totals, gilde, team_coaches)")
     build_totals(instances, start, course, results, student_totals)
+    print("build_bootstrap_general(start, course, results, team_coaches, labels_colors)")
+    build_bootstrap_general(instances, start, course, results, team_coaches, labels_colors, student_totals)
 
-    if instances.is_instance_of("inno_courses"):
+    if instances.is_instance_of("inno_courses") or instances.is_instance_of("inno_courses_new"):
         # with open("dump.json", 'w') as f:
         #     # dict_result = json.dumps(student_totals, indent = 4)
         #     json.dump(student_totals, f, indent=2)
@@ -160,7 +160,8 @@ def main(instance_name):
         dict_result = workload_history.to_json()
         json.dump(dict_result, f, indent=2)
 
-    plot_totals(instances, start, course, student_totals, read_progress(start.progress_file_name), workload_history, labels_colors)
+    plot_werkvoorraad(instances, start, course, student_totals, workload_history, labels_colors)
+    plot_voortgang(instances, start, course, student_totals, read_progress(start.progress_file_name), labels_colors)
     print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 
 

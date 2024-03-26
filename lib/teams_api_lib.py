@@ -4,6 +4,7 @@ from lib.translation_table import translation_table
 import subprocess
 import io
 
+teams = ["943b34c2-39cc-44d2-8251-88b75a835cfc", "d1f12dcf-875b-4d0c-bba6-262b3b57daea", "1b8c2e9b-8c84-4e1d-af12-1ea4d4aff274", "961f8415-0d43-4f85-94df-4c1e4ec48757"]
 
 def get_access_token(a_tenant_id, a_client_id):
     print("get_access_token", a_tenant_id, a_client_id)
@@ -124,7 +125,7 @@ def get_team_channels(a_token, a_team_id):
         return None
 
 
-def get_sites(a_token, a_course, a_query):
+def get_sites(a_token, a_query):
     url = f"https://graph.microsoft.com/v1.0/sites?search={a_query}"
     headers = {
         "Authorization": "Bearer " + a_token,
@@ -135,24 +136,19 @@ def get_sites(a_token, a_course, a_query):
         result = response.json()
         values = result['value']
         print("Aantal sites:",len(values))
+        names = {}
         for value in values:
-
             # "INNO - Sep23 - Studenten - Kyrill Westdorp"
             l_display_name = value['displayName']
-            print("DisplayName:", l_display_name)
+            # print("DisplayName:", l_display_name)
             l_display_name_split = l_display_name.split(' - ')
             if len(l_display_name_split) > 3:
                 l_student_name = l_display_name_split[3]
-                print("Student:", l_student_name)
-                l_student = a_course.find_student_by_name(l_student_name)
-                if l_student:
-                    print("Site:", value['id'])
-                    l_student.site = value['id']
-                else:
-                    print("Student from channel name not found", l_student_name)
+                names[l_student_name] =  value['id']
+                # print("Student:", l_student_name)
             else:
                 print("DisplayName doesn't contain a student name")
-        return a_course
+        return names
     else:
         print(f"Error getting token: {response.json()}")
         return None
@@ -198,7 +194,6 @@ def upload_file_html(a_token, a_plot_path, a_name, a_channel):
     if response.status_code != 200:
         print(f"Error {response.status_code} response: {response.json()}")
 
-
 def upload_file_jpeg(a_token, a_plot_path, a_name, a_channel):
     l_headers = {
         "Authorization": "Bearer "+a_token,
@@ -222,7 +217,7 @@ def create_channel(a_token, a_team_id, a_diplay_name):
     }
     l_data = {
         'displayName': a_diplay_name,
-        'description': 'In dit kanaal wordt je persoonlijke dashboard geplaatst.',
+        'description': 'In dit kanaal wordt je persoonlijke INNO-dashboard geplaatst.',
         "membershipType": "private"
     }
     l_json_object = json.dumps(l_data)
@@ -234,7 +229,10 @@ def create_channel(a_token, a_team_id, a_diplay_name):
         l_result = response.json()
         with open('teams-api/dump.json', 'w') as f:
             json.dump(l_result, f, indent=2)
+        return l_result["id"]
     print(f"Response: {response.json()}")
+    return None
+
 
 
 def add_member_to_team(a_token, a_team_id, a_member_login):
@@ -275,3 +273,36 @@ def add_member_to_channel(a_token, a_team_id, a_channel_id, a_member_login):
         print(f"Error response: {response.json()}")
         return None
 
+def get_channels(a_token, a_team_id):
+    url = f"https://graph.microsoft.com/v1.0/teams/{a_team_id}/channels"
+    print(url)
+    headers = {
+        "Authorization": "Bearer " + a_token,
+        "Content-Type": "application/json"
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        result = response.json()
+        values = result['value']
+        channels = []
+        for value in values:
+            channels.append(value['displayName'])
+        return channels
+    else:
+        print(f"Error getting token: {response.json()}")
+    return None
+
+def get_team(a_token, a_team_id):
+    url = f"https://graph.microsoft.com/v1.0/teams/{a_team_id}"
+    print(url)
+    headers = {
+        "Authorization": "Bearer " + a_token,
+        "Content-Type": "application/json"
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        result = response.json()
+        return {"displayName": result['displayName'], "members": result['summary']['membersCount']}
+    else:
+        print(f"Error getting token: {response.json()}")
+    return None

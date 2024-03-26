@@ -4,7 +4,13 @@
     "inno_courses": {
       "category": "inno_courses",
       "course_instances": [
-        "sep23_inno",
+        "sep23_inno"
+      ]
+    },
+    "inno_courses_new": {
+      "category": "inno_courses_new",
+      "course_instances": [
+        "sep23_inno_test",
         "feb24_inno"
       ]
     },
@@ -18,7 +24,6 @@
     "other_courses": {
       "category": "other_courses",
       "course_instances": [
-        "wilkens"
       ]
     }
   },
@@ -66,7 +71,7 @@
     },
     "sep23_inno_test": {
       "name": "sep23_inno_test",
-      "category": "inno_courses",
+      "category": "inno_courses_test",
       "listen": {
         "course_create_event": {
           "name": "course_create_event",
@@ -118,7 +123,7 @@
     },
     "feb24_inno": {
       "name": "feb24_inno",
-      "category": "inno_courses",
+      "category": "inno_courses_new",
       "listen": {
         "course_create_event": {
           "name": "course_create_event",
@@ -141,8 +146,7 @@
             "generate_progress.py",
             "generate_dashboard.py",
             "generate_plotly.py",
-            "publish_dashboard.py",
-            "publish_student_files.py"
+            "publish_dashboard.py"
           ]
         },
         "results_create_event": {

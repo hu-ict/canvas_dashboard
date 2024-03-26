@@ -1,5 +1,5 @@
 import textwrap
-from lib.lib_plotly import peil_labels, score_dict
+from lib.lib_plotly import peil_labels
 from lib.lib_submission import NO_DATA
 
 

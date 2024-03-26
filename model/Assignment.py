@@ -1,4 +1,5 @@
 from lib.lib_date import get_date_time_obj, get_date_time_str
+from model.Criterion import Criterion
 
 
 class Assignment:
@@ -13,6 +14,13 @@ class Assignment:
         self.assignment_date = assignment_date
         self.unlock_date = unlock_date
         self.assignment_day = assignment_day
+        self.rubrics = []
+
+    def get_criterion(self, criterion_id):
+        for criterion in self.rubrics:
+            if criterion.id == criterion_id:
+                return criterion
+        return None
 
     def to_json(self):
         return {
@@ -25,7 +33,8 @@ class Assignment:
             'unlock_date': get_date_time_str(self.unlock_date),
             'assignment_date': get_date_time_str(self.assignment_date),
             'assignment_day': self.assignment_day,
-            'points': int(self.points)
+            'points': int(self.points),
+            'rubrics': list(map(lambda r: r.to_json(), self.rubrics)),
         }
 
     def __str__(self):
@@ -34,13 +43,15 @@ class Assignment:
     @staticmethod
     def from_dict(data_dict):
         if 'unlock_date' in data_dict:
-            return Assignment(data_dict['id'], data_dict['name'], data_dict['group_id'], data_dict['section_id'],
+            new = Assignment(data_dict['id'], data_dict['name'], data_dict['group_id'], data_dict['section_id'],
                               data_dict['grading_type'], data_dict['grading_standard_id'], data_dict['points'],
                               get_date_time_obj(data_dict['assignment_date']),
                               get_date_time_obj(data_dict['unlock_date']),
                               data_dict['assignment_day'],)
         else:
-            return Assignment(data_dict['id'], data_dict['name'], data_dict['group_id'], data_dict['section_id'],
+            new = Assignment(data_dict['id'], data_dict['name'], data_dict['group_id'], data_dict['section_id'],
                               data_dict['grading_type'], data_dict['grading_standard_id'], data_dict['points'],
                               get_date_time_obj(data_dict['assignment_date']), get_date_time_obj("2023-02-06T00:00:00Z"),
                               get_date_time_obj(data_dict['assignment_day']))
+        new.rubrics = list(map(lambda c: Criterion.from_dict(c), data_dict['rubrics']))
+        return new

@@ -84,5 +84,4 @@ class Start:
             for key in data_dict['perspectives'].keys():
                 new.perspectives[key] = Perspective.from_dict(data_dict['perspectives'][key])
         new.roles = list(map(lambda r: Role.from_dict(r), data_dict['roles']))
-        print(new)
         return new

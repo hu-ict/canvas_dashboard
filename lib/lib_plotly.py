@@ -35,7 +35,7 @@ def get_color_bar(a_start, a_course, a_labels_colors):
     return colors_bar
 
 
-def fraction_to_level(a_fraction):
+def fraction_to_level3(a_fraction):
     if a_fraction < 0.001:
         return 0
     elif a_fraction < 0.55:
@@ -45,6 +45,19 @@ def fraction_to_level(a_fraction):
     else:
         return 3
 
+def fraction_to_level5(a_fraction):
+    if a_fraction < 0.10:
+        return 0
+    elif a_fraction < 0.40:
+        return 1
+    elif a_fraction < 0.60:
+        return 2
+    elif a_fraction < 0.75:
+        return 3
+    elif a_fraction < 0.85:
+        return 4
+    else:
+        return 5
 
 def attendance_to_level(a_fraction):
     if a_fraction < 0.10:

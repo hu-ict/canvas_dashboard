@@ -13,7 +13,7 @@ class StudentGroup:
             'id': self.id,
             'name': self.name,
             'teachers': self.teachers,
-            'students': list(map(lambda s: s.to_json([]), self.students)),
+            'students': list(map(lambda s: s.to_json(scope), self.students)),
         }
 
     def __str__(self):

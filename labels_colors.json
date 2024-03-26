@@ -6,7 +6,7 @@
     },
     "-1": {
       "label": "Leeg",
-      "color": "#cccccc"
+      "color": "#aaaaaa"
     },
     "0": {
       "label": "Niet zichtbaar",
@@ -25,6 +25,40 @@
       "color": "#2bad4e"
     }
   },
+  "samen5": {
+    "-2": {
+      "label": "Leeg",
+      "color": "cornflowerblue"
+    },
+    "-1": {
+      "label": "Leeg",
+      "color": "#aaaaaa"
+    },
+    "0": {
+      "label": "Niet zichtbaar",
+      "color": "#EDF8F0"
+    },
+    "1": {
+      "label": "Startend",
+      "color": "#c8ead1"
+    },
+    "2": {
+      "label": "Bijna Samenwerkend",
+      "color": "#a4dbb1"
+    },
+    "3": {
+      "label": "Samenwerkend",
+      "color": "#80cb90"
+    },
+    "4": {
+      "label": "Bijna Excellerend",
+      "color": "#5abb6f"
+    },
+    "5": {
+      "label": "Excellerend",
+      "color": "#2bad4e"
+    }
+  },
   "niveau": {
     "-2": {
       "label": "Leeg",
@@ -32,7 +66,7 @@
     },
     "-1": {
       "label": "Leeg",
-      "color": "#cccccc"
+      "color": "#aaaaaa"
     },
     "0": {
       "label": "Niet zichtbaar",
@@ -58,7 +92,7 @@
     },
     "-1": {
       "label": "Leeg",
-      "color": "#cccccc"
+      "color": "#aaaaaa"
     },
     "0": {
       "label": "Niet voldaan",
@@ -119,8 +153,8 @@
       "color": "cornflowerblue"
     },
     "-1": {
-      "label": "Niet bepaald",
-      "color": "#cccccc"
+      "label": "Beoordeling niet bepaald",
+      "color": "#aaaaaa"
     },
     "0": {
       "label": "Niet zichtbaar",

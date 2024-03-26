@@ -16,7 +16,6 @@ def main(instance_name):
     if len(instance_name) > 0:
         instances.current_instance = instance_name
     print("Instance:", instances.current_instance)
-    start = read_start(instances.get_start_file_name())
     for l_student in course.students:
         if l_student.site is not None:
             print('HTML, JPEG Student:', l_student.name)

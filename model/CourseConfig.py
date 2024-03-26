@@ -21,6 +21,7 @@ class CourseConfig:
         self.teachers = []
         self.assignment_groups = []
         self.student_groups = []
+        self.role_groups = []
         self.slb_groups = []
         self.students = []
 
@@ -55,7 +56,7 @@ class CourseConfig:
             'assignment_groups': list(map(lambda ag: ag.to_json(scope), self.assignment_groups)),
             'student_groups': list(map(lambda sg: sg.to_json([]), self.student_groups)),
             'slb_groups': list(map(lambda sg: sg.to_json([]), self.slb_groups)),
-            'students': list(map(lambda s: s.to_json('submissions'), self.students)),
+            'students': list(map(lambda s: s.to_json(['perspectives']), self.students)),
         }
         for key in self.perspectives:
             dict_result['perspectives'][key] = self.perspectives[key].to_json()
@@ -66,6 +67,13 @@ class CourseConfig:
             if group.id == group_id:
                 return group
         return None
+
+    def find_students_by_role(self, role_short):
+        students = []
+        for student in self.students:
+            if student.role == role_short:
+                students.append(student)
+        return students
 
     def find_slb_group(self, slb_group_id):
         for group in self.slb_groups:

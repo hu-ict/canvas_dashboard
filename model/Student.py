@@ -46,7 +46,7 @@ class Student:
             'progress': self.progress,
             'perspectives': {}
         }
-        if "submissions" in scope:
+        if "perspectives" in scope:
             for key in self.perspectives:
                 dict_result['perspectives'][key] = self.perspectives[key].to_json()
         return dict_result

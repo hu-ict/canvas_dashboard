@@ -1,3 +1,6 @@
+from lib.lib_date import date_to_day
+
+
 def student_total(a_perspective):
     cum_score = 0
     for l_submission in a_perspective:
@@ -6,36 +9,21 @@ def student_total(a_perspective):
 
 
 def get_overall_progress(a_perspectives):
-    boven = 7
-    for l_perspective in a_perspectives.values():
-        if l_perspective.name == 'team':
-            boven = 8
+    boven = 8
     l_progress = []
     for l_perspective in a_perspectives.values():
         if l_perspective.name == "peil":
-            pass
-        elif l_perspective.name == "project":
-            pass
-        elif l_perspective.progress == -1:
-            pass
+            continue
+        if l_perspective.progress == 0:
+            return 0
+    for l_perspective in a_perspectives.values():
+        if l_perspective.name == "peil":
+            continue
+        if l_perspective.progress == -1:
+            return -1
         else:
             l_progress.append(l_perspective.progress)
-    if len(l_progress) == 2:
-        if l_progress[0] >= 2 and l_progress[1] >= 2:
-            if sum(l_progress) >= 5:
-                # boven niveau
-                return 3
-            else:
-                # op niveau
-                return 2
-        else:
-            # minimaal onder niveau
-            if l_progress[0] <= 0 and l_progress[1] <= 0:
-                # geen activiteit in semester ná deadlines
-                return 0
-            else:
-                return 1
-    if len(l_progress) == 3:
+    if len(l_progress) == 3: # 3 perspectieven
         if l_progress[0] >= 2 and l_progress[1] >= 2 and l_progress[2] >= 2:
             if sum(l_progress) >= boven:
                 # boven niveau
@@ -45,8 +33,8 @@ def get_overall_progress(a_perspectives):
                 return 2
         else:
             # minimaal onder niveau
-            if l_progress[0] == 0 and l_progress[1] == 0 and l_progress[2] == 0:
-                # geen activiteit in semester ná deadlines
+            if l_progress[0] == 0 or l_progress[1] == 0 or l_progress[2] == 0:
+                # geen activiteit in één van de perspectieven
                 return 0
             else:
                 return 1
@@ -88,7 +76,7 @@ def count_student(a_start, a_course, a_student_totals, a_student):
             add_total(a_student_totals['perspectives'][l_perspective.name]['count'], int(student_total(l_perspective.submissions)))
 
 
-def check_for_late(a_instances, a_course, a_student_totals, a_student, a_submission, a_perspective, a_actual_date):
+def check_for_late(a_instances, a_course, a_student_totals, a_student, a_submission, a_perspective, a_actual_day):
     if not a_submission.graded:
         if a_student.coach != "None":
             if a_perspective == 'team':
@@ -96,19 +84,18 @@ def check_for_late(a_instances, a_course, a_student_totals, a_student, a_submiss
             else:
                 l_selector = a_student.role
         else:
-            if a_instances.is_instance_of("inno_courses"):
+            if a_instances.is_instance_of("inno_courses") or a_instances.is_instance_of("inno_courses_new"):
                 l_selector = a_student.role
             else:
                 l_selector = a_course.find_student_group(a_student.group_id).name
-        late_days = (a_actual_date - a_submission.submitted_date).days
+        late_days = a_actual_day - a_submission.submitted_day
         a_student_totals['perspectives'][a_perspective]['list'][l_selector].append(a_submission.to_json())
         if late_days <= 7:
             a_student_totals['perspectives'][a_perspective]['pending'][l_selector] += 1
+        elif 7 < late_days <= 14:
+            a_student_totals['perspectives'][a_perspective]['late'][l_selector] += 1
         else:
-            if 7 < late_days <= 14:
-                a_student_totals['perspectives'][a_perspective]['late'][l_selector] += 1
-            else:
-                a_student_totals['perspectives'][a_perspective]['to_late'][l_selector] += 1
+            a_student_totals['perspectives'][a_perspective]['to_late'][l_selector] += 1
         add_total(a_student_totals['late']['count'], late_days)
 
 
@@ -119,7 +106,9 @@ def build_totals(a_instances, a_start, a_course, a_results, a_student_totals):
             if l_perspective.name == "peil":
                 continue
             for l_submission in l_perspective.submissions:
-                check_for_late(a_instances, a_course, a_student_totals, l_student, l_submission, l_perspective.name, a_results.actual_date)
+
+                check_for_late(a_instances, a_course, a_student_totals, l_student, l_submission, l_perspective.name,
+                               date_to_day(a_start.start_date,  a_results.actual_date))
 
 
 

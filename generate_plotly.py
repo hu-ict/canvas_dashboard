@@ -17,7 +17,6 @@ def main(instance_name):
         instances.current_instance = instance_name
     print("Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
-    traces = []
     course = read_course(start.course_file_name)
     results = read_results(start.results_file_name)
     labels_colors = read_labels_colors("labels_colors.json")
@@ -56,7 +55,23 @@ def main(instance_name):
                 {'type': 'scatter', 'colspan': 3}, None, None
             ],
             [
-                {'type': 'scatter', "colspan": 3}, None, None, {'type': 'domain'}, {'type': 'domain'}, {'type': 'domain'}
+                {'type': 'scatter', "colspan": 3}, None, None, {'type': 'domain'}, {'type': 'domain'},
+                {'type': 'domain'}
+            ]
+        ]
+    elif instances.is_instance_of('inno_courses_new'):
+        titles = ["Team", "Gilde", "Kennis"]
+        positions = {'team': {'row': 1, 'col': 1},
+                     'gilde': {'row': 1, 'col': 2},
+                     'kennis': {'row': 2, 'col': 1}}
+        specs = [
+            [
+                {'type': 'scatter'},
+                {'type': 'scatter'}
+            ],
+            [
+                {'type': 'scatter'},
+                {'type': 'scatter'}
             ]
         ]
     else:
@@ -141,8 +156,8 @@ def main(instance_name):
 
 
     def plot_student(a_instances, a_start, a_course, a_student, a_actual_date, a_peil_construction):
-        fig = make_subplots(rows=2, cols=6, subplot_titles=titles, specs=specs, vertical_spacing=0.15, horizontal_spacing=0.08)
-        fig.update_layout(height=1000, width=1200, showlegend=False)
+        fig = make_subplots(rows=2, cols=2, subplot_titles=titles, specs=specs, vertical_spacing=0.10, horizontal_spacing=0.08)
+        fig.update_layout(height=900, width=1200, showlegend=False)
         for perspective in a_student.perspectives.values():
             if perspective.name != a_start.progress_perspective:
                 #alleen gewone perspectieven
