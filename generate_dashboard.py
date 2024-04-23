@@ -119,7 +119,7 @@ def main(instance_name):
                 'gilde': {'count': [], 'pending': init_roles_count(course), 'late': init_roles_count(course), 'to_late': init_roles_count(course), 'list': init_roles_list(course)},
                 'kennis': {'count': [], 'pending': init_roles_count(course), 'late': init_roles_count(course), 'to_late': init_roles_count(course), 'list': init_roles_list(course)}
             },
-            'peil': peilen,
+            'progress': peilen,
             'late': {'count': []}
         }
     else:

@@ -1,3 +1,4 @@
+from model.perspective.StudentProgress import StudentProgress
 from model.perspective.StudentPerspective import StudentPerspective
 
 
@@ -12,6 +13,7 @@ class Student:
         self.site = a_site
         self.progress = a_progress
         self.role = a_role
+        self.student_progress = {}
         self.perspectives = {}
 
     def get_perspective(self, name):
@@ -21,13 +23,23 @@ class Student:
         return None
 
     def get_peilmoment(self, assigment_id):
-        for peilmoment in self.perspectives["peil"].submissions:
+        for peilmoment in self.student_progress.submissions:
             if peilmoment.assignment_id == assigment_id:
                 return peilmoment
         return None
 
+    def get_peilmoment_by_query(self, a_query):
+        for submission in self.student_progress.submissions:
+            condition = 0
+            for selector in a_query:
+                if selector.lower() in submission.assignment_name.lower():
+                    condition += 1
+            if condition == len(a_query):
+                return submission
+        return None
+
     def get_judgement(self, perspective_name):
-        for peilmoment in self.perspectives["peil"].submissions:
+        for peilmoment in self.student_progress.submissions:
             if perspective_name in peilmoment.assignment_name.lower() and "beoordeling" in peilmoment.assignment_name.lower():
                 return int(peilmoment.score)
         return None
@@ -44,6 +56,7 @@ class Student:
             'site': self.site,
             'role': self.role,
             'progress': self.progress,
+            'student_progress': self.student_progress.to_json(),
             'perspectives': {}
         }
         if "perspectives" in scope:
@@ -62,6 +75,8 @@ class Student:
         # print("Student.from_dict", data_dict)
         new = Student(data_dict['id'], data_dict['group_id'], data_dict['name'], data_dict['sortable_name'], data_dict['coach'],
             data_dict['role'], data_dict['email'], data_dict[ 'site'], data_dict['progress'])
+        if data_dict['student_progress']:
+            new.student_progress = StudentProgress.from_dict(data_dict['student_progress'])
         if data_dict['perspectives']:
             for key in data_dict['perspectives'].keys():
                 new.perspectives[key] = StudentPerspective.from_dict(data_dict['perspectives'][key])

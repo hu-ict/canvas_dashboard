@@ -4,17 +4,21 @@ from model.CriteriumScore import CriteriumScore
 
 
 class Submission:
-    def __init__(self, submission_id, assignment_group_id, assignment_id, student_id, assignment_name, assignment_date, submitted_date, submitted_day, graded, grader_id, score, points, flow):
+    def __init__(self, submission_id, assignment_group_id, assignment_id, student_id,
+                 assignment_name, assignment_date, assignment_day,
+                 submitted_date, submitted_day, graded, grader_name, graded_date, score, points, flow):
         self.id = submission_id
         self.assignment_group_id = assignment_group_id
         self.assignment_name = assignment_name
         self.assignment_id = assignment_id
         self.student_id = student_id
         self.assignment_date = assignment_date
+        self.assignment_day = assignment_day
         self.submitted_date = submitted_date
         self.submitted_day = submitted_day
         self.graded = graded
-        self.grader_id = grader_id
+        self.grader_name = grader_name
+        self.graded_date = graded_date
         self.score = score
         self.points = points
         self.flow = flow
@@ -32,10 +36,12 @@ class Submission:
             'student_id': self.student_id,
             'assignment_name': self.assignment_name,
             'assignment_date': get_date_time_str(self.assignment_date),
+            'assignment_day': self.assignment_day,
             'submitted_date': get_date_time_str(self.submitted_date),
             'submitted_day': self.submitted_day,
             'graded': self.graded,
-            'grader_id': self.grader_id,
+            'grader_name': self.grader_name,
+            "graded_date": get_date_time_str(self.graded_date),
             'score': int(self.score*10)/10,
             'points': int(self.points),
             'flow': int(self.flow*100)/100,
@@ -44,12 +50,13 @@ class Submission:
         }
 
     def __str__(self):
-        return f'Submission({self.id}, {self.assignment_group_id}, {self.assignment_id}, {self.student_id}, {self.assignment_name}, {get_date_time_str(self.assignment_date)}, {get_date_time_str(self.submitted_date)}, {self.graded}, {self.grader_id}, {self.score}, {self.points}, Comments: {len(self.comments)})'
+        return f'Submission({self.id}, {self.assignment_group_id}, {self.assignment_id}, {self.student_id}, {self.assignment_name}, {get_date_time_str(self.assignment_date)}, {get_date_time_str(self.submitted_date)}, {self.graded}, {self.score}, {self.points}, Comments: {len(self.comments)})'
 
     @staticmethod
     def from_dict(data_dict):
         new_submission = Submission(data_dict['id'], data_dict['assignment_group_id'], data_dict['assignment_id'], data_dict['student_id'], data_dict['assignment_name'],
-                                    get_date_time_obj(data_dict['assignment_date']), get_date_time_obj(data_dict['submitted_date']), data_dict['submitted_day'], data_dict['graded'], data_dict['grader_id'], data_dict['score'], data_dict['points'], data_dict['flow'])
+                                    get_date_time_obj(data_dict['assignment_date']), data_dict['assignment_day'], get_date_time_obj(data_dict['submitted_date']), data_dict['submitted_day'],
+                                    data_dict['graded'], data_dict['grader_name'], get_date_time_obj(data_dict['graded_date']), data_dict['score'], data_dict['points'], data_dict['flow'])
         new_submission.comments = list(map(lambda c: Comment.from_dict(c), data_dict['comments']))
         new_submission.rubrics = list(map(lambda c: CriteriumScore.from_dict(c), data_dict['rubrics']))
         return new_submission

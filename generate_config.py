@@ -41,7 +41,8 @@ def main(instance_name):
     canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignments', 'overrides'])
     for canvas_assignment_group in canvas_assignment_groups:
         group_points_possible = 0
-        assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name, [], [], "LINEAIR", 0, 0, 0, None)
+        assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name, [], [], "LINEAIR",
+                                           0, 0, 0, 0, 0, None)
         for canvas_assignment in canvas_assignment_group.assignments:
             if canvas_assignment['overrides']:
                 for overrides in canvas_assignment['overrides']:

@@ -8,7 +8,7 @@ def build_student_button(start, course, student, templates, labels_colors):
     file_name = "./plotly/" + student.name.replace(" ", "%20") + ".html"
 #       file_name = plot_path + student.name + ".html"
     asci_file_name = file_name.translate(translation_table)
-    l_progress_color = labels_colors.level_series[start.progress_levels].levels[str(student.progress)].color
+    l_progress_color = labels_colors.level_series[start.progress.levels].levels[str(student.progress)].color
     return templates['student'].substitute(
             {'btn_color': color, 'progress_color': l_progress_color, 'student_name': student.name,
             'student_role': role.name, 'student_file': asci_file_name})

@@ -41,13 +41,17 @@ def main(instance_name):
                     student = results.find_student(canvas_submission.user_id)
                     if student is not None:
                         # voeg een submission toe aan een van de perspectieven
+                        # print(f"R31 Submission for {student.name}")
                         l_submission = submission_builder(start, course, student, assignment, canvas_submission)
                         if l_submission is not None:
                             l_perspective = course.find_perspective_by_assignment_group(l_submission.assignment_group_id)
                             if l_perspective:
-                                this_perspective = student.perspectives[l_perspective.name]
-                                if this_perspective:
-                                    this_perspective.submissions.append(l_submission)
+                                if l_perspective == "peil":
+                                    student.student_progress.submissions.append(l_submission)
+                                else:
+                                    this_perspective = student.perspectives[l_perspective.name]
+                                    if this_perspective:
+                                        this_perspective.submissions.append(l_submission)
                             else:
                                 print(f"R21 clould not find perspective for assignment_group {assignment_group.name}")
                         # else:

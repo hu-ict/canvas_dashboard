@@ -44,20 +44,18 @@ def main(instance_name):
     elif instances.is_instance_of('inno_courses'):
         titles = ["Team", "Kennis", "Gilde", "Halfweg", "Ná sprint 7", "Eindbeoordeling"]
         positions = {'team': {'row': 1, 'col': 1},
-                     'gilde': {'row': 2, 'col': 1},
+                     'gilde': {'row': 4, 'col': 1},
                      'kennis': {'row': 1, 'col': 4},
-                     'halfweg': {'row': 2, 'col': 4},
-                     'eind': {'row': 2, 'col': 5},
-                     'beoordeling': {'row': 2, 'col': 6}}
+                     'Sprint 4': {'row': 6, 'col': 4},
+                     'Sprint 7': {'row': 6, 'col': 5},
+                     'Beoordeling': {'row': 6, 'col': 6}}
         specs = [
-            [
-                {'type': 'scatter', 'colspan': 3}, None, None,
-                {'type': 'scatter', 'colspan': 3}, None, None
-            ],
-            [
-                {'type': 'scatter', "colspan": 3}, None, None, {'type': 'domain'}, {'type': 'domain'},
-                {'type': 'domain'}
-            ]
+            [{'type': 'scatter', 'colspan': 3, 'rowspan': 3}, None, None, {'type': 'scatter', 'colspan': 3, 'rowspan': 3}, None, None],
+            [None, None, None, None, None, None],
+            [None, None, None, None, None, None],
+            [{'type': 'scatter', "colspan": 3, 'rowspan': 3}, None, None, None, None, None],
+            [None, None, None, None, None, None],
+            [None, None, None, {'type': 'domain'}, {'type': 'domain'}, {'type': 'domain'}]
         ]
     elif instances.is_instance_of('inno_courses_new'):
         titles = ["Team", "Gilde", "Kennis"]
@@ -88,17 +86,13 @@ def main(instance_name):
             ]
         ]
 
-
     def peil_construct(a_start, a_course):
         l_peilingen = {}
-        if a_start.progress_perspective is None:
+        if a_start.progress is None:
             return l_peilingen
         for perspective in a_course.perspectives.values():
-            # peil is niet echt een perspective
-            if perspective.name != a_start.progress_perspective:
-                l_peilingen[perspective.name] = []
-        progress_perspective = a_course.perspectives[a_start.progress_perspective]
-        assignment_group = a_course.find_assignment_group(progress_perspective.assignment_groups[0])
+            l_peilingen[perspective.name] = []
+        assignment_group = a_course.find_assignment_group(a_course.progress.assignment_groups[0])
         for assignment in assignment_group.assignments:
             #zoek de juiste Assignment
             for peil_label in peil_labels:
@@ -108,7 +102,6 @@ def main(instance_name):
                         if perspective_name.lower() in assignment.name.lower():
                             l_peilingen[perspective_name].append({'assignment': assignment, 'submission': None})
         return l_peilingen
-
 
     def plot_gauge(a_row, a_col, a_fig, a_peil, a_start, a_course, a_labels_colors):
         # plotting de gauge
@@ -154,32 +147,27 @@ def main(instance_name):
                     'value': a_peil}})
         a_fig.add_trace(l_gauge, a_row, a_col)
 
-
     def plot_student(a_instances, a_start, a_course, a_student, a_actual_date, a_peil_construction):
-        fig = make_subplots(rows=2, cols=2, subplot_titles=titles, specs=specs, vertical_spacing=0.10, horizontal_spacing=0.08)
+        if instances.is_instance_of('inno_courses'):
+            fig = make_subplots(rows=6, cols=6, subplot_titles=titles, specs=specs, vertical_spacing=0.10, horizontal_spacing=0.08)
+        else:
+            fig = make_subplots(rows=2, cols=2, subplot_titles=titles, specs=specs, vertical_spacing=0.10, horizontal_spacing=0.08)
+
         fig.update_layout(height=900, width=1200, showlegend=False)
         for perspective in a_student.perspectives.values():
-            if perspective.name != a_start.progress_perspective:
-                #alleen gewone perspectieven
-                row = positions[perspective.name]['row']
-                col = positions[perspective.name]['col']
-                plot_perspective(row, col, fig, a_instances, a_start, a_course, perspective, a_peil_construction,
+            row = positions[perspective.name]['row']
+            col = positions[perspective.name]['col']
+            plot_perspective(row, col, fig, a_instances, a_start, a_course, perspective, a_peil_construction,
                               results.actual_day, get_date_time_loc(a_actual_date), labels_colors)
 
         if a_instances.is_instance_of('inno_courses'):
             # Peil overall drie peilmomenten
-            if a_student.get_peilmoment(295180):
-                plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig, a_student.get_peilmoment(295180).score + 0.5, a_start, a_course, labels_colors)
-            else:
-                plot_gauge(positions['halfweg']['row'], positions['halfweg']['col'], fig, 0.1, a_start, a_course, labels_colors)
-            if a_student.get_peilmoment(295184):
-                plot_gauge(positions['eind']['row'], positions['eind']['col'], fig, a_student.get_peilmoment(295184).score + 0.5, a_start, a_course, labels_colors)
-            else:
-                plot_gauge(positions['eind']['row'], positions['eind']['col'], fig, 0.1, a_start, a_course, labels_colors)
-            if a_student.get_peilmoment(295108):
-                plot_gauge(positions['beoordeling']['row'], positions['beoordeling']['col'], fig, a_student.get_peilmoment(295108).score + 0.5, a_start, a_course, labels_colors)
-            else:
-                plot_gauge(positions['beoordeling']['row'], positions['beoordeling']['col'], fig, 0.1, a_start, a_course, labels_colors)
+            for peil in peil_labels[1:]:
+                peil_moment = a_student.get_peilmoment_by_query([peil, "overall"])
+                if peil_moment:
+                    plot_gauge(positions[peil]['row'], positions[peil]['col'], fig, peil_moment.score + 0.5, a_start, a_course, labels_colors)
+                else:
+                    plot_gauge(positions[peil]['row'], positions[peil]['col'], fig, 0.1, a_start, a_course, labels_colors)
 
         file_name = a_instances.get_plot_path() + a_student.name
         asci_file_name = file_name.translate(translation_table)

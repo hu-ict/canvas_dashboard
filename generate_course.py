@@ -10,6 +10,7 @@ from model.Criterion import Criterion
 from model.Rating import Rating
 from model.Student import Student
 from model.perspective.StudentPerspective import StudentPerspective
+from model.perspective.StudentProgress import StudentProgress
 
 
 def get_dates(start, input):
@@ -25,6 +26,18 @@ def get_dates(start, input):
     else:
         unlock_date = start.start_date
     return unlock_date, assignment_date
+
+def get_rubrics(canvas_rubrics):
+    # print("C74 -", canvas_assignment)
+    rubrics_points = 0
+    rubrics = []
+    for canvas_criterium in canvas_rubrics:
+        criterion = Criterion(canvas_criterium['id'], canvas_criterium['points'], canvas_criterium['description'])
+        rubrics_points += criterion.points
+        rubrics.append(criterion)
+        for canvas_rating in canvas_criterium['ratings']:
+            criterion.ratings.append(Rating(canvas_rating['id'], canvas_rating['points'], canvas_rating['description']))
+    return rubrics, rubrics_points
 
 
 def link_teachers(config):
@@ -94,6 +107,9 @@ def main(instance_name):
             config.students.remove(student)
     config.student_count = len(config.students)
 
+    # StudentProgress toevoegen aan Students
+    for student in config.students:
+        student.student_progress = StudentProgress(config.progress.name, config.progress.assignment_groups)
     # Perspectives toevoegen aan Students
     for student in config.students:
         student.perspectives = {}
@@ -158,31 +174,26 @@ def main(instance_name):
     for canvas_assignment_group in canvas_assignment_groups:
         # use only relevant assignment_groups
         assignment_group = config.find_assignment_group(canvas_assignment_group.id)
-        print("C61 -", "assignment_group", canvas_assignment_group.id)
+        # print("C61 -", "assignment_group", canvas_assignment_group.id)
         if assignment_group:
-            print("C62 -", "assignment_group", assignment_group.name, assignment_group.strategy)
-            group_points_possible = 0
+            print(f"C62 - assignment_group {assignment_group.name} is used with strategy {assignment_group.strategy}")
+            total_group_points = 0
+            total_rubrics_points = 0
             for c_assignment in canvas_assignment_group.assignments:
                 canvas_assignment = canvas_course.get_assignment(c_assignment['id'], include=['overrides', 'online_quiz'])
-                print("C63 -", canvas_assignment.name, "grading_type:", canvas_assignment.grading_type, "grading_standard_id:", canvas_assignment.grading_standard_id)
+                # print("C63 -", canvas_assignment.name, "grading_type:", canvas_assignment.grading_type, "grading_standard_id:", canvas_assignment.grading_standard_id)
                 if canvas_assignment.grading_type == "points":
+                    points_possible = 0
                     if canvas_assignment.points_possible:
-                        group_points_possible += canvas_assignment.points_possible
+                        total_group_points += canvas_assignment.points_possible
                         points_possible = canvas_assignment.points_possible
-                    print("C64 - points, points_possible", points_possible)
-                elif canvas_assignment.grading_type == "pass_fail":
-                    # voldaan/niet voldaan
-                    # if canvas_assignment['submission_types']:
-                    points_possible = 1
-                    group_points_possible += points_possible
-                    print("C65 - , points_possible 1")
-                elif canvas_assignment.grading_type == 'letter_grade':
+                    # print(f"C64 - [{canvas_assignment.grading_type}] points_possible {points_possible}")
+                elif canvas_assignment.grading_type == "pass_fail" or canvas_assignment.grading_type == 'letter_grade':
                     points_possible = int(canvas_assignment.points_possible)
-                    group_points_possible += points_possible
-                    print("C66 - letter_grade, points_possible", points_possible)
+                    total_group_points += points_possible
+                    # print(f"C65 - {canvas_assignment.grading_type} points_possible {points_possible}")
                 else:
-                    print("C67 -", "AFGEWEZEN grading_type", canvas_assignment.name, canvas_assignment.grading_type,
-                          canvas_assignment.points_possible)
+                    print(f"C66 - {canvas_assignment.grading_type} AFGEWEZEN grading_type {canvas_assignment.name} points_possible {canvas_assignment.points_possible}")
                     continue
                 if canvas_assignment.overrides:
                     for overrides in canvas_assignment.overrides:
@@ -203,33 +214,25 @@ def main(instance_name):
                 # print(assignment)
                 assignment_group.append_assignment(assignment)
                 try:
-                    print("C74 -", canvas_assignment)
-                    assignment_points = 0
-                    for canvas_criterium in canvas_assignment.rubric:
-                        criterion = Criterion(canvas_criterium['id'], canvas_criterium['points'], canvas_criterium['description'])
-                        assignment_points += criterion.points
-                        assignment.rubrics.append(criterion)
-                        for canvas_rating in canvas_criterium['ratings']:
-                            criterion.ratings.append(Rating(canvas_rating['id'], canvas_rating['points'], canvas_rating['description']))
-                    if assignment.points > 0 and assignment.points != assignment_points:
-                        print("C75 - FOUT", assignment.name, "assignment points", assignment.points, " points from rubrics", assignment_points)
+                    assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
+                    if assignment.points > 0 and assignment.points != rubrics_points:
+                        print("C75 - ERROR", assignment.name, "assignment points", assignment.points,
+                              " points from rubrics",
+                              rubrics_points)
                     else:
-                        assignment.points = assignment_points
-                        print("C76 -", assignment.name, "points", assignment.points, "criteria aantal", len(assignment.rubrics))
+                        assignment.points = rubrics_points
+                        # print("C76 -", assignment.name, "points", assignment.points, "criteria aantal", len(assignment.rubrics))
+                    total_rubrics_points += rubrics_points
                 except:
-                    print("C77 - Geen rubric", canvas_assignment.name)
-            print("C78 -", assignment_group.name, "total_points", assignment_group.total_points, "sum_points", group_points_possible)
+                    print("C77 - No rubric", canvas_assignment.name)
+                if assignment_group.strategy == "POINTS":
+                    assignment_group.total_points = total_group_points
+                else:
+                    assignment_group.total_points = total_rubrics_points
+            print("C78 -", assignment_group.name, "total_group_points", total_group_points, "total_rubrics_points", total_rubrics_points)
             # assignment_group.total_points = group_points_possible
         else:
-            print("C79 -", "assignment_group not found", canvas_assignment_group.id)
-
-    # for assignment_group in config.assignment_groups:
-    #     assignment_group.assignments = sorted(assignment_group.assignments, key=lambda a: a.assignment_day)
-    #
-    #     if assignment_group.strategy == "NONE":
-    #         assignment_group.bandwidth = None
-    #     else:
-    #         assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
+            print(f"C79 - assignment_group {canvas_assignment_group.name} is not used")
 
     for student_group in config.student_groups:
         student_group.students = sorted(student_group.students, key=lambda s: s.sortable_name)

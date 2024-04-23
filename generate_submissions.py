@@ -26,50 +26,52 @@ def main(instance_name):
     else:
         results.actual_date = g_actual_date
         results.actual_day = (results.actual_date - start.start_date).days
-    canvas_assignments = canvas_course.get_assignments(include=['overrides'])
-    for canvas_assignment in canvas_assignments:
-        if canvas_assignment.id == "273700":
-            #Roll Call Attendance
-            break
-        assignment_group = course.find_assignment_group(canvas_assignment.assignment_group_id)
-        if assignment_group is not None:
-            # print("Processing G {0:8} - {1}".format(assignment_group.id, assignment_group.name))
-            assignment = course.find_assignment_by_group(assignment_group.id, canvas_assignment.id)
-            if assignment is not None:
-                print("Processing Assignment {0:6} - {1} {2}".format(assignment.id, assignment_group.name, assignment.name))
-                if (results.actual_date - assignment.assignment_date).days > 10:
-                    # deadline langer dan twee weken geleden. Alle feedback is gegeven.
-                    continue
-                if assignment.unlock_date:
-                    if assignment.unlock_date > results.actual_date:
-                        if assignment.id != 267540:
-                            # praktijktoets Foundation
-                            continue
-                if canvas_assignment.overrides:
-                    for override in canvas_assignment.overrides:
-                        assignment_date = get_assignment_date(override.due_at, override.lock_at, start.end_date)
-                else:
-                    assignment_date = get_assignment_date(canvas_assignment.due_at, canvas_assignment.lock_at, start.end_date)
 
-                canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments'])
+    for assignment_group in course.assignment_groups:
+        for assignment in assignment_group.assignments:
+            print("Processing Assignment {0:6} - {1} {2}".format(assignment.id, assignment_group.name, assignment.name))
+            if (results.actual_date - assignment.assignment_date).days > 14:
+                # deadline langer dan twee weken geleden. Alle feedback is gegeven.
+                continue
+            if assignment.unlock_date:
+                if assignment.unlock_date > results.actual_date:
+                    # volgende assignment
+                    continue
+            canvas_assignment = canvas_course.get_assignment(assignment.id, include=['submissions'])
+            if canvas_assignment is not None:
+                canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments', 'rubric_assessment'])
                 for canvas_submission in canvas_submissions:
                     student = results.find_student(canvas_submission.user_id)
                     if student is not None:
-                        # maak een Submission
-                        l_submission = submission_builder(student, assignment, canvas_submission, assignment_date)
+                        # voeg een submission toe aan een van de perspectieven
+                        # print(f"R31 Submission for {student.name}")
+                        l_submission = submission_builder(start, course, student, assignment, canvas_submission)
                         if l_submission is not None:
-                            # zoek bij welk perspectief de Submission hoort
                             l_perspective = course.find_perspective_by_assignment_group(l_submission.assignment_group_id)
-                            if l_perspective is not None:
-                                # haal het student perspectief op
-                                this_perspective = student.perspectives[l_perspective.name]
-                                if this_perspective is not None:
-                                    # voeg of vervang de Submission aan het perspectief toe
-                                    this_perspective.put_submission(l_submission)
+                            if l_perspective:
+                                if l_perspective == "peil":
+                                    student.student_progress.put_submission(l_submission)
+                                else:
+                                    this_perspective = student.perspectives[l_perspective.name]
+                                    if this_perspective:
+                                        this_perspective.put_submission(l_submission)
+
+                            else:
+                                print(f"R21 clould not find perspective for assignment_group {assignment_group.name}")
+                        # else:
+                        #     print(f"R22 Error creating submission {assignment.name} for student {student.name}")
+                    # else:
+                    #     print("R23 Could not find student", canvas_submission.user_id)
+            else:
+                print("R25 Could not find assignment", canvas_assignment.id, "within group", assignment_group.id)
+
+
+
 
     for student in results.students:
         for perspective in student.perspectives.values():
             add_missed_assignments(start, course, results, perspective)
+
     for student in results.students:
         for perspective in student.perspectives.values():
             perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_date)
@@ -77,7 +79,7 @@ def main(instance_name):
     results.submission_count, results.not_graded_count = count_graded(results)
 
     with open(start.results_file_name, 'w') as f:
-        dict_result = results.to_json([])
+        dict_result = results.to_json(["perspectives"])
         json.dump(dict_result, f, indent=2)
 
     print("Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")

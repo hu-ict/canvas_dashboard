@@ -16,6 +16,7 @@ class CourseConfig:
         self.student_count = student_count
         self.days_in_semester = days_in_semester
         self.sections = []
+        self.progress = {}
         self.perspectives = {}
         self.roles = []
         self.teachers = []
@@ -50,6 +51,7 @@ class CourseConfig:
             'student_count': self.student_count,
             'days_in_semester': self.days_in_semester,
             'sections': list(map(lambda s: s.to_json(), self.sections)),
+            'progress': self.progress.to_json(),
             'perspectives': {},
             'roles': list(map(lambda r: r.to_json([]), self.roles)),
             'teachers': list(map(lambda t: t.to_json(), self.teachers)),
@@ -58,6 +60,7 @@ class CourseConfig:
             'slb_groups': list(map(lambda sg: sg.to_json([]), self.slb_groups)),
             'students': list(map(lambda s: s.to_json(['perspectives']), self.students)),
         }
+
         for key in self.perspectives:
             dict_result['perspectives'][key] = self.perspectives[key].to_json()
         return dict_result
@@ -135,6 +138,8 @@ class CourseConfig:
         for perspective in self.perspectives.values():
             if group_id in perspective.assignment_groups:
                 return perspective
+        if group_id in self.progress.assignment_groups:
+            return "peil"
         return None
 
     def find_assignment_group_by_name(self, group_name):
@@ -201,6 +206,9 @@ class CourseConfig:
         new.student_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['student_groups']))
         new.slb_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['slb_groups']))
         new.students = list(map(lambda s: Student.from_dict(s), data_dict['students']))
+        if data_dict['progress']:
+            new.progress = Perspective.from_dict(data_dict['progress'])
+
         if 'perspectives' in data_dict.keys():
             for key in data_dict['perspectives'].keys():
                 new.perspectives[key] = Perspective.from_dict(data_dict['perspectives'][key])
