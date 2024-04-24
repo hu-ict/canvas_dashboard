@@ -116,8 +116,8 @@ Wanneer de structuur van studenten en assigments niet wijzigd kunnen bij een sna
 De volgende stap is de resultaten/submissions uitlezen uit Canvas. Er wordt intensief gebruik gemaakt van de Canvas-API. Hier zijn twee varianten beschikbaar:
 - `generate_results.py`
 - `generate_submissions.py`
-daarna moet nog de voortgang bepaald worden
-- `generate_progress.py
+Daarna moet nog de voortgang bepaald worden
+- `generate_progress.py`
 ## Stap 7
 Genereer de visuals:
 - `generate_plotly.py`
@@ -126,7 +126,7 @@ Genereer de visuals:
 Kopieer files naar de teams oneDrive voor docenten
 - `publish_dashboard.py`
 Kopieeer de JPG en HTML naar het private channel van de student
-- `publish_student_files`
+- `publish_student_files.py`
 
 Bovenstaande stappen kunnen ook gemodelleerd worden met de 
 - `runner.py`
