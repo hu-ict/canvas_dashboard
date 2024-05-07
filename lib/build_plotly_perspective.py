@@ -1,10 +1,11 @@
 import copy
 import textwrap
+import plotly.graph_objs as go
 
 from lib.lib_bandwidth import calc_dev
 from lib.lib_date import date_to_day, get_date_time_loc
 from lib.lib_plotly import get_marker_size, fraction_to_level3, hover_style, fraction_to_bin_level, get_score_bin_dict
-import plotly.graph_objs as go
+
 
 from lib.lib_submission import NOT_GRADED, NO_DATA
 
@@ -12,7 +13,7 @@ POINTS = True
 NO_POINTS = False
 
 
-def get_hover(a_peil_submissions, a_start, a_course, a_labels_colors):
+def get_hover_peiling(a_peil_submissions, a_start, a_course, a_labels_colors):
     score = 0.1
     hover = NO_DATA
     if a_peil_submissions:
@@ -22,12 +23,17 @@ def get_hover(a_peil_submissions, a_start, a_course, a_labels_colors):
             hover = "<b>"+a_peil_submissions.assignment_name + "</b> " + a_labels_colors.level_series[a_start.grade_levels].levels[str(int(score-1))].label
         else:
             hover = "<b>"+a_peil_submissions.assignment_name + "</b> " + a_labels_colors.level_series[a_start.progress.levels].levels[str(int(score-1))].label
+
+
+        hover += "<br>Bepaald door " + str(a_peil_submissions.grader_name)
+
         for comment in a_peil_submissions.comments:
             value = comment.author_name + " - " + comment.comment
             wrapper = textwrap.TextWrapper(width=75)
             word_list = wrapper.wrap(text=value)
             for line in word_list:
                 hover += "<br>" + line
+        hover += get_hover_rubrics_comments(a_course, a_peil_submissions, a_labels_colors)
     return hover
 
 
@@ -55,7 +61,7 @@ def get_hover_comments(submission):
     return l_hover
 
 
-def get_hover_rubrics(course, submission):
+def get_hover_rubrics_comments(course, submission, labels_colors):
     if len(submission.rubrics) == 0:
         return ""
     l_hover = "<br><b>Criteria:</b>"
@@ -66,7 +72,7 @@ def get_hover_rubrics(course, submission):
         else:
             # if criterion_score.score:
                 if criterion_score.score == 0:
-                    l_hover += "<br>- " + criterion.description + " <b>Niet zichtbaar</b>"
+                    l_hover += "<br>- " + criterion.description + " <b>"+labels_colors.level_series["niveau"].levels[str(int(criterion_score.score))].label+"</b>"
                 else:
                     l_hover += "<br>- " + criterion.description + " <b>"+str(criterion_score.score)+"</b>"
             # else:
@@ -103,7 +109,6 @@ def get_hover_assignment(points, data_point):
             return "<b>" + submission.assignment_name + "</b>, deadline " + get_date_time_loc(submission.assignment_date)
 
 
-
 def find_submissions(a_student, a_peil_construction):
     if a_peil_construction is None:
         return
@@ -123,12 +128,14 @@ def plot_progress(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_label
         if pleiling['submission']:
             #Heeft beoordeling
             series['size'].append(get_marker_size(True)+2)
-            series['hover'].append(get_hover(pleiling['submission'], a_start, a_course, a_labels_colors))
+            series['hover'].append(get_hover_peiling(pleiling['submission'], a_start, a_course, a_labels_colors))
             series['x'].append(date_to_day(a_start.start_date, pleiling['submission'].submitted_date))
             if "beoordeling" in pleiling['assignment'].name.lower():
                 series['color'].append(a_labels_colors.level_series[a_start.grade_levels].levels[str(int(pleiling['submission'].score))].color)
             else:
                 series['color'].append(a_labels_colors.level_series[a_start.progress.levels].levels[str(int(pleiling['submission'].score))].color)
+
+
         else:
             #Heeft nog geen beoordeling
             series['size'].append(get_marker_size(False)+2)
@@ -342,7 +349,7 @@ def plot_submissions_points(a_row, a_col, a_fig, a_instances, a_start, a_course,
             y_colors.append(a_labels_colors.level_series[a_course.perspectives[a_perspective.name].levels].levels["-2"].color)
             l_hover += "<br><b>" + NOT_GRADED + "</b> ingeleverd " + get_date_time_loc(submission.submitted_date)
         l_hover += get_hover_comments(submission)
-        l_hover += get_hover_rubrics(a_course, submission)
+        l_hover += get_hover_rubrics_comments(a_course, submission, a_labels_colors)
         y_submission.append(cum_score)
         y_hover.append(l_hover)
 
@@ -432,7 +439,7 @@ def plot_submissions_no_points(a_row, a_col, a_fig, a_start, a_course, a_perspec
             y_colors.append(a_labels_colors.level_series[a_course.perspectives[a_perspective.name].levels].levels[str(level)].color)
             l_hover += get_hover_grade(NO_POINTS, a_labels_colors, a_course, a_perspective, level, submission)
             l_hover += get_hover_comments(submission)
-            l_hover += get_hover_rubrics(a_course, submission)
+            l_hover += get_hover_rubrics_comments(a_course, submission, a_labels_colors)
             y_submission.append(submission.flow)
             y_hover.append(l_hover)
     a_fig.add_trace(

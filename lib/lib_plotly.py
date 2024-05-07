@@ -15,7 +15,6 @@ score_binair_dict = {
     1: {'niveau': 'Voldaan', 'color': '#85e043'}
 }
 
-
 def get_score_bin_dict(course_instances):
     if course_instances.is_instance_of('prop_courses'):
         return {"project": score_binair_dict, "final": score_binair_dict, "toets": score_binair_dict}
