@@ -28,8 +28,8 @@
     }
   },
   "instances": {
-    "sep23_inno": {
-      "name": "sep23_inno",
+    "inno_courses": {
+      "name": "inno_courses",
       "category": "inno_courses",
       "listen": {
         "course_update_event": {

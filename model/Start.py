@@ -5,13 +5,14 @@ from model.perspective.Perspective import Perspective
 
 class Start:
     def __init__(self, canvas_course_id, projects_groep_name, slb_groep_name,
-                 progress, attendance_perspective, start_date,
-                 end_date, template_path, target_path, target_slb_path, config_file_name, course_file_name,
+                 attendance_perspective,
+                 start_date, end_date,
+                 template_path, target_path, target_slb_path, config_file_name, course_file_name,
                  results_file_name, progress_file_name, workload_file_name, attendance_report,
-                 api_key, a_grade_levels):
+                 api_key, a_grade_levels, a_progress):
         self.canvas_course_id = canvas_course_id
         self.api_key = api_key
-        self.progress = {}
+        self.progress = a_progress
         self.perspectives = {}
         self.roles = []
         self.grade_levels = a_grade_levels
@@ -67,7 +68,6 @@ class Start:
         new = Start(data_dict['canvas_course_id'],
                     data_dict['projects_groep_name'],
                     data_dict['slb_groep_name'],
-                    data_dict['progress'],
                     data_dict['attendance_perspective'],
                     get_date_time_obj(data_dict['start_date']),
                     get_date_time_obj(data_dict['end_date']),
@@ -76,9 +76,8 @@ class Start:
                     data_dict['results_file_name'], data_dict['progress_file_name'], data_dict['workload_file_name'],
                     data_dict['attendance_report'],
                     data_dict['api_key'],
-                    data_dict['grade_levels'])
-        if data_dict['progress']:
-            new.progress = Perspective.from_dict(data_dict['progress'])
+                    data_dict['grade_levels'],
+                    Perspective.from_dict(data_dict['progress']))
         if data_dict['perspectives']:
             for key in data_dict['perspectives'].keys():
                 new.perspectives[key] = Perspective.from_dict(data_dict['perspectives'][key])

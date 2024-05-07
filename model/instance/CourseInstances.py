@@ -18,6 +18,10 @@ class CourseInstances:
         }
         for key in self.course_categories:
             dict_result['course_categories'][key] = self.course_categories[key].to_json()
+        for key in self.instances:
+            dict_result['instances'][key] = self.instances[key].to_json()
+        for key in self.events:
+            dict_result['events'][key] = self.events[key].to_json()
         return dict_result
 
     def __str__(self):

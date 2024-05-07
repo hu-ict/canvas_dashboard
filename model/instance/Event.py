@@ -7,6 +7,14 @@ class Event:
         return f' Event({self.name}, {self.trigger})\n'
 
 
+    def to_json(self):
+        dict_result = {
+            'name': self.name,
+            'trigger': self.trigger
+        }
+        return dict_result
+
+
     @staticmethod
     def from_dict(key, data_dict):
         # print(data_dict)

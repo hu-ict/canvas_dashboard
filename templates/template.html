@@ -29,9 +29,9 @@
             });
         }
 
-        function setClassHidden(className) {
-            total_classname = "btn btn-sm student "+className
-            console.info("Hello! "+className);
+        function setClassHidden(button_color) {
+            total_classname = "btn btn-sm student "+button_color
+            console.info("Hello! "+button_color);
             const boxes = document.getElementsByClassName("student");
             console.info("coll: "+boxes.length);
             for (let el of boxes) {
@@ -46,6 +46,28 @@
             }
         }
 
+        function setRole(role_name) {
+            const views = document.getElementsByClassName("role_view");
+            for (i = views.length - 1; i >= 0; --i) {
+                if (views[i].className.includes(role_name)) {
+                    views[i].style.display = "block";
+                } else {
+                    views[i].style.display = "none";
+                }
+            }
+        }
+
+        function setView(view) {
+            const views = document.getElementsByClassName("dashboard_view");
+            for (i = views.length - 1; i >= 0; --i) {
+                if (views[i].className.includes(view)) {
+                    views[i].style.display = "block";
+                } else {
+                    views[i].style.display = "none";
+                }
+            }
+        }
+
         function setCoach(coach_initials) {
             console.info("Coach! "+coach_initials);
             const leer_team = document.getElementsByClassName("coach");
@@ -54,11 +76,7 @@
                 console.info("check "+ leer_team[i].className)
                 console.info(leer_team[i].style.visibility)
                 if (leer_team[i].className.includes(coach_initials)) {
-    // whenever we run splice, the array gets reindexed
-    // so we will skip over an index
-    //                 boxes.splice(i, 1);
-    //                leer_team[i].remove()
-                    leer_team[i].style.display = "flex";
+                    leer_team[i].style.display = "block";
                 } else {
                     leer_team[i].style.display = "none";
                 }
@@ -86,29 +104,11 @@
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4 .gap-2">
                         <h2 class="mt-4">Dashboard $course_name</h2>
-                            <div class="col-lg-4">
-                                        <a onclick="setDetailName('', '')"
-                                            target="iframe_a"
-                                            href="late.html"
-                                            class="btn btn-outline-dark btn-sm">
-                                            <span class="icon text-white-50"><i class="fas fa-flag"></i></span>
-                                            <span class="text">Openstaande opleveringen</span>
-                                        </a>
-                                        <a onclick="setDetailName('', '')"
-                                            target="iframe_a"
-                                            href="./plotly/totals.html"
-                                            class="btn btn-outline-dark btn-sm">
-                                            <span class="icon text-white-50"><i class="fas fa-flag"></i></span>
-                                            <span class="text">Overzicht totalen</span>
-                                        </a>
-
-                            </div>
                     </div>
 
                     <!-- Content Row -->
                     <div class="row">
 
-                        <!-- Earnings (Monthly) Card Example -->
                         <div class="col-xl-2 col-md-6 mb-4">
                             <div class="card border-left-primary shadow h-100 py-2">
                                 <div class="card-body">
@@ -126,7 +126,6 @@
                             </div>
                         </div>
 
-                        <!-- Earnings (Monthly) Card Example -->
                         <div class="col-xl-2 col-md-6 mb-4">
                             <div class="card border-left-success shadow h-100 py-2">
                                 <div class="card-body">
@@ -144,7 +143,6 @@
                             </div>
                         </div>
 
-                        <!-- Earnings (Monthly) Card Example -->
                         <div class="col-xl-2 col-md-6 mb-4">
                             <div class="card border-left-info shadow h-100 py-2">
                                 <div class="card-body">
@@ -172,8 +170,25 @@
                             </div>
                         </div>
 
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                $roles
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"></div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                        <div class="col-xl-6 col-md-6 mb-4">
+                        <div class="col-xl-3 col-md-6 mb-4">
                             <div class="card border-left-warning shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
@@ -193,8 +208,128 @@
                     <!-- Content Row -->
 
                     <div class="row">
-                        <div class="col-lg-4">$student_groups</div>
+                        <div class="col-lg-4 dashboard_view groups">
+                            <ul class="nav nav-tabs">
+                                <li class="nav-item">
+                                    <a onclick="setView('groups')" class="nav-link active" aria-current="page" href="#">Groepen</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('roles')" class="nav-link" href="#">Rollen</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('voortgang')" class="nav-link" href="#">Voortgang</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('slb')" class="nav-link" href="#">SLB</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('overzicht')" class="nav-link" href="#">Overzicht</a>
+                                </li>
+                            </ul>
+                            $student_groups
+                        </div>
+                        <div class="col-lg-4 dashboard_view roles">
+                            <ul class="nav nav-tabs">
+                                <li class="nav-item">
+                                    <a onclick="setView('groups')" class="nav-link"href="#">Groepen</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('roles')" class="nav-link active" aria-current="page"  href="#">Rollen</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('voortgang')" class="nav-link" href="#">Voortgang</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('slb')" class="nav-link" href="#">SLB</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('overzicht')" class="nav-link" href="#">Overzicht</a>
+                                </li>
+                            </ul>
+                            $role_groups
+                        </div>
 
+                        <div class="col-lg-4 dashboard_view voortgang">
+                            <ul class="nav nav-tabs">
+                                <li class="nav-item">
+                                    <a onclick="setView('groups')" class="nav-link"href="#">Groepen</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('roles')" class="nav-link"  href="#">Rollen</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('voortgang')" class="nav-link active" aria-current="page" href="#">Voortgang</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('slb')" class="nav-link" href="#">SLB</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('overzicht')" class="nav-link" href="#">Overzicht</a>
+                                </li>
+                            </ul>
+                            $progress_groups
+                        </div>
+
+                        <div class="col-lg-4 dashboard_view slb">
+                            <ul class="nav nav-tabs">
+                                <li class="nav-item">
+                                    <a onclick="setView('groups')" class="nav-link" href="#">Groepen</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('roles')" class="nav-link " href="#">Rollen</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('voortgang')" class="nav-link" href="#">Voortgang</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('slb')" class="nav-link active" aria-current="page" href="#">SLB</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('overzicht')" class="nav-link" href="#">Overzicht</a>
+                                </li>
+                            </ul>
+                            $slb_groups
+                        </div>
+
+                        <div class="col-lg-4 dashboard_view overzicht">
+                            <ul class="nav nav-tabs">
+                                <li class="nav-item">
+                                    <a onclick="setView('groups')" class="nav-link" href="#">Groepen</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('roles')" class="nav-link " href="#">Rollen</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('voortgang')" class="nav-link" href="#">Voortgang</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('slb')" class="nav-link"  href="#">SLB</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a onclick="setView('overzicht')" class="nav-link active"  aria-current="page" href="#">Overzicht</a>
+                                </li>
+                            </ul>
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Overzicht</h6>
+                                </div>
+                                <div class="card-body">
+                                    <a onclick="setDetailName('', '')"
+                                        target="iframe_a"
+                                        href="./plotly/totals_werkvoorraad.html"
+                                        class="btn btn-outline-dark btn-sm">
+                                        <span class="text">Werkvoorraad</span>
+                                    </a>
+                                    <a onclick="setDetailName('', '')"
+                                        target="iframe_a"
+                                        href="./plotly/totals_voortgang.html"
+                                        class="btn btn-outline-dark btn-sm">
+                                        <span class="text">Voortgang</span>
+                                    </a>
+                                </div>
+                            </div>
+                            $overzicht
+                        </div>
                         <div class="col-lg-8">
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3">
@@ -209,6 +344,7 @@
                                 </div>
                             </div>
                         </div>
+                        <script>setView("groups")</script>
                     </div>
 
                 </div>
@@ -221,7 +357,7 @@
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Berend Wilkens 2023</span>
+                        <span>Copyright &copy; Berend Wilkens 2024</span>
                     </div>
                 </div>
             </footer>
@@ -254,7 +390,6 @@
     <!-- Page level custom scripts -->
     <script src="./js/demo/chart-area-demo.js"></script>
     <script src="./js/demo/chart-pie-demo.js"></script>
-
 
 </body>
 

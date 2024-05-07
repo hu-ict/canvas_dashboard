@@ -57,7 +57,7 @@ def remove_assignment(a_assignments, a_submission):
 
 
 def get_rubric_score(rubrics_submission, student):
-    submission_score = 0.00
+    rubric_score = 0.00
     criterium_scores = []
     if rubrics_submission:
         # try:
@@ -66,7 +66,7 @@ def get_rubric_score(rubrics_submission, student):
                 id = canvas_criterium[0]
                 try:
                     points = canvas_criterium[1]['points']
-                    submission_score += points
+                    rubric_score += points
                 except:
                     print(
                         f"R41 Fout in criterium_score criterium {canvas_criterium} canvas_submission {rubrics_submission} student {student.name}")
@@ -79,7 +79,7 @@ def get_rubric_score(rubrics_submission, student):
                 criterium_scores.append(criterium_score)
         # except:
         #     print(f"R42 Fout in bepalen rubric_score {rubrics_assessment}")
-    return criterium_scores, round(submission_score, 2)
+    return criterium_scores, round(rubric_score, 2)
 
 
 def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_submission):
@@ -116,11 +116,13 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
                     score = 0.0
         elif a_assignment.grading_type == "points":
             if graded:
-                if not a_canvas_submission.score:
-                    print(f"S02 Submission score is empty {a_assignment.grading_type} for assignment {a_assignment.name}")
+                if a_canvas_submission.score == None:
+                    print(a_canvas_submission, a_canvas_submission.score)
+                    print(f"S02 WARNING Submission score is empty {a_assignment.grading_type} for assignment {a_assignment.name}, student: {a_student.name}")
                     score = 0.00
                 else:
                     submission_score = round(a_canvas_submission.score, 2)
+
                     rubrics_scores, rubric_score = get_rubric_score(rubrics_assessment, a_student)
                     if submission_score != rubric_score:
                         if rubric_score > 0:
@@ -132,7 +134,7 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
             else:
                 score = 0.00
         else:
-            print(f"S04 Unknown grading_type {a_assignment.grading_type} for assignment {a_assignment.name}")
+            print(f"S04 ERROR Unknown grading_type {a_assignment.grading_type} for assignment {a_assignment.name}")
         if a_canvas_submission.grader_id and a_canvas_submission.grader_id > 0:
             teacher = a_course.find_teacher(a_canvas_submission.grader_id)
             if teacher:
@@ -177,7 +179,7 @@ def add_missed_assignments(start, course, results, perspective):
     if len(perspective.assignment_groups) == 1:
         l_assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
         if l_assignment_group is None:
-            print("Assignment_group for perspective not found in course", perspective.assignment_groups[0])
+            print("S06 Assignment_group for perspective not found in course", perspective.assignment_groups[0])
             return
         l_assignments = l_assignment_group.assignments[:]
         # remove already submitted
@@ -195,7 +197,7 @@ def add_missed_assignments(start, course, results, perspective):
                 l_submission.comments.append(Comment(0, "Systeem", l_assignment.assignment_date, NO_SUBMISSION))
                 perspective.submissions.append(l_submission)
     elif len(perspective.assignment_groups) > 1:
-        print("Perspective has more then one assignment_groups attached", perspective.name,
+        print("S07 Perspective has more then one assignment_groups attached", perspective.name,
               perspective.assignment_groups)
     else:
-        print("Perspective has no assignment_groups attached", perspective.name, perspective.assignment_groups)
+        print("S08 Perspective has no assignment_groups attached", perspective.name, perspective.assignment_groups)

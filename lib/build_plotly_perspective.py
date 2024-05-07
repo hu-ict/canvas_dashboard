@@ -21,7 +21,7 @@ def get_hover(a_peil_submissions, a_start, a_course, a_labels_colors):
         if "beoordeling".lower() in a_peil_submissions.assignment_name.lower():
             hover = "<b>"+a_peil_submissions.assignment_name + "</b> " + a_labels_colors.level_series[a_start.grade_levels].levels[str(int(score-1))].label
         else:
-            hover = "<b>"+a_peil_submissions.assignment_name + "</b> " + a_labels_colors.level_series[a_start.progress_levels].levels[str(int(score-1))].label
+            hover = "<b>"+a_peil_submissions.assignment_name + "</b> " + a_labels_colors.level_series[a_start.progress.levels].levels[str(int(score-1))].label
         for comment in a_peil_submissions.comments:
             value = comment.author_name + " - " + comment.comment
             wrapper = textwrap.TextWrapper(width=75)
@@ -44,6 +44,7 @@ def get_hover_grade(points, a_labels_colors, a_course, a_perspective, level, sub
 
 def get_hover_comments(submission):
     l_hover = ""
+              # '<br><a target="_blank" href="https://canvas.hu.nl/courses/39869/gradebook/speed_grader?assignment_id=298259&amp;student_id=226811">Naar inzending</a>'
     for comment in submission.comments:
         l_hover += "<br><b>" + comment.author_name + "</b> " + get_date_time_loc(comment.date)
         value = comment.comment
@@ -127,7 +128,7 @@ def plot_progress(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_label
             if "beoordeling" in pleiling['assignment'].name.lower():
                 series['color'].append(a_labels_colors.level_series[a_start.grade_levels].levels[str(int(pleiling['submission'].score))].color)
             else:
-                series['color'].append(a_labels_colors.level_series[a_start.progress_levels].levels[str(int(pleiling['submission'].score))].color)
+                series['color'].append(a_labels_colors.level_series[a_start.progress.levels].levels[str(int(pleiling['submission'].score))].color)
         else:
             #Heeft nog geen beoordeling
             series['size'].append(get_marker_size(False)+2)
