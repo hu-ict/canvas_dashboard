@@ -3,6 +3,9 @@ from lib.file import read_start, read_course, read_msteams_api, read_course_inst
 from lib.teams_api_lib import get_team_channels, get_me_for_check, get_access_token, add_member_to_team, \
     add_member_to_channel, create_channel
 
+# teams like ["b7cf78ae-8c6f-460d-a47a-d4bc2b8b2f18"]
+teams = []
+
 RedirectURI = "https://localhost"
 
 instances = read_course_instance()
@@ -19,16 +22,16 @@ if get_me_for_check(msteams_api.gen_token) is None:
         json.dump(dict_result, f, indent=2)
 
 print(len(course.students))
-student_number = 1
+student_count = 1
 for student in course.students:
-    team_id = teams[student_number % len(teams)]
+    team_id = teams[student_count % len(teams)]
     print(team_id, student.email)
     channel_id = create_channel(msteams_api.gen_token, team_id, student.name)
     if channel_id:
         print(channel_id, student.email)
         add_member_to_team(msteams_api.gen_token, team_id, student.email)
         add_member_to_channel(msteams_api.gen_token, team_id, channel_id, student.email)
-    student_number += 1
+    student_count += 1
 
 with open(start.course_file_name, 'w') as f:
     dict_result = course.to_json(["assignment"])
