@@ -130,3 +130,20 @@ Kopieeer de JPG en HTML naar het private channel van de student
 
 Bovenstaande stappen kunnen ook gemodelleerd worden met de 
 - `runner.py`
+# Werken met MSTeams kanalen
+## Stap 1 Aanmaken teams
+Aanmaken teams in MSTeams. Je hebt voor elke max 30 studenten een team nodig.
+## Stap 2 Aanmaken kanalen
+Private kanalen worden aangemaakt binnen een bestaand team. Het `team_id` wordt verkregen met de GrapgQL MSTeams interface. Er geldt een maximum van 30 privékanalen in eden team. Het script:
+- `generate_channels.py`
+
+Dit script maakt een privékanaal en en voegt de de gebruiker (student) toe aan het team én het kanaal. Het json `msteams_api.json` bestand wordt gebruikt voor het opslaan en uitlezen van de api_keys. De api_key verloopt binnen een dag. Ik werk met een update van de key via de Graph Explorer. De api_key wordt in het api bestand gezet onder `gen_token`.
+## Stap 3 Uilezen kanaal UID
+Met het volgende script worden de id's van de kanalen gekoppeld aan de studenten in de `course.json`. Het json `msteams_api.json` bestand wordt gebruikt voor het opslaan en uitlezen van de api_keys.
+- `update_sites.py`
+
+De api_key verloopt binnen een dag. Ik werk met een update van de key via de Graph Explorer. De api_key wordt handmatig in het api bestand gezet `my_token`.
+## Stap 4 Kopieren bestanden
+- `publish_student_files.py`
+Kopieert de bestanden (html en jpg) naar het teamskanaal. Het json `msteams_api.json` bestand wordt gebruikt voor het opslaan en uitlezen van de api_keys. De api_key verloopt binnen een dag. Ik werk met een update van de key via de Graph Explorer. De api_key wordt handmatig in het api bestand gezet `my_token`.
+
