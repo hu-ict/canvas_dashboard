@@ -12,53 +12,95 @@ Hier worden attributen in JSON formaat opgegeven:
 ```json 
 {
   "api_key": "api_key from Canvas",
-  "course_id": 39872,
+  "canvas_course_id": 39869,
+  "grade_levels": "grade",
   "projects_groep_name": "Project Groups",
   "slb_groep_name": "SLB Groep",
-  "peil_perspective": "peil",
-  "config_file_name": "config_sep23.json",
-  "course_file_name": "course_sep23.json",
-  "results_file_name": "results_sep23.json",
-  "start_date": "2023-09-04T00:00:00Z",
-  "end_date": "2024-02-02T23:59:59Z",
-  "perspectives": [
-    {
+  "start_date": "2024-02-12T00:00:00Z",
+  "end_date": "2024-07-12T23:59:59Z",
+  "progress": {
+      "name": "progress",
+      "levels": "progress",
+      "show_points": true,
+      "assignment_groups": [
+      ]
+  },
+  "attendance_perspective": "",
+  "template_path": ".//courses//feb24_inno//templates//",
+  "target_path": "C://Users//berend.wilkens//OneDrive - Stichting Hogeschool Utrecht//General//dashboard//",
+  "target_slb_path": "C://Users//berend.wilkens//Stichting Hogeschool Utrecht//INNO - SLB - General//INNO dashboard - SLB//",
+  "config_file_name": ".//courses//feb24_inno//config_feb24_inno.json",
+  "course_file_name": ".//courses//feb24_inno//course_feb24_inno.json",
+  "results_file_name": ".//courses//feb24_inno//result_feb24_inno.json",
+  "progress_file_name": ".//courses//feb24_inno//progress_feb24_inno.json",
+  "workload_file_name": ".//courses//feb24_inno//workload_feb24_inno.json",
+  "attendance_report": ".//courses//feb24_inno//attendance_report.csv",
+  "perspectives": {
+    "team": {
       "name": "team",
+      "levels": "samen",
+      "show_points": false
     },
-    {
+    "gilde": {
       "name": "gilde",
+      "levels": "samen5",
+      "show_points": false
     },
-    {
+    "kennis": {
       "name": "kennis",
-    },
-    {
-      "name": "peil",
+      "levels": "niveau",
+      "show_points": true
     }
-  ],
+  },
   "roles": [
+    {
+      "short": "AI",
+      "name": "AI - Engineer",
+      "btn_color": "btn-warning",
+      "assignment_groups": [],
+      "students": []
+    },
     {
       "short": "BIM",
       "name": "Business Analist",
       "btn_color": "btn-success",
-      "assignment_groups": []
+      "assignment_groups": [],
+      "students": []
     },
     {
       "short": "CSC-C",
       "name": "Cloud",
       "btn_color": "btn-danger",
-      "assignment_groups": []
+      "assignment_groups": [],
+      "students": []
+    },
+    {
+      "short": "CSC_S",
+      "name": "Security",
+      "btn_color": "btn-danger",
+      "assignment_groups": [],
+      "students": []
     },
     {
       "short": "SD_B",
       "name": "Back-end developer",
       "btn_color": "btn-dark",
-      "assignment_groups": []
+      "assignment_groups": [],
+      "students": []
+    },
+    {
+      "short": "SD_F",
+      "name": "Front-end developer",
+      "btn_color": "btn-primary",
+      "assignment_groups": [],
+      "students": []
     },
     {
       "short": "TI",
       "name": "Embedded - Engineer",
       "btn_color": "btn-info",
-      "assignment_groups": []
+      "assignment_groups": [],
+      "students": []
     }
   ]
 }
@@ -73,11 +115,35 @@ Verder worden de attributen aangemaakt (gekopieerd uit `start.json`):
 - Perspectiven
 - Rollen
 Dit bestand is ook weer een JSON-bestand met de naam `config_file_name` uit `start.json`
-## Stap 3 - Verijken config
+## Stap 3 - Verrijken config perspectieven
 Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica.
 ### Perspectives
 - Verwijder de niet relevante `perspectives`.
-- `assignment_groups` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `perspective`.
+- Bepaal welke `levels` gebruikt worden, dit is een koppeling met de niveaus in het `labels_colors.json` bestand.
+- Bepaal of er punten getoond moeten worden met `show_points` in het dashboard.
+- `assignment_group` heeft een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `perspective`.
+```
+"perspectives": {
+  "team": {
+  "name": "team",
+  "levels": "samen",
+  "show_points": false,
+  "assignment_groups": [73974]
+},
+"gilde": {
+  "name": "gilde",
+  "levels": "samen5",
+  "show_points": false,
+  "assignment_groups": [73983]
+},
+"kennis": {
+  "name": "kennis",
+  "levels": "niveau",
+  "show_points": true,
+  "assignment_groups": [73113]
+}
+
+```
 ### AssignmentGroups
 - Verwijder de niet relevante `assignment_group`.
 - controlleer de `total_points`
@@ -93,6 +159,7 @@ Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica
 ```
 - `strategy` kent meerdere opties: `NONE`, `EXP_POINTS`, `LIN_POINTS`, `POINTS`, `LINEAIR`, `EXPONENTIAL`, `CONSTANT`, `FIXED`, `ATTENDANCE`.
 De strategiën `EXP_POINTS`, `LIN_POINTS`, `POINTS` worden het meest gebruikt. De strategie `ATTENDANCE` heeft een heel eigen werkwijze.
+## Stap 4 Verrijken groepen, rollen en docenten
 ### Roles
 - Verwijder de niet relevante `roles`.
 Het id van de `assignment_groups` binnen de rollen vullen:
@@ -113,26 +180,26 @@ Secties worden gebruikt voor de rol van een student of de klas- waarin de studen
 Hier worden de `projects` en `assignment_groups` aan de `teachers` gekoppeld. 
 - `projects` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`.
 - `assignment_groups` hebben ook een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`.
-## Stap 4
+## Stap 5 - Update total course
 Door het uitvoeren van het Python script `generate_course.py` wordt de json bestand `course_file_name` gemaakt. De configuratie voor de `course` is nu klaar. Wanneer de structuur van studenten en assigments niet wijzigd kunnen bij een snapshot stap 1 tm 4 overgeslagen worden.
-## Stap 5
-Lees de private team channels
-- `update_sites.py`
 ## Stap 6
 Bereken de bandbreedte (onder, op en boven niveau)
 - `generate_bandwidth.py`
 Wanneer de structuur van studenten en assigments niet wijzigd kunnen bij een snapshot stap 1 tm 6 overgeslagen worden.
-## Stap 7
+## Stap 7 - MSTeams
+Lees de private team channels
+- `update_sites.py`
+## Stap 8 - Resultaten
 De volgende stap is de resultaten/submissions uitlezen uit Canvas. Er wordt intensief gebruik gemaakt van de Canvas-API. Hier zijn twee varianten beschikbaar:
 - `generate_results.py`
 - `generate_submissions.py`
 Daarna moet nog de voortgang bepaald worden
 - `generate_progress.py`
-## Stap 7
+## Stap 9 - Dashboard
 Genereer de visuals:
 - `generate_plotly.py`
 - `generate_dashboard.py`
-## Stap 8
+## Stap 10 - Publiceren
 Kopieer files naar de teams oneDrive voor docenten
 - `publish_dashboard.py`
 Kopieeer de JPG en HTML naar het private channel van de student
