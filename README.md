@@ -4,8 +4,7 @@ Deze Python modules genereren een set van statische html-pagina's op basis van g
 # De workflow
 Er wordt gebruik gemaakt van verschillende stappen om dat het dashboard te komen.
 ![Activity Diagram](dashboard.png)
-## Stap 1
-## Stap 2
+## Stap 1 - Genereren omgeving
 Om een nieuwe course omgeving te maken:
 - run het Python script `generate_start.py`
 
@@ -64,24 +63,35 @@ Hier worden attributen in JSON formaat opgegeven:
   ]
 }
 ```
-## Stap 2
+## Stap 2 - Genereren configuratie
 Door het uitvoeren van het Python script `generate_config.py`. De Canvas API wordt aangeroepen om de structuur van Canvas uit te lezen.
 - Canvas secties (Sections)
 - Opdrachtgroepen (AssignmentGroups)
-- Projectgroepen 
+- Projectgroepen (
 - Docenten (Users)
 Verder worden de attributen aangemaakt (gekopieerd uit `start.json`):
 - Perspectiven
 - Rollen
 Dit bestand is ook weer een JSON-bestand met de naam `config_file_name` uit `start.json`
-## Stap 3
+## Stap 3 - Verijken config
 Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica.
-### Secties
-- Verwijder de niet relevante `secties`.
-- Verrijk een sectie met de `role`, dit is de short name van de `role` uit de `roles` lijst in deze json.
 ### Perspectives
 - Verwijder de niet relevante `perspectives`.
 - `assignment_groups` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `perspective`.
+### AssignmentGroups
+- Verwijder de niet relevante `assignment_groups`.
+- controlleer de `total_points`
+- vul de `lower_points` en de `upper_points` voor de bandbreedte (onder niveau en boven niveau)
+  `teachers`, `roles` en `assignments` wordt later automatisch gevuld,
+```
+"strategy": "EXP_POINTS",
+"upper_c": 4,
+"lower_c": -1,
+"total_points": 89,
+"lower_points": 44,
+"upper_points": 56,
+```
+- `strategy` kent meerdere opties:
 ### Roles
 - Verwijder de niet relevante `roles`.
 Het id van de `assignment_groups` binnen de rollen vullen:
@@ -93,16 +103,15 @@ Het id van de `assignment_groups` binnen de rollen vullen:
       "assignment_groups": [62149]
     },
 ```
+### Secties
+Secties worden gebruikt voor de rol van een student of de klas- waarin de student zit.
+- Verwijder de niet relevante `secties`.
+- Verrijk een sectie met de `role`, dit is de short name van de `role` uit de `roles` lijst in deze json.
 ### Teachers
 - Verwijder de niet relevante `teachers`.
 Hier worden de `projects` en `assignment_groups` aan de `teachers` gekoppeld. 
 - `projects` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`.
 - `assignment_groups` hebben ook een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`.
-### AssignmentGroups
-- Verwijder de niet relevante `assignment_groups`.
-- controlleer de `total_points`
-- vul de `lower_points` en de `upper_points` voor de bandbreedte (onder niveau en boven niveau)
-  `teachers`, `roles` en `assignments` wordt later automatisch gevuld, 
 ## Stap 4
 Door het uitvoeren van het Python script `generate_course.py` wordt de json bestand `course_file_name` gemaakt. De configuratie voor de `course` is nu klaar. Wanneer de structuur van studenten en assigments niet wijzigd kunnen bij een snapshot stap 1 tm 4 overgeslagen worden.
 ## Stap 5
