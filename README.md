@@ -79,7 +79,7 @@ Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica
 - Verwijder de niet relevante `perspectives`.
 - `assignment_groups` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `perspective`.
 ### AssignmentGroups
-- Verwijder de niet relevante `assignment_groups`.
+- Verwijder de niet relevante `assignment_group`.
 - controlleer de `total_points`
 - vul de `lower_points` en de `upper_points` voor de bandbreedte (onder niveau en boven niveau)
   `teachers`, `roles` en `assignments` wordt later automatisch gevuld,
@@ -91,7 +91,8 @@ Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica
 "lower_points": 44,
 "upper_points": 56,
 ```
-- `strategy` kent meerdere opties:
+- `strategy` kent meerdere opties: `NONE`, `EXP_POINTS`, `LIN_POINTS`, `POINTS`, `LINEAIR`, `EXPONENTIAL`, `CONSTANT`, `FIXED`, `ATTENDANCE`.
+De strategiën `EXP_POINTS`, `LIN_POINTS`, `POINTS` worden het meest gebruikt. De strategie `ATTENDANCE` heeft een heel eigen werkwijze.
 ### Roles
 - Verwijder de niet relevante `roles`.
 Het id van de `assignment_groups` binnen de rollen vullen:
