@@ -158,7 +158,27 @@ Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica
 "upper_points": 56,
 ```
 - `strategy` kent meerdere opties: `NONE`, `EXP_POINTS`, `LIN_POINTS`, `POINTS`, `LINEAIR`, `EXPONENTIAL`, `CONSTANT`, `FIXED`, `ATTENDANCE`.
-De strategiën `EXP_POINTS`, `LIN_POINTS`, `POINTS` worden het meest gebruikt. De strategie `ATTENDANCE` heeft een heel eigen werkwijze.
+### Strategy
+De strategiën `EXP_POINTS`, `LIN_POINTS`, `POINTS` en `CONSTANT` worden het meest gebruikt. De strategie `ATTENDANCE` lijkt veel op `CONSTANT.
+
+Met de constanten `lower_points` en `upper_points` worden de einddoelen van de onderwijseenheid bepaald. Wanneer de student onder `lower_points` scoort heeft de student niet het verwachtte niveau en zal het perspectief niet halen. Wanneer de student boven `upper_points` scoort gaat deze het boven niveau het perspectief afronden. Daar tussen in wordt het op niveau. Deze einddoelen worden volgens een bepaalde strategie terug geinterpoleerd, daardoor ontstaat er een bandbreedte in de tijd.
+
+De volgende formule wordt gebruikt bij de strategy `EXP_POINTS` en `EXPONENTIAL`
+```
+y = ax2 + bx + c
+```
+- y: opgebouwde waarde
+- x: tijd
+- a: groeipotentieel of leervermogen
+- b: wat je al geleerd hebt en opnieuw laat zien
+- c: initieel zichtbaar
+
+De constande a, b, en c hebben een waarde groter dan 0.
+
+Bij de strategy `CONSTANT` is de waarde constant in de tijd. De constanten a en b zijn nul en de constante c wordt gelijkgesteld aan `lower_points` en `uppper_points`.
+
+Bij `POINTS` wordt de bandbreedte bepaald hoeveel punten er voor elk portfolio-item gehaald kan worden. Minder dan 55% in onder bandbreedte en boven 80% boven bandbreedte en dit cummulatief in de tijd. 
+
 ## Stap 4 Verrijken groepen, rollen en docenten
 ### Roles
 - Verwijder de niet relevante `roles`.
