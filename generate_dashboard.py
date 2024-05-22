@@ -94,7 +94,7 @@ def main(instance_name):
     instances = read_course_instance()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    print("Instance:", instances.current_instance)
+    print("Instance:", instances.current_instance, instances.get_category(instances.current_instance))
     start = read_start(instances.get_start_file_name())
 
     course = read_course(start.course_file_name)
@@ -126,12 +126,11 @@ def main(instance_name):
         student_totals = {
             'student_count': 0,
             'perspectives': {},
-            'peil': peilen,
+            'progress': peilen,
             'late': {'count': []}
         }
         for perspective in course.perspectives:
-            if start.progress_perspective is None or perspective != start.progress_perspective:
-                student_totals['perspectives'][perspective] = {'count': [], 'pending': init_sections_count(course), 'late': init_sections_count(course), 'to_late': init_sections_count(course), 'list': init_sections_list(course)}
+            student_totals['perspectives'][perspective] = {'count': [], 'pending': init_sections_count(course), 'late': init_sections_count(course), 'to_late': init_sections_count(course), 'list': init_sections_list(course)}
 
     team_coaches = init_coaches_dict(course)
     # with open("dump.json", 'w') as f:

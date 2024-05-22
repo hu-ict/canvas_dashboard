@@ -21,19 +21,20 @@ if get_me_for_check(msteams_api.gen_token) is None:
         dict_result = msteams_api.to_json()
         json.dump(dict_result, f, indent=2)
 
-print(len(course.students))
+print(f"Aantal studenten {len(course.students)}, aantal teams {len(teams)}")
 student_count = 1
-for student in course.students:
-    team_id = teams[student_count % len(teams)]
-    print(team_id, student.email)
-    channel_id = create_channel(msteams_api.gen_token, team_id, student.name)
-    if channel_id:
-        print(channel_id, student.email)
-        add_member_to_team(msteams_api.gen_token, team_id, student.email)
-        add_member_to_channel(msteams_api.gen_token, team_id, channel_id, student.email)
-    student_count += 1
+if len(teams) > 0:
+    for student in course.students:
+        team_id = teams[student_count % len(teams)]
+        print(team_id, student.email)
+        channel_id = create_channel(msteams_api.gen_token, team_id, student.name)
+        if channel_id:
+            print(channel_id, student.email)
+            add_member_to_team(msteams_api.gen_token, team_id, student.email)
+            add_member_to_channel(msteams_api.gen_token, team_id, channel_id, student.email)
+        student_count += 1
 
-with open(start.course_file_name, 'w') as f:
-    dict_result = course.to_json(["assignment"])
-    json.dump(dict_result, f, indent=2)
+    with open(start.course_file_name, 'w') as f:
+        dict_result = course.to_json(["assignment"])
+        json.dump(dict_result, f, indent=2)
 

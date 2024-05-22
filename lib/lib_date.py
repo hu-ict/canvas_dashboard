@@ -41,7 +41,10 @@ def get_date_time_str(a_date_time_obj):
 
 
 def get_date_time_loc(a_date_time_obj):
-    date_time_str = a_date_time_obj.strftime(DATE_TIME_LOC)
+    if a_date_time_obj:
+        date_time_str = a_date_time_obj.strftime(DATE_TIME_LOC)
+    else:
+        date_time_str = "geen datum"
     return date_time_str
 
 

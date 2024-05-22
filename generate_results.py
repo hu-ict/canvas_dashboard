@@ -2,7 +2,7 @@ import sys
 from canvasapi import Canvas
 import json
 from lib.file import read_start, read_course, read_course_instance
-from lib.lib_submission import submission_builder, count_graded, add_missed_assignments
+from lib.lib_submission import submission_builder, count_graded, add_missed_assignments, read_submissions
 from model.Result import *
 from lib.lib_date import get_actual_date, API_URL, get_assignment_date
 
@@ -27,40 +27,7 @@ def main(instance_name):
 
     results.students = course.students
 
-    for assignment_group in course.assignment_groups:
-        for assignment in assignment_group.assignments:
-            print("Processing Assignment {0:6} - {1} {2}".format(assignment.id, assignment_group.name, assignment.name))
-            if assignment.unlock_date:
-                if assignment.unlock_date > results.actual_date:
-                    # volgende assignment
-                    continue
-            canvas_assignment = canvas_course.get_assignment(assignment.id, include=['submissions'])
-            if canvas_assignment is not None:
-                canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments', 'rubric_assessment'])
-                for canvas_submission in canvas_submissions:
-                    student = results.find_student(canvas_submission.user_id)
-                    if student is not None:
-                        # voeg een submission toe aan een van de perspectieven
-                        # print(f"R31 Submission for {student.name}")
-                        l_submission = submission_builder(start, course, student, assignment, canvas_submission)
-                        if l_submission is not None:
-                            l_perspective = course.find_perspective_by_assignment_group(l_submission.assignment_group_id)
-                            if l_perspective:
-                                if l_perspective == "peil":
-                                    student.student_progress.submissions.append(l_submission)
-                                else:
-                                    this_perspective = student.perspectives[l_perspective.name]
-                                    if this_perspective:
-                                        this_perspective.submissions.append(l_submission)
-                            else:
-                                print(f"R21 clould not find perspective for assignment_group {assignment_group.name}")
-                        # else:
-                        #     print(f"R22 Error creating submission {assignment.name} for student {student.name}")
-                    # else:
-                    #     print("R23 Could not find student", canvas_submission.user_id)
-            else:
-                print("R25 Could not find assignment", canvas_assignment.id, "within group", assignment_group.id)
-
+    read_submissions(canvas_course, start, course, results, True)
 
     for student in results.students:
         for perspective in student.perspectives.values():

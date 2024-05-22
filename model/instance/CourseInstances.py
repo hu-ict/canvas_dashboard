@@ -37,6 +37,9 @@ class CourseInstances:
     def get_project_path(self):
         return ".//courses//" + self.current_instance + "//"
 
+    def get_test_path(self):
+        return self.get_project_path() + "test//"
+
     def get_plot_path(self):
         return self.get_project_path() + "dashboard_" + self.current_instance + "//plotly//"
 
@@ -46,6 +49,13 @@ class CourseInstances:
     def get_start_file_name(self):
         return self.get_project_path() + "start_" + self.current_instance + ".json"
 
+    def get_category(self, instance_name):
+        for category in self.course_categories.values():
+            for instance in category.course_instances:
+                if instance_name == instance:
+                    return category.category
+        return None
+
     def is_instance_of(self, category):
         for key in self.instances.keys():
             if self.current_instance == key:
@@ -53,9 +63,9 @@ class CourseInstances:
                     return True
         return False
 
-    def is_instance(self, a_instance):
+    def is_instance(self, instance_name):
         for key in self.course_categories.keys():
-            if a_instance in self.course_categories[key].course_instances:
+            if instance_name in self.course_categories[key].course_instances:
                 return True
         return False
 

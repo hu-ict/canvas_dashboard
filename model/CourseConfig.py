@@ -16,7 +16,7 @@ class CourseConfig:
         self.student_count = student_count
         self.days_in_semester = days_in_semester
         self.sections = []
-        self.progress = {}
+        self.progress = None
         self.perspectives = {}
         self.roles = []
         self.teachers = []
@@ -128,11 +128,11 @@ class CourseConfig:
                 return section
         return None
 
-    # def find_perspective_by_name(self, name):
-    #     for perspective in self.perspectives:
-    #         if name == perspective.name:
-    #             return perspective
-    #     return None
+    def find_perspective_by_name(self, name):
+        for perspective in self.perspectives.values():
+            if name == perspective.name:
+                return perspective
+        return None
 
     def find_perspective_by_assignment_group(self, group_id):
         for perspective in self.perspectives.values():
@@ -170,6 +170,18 @@ class CourseConfig:
         for role in self.roles:
             if role.name == role_name:
                 return self.find_assignment_group(role.assignment_group_id)
+        return None
+
+    def get_peilmoment_by_query(self, a_query):
+        for assignment_group_id in self.progress.assignment_groups:
+            assignment_group = self.find_assignment_group(assignment_group_id)
+            for assignment in assignment_group.assignments:
+                condition = 0
+                for selector in a_query:
+                    if selector.lower() in assignment.name.lower():
+                        condition += 1
+                if condition == len(a_query):
+                    return assignment
         return None
 
     def get_role(self, role_short):

@@ -127,7 +127,7 @@
       "color": "cornflowerblue"
     },
     "-1": {
-      "label": "Voortgang niet bepaald",
+      "label": "Voortgang (nog) niet bepaald",
       "color": "#aaaaaa"
     },
     "0": {
@@ -153,7 +153,7 @@
       "color": "cornflowerblue"
     },
     "-1": {
-      "label": "Beoordeling niet bepaald",
+      "label": "Beoordeling (nog) niet bepaald",
       "color": "#aaaaaa"
     },
     "0": {
@@ -161,15 +161,15 @@
       "color": "#f25829"
     },
     "1": {
-      "label": "Onder niveau",
+      "label": "Beoordeling onder niveau",
       "color": "#f2a529"
     },
     "2": {
-      "label": "Op niveau",
+      "label": "Beoordeling op niveau",
       "color": "#85e043"
     },
     "3": {
-      "label": "Boven niveau",
+      "label": "Beoordeling boven niveau",
       "color": "#2bad4e"
     }
   }

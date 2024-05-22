@@ -19,35 +19,22 @@ class AssignmentGroup:
 
     def to_json(self, scope):
         check = lambda x: self.bandwidth.to_json() if x is not None else None
+        json_string = {
+                'name': self.name,
+                'id': self.id,
+                'teachers': self.teachers,
+                'role': self.role,
+                'strategy' : self.strategy,
+                'lower_c': self.lower_c,
+                'upper_c': self.upper_c,
+                'total_points': self.total_points,
+                'lower_points': self.lower_points,
+                'upper_points': self.upper_points,
+                'bandwidth': check(self.bandwidth),
+            }
         if "assignment" in scope:
-            return {
-                'name': self.name,
-                'id': self.id,
-                'teachers': self.teachers,
-                'role': self.role,
-                'strategy' : self.strategy,
-                'lower_c': self.lower_c,
-                'upper_c': self.upper_c,
-                'total_points': self.total_points,
-                'lower_points': self.lower_points,
-                'upper_points': self.upper_points,
-                'bandwidth': check(self.bandwidth),
-                'assignments': list(map(lambda a: a.to_json(), self.assignments)),
-            }
-        else:
-            return {
-                'name': self.name,
-                'id': self.id,
-                'teachers': self.teachers,
-                'role': self.role,
-                'strategy' : self.strategy,
-                'lower_c': self.lower_c,
-                'upper_c': self.upper_c,
-                'total_points': self.total_points,
-                'lower_points': self.lower_points,
-                'upper_points': self.upper_points,
-                'bandwidth': check(self.bandwidth),
-            }
+            json_string['assignments'] = list(map(lambda a: a.to_json(), self.assignments))
+        return json_string
 
     def find_assignment(self, a_assignment):
         for assignment in self.assignments:

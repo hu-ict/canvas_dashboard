@@ -129,7 +129,7 @@ def plot_voortgang(a_instances, a_start, a_course, student_totals, a_progress_hi
     for perspective in a_start.perspectives.keys():
         plot_progress_history(fig, 2, row, a_progress_history, perspective, a_start, a_course, a_labels_colors)
         row += 1
-    if a_instances.is_instance_of("inno_courses_new"):
+    if a_instances.is_instance_of("inno_courses_new") or a_instances.is_instance_of("inno_courses"):
         plot_peilingen(fig, 1, 2, student_totals, a_start, a_course, a_labels_colors)
     file_name = a_instances.get_plot_path() + "totals_voortgang" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")

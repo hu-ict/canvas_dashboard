@@ -40,9 +40,9 @@ start = Start(canvas_course_id, "Project Groups", "", "aanwezig", get_date_time_
               project_path + "progress_" + course_instance + ".json",
               project_path + "workload_" + course_instance + ".json",
               project_path + "attendance_report.csv",
-              "", "grade", Perspective("progress", "progress"))
+              "", "grade", Perspective("progress", "progress", True, False))
 
-perspective = Perspective("project", "samen")
+perspective = Perspective("project", "samen", True, False)
 start.perspectives[perspective.name] = perspective
 role = Role("role", "Student", "border-dark")
 start.roles.append(role)
@@ -51,6 +51,8 @@ os.makedirs(os.path.dirname(project_path), exist_ok=True)
 os.makedirs(os.path.dirname(project_path +"dashboard_" + course_instance + "//"), exist_ok=True)
 os.makedirs(os.path.dirname(project_path +"dashboard_" + course_instance + "//plotly//"), exist_ok=True)
 os.makedirs(os.path.dirname(project_path+"templates//"), exist_ok=True)
+os.makedirs(os.path.dirname(project_path+"test//"), exist_ok=True)
+
 dir_names = ["css", "js", "scss", "vendor"]
 for dir_name in dir_names:
     # shutil.copyfile(html_path+file_name, target_path+file_name)

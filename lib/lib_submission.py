@@ -141,15 +141,19 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
                 grader_name = teacher.name
             else:
                 grader_name = a_canvas_submission.grader_id
+            if a_canvas_submission.graded_at:
+                grader_date = get_date_time_obj(a_canvas_submission.graded_at)
         else:
             grader_name = "onbekend"
+            grader_date = None
+
         l_submission = Submission(a_canvas_submission.id, a_assignment.group_id, a_assignment.id, a_student.id,
                                   a_assignment.name,
                                   a_assignment.assignment_date,
                                   date_to_day(a_start.start_date, a_assignment.assignment_date),
                                   None,
                                   None,
-                                  graded, grader_name, None, score,
+                                  graded, grader_name, grader_date, score,
                                   a_assignment.points, 0)
         l_submission.rubrics = rubrics_scores
         for canvas_comment in canvas_comments:
@@ -157,8 +161,6 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
                 Comment(canvas_comment['author_id'], canvas_comment['author_name'],
                         get_date_time_obj(canvas_comment['created_at']), canvas_comment['comment']))
         # bepaal de date/time van het datapunt
-        if a_canvas_submission.graded_at:
-            get_date_time_obj(a_canvas_submission.graded_at)
         if a_canvas_submission.submitted_at:
             l_submission.submitted_date = get_date_time_obj(a_canvas_submission.submitted_at)
             l_submission.submitted_day = date_to_day(a_start.start_date, l_submission.submitted_date)
@@ -170,7 +172,6 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
                 l_submission.submitted_date = a_assignment.assignment_date
                 l_submission.submitted_day = date_to_day(a_start.start_date, l_submission.submitted_date)
         return l_submission
-
 
 
 def add_missed_assignments(start, course, results, perspective):
@@ -201,3 +202,46 @@ def add_missed_assignments(start, course, results, perspective):
               perspective.assignment_groups)
     else:
         print("S08 Perspective has no assignment_groups attached", perspective.name, perspective.assignment_groups)
+
+
+def read_submissions(a_canvas_course, a_start, a_course, a_results, a_total_refresh):
+    for assignment_group in a_course.assignment_groups:
+        for assignment in assignment_group.assignments:
+            print("Processing Assignment {0:6} - {1} {2}".format(assignment.id, assignment_group.name, assignment.name))
+            if not a_total_refresh and ((a_results.actual_date - assignment.assignment_date).days > 10):
+                # deadline langer dan twee weken geleden. Alle feedback is gegeven.
+                continue
+            if assignment.unlock_date:
+                if assignment.unlock_date > a_results.actual_date:
+                    # volgende assignment
+                    continue
+            canvas_assignment = a_canvas_course.get_assignment(assignment.id, include=['submissions'])
+            if canvas_assignment is not None:
+                canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments', 'rubric_assessment'])
+                for canvas_submission in canvas_submissions:
+                    student = a_results.find_student(canvas_submission.user_id)
+                    if student is not None:
+                        # voeg een submission toe aan een van de perspectieven
+                        # print(f"R31 Submission for {student.name}")
+                        l_submission = submission_builder(a_start, a_course, student, assignment, canvas_submission)
+                        if l_submission is not None:
+                            l_perspective = a_course.find_perspective_by_assignment_group(l_submission.assignment_group_id)
+                            if l_perspective:
+                                if l_perspective == "peil":
+                                    student.student_progress.put_submission(l_submission)
+                                else:
+                                    this_perspective = student.perspectives[l_perspective.name]
+                                    if this_perspective:
+                                        if a_total_refresh:
+                                            this_perspective.submissions.append(l_submission)
+                                        else:
+                                            this_perspective.put_submission(l_submission)
+
+                            else:
+                                print(f"R21 clould not find perspective for assignment_group {assignment_group.name}")
+                        # else:
+                        #     print(f"R22 Error creating submission {assignment.name} for student {student.name}")
+                    # else:
+                    #     print("R23 Could not find student", canvas_submission.user_id)
+            else:
+                print("R25 Could not find assignment", canvas_assignment.id, "within group", assignment_group.id)

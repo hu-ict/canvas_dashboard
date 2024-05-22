@@ -1,9 +1,8 @@
 import sys
-from lib.build_totals import get_overall_progress
 import json
 from lib.file import read_start, read_course, read_progress, read_results, read_course_instance
 from lib.lib_date import get_actual_date
-from lib.lib_submission import get_progress
+from lib.lib_progress import get_overall_progress
 from model.ProgressDay import ProgressDay
 from model.perspective.Perspectives import Perspectives
 from model.perspective.StudentPerspective import StudentPerspective

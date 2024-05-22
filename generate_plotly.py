@@ -3,11 +3,12 @@ import sys
 
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-from lib.build_plotly_perspective import plot_perspective, find_submissions
+from lib.build_plotly_perspective import plot_perspective, find_submissions, plot_overall_peilingen
 from lib.lib_date import get_date_time_loc, get_actual_date
 from lib.lib_plotly import peil_labels, get_color_bar
 from lib.file import read_start, read_course, read_results, read_labels_colors, read_course_instance
 from lib.translation_table import translation_table
+from model.Submission import Submission
 
 
 def main(instance_name):
@@ -42,20 +43,16 @@ def main(instance_name):
             ]
         ]
     elif instances.is_instance_of('inno_courses'):
-        titles = ["Team", "Kennis", "Gilde", "Halfweg", "Ná sprint 7", "Eindbeoordeling"]
+        titles = ["Team", "Gilde", "Kennis", "Halfweg", "Ná sprint 7", "Eindbeoordeling"]
         positions = {'team': {'row': 1, 'col': 1},
-                     'gilde': {'row': 4, 'col': 1},
-                     'kennis': {'row': 1, 'col': 4},
-                     'Sprint 4': {'row': 6, 'col': 4},
-                     'Sprint 7': {'row': 6, 'col': 5},
-                     'Beoordeling': {'row': 6, 'col': 6}}
+                     'gilde': {'row': 1, 'col': 4},
+                     'kennis': {'row': 2, 'col': 1},
+                     'Sprint 4': {'row': 2, 'col': 4},
+                     'Sprint 7': {'row': 2, 'col': 5},
+                     'Beoordeling': {'row': 2, 'col': 6}}
         specs = [
-            [{'type': 'scatter', 'colspan': 3, 'rowspan': 3}, None, None, {'type': 'scatter', 'colspan': 3, 'rowspan': 3}, None, None],
-            [None, None, None, None, None, None],
-            [None, None, None, None, None, None],
-            [{'type': 'scatter', "colspan": 3, 'rowspan': 3}, None, None, None, None, None],
-            [None, None, None, None, None, None],
-            [None, None, None, {'type': 'domain'}, {'type': 'domain'}, {'type': 'domain'}]
+            [{'type': 'scatter', 'colspan': 3}, None, None, {'type': 'scatter', 'colspan': 3}, None, None],
+            [{'type': 'scatter', "colspan": 3}, None, None, {'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
         ]
     elif instances.is_instance_of('inno_courses_new'):
         titles = ["Team", "Gilde", "Kennis"]
@@ -105,7 +102,7 @@ def main(instance_name):
 
     def plot_gauge(a_row, a_col, a_fig, a_peil, a_start, a_course, a_labels_colors):
         # plotting de gauge
-        colors_bar = get_color_bar(a_start, a_course, a_labels_colors)
+        colors_bar = get_color_bar(a_start, a_labels_colors)
         plot_bgcolor = "#eee"
         quadrant_colors = list(colors_bar.values())[1:]
         n_quadrants = len(quadrant_colors)
@@ -145,11 +142,12 @@ def main(instance_name):
                     'line': {'color': "#555555", 'width': 12},
                     'thickness': 0.6,
                     'value': a_peil}})
+
         a_fig.add_trace(l_gauge, a_row, a_col)
 
     def plot_student(a_instances, a_start, a_course, a_student, a_actual_date, a_peil_construction):
         if instances.is_instance_of('inno_courses'):
-            fig = make_subplots(rows=6, cols=6, subplot_titles=titles, specs=specs, vertical_spacing=0.10, horizontal_spacing=0.08)
+            fig = make_subplots(rows=2, cols=6, subplot_titles=titles, specs=specs, vertical_spacing=0.10, horizontal_spacing=0.08)
         else:
             fig = make_subplots(rows=2, cols=2, subplot_titles=titles, specs=specs, vertical_spacing=0.10, horizontal_spacing=0.08)
 
@@ -165,9 +163,14 @@ def main(instance_name):
             for peil in peil_labels[1:]:
                 peil_moment = a_student.get_peilmoment_by_query([peil, "overall"])
                 if peil_moment:
-                    plot_gauge(positions[peil]['row'], positions[peil]['col'], fig, peil_moment.score + 0.5, a_start, a_course, labels_colors)
+                    plot_overall_peilingen(fig, positions[peil]['row'], positions[peil]['col'], a_start, a_course, peil_moment, labels_colors)
+                    #plot_gauge(positions[peil]['row'], positions[peil]['col'], fig, peil_moment.score + 0.5, a_start, a_course, labels_colors)
                 else:
-                    plot_gauge(positions[peil]['row'], positions[peil]['col'], fig, 0.1, a_start, a_course, labels_colors)
+                    l_assignment = a_course.get_peilmoment_by_query([peil, "overall"])
+                    l_peil_moment = Submission(0, 0, 0, 0, l_assignment.name, l_assignment.assignment_date, l_assignment.assignment_day,
+                                               None, None, False, None, None, -1, 3, 0)
+                    plot_overall_peilingen(fig, positions[peil]['row'], positions[peil]['col'], a_start, a_course, l_peil_moment, labels_colors)
+                    #plot_gauge(positions[peil]['row'], positions[peil]['col'], fig, 0.1, a_start, a_course, labels_colors)
 
         file_name = a_instances.get_plot_path() + a_student.name
         asci_file_name = file_name.translate(translation_table)

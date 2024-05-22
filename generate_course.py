@@ -8,9 +8,6 @@ from lib.file import read_start, read_config, read_course_instance
 from model.Assignment import Assignment
 from model.Criterion import Criterion
 from model.Rating import Rating
-from model.Student import Student
-from model.perspective.StudentPerspective import StudentPerspective
-from model.perspective.StudentProgress import StudentProgress
 
 
 def get_dates(start, input):
@@ -27,6 +24,7 @@ def get_dates(start, input):
         unlock_date = start.start_date
     return unlock_date, assignment_date
 
+
 def get_rubrics(canvas_rubrics):
     # print("C74 -", canvas_assignment)
     rubrics_points = 0
@@ -40,17 +38,22 @@ def get_rubrics(canvas_rubrics):
     return rubrics, rubrics_points
 
 
-def link_teachers(config):
-    print('Link teachers to student_groups and assignment_groups')
-    for teacher in config.teachers:
-        for studentGroupId in teacher.projects:
-            studentGroup = config.find_student_group(studentGroupId)
-            if studentGroup:
-                studentGroup.teachers.append(teacher.id)
-        for assignmentGroupId in teacher.assignment_groups:
-            assignmentGroup = config.find_assignment_group(assignmentGroupId)
-            if assignmentGroup:
-                assignmentGroup.teachers.append(teacher.id)
+def get_uses_assignment_groups(config):
+    uses_assignment_groups = []
+    if len(config.progress.assignment_groups) > 0:
+        uses_assignment_groups += config.progress.assignment_groups
+    else:
+        print("P01 - WARNING no assignments_group for progress perspective ", config.progress.name)
+
+    for perspective in config.perspectives.values():
+        if len(perspective.assignment_groups) > 0:
+            uses_assignment_groups += perspective.assignment_groups
+        else:
+            print("P02 - WARNING no assignments_group for perspective ", perspective.name)
+
+    print("P03 - Used assignment_groups", uses_assignment_groups)
+    return uses_assignment_groups
+
 
 def main(instance_name):
     g_actual_date = get_actual_date()
@@ -65,117 +68,15 @@ def main(instance_name):
     canvas = Canvas(API_URL, start.api_key)
     user = canvas.get_current_user()
     print("C03 -", user.name)
+    uses_assignment_groups = get_uses_assignment_groups(config)
     canvas_course = canvas.get_course(start.canvas_course_id)
-    link_teachers(config)
-    # Ophalen Students
-    print("C04 -", "Ophalen studenten")
-    users = canvas_course.get_users(enrollment_type=['student'])
-    config.students = []
-    student_count = 0
-    for user in users:
-        if hasattr(user, 'login_id'):
-            print("C11 -", user.name, user.login_id)
-            student = Student(user.id, 0, user.name, user.sortable_name, 'None', "", user.login_id, "", 0)
-            config.students.append(student)
-            student_count += 1
-            # if student_count > 100:
-            #     break
-    # Ophalen Secties en Roles
-    print("C05 -", "Ophalen student secties uit Canvas deze koppelen aan Role ")
-    canvas_sections = canvas_course.get_sections(include=['students'])
-    for course_section in canvas_sections:
-        # use only relevant sections
-        section = config.find_section(course_section.id)
-        if section:
-            course_section_students = course_section.students
-            if course_section_students:
-                for section_student in course_section_students:
-                    student_id = section_student["id"]
-                    student = config.find_student(student_id)
-                    if student:
-                        student.role = section.role
-                    else:
-                        print("C21 -", "Student not found", section_student["id"])
-            else:
-                print("C22 -", "No students in section", course_section.name)
-        else:
-            print("C23 -", "Section not found", course_section.name)
-
-    print("C07 -", "Opschonen studenten zonder Role")
-    for student in config.students:
-        if len(student.role) == 0:
-            config.students.remove(student)
-    config.student_count = len(config.students)
-
-    # StudentProgress toevoegen aan Students
-    for student in config.students:
-        student.student_progress = StudentProgress(config.progress.name, config.progress.assignment_groups)
-    # Perspectives toevoegen aan Students
-    for student in config.students:
-        student.perspectives = {}
-        for perspective in config.perspectives.values():
-            if len(perspective.assignment_groups) > 1:
-                # meerdere assignment_group: kennis
-                student.perspectives[perspective.name] = StudentPerspective(perspective.name, 0, 0, 0)
-                assignment_group_id = config.find_assignment_group_by_role(student.role)
-                student.perspectives[perspective.name].assignment_groups.append(assignment_group_id)
-            elif len(perspective.assignment_groups) == 1:
-                # één assignment_group: team, gilde en peil
-                student.perspectives[perspective.name] = StudentPerspective(perspective.name, 0, 0, 0)
-                assignment_group_id = config.perspectives[perspective.name].assignment_groups[0]
-                student.perspectives[perspective.name].assignment_groups.append(assignment_group_id)
-            else:
-                print("C31 - ERROR: geen assignment_group for perspective")
-
-
-    # Students en StudentGroups koppelen
-    canvas_group_categories = canvas_course.get_group_categories()
-
-    for canvas_group_category in canvas_group_categories:
-        print("C41 -", canvas_group_category)
-        # ophalen projectgroepen
-        if canvas_group_category.name == start.projects_groep_name:
-            canvas_groups = canvas_group_category.get_groups()
-            for canvas_group in canvas_groups:
-                print("C42 -", canvas_group)
-                studentGroup = config.find_student_group(canvas_group.id)
-                if studentGroup:
-                    canvas_users = canvas_group.get_users()
-                    for canvas_user in canvas_users:
-                        student = config.find_student(canvas_user.id)
-                        if student:
-                            student.group_id = studentGroup.id
-                            if len(studentGroup.teachers) > 0:
-                                student.coach = studentGroup.teachers[0]
-                            studentGroup.students.append(student)
-                        else:
-                            print("C43 - Student in Canvas project group not found", canvas_user.id)
-        # ophalen slb-groepen
-        if start.slb_groep_name is not None and canvas_group_category.name == start.slb_groep_name:
-            canvas_groups = canvas_group_category.get_groups()
-            for canvas_group in canvas_groups:
-                print("C45 -", canvas_group)
-                slb_group = config.find_slb_group(canvas_group.id)
-                if slb_group:
-                    canvas_users = canvas_group.get_users()
-                    for canvas_user in canvas_users:
-                        student = config.find_student(canvas_user.id)
-                        if student:
-                            slb_group.students.append(student)
-                        else:
-                            print("C46 - Student in Canvas slb group not found", canvas_user.id)
-
-        for role in config.roles:
-            students = config.find_students_by_role(role.short)
-            role.students = students
-
     # Ophalen Assignments bij de AssignmentsGroups
     canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignments', 'overrides', 'online_quiz'])
     for canvas_assignment_group in canvas_assignment_groups:
         # use only relevant assignment_groups
         assignment_group = config.find_assignment_group(canvas_assignment_group.id)
         # print("C61 -", "assignment_group", canvas_assignment_group.id)
-        if assignment_group:
+        if assignment_group and assignment_group.id in uses_assignment_groups:
             print(f"C62 - assignment_group {assignment_group.name} is used with strategy {assignment_group.strategy}")
             total_group_points = 0
             total_rubrics_points = 0
@@ -216,15 +117,13 @@ def main(instance_name):
                 try:
                     assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
                     if assignment.points > 0 and assignment.points != rubrics_points:
-                        print("C75 - ERROR", assignment.name, "assignment points", assignment.points,
-                              " points from rubrics",
-                              rubrics_points)
+                        print("C75 - WARNING inconsistency in ", assignment.name, "assignment points", assignment.points, "rubrics points", rubrics_points)
                     else:
                         assignment.points = rubrics_points
                         # print("C76 -", assignment.name, "points", assignment.points, "criteria aantal", len(assignment.rubrics))
                     total_rubrics_points += rubrics_points
                 except:
-                    print("C77 - No rubric", canvas_assignment.name)
+                    print("C77 - WARNING No rubric", canvas_assignment.name)
                 if assignment_group.strategy == "POINTS":
                     assignment_group.total_points = total_group_points
                 else:
@@ -234,16 +133,18 @@ def main(instance_name):
         else:
             print(f"C79 - assignment_group {canvas_assignment_group.name} is not used")
 
-    for student_group in config.student_groups:
-        student_group.students = sorted(student_group.students, key=lambda s: s.sortable_name)
-
-    for role in config.roles:
-        role.students = sorted(role.students, key=lambda s: s.sortable_name)
-
+    for assignment_group in config.assignment_groups:
+        assignment_group.assignments = sorted(assignment_group.assignments, key=lambda a: a.assignment_day)
+        if assignment_group.strategy == "NONE":
+            assignment_group.bandwidth = None
+        else:
+            assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
 
     with open(start.course_file_name, 'w') as f:
         dict_result = config.to_json(["assignment"])
         json.dump(dict_result, f, indent=2)
+
+    print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":

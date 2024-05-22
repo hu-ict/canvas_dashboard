@@ -67,11 +67,11 @@ def main(instance_name):
                         section_id = overrides['course_section_id']
                     else:
                         section_id = 0
-                    assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'],
-                                            canvas_assignment['assignment_group_id'], section_id,
-                                            canvas_assignment['grading_type'],
-                                            canvas_assignment['grading_standard_id'],
-                                            points_possible, assignment_date, unlock_date, date_to_day(start.start_date, assignment_date))
+                    # assignment = Assignment(canvas_assignment['id'], canvas_assignment['name'],
+                    #                         canvas_assignment['assignment_group_id'], section_id,
+                    #                         canvas_assignment['grading_type'],
+                    #                         canvas_assignment['grading_standard_id'],
+                    #                         points_possible, assignment_date, unlock_date, date_to_day(start.start_date, assignment_date))
                     # assignment_group.append_assignment(assignment)
             else:
                 if canvas_assignment['points_possible']:
@@ -137,7 +137,7 @@ def main(instance_name):
                 course_config.slb_groups.append(studentGroup)
                 print(canvas_group)
 
-
+    course_config.progress = start.progress
     course_config.perspectives = start.perspectives
     course_config.roles = start.roles
     with open(start.config_file_name, 'w') as f:

@@ -7,6 +7,7 @@ class Instance:
         self.category = category
         self.listen = {}
 
+
     def to_json(self):
         dict_result = {
             'name': self.name,
