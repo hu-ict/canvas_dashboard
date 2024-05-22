@@ -2,12 +2,12 @@
 # Inleiding
 Deze Python modules genereren een set van statische html-pagina's op basis van gegevens uit Canvas. De basis zijn de Canvas opdrachten (Assignments).
 # De workflow
-Er wordt gebruik gemaakt van verschillende stappen om dat het dashboard te komen.
+Er wordt gebruik gemaakt van verschillende stappen om tot het dashboard te komen.
 ![Activity Diagram](dashboard.png)
 ## Stap 1 - Genereren omgeving
 Om een nieuwe course omgeving te maken:
 - run het Python script `generate_start.py`
-
+Er wordt gevraagd naar een naam van de `instance` bijvoorbeeld `inno-sep24`. De `category` moet opgegeven worden, bijvoorbeeld `inno_courses`. Geef ook het `canvas_course_id` op.
 Hier worden attributen in JSON formaat opgegeven:
 ```json 
 {
@@ -105,7 +105,9 @@ Hier worden attributen in JSON formaat opgegeven:
   ]
 }
 ```
-## Stap 2 - Genereren configuratie
+## Stap 2 - Aanpassen start.json
+Ontwerp de perspectieven en rollen door de `start.json` aan te passen.
+## Stap 3 - Genereren configuratie
 Door het uitvoeren van het Python script `generate_config.py`. De Canvas API wordt aangeroepen om de structuur van Canvas uit te lezen.
 - Canvas secties (Sections)
 - Opdrachtgroepen (AssignmentGroups)
@@ -115,10 +117,10 @@ Verder worden de attributen aangemaakt (gekopieerd uit `start.json`):
 - Perspectiven
 - Rollen
 Dit bestand is ook weer een JSON-bestand met de naam `config_file_name` uit `start.json`
-## Stap 3 - Verrijken config perspectieven
+## Stap 4a - Verrijken config perspectieven
 Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica.
 ### Perspectives
-- Verwijder de niet relevante `perspectives`.
+- Verwijder de niet relevante `perspectives` of voeg er toe.
 - Bepaal welke `levels` gebruikt worden, dit is een koppeling met de niveaus in het `labels_colors.json` bestand.
 - Bepaal of er punten getoond moeten worden met `show_points` in het dashboard.
 - `assignment_group` heeft een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `perspective`.
@@ -128,18 +130,21 @@ Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica
   "name": "team",
   "levels": "samen",
   "show_points": false,
+  "show_flow: true,
   "assignment_groups": [73974]
 },
 "gilde": {
   "name": "gilde",
   "levels": "samen5",
   "show_points": false,
+  "show_flow: true,
   "assignment_groups": [73983]
 },
 "kennis": {
   "name": "kennis",
   "levels": "niveau",
   "show_points": true,
+  "show_flow: true,
   "assignment_groups": [73113]
 }
 
@@ -179,7 +184,7 @@ Bij de strategy `CONSTANT` is de waarde constant in de tijd. De constanten a en 
 
 Bij `POINTS` wordt de bandbreedte bepaald hoeveel punten er voor elk portfolio-item gehaald kan worden. Minder dan 55% in onder bandbreedte en boven 80% boven bandbreedte en dit cummulatief in de tijd. 
 
-## Stap 4 Verrijken groepen, rollen en docenten
+## Stap 4b Verrijken groepen, rollen en docenten
 ### Roles
 - Verwijder de niet relevante `roles`.
 Het id van de `assignment_groups` binnen de rollen vullen:
@@ -200,21 +205,18 @@ Secties worden gebruikt voor de rol van een student of de klas- waarin de studen
 Hier worden de `projects` en `assignment_groups` aan de `teachers` gekoppeld. 
 - `projects` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`.
 - `assignment_groups` hebben ook een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`.
-## Stap 5 - Update total course
-Door het uitvoeren van het Python script `generate_course.py` wordt de json bestand `course_file_name` gemaakt. De configuratie voor de `course` is nu klaar. Wanneer de structuur van studenten en assigments niet wijzigd kunnen bij een snapshot stap 1 tm 4 overgeslagen worden.
-## Stap 6
-Bereken de bandbreedte (onder, op en boven niveau)
-- `generate_bandwidth.py`
+## Stap 5 - Lees assignments
+Door het uitvoeren van het Python script `generate_course.py` wordt het json bestand `course_file_name` gemaakt. De assignments worden gelezen en aan het perspectief gekoppeld. De bandbreedte  (onder, op en boven niveau) wordt bepaald door de `strategy`. Stap 4a moet uitgevoerd zijn.
+## Stap 6 - Lees studenten
+Studenten worden uit Canvas gelezen. De project groepen en rollen worden gevuld. Docenten worden aan de juiste groepen gekoppeld. Start daarvoor het script: `generate_student.py`. Stap 4a, 4b en 5 moeten uitgevoerd zijn.
+
 Wanneer de structuur van studenten en assigments niet wijzigd kunnen bij een snapshot stap 1 tm 6 overgeslagen worden.
-## Stap 7 - MSTeams
-Lees de private team channels
-- `update_sites.py`
-## Stap 8 - Resultaten
+## Stap 7 - Resultaten
 De volgende stap is de resultaten/submissions uitlezen uit Canvas. Er wordt intensief gebruik gemaakt van de Canvas-API. Hier zijn twee varianten beschikbaar:
 - `generate_results.py`
 - `generate_submissions.py`
-Daarna moet nog de voortgang bepaald worden
-- `generate_progress.py`
+Als met attendance gewerkt wordt wordt het csv bestand ingelezen en gekoppeld aan het juiste perspectief.
+De voortgang wordt ook bepaald.
 ## Stap 9 - Dashboard
 Genereer de visuals:
 - `generate_plotly.py`
