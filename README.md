@@ -7,6 +7,7 @@ Er wordt gebruik gemaakt van verschillende stappen om tot het dashboard te komen
 ## Stap 1 - Genereren omgeving
 Om een nieuwe course omgeving te maken:
 - run het Python script `generate_start.py`
+
 Er wordt gevraagd naar een naam van de `instance` bijvoorbeeld `inno-sep24`. De `category` moet opgegeven worden, bijvoorbeeld `inno_courses`. Geef ook het `canvas_course_id` op.
 Hier worden attributen in JSON formaat opgegeven:
 ```json 
@@ -113,9 +114,11 @@ Door het uitvoeren van het Python script `generate_config.py`. De Canvas API wor
 - Opdrachtgroepen (AssignmentGroups)
 - Projectgroepen (
 - Docenten (Users)
+
 Verder worden de attributen aangemaakt (gekopieerd uit `start.json`):
 - Perspectiven
 - Rollen
+  
 Dit bestand is ook weer een JSON-bestand met de naam `config_file_name` uit `start.json`
 ## Stap 4a - Verrijken config perspectieven
 Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica.
@@ -187,6 +190,7 @@ Bij `POINTS` wordt de bandbreedte bepaald hoeveel punten er voor elk portfolio-i
 ## Stap 4b Verrijken groepen, rollen en docenten
 ### Roles
 - Verwijder de niet relevante `roles`.
+
 Het id van de `assignment_groups` binnen de rollen vullen:
 ```
     {
@@ -215,8 +219,8 @@ Wanneer de structuur van studenten en assigments niet wijzigd kunnen bij een sna
 De volgende stap is de resultaten/submissions uitlezen uit Canvas. Er wordt intensief gebruik gemaakt van de Canvas-API. Hier zijn twee varianten beschikbaar:
 - `generate_results.py`
 - `generate_submissions.py`
-Als met attendance gewerkt wordt wordt het csv bestand ingelezen en gekoppeld aan het juiste perspectief.
-De voortgang wordt ook bepaald.
+
+Als met attendance gewerkt wordt wordt het csv bestand ingelezen en gekoppeld aan het juiste perspectief. De voortgang wordt ook bepaald.
 ## Stap 9 - Dashboard
 Genereer de visuals:
 - `generate_plotly.py`
