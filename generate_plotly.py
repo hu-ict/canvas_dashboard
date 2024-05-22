@@ -6,7 +6,7 @@ from plotly.subplots import make_subplots
 from lib.build_plotly_perspective import plot_perspective, find_submissions, plot_overall_peilingen
 from lib.lib_date import get_date_time_loc, get_actual_date
 from lib.lib_plotly import peil_labels, get_color_bar
-from lib.file import read_start, read_course, read_results, read_labels_colors, read_course_instance
+from lib.file import read_start, read_course, read_results, read_levels, read_course_instance
 from lib.translation_table import translation_table
 from model.Submission import Submission
 
@@ -20,7 +20,7 @@ def main(instance_name):
     start = read_start(instances.get_start_file_name())
     course = read_course(start.course_file_name)
     results = read_results(start.results_file_name)
-    labels_colors = read_labels_colors("labels_colors.json")
+    levels = read_levels("levels.json")
 
     if results.actual_day > course.days_in_semester:
         course.days_in_semester = results.actual_day + 1
@@ -156,20 +156,20 @@ def main(instance_name):
             row = positions[perspective.name]['row']
             col = positions[perspective.name]['col']
             plot_perspective(row, col, fig, a_instances, a_start, a_course, perspective, a_peil_construction,
-                              results.actual_day, get_date_time_loc(a_actual_date), labels_colors)
+                              results.actual_day, get_date_time_loc(a_actual_date), levels)
 
         if a_instances.is_instance_of('inno_courses'):
             # Peil overall drie peilmomenten
             for peil in peil_labels[1:]:
                 peil_moment = a_student.get_peilmoment_by_query([peil, "overall"])
                 if peil_moment:
-                    plot_overall_peilingen(fig, positions[peil]['row'], positions[peil]['col'], a_start, a_course, peil_moment, labels_colors)
+                    plot_overall_peilingen(fig, positions[peil]['row'], positions[peil]['col'], a_start, a_course, peil_moment, levels)
                     #plot_gauge(positions[peil]['row'], positions[peil]['col'], fig, peil_moment.score + 0.5, a_start, a_course, labels_colors)
                 else:
                     l_assignment = a_course.get_peilmoment_by_query([peil, "overall"])
                     l_peil_moment = Submission(0, 0, 0, 0, l_assignment.name, l_assignment.assignment_date, l_assignment.assignment_day,
                                                None, None, False, None, None, -1, 3, 0)
-                    plot_overall_peilingen(fig, positions[peil]['row'], positions[peil]['col'], a_start, a_course, l_peil_moment, labels_colors)
+                    plot_overall_peilingen(fig, positions[peil]['row'], positions[peil]['col'], a_start, a_course, l_peil_moment, levels)
                     #plot_gauge(positions[peil]['row'], positions[peil]['col'], fig, 0.1, a_start, a_course, labels_colors)
 
         file_name = a_instances.get_plot_path() + a_student.name

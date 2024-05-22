@@ -7,8 +7,7 @@ from lib.build_late import build_late_list
 from lib.lib_date import get_actual_date
 from lib.lib_plotly import peil_labels
 from lib.plot_totals import plot_werkvoorraad, plot_voortgang
-from lib.file import read_course, read_start, read_results, read_progress, read_labels_colors, read_course_instance, \
-    read_workload
+from lib.file import read_course, read_start, read_results, read_progress, read_levels, read_course_instance, read_workload
 from model.WorkloadDay import WorkloadDay
 
 
@@ -99,7 +98,7 @@ def main(instance_name):
 
     course = read_course(start.course_file_name)
     results = read_results(start.results_file_name)
-    labels_colors = read_labels_colors("labels_colors.json")
+    levels = read_levels("levels.json")
 
     # if start.progress_perspective:
     peilen = {}
@@ -141,7 +140,7 @@ def main(instance_name):
     print("build_totals(start, course, results, student_totals, gilde, team_coaches)")
     build_totals(instances, start, course, results, student_totals)
     print("build_bootstrap_general(start, course, results, team_coaches, labels_colors)")
-    build_bootstrap_general(instances, start, course, results, team_coaches, labels_colors, student_totals)
+    build_bootstrap_general(instances, start, course, results, team_coaches, levels, student_totals)
 
     if instances.is_instance_of("inno_courses") or instances.is_instance_of("inno_courses_new"):
         # with open("dump.json", 'w') as f:
@@ -159,8 +158,8 @@ def main(instance_name):
         dict_result = workload_history.to_json()
         json.dump(dict_result, f, indent=2)
 
-    plot_werkvoorraad(instances, start, course, student_totals, workload_history, labels_colors)
-    plot_voortgang(instances, start, course, student_totals, read_progress(start.progress_file_name), labels_colors)
+    plot_werkvoorraad(instances, start, course, student_totals, workload_history, levels)
+    plot_voortgang(instances, start, course, student_totals, read_progress(start.progress_file_name), levels)
     print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 
 

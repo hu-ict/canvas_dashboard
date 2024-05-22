@@ -19,7 +19,7 @@ def read_attendance(attendance_file_name):
             else:
                 score = 1
             l_date = get_date_time_obj_alt(item["Class Date"])
-            l_submission = Submission(0, 72500, 0, item["Student ID"], "Attendance", l_date, l_date, True, score, 2, 0)
+            l_submission = Submission(0, 72500, 0, int(item["Student ID"]), "Attendance", l_date, l_date, True, score, 2, 0)
             appendances.append(l_submission)
     return appendances
 

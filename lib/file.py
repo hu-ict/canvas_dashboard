@@ -29,9 +29,9 @@ def read_start(start_file_name):
         return start
 
 
-def read_labels_colors(labels_file_name):
-    print("read_labels", labels_file_name)
-    with open(labels_file_name, mode='r', encoding="utf-8") as file_labels:
+def read_levels(levels_file_name):
+    print("read_levels", levels_file_name)
+    with open(levels_file_name, mode='r', encoding="utf-8") as file_labels:
         data = json.load(file_labels)
         level_series = LevelSeries.from_dict(data)
         return level_series

@@ -35,10 +35,9 @@
         "course_update_event": {
           "name": "course_update_event",
           "run": [
-            "update_course_assignments.py",
-            "generate_bandwidth.py",
+            "generate_course.py",
+            "generate_students.py",
             "generate_results.py",
-            "generate_progress.py",
             "generate_dashboard.py",
             "generate_plotly.py",
             "publish_dashboard.py",
@@ -49,7 +48,6 @@
           "name": "results_create_event",
           "run": [
             "generate_results.py",
-            "generate_progress.py",
             "generate_dashboard.py",
             "generate_plotly.py",
             "publish_dashboard.py",
@@ -60,7 +58,6 @@
           "name": "results_update_event",
           "run": [
             "generate_submissions.py",
-            "generate_progress.py",
             "generate_dashboard.py",
             "generate_plotly.py",
             "publish_dashboard.py",
