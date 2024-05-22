@@ -221,11 +221,11 @@ De volgende stap is de resultaten/submissions uitlezen uit Canvas. Er wordt inte
 - `generate_submissions.py`
 
 Als met attendance gewerkt wordt wordt het csv bestand ingelezen en gekoppeld aan het juiste perspectief. De voortgang wordt ook bepaald.
-## Stap 9 - Dashboard
+## Stap 8 - Dashboard
 Genereer de visuals:
 - `generate_plotly.py`
 - `generate_dashboard.py`
-## Stap 10 - Publiceren
+## Stap 9 - Publiceren
 Kopieer files naar de teams oneDrive voor docenten
 - `publish_dashboard.py`
 Kopieeer de JPG en HTML naar het private channel van de student
