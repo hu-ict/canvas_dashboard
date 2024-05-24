@@ -1,6 +1,6 @@
 # canvas_dashboard
 # Inleiding
-Deze Python modules genereren een set van statische html-pagina's op basis van gegevens uit Canvas. De basis zijn de Canvas opdrachten (Assignments). Na het uitvoeren van `git clone` moet in de directory `.\courses` het bestand `course_instances.json` gemaakt worden. De volgende initële vulling wordt er in gezet:
+Deze Python modules genereren een set van statische html-pagina's op basis van gegevens uit Canvas. De basis zijn de Canvas opdrachten (Assignments). Na het uitvoeren van `git clone` moet in de directory `.\courses` het bestand `course_instances.json` gemaakt worden. De volgende initële vulling is een voorbeeld:
 ```
 {
   "current_instance": "feb24_inno",
