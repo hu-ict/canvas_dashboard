@@ -4,10 +4,16 @@ import plotly.graph_objs as go
 
 from lib.lib_bandwidth import calc_dev
 from lib.lib_date import date_to_day, get_date_time_loc
-from lib.lib_plotly import get_marker_size, fraction_to_level3, hover_style, fraction_to_bin_level, get_score_bin_dict, \
-    peil_levels, peil_labels
+from lib.lib_plotly import get_marker_size, hover_style, fraction_to_bin_level, get_score_bin_dict
 
 from lib.lib_submission import NOT_GRADED, NO_DATA
+
+
+def get_punten_str(points):
+    if points == 1:
+        return " punt"
+    else:
+        return " punten"
 
 
 def get_hover_assignment(points, data_point):
@@ -15,21 +21,13 @@ def get_hover_assignment(points, data_point):
         # geen oplevering
         assignment = data_point
         if points:
-            if assignment.points == 1:
-                PUNTEN = " punt"
-            else:
-                PUNTEN = " punten"
-            return "<b>" + assignment.name + "</b>, " + str(assignment.points) + PUNTEN + ", deadline " + get_date_time_loc(assignment.assignment_date)
+            return "<b>" + assignment.name + "</b>, " + str(assignment.points) + get_punten_str(assignment.points) + ", deadline " + get_date_time_loc(assignment.assignment_date)
         else:
             return "<b>" + assignment.name + "</b>, deadline " + get_date_time_loc(assignment.assignment_date)
     else:
         submission = data_point
         if points:
-            if submission.points == 1:
-                PUNTEN = " punt"
-            else:
-                PUNTEN = " punten"
-            return "<b>" + submission.assignment_name + "</b>, " + str(submission.points) + PUNTEN + ", deadline " + get_date_time_loc(submission.submitted_date)
+            return "<b>" + submission.assignment_name + "</b>, " + str(submission.points) + get_punten_str(submission.points) + ", deadline " + get_date_time_loc(submission.submitted_date)
         else:
             return "<b>" + submission.assignment_name + "</b>, deadline " + get_date_time_loc(submission.assignment_date)
 
@@ -88,13 +86,10 @@ def get_hover_rubrics_comments(course, submission, levels):
         if criterion_score.rating_id:
             l_hover += "<br>- " + criterion.description + " <b>" + criterion.get_rating(criterion_score.rating_id).description + "</b>"
         else:
-            # if criterion_score.score:
-                if criterion_score.score == 0:
-                    l_hover += "<br>- " + criterion.description + " <b>"+levels.level_series["niveau"].levels[str(int(criterion_score.score))].label+"</b>"
-                else:
-                    l_hover += "<br>- " + criterion.description + " <b>"+str(criterion_score.score)+"</b>"
-            # else:
-            #     l_hover += "<br>- " + criterion.description + " <b>Geen waardering</b>"
+            if criterion_score.score == 0:
+                l_hover += "<br>- " + criterion.description + " <b>"+levels.level_series["niveau"].levels[str(int(criterion_score.score))].label+"</b>"
+            else:
+                l_hover += "<br>- " + criterion.description + " <b>"+str(criterion_score.score)+"</b>"
         if criterion_score.comment:
             value = "<i>" + criterion_score.comment + "</i>"
             wrapper = textwrap.TextWrapper(width=125)
@@ -108,8 +103,9 @@ def get_hover_day_bar(l_label, a_actual_day, a_actual_date):
     l_hover = f"<b>{l_label}</b>"
     l_hover += f"<br>dag {a_actual_day} in onderwijsperiode [{a_actual_date}]"
     if False:
-        l_hover += f"<br>{int(a_score)} punt(en)"
+        l_hover += f"<br>{int(a_score)} {get_punten_str(int(a_score))}"
     return l_hover
+
 
 def find_submissions(a_student, a_peil_construction):
     if a_peil_construction is None:
@@ -136,8 +132,6 @@ def plot_progress(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_level
                 series['color'].append(a_levels.level_series[a_start.grade_levels].levels[str(int(pleiling['submission'].score))].color)
             else:
                 series['color'].append(a_levels.level_series[a_start.progress.levels].levels[str(int(pleiling['submission'].score))].color)
-
-
         else:
             #Heeft nog geen beoordeling
             series['size'].append(get_marker_size(False)+2)
@@ -296,7 +290,7 @@ def plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
     l_submissions = sorted(a_perspective.submissions, key=lambda s: s.submitted_day)
     score_bin_dict = get_score_bin_dict(a_instances)
     x_submission = [0]
-    if l_assignment_group.strategy == "EXP_POINTS" or l_assignment_group.strategy == "LIN_POINTS":
+    if l_perspective.show_flow:
         y_submission = [0.5]
     else:
         y_submission = [0]
@@ -322,14 +316,13 @@ def plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
                 y_colors.append(score_bin_dict[a_perspective.name][fraction_to_bin_level(submission.score / submission.points)]['color'])
                 level = score_bin_dict[a_perspective.name][fraction_to_bin_level(submission.score / submission.points)]['niveau']
                 l_hover += get_hover_grade(a_levels, a_course, a_perspective, level, submission)
-                l_hover += "<br><b>" + level + "</b>, score: " + str(submission.score) + ", ingeleverd " + get_date_time_loc(submission.submitted_date)
             elif a_perspective.name == a_start.attendance_perspective:
                 # print(submission.flow, submission.score, submission.points)
                 y_colors.append(a_levels.level_series[a_course.perspectives[a_perspective.name].levels].levels[str(int(submission.score))].color)
                 l_label = a_levels.level_series[a_course.perspectives[a_perspective.name].levels].levels[str(int(submission.score))].label
                 l_hover += "<br><b>" + l_label + "</b>, score: " + str(submission.score) + ", datum " + get_date_time_loc(submission.submitted_date)
             else:
-                level = fraction_to_level3(submission.score / submission.points)
+                level = a_levels.level_series[a_course.perspectives[a_perspective.name].levels].get_level_by_fraction(submission.score / submission.points)
                 y_colors.append(a_levels.level_series[a_course.perspectives[a_perspective.name].levels].levels[str(level)].color)
                 l_hover += get_hover_grade(a_levels, a_course, a_perspective, level, submission)
         else:
@@ -338,7 +331,7 @@ def plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
         l_hover += get_hover_comments(submission.comments)
         l_hover += get_hover_rubrics_comments(a_course, submission, a_levels)
         y_hover.append(l_hover)
-        if l_assignment_group.strategy == "EXP_POINTS" or l_assignment_group.strategy == "LIN_POINTS":
+        if l_perspective.show_flow:
             y_submission.append(submission.flow)
         else:
             y_submission.append(cum_score)
@@ -363,7 +356,7 @@ def plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
         ),
         row=a_row, col=a_col
     )
-    if l_assignment_group.strategy == "EXP_POINTS" or l_assignment_group.strategy == "LIN_POINTS":
+    if l_perspective.show_flow:
         a_fig.update_yaxes(title_text="Voortgang", range=[0, 1], dtick=1, row=a_row, col=a_col)
     elif a_perspective.name == a_start.attendance_perspective:
         a_fig.update_yaxes(title_text="Percentage aanwezig", range=[0, l_assignment_group.total_points], row=a_row, col=a_col)

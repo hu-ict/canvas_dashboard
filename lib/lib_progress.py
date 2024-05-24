@@ -39,13 +39,18 @@ def get_progress(start, course, results, perspective):
                 perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_date)
                 total_score = 0
                 total_count = 0
+                last_flow = 0.5
                 for submission in perspective.submissions:
-                    perspective.last_score = date_to_day(start.start_date, submission.submitted_date)
-                    total_score += submission.score
-                    total_count += 1
-                    submission.flow = total_score / total_count * 100 / 2
-                    # print(submission.flow)
-                    perspective.sum_score = total_score
+                    if submission.graded:
+                        perspective.last_score = date_to_day(start.start_date, submission.submitted_date)
+                        total_score += submission.score
+                        total_count += 1
+                        submission.flow = total_score / total_count * 100 / 2
+                        # print(submission.flow)
+                        perspective.sum_score = total_score
+                        last_flow = submission.flow
+                    else:
+                        submission.flow = last_flow
                 perspective.progress = assignment_group.bandwidth.get_progress(assignment_group.strategy,
                                                                                results.actual_day,
                                                                                perspective.last_score,
@@ -55,6 +60,7 @@ def get_progress(start, course, results, perspective):
                     perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_date)
                     total_score = 0
                     total_count = 0
+                    last_flow = 0.5
                     for submission in perspective.submissions:
                         if submission.graded:
                             perspective.last_score = submission.assignment_day
@@ -63,9 +69,10 @@ def get_progress(start, course, results, perspective):
                             submission.flow = assignment_group.bandwidth.get_progress_range(perspective.last_score, total_score)
                             # print(submission.flow)
                             perspective.sum_score = total_score
+                            last_flow = submission.flow
                             # print("Graded")
                         else:
-                            pass
+                            submission.flow = last_flow
                             # print("Not graded")
                     if total_count == 0:
                         # Niet te bepalen

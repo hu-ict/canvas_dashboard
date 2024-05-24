@@ -87,7 +87,6 @@ def init_coaches_dict(a_course):
     return l_coaches
 
 
-
 def main(instance_name):
     g_actual_date = get_actual_date()
     instances = read_course_instance()

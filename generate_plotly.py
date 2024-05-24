@@ -1,11 +1,9 @@
-import math
 import sys
 
-import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 from lib.build_plotly_perspective import plot_perspective, find_submissions, plot_overall_peilingen
 from lib.lib_date import get_date_time_loc, get_actual_date
-from lib.lib_plotly import peil_labels, get_color_bar
+from lib.lib_plotly import peil_moments
 from lib.file import read_start, read_course, read_results, read_levels, read_course_instance
 from lib.translation_table import translation_table
 from model.Submission import Submission
@@ -54,21 +52,6 @@ def main(instance_name):
             [{'type': 'scatter', 'colspan': 3}, None, None, {'type': 'scatter', 'colspan': 3}, None, None],
             [{'type': 'scatter', "colspan": 3}, None, None, {'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
         ]
-    elif instances.is_instance_of('inno_courses_new'):
-        titles = ["Team", "Gilde", "Kennis"]
-        positions = {'team': {'row': 1, 'col': 1},
-                     'gilde': {'row': 1, 'col': 2},
-                     'kennis': {'row': 2, 'col': 1}}
-        specs = [
-            [
-                {'type': 'scatter'},
-                {'type': 'scatter'}
-            ],
-            [
-                {'type': 'scatter'},
-                {'type': 'scatter'}
-            ]
-        ]
     else:
         titles = ["Kennis", "Project"]
         positions = {'kennis': {'row': 1, 'col': 1},
@@ -92,7 +75,7 @@ def main(instance_name):
         assignment_group = a_course.find_assignment_group(a_course.progress.assignment_groups[0])
         for assignment in assignment_group.assignments:
             #zoek de juiste Assignment
-            for peil_label in peil_labels:
+            for peil_label in peil_moments:
                 if peil_label.lower() in assignment.name.lower():
                     #zoek het juiste Perspective
                     for perspective_name in l_peilingen:
@@ -100,50 +83,6 @@ def main(instance_name):
                             l_peilingen[perspective_name].append({'assignment': assignment, 'submission': None})
         return l_peilingen
 
-    def plot_gauge(a_row, a_col, a_fig, a_peil, a_start, a_course, a_labels_colors):
-        # plotting de gauge
-        colors_bar = get_color_bar(a_start, a_labels_colors)
-        plot_bgcolor = "#eee"
-        quadrant_colors = list(colors_bar.values())[1:]
-        n_quadrants = len(quadrant_colors)
-        total_reference_moments = 4
-
-        # deel de gauge op in n quadrants (met getallen die niet heel deelbaar zijn door n is het laatste quadrant
-        # nu korter)
-        gauge_quadrants = list(
-            range(0, math.ceil(total_reference_moments + total_reference_moments / n_quadrants),
-                  math.ceil(total_reference_moments / n_quadrants)))
-
-        l_gauge = go.Indicator(
-            mode="gauge",
-            value=a_peil,
-
-            delta={
-                'reference': 0,
-                'increasing': {
-                    'color': quadrant_colors[[a_peil > x for x in gauge_quadrants].index(False) - 1],
-                    'symbol': ''
-                }
-            },
-            gauge={
-                'axis': {
-                    'visible': False,
-                    'range': [None, total_reference_moments],
-                    'dtick': math.ceil(total_reference_moments / n_quadrants)
-                },
-
-                'bar': {'color': "#555555", 'thickness': 0.3},
-                'bgcolor': plot_bgcolor,
-                'steps': [
-                    {'line': {'width': 0}, 'range': [gauge_quadrants[i], gauge_quadrants[i + 1]],
-                     'color': quadrant_colors[i]}
-                    for i in range(len(gauge_quadrants) - 1)],
-                'threshold': {
-                    'line': {'color': "#555555", 'width': 12},
-                    'thickness': 0.6,
-                    'value': a_peil}})
-
-        a_fig.add_trace(l_gauge, a_row, a_col)
 
     def plot_student(a_instances, a_start, a_course, a_student, a_actual_date, a_peil_construction):
         if instances.is_instance_of('inno_courses'):
@@ -160,17 +99,17 @@ def main(instance_name):
 
         if a_instances.is_instance_of('inno_courses'):
             # Peil overall drie peilmomenten
-            for peil in peil_labels[1:]:
+            for peil in peil_moments[1:]:
                 peil_moment = a_student.get_peilmoment_by_query([peil, "overall"])
                 if peil_moment:
+                    # ingevuld
                     plot_overall_peilingen(fig, positions[peil]['row'], positions[peil]['col'], a_start, a_course, peil_moment, levels)
-                    #plot_gauge(positions[peil]['row'], positions[peil]['col'], fig, peil_moment.score + 0.5, a_start, a_course, labels_colors)
                 else:
+                    # nog niet ingevuld
                     l_assignment = a_course.get_peilmoment_by_query([peil, "overall"])
                     l_peil_moment = Submission(0, 0, 0, 0, l_assignment.name, l_assignment.assignment_date, l_assignment.assignment_day,
                                                None, None, False, None, None, -1, 3, 0)
                     plot_overall_peilingen(fig, positions[peil]['row'], positions[peil]['col'], a_start, a_course, l_peil_moment, levels)
-                    #plot_gauge(positions[peil]['row'], positions[peil]['col'], fig, 0.1, a_start, a_course, labels_colors)
 
         file_name = a_instances.get_plot_path() + a_student.name
         asci_file_name = file_name.translate(translation_table)

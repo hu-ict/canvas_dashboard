@@ -1,4 +1,4 @@
-peil_labels = ["Actueel", "Sprint 4", "Sprint 7", "Beoordeling"]
+peil_moments = ["Actueel", "Sprint 4", "Sprint 7", "Beoordeling"]
 peil_levels = [-2, -1, 0, 1, 2, 3]
 peil_history = {}
 
@@ -23,26 +23,6 @@ def get_score_bin_dict(course_instances):
     else:
         return {"project": score_binair_dict, "kennis": score_binair_dict}
 
-
-def get_color_bar(a_start, a_labels_colors):
-    colors_bar = {}
-    colors_bar["-1"] = a_labels_colors.level_series[a_start.progress.levels].levels["-1"].color
-    colors_bar["0"] = a_labels_colors.level_series[a_start.progress.levels].levels["0"].color
-    colors_bar["1"] = a_labels_colors.level_series[a_start.progress.levels].levels["1"].color
-    colors_bar["2"] = a_labels_colors.level_series[a_start.progress.levels].levels["2"].color
-    colors_bar["3"] = a_labels_colors.level_series[a_start.progress.levels].levels["3"].color
-    return colors_bar
-
-
-def fraction_to_level3(a_fraction):
-    if a_fraction < 0.01:
-        return 0
-    elif a_fraction < 0.55:
-        return 1
-    elif a_fraction < 0.80:
-        return 2
-    else:
-        return 3
 
 def fraction_to_level5(a_fraction):
     if a_fraction < 0.10:

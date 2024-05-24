@@ -3,7 +3,7 @@ import sys
 
 import plotly.graph_objs as go
 from lib.build_plotly_perspective import plot_bandbreedte_colored, plot_open_assignments
-from lib.file import read_start, read_course, read_progress, read_results, read_course_instance, read_labels_colors
+from lib.file import read_start, read_course, read_course_instance, read_levels
 from lib.lib_bandwidth import bandwidth_builder
 from lib.lib_date import get_actual_date
 from lib.translation_table import translation_table
@@ -17,7 +17,7 @@ def main(instance_name):
     print("Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
     course = read_course(start.course_file_name)
-    labels_colors = read_labels_colors("labels_colors.json")
+    labels_colors = read_levels("levels.json")
     for assignment_group in course.assignment_groups:
         assignment_group.assignments = sorted(assignment_group.assignments, key=lambda a: a.assignment_day)
         if assignment_group.strategy == "NONE":
@@ -29,7 +29,7 @@ def main(instance_name):
             continue
         fig = go.Figure()
         plot_bandbreedte_colored(0, 0, fig, course.days_in_semester, assignment_group, False)
-        fig.update_layout(title = assignment_group.name+ ", strategy " + assignment_group.strategy)
+        fig.update_layout(title = assignment_group.name+ ", strategy " + assignment_group.strategy, showlegend=False)
 
         if False:
             fig.update_yaxes(title_text="Voortgang", range=[0, 1], dtick=1)

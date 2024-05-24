@@ -5,7 +5,7 @@ import json
 from generate_attendance import read_attendance
 from lib.file import read_start, read_course, read_course_instance, read_progress
 from lib.lib_progress import get_progress, get_overall_progress
-from lib.lib_submission import submission_builder, count_graded, add_missed_assignments, read_submissions
+from lib.lib_submission import count_graded, add_missed_assignments, read_submissions
 from model.ProgressDay import ProgressDay
 from model.Result import *
 from lib.lib_date import get_actual_date, API_URL, get_assignment_date
@@ -38,7 +38,7 @@ def main(instance_name):
             # Perspective aanvullen met missed Assignments (niets ingeleverd)
             add_missed_assignments(start, course, results, perspective)
 
-    if start.attendance_report is not None or start.attendance_perspective is not None:
+    if len(start.attendance_perspective) > 0:
         attendances = read_attendance(start.attendance_report)
         not_found = set()
         for student in results.students:

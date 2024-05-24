@@ -2,27 +2,33 @@
   "samen": {
     "-2": {
       "label": "Leeg",
-      "color": "cornflowerblue"
+      "color": "cornflowerblue",
+      "fraction": null
     },
     "-1": {
       "label": "Leeg",
-      "color": "#aaaaaa"
+      "color": "#aaaaaa",
+      "fraction": null
     },
     "0": {
       "label": "Niet zichtbaar",
-      "color": "#EDF8F0"
+      "color": "#EDF8F0",
+      "fraction": 0.1
     },
     "1": {
       "label": "Startend",
-      "color": "#B8E3C4"
+      "color": "#B8E3C4",
+      "fraction": 0.55
     },
     "2": {
       "label": "Samenwerkend",
-      "color": "#85e043"
+      "color": "#85e043",
+      "fraction": 0.8
     },
     "3": {
       "label": "Excellerend",
-      "color": "#2bad4e"
+      "color": "#2bad4e",
+      "fraction": 1.0
     }
   },
   "samen5": {
@@ -62,27 +68,37 @@
   "niveau": {
     "-2": {
       "label": "Leeg",
-      "color": "cornflowerblue"
+      "color": "cornflowerblue",
+      "fraction": null
     },
     "-1": {
       "label": "Leeg",
-      "color": "#aaaaaa"
+      "color": "#aaaaaa",
+      "fraction": null
+
     },
     "0": {
       "label": "Niet zichtbaar",
-      "color": "#f25829"
+      "color": "#f25829",
+      "fraction": 0.01
+
     },
     "1": {
       "label": "Onder niveau",
-      "color": "#f2a529"
+      "color": "#f2a529",
+      "fraction": 0.55
+
     },
     "2": {
       "label": "Op niveau",
-      "color": "#85e043"
+      "color": "#85e043",
+      "fraction": 0.8
+
     },
     "3": {
       "label": "Boven niveau",
-      "color": "#2bad4e"
+      "color": "#2bad4e",
+      "fraction": 1.0
     }
   },
   "bin": {
@@ -106,19 +122,25 @@
   "attendance": {
     "-1": {
       "label": "Niet zichtbaar",
-      "color": "#EDF8F0"
+      "color": "#EDF8F0",
+      "fraction": null
+
     },
     "0": {
       "label": "Niet aanwezig",
-      "color": "#B8E3C4"
+      "color": "#B8E3C4",
+      "fraction": 0.01
     },
     "1": {
       "label": "Te laat",
-      "color": "#85e043"
+      "color": "#85e043",
+      "fraction": 0.5
+
     },
     "2": {
       "label": "Aanwezig",
-      "color": "#2bad4e"
+      "color": "#2bad4e",
+      "fraction": 1.0
     }
   },
   "progress": {
