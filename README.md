@@ -3,13 +3,11 @@
 Deze Python modules genereren een set van statische html-pagina's op basis van gegevens uit Canvas. De basis zijn de Canvas opdrachten (Assignments). Na het uitvoeren van `git clone` moet in de directory `.\courses` het bestand `course_instances.json` gemaakt worden. De volgende initële vulling is een voorbeeld:
 ```
 {
-  "current_instance": "feb24_inno",
+  "current_instance": "",
   "course_categories": {
     "inno_courses": {
       "category": "inno_courses",
-      "course_instances": [
-        "feb24_inno"
-      ]
+      "course_instances": []
     },
     "prop_courses": {
       "category": "prop_courses",
@@ -20,52 +18,7 @@ Deze Python modules genereren een set van statische html-pagina's op basis van g
       "course_instances": []
     }
   },
-  "instances": {
-    "feb24_inno": {
-      "name": "feb24_inno",
-      "category": "inno_courses",
-      "listen": {
-        "course_create_event": {
-          "name": "course_create_event",
-          "run": [
-            "generate_course.py",
-            "generate_results.py",
-            "generate_dashboard.py",
-            "generate_plotly.py",
-            "publish_dashboard.py"
-          ]
-        },
-        "course_update_event": {
-          "name": "course_update_event",
-          "run": [
-            "update_course.py",
-            "generate_results.py",
-            "generate_dashboard.py",
-            "generate_plotly.py",
-            "publish_dashboard.py"
-          ]
-        },
-        "results_create_event": {
-          "name": "results_create_event",
-          "run": [
-            "generate_results.py",
-            "generate_dashboard.py",
-            "generate_plotly.py",
-            "publish_dashboard.py"
-          ]
-        },
-        "results_update_event": {
-          "name": "results_update_event",
-          "run": [
-            "generate_submissions.py",
-            "generate_dashboard.py",
-            "generate_plotly.py",
-            "publish_dashboard.py"
-          ]
-        }
-      }
-    }
-  },
+  "instances": {},
   "events": {
     "course_create_event": {
       "name": "course_create_event",
