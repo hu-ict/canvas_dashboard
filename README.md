@@ -1,50 +1,13 @@
 # canvas_dashboard
 # Inleiding
-Deze Python modules genereren een set van statische html-pagina's op basis van gegevens uit Canvas. De basis zijn de Canvas opdrachten (Assignments). Na het uitvoeren van `git clone` moet in de directory `.\courses` het bestand `course_instances.json` gemaakt worden. De volgende initële vulling is een voorbeeld:
-```
-{
-  "current_instance": "",
-  "course_categories": {
-    "inno_courses": {
-      "category": "inno_courses",
-      "course_instances": []
-    },
-    "prop_courses": {
-      "category": "prop_courses",
-      "course_instances": []
-    },
-    "other_courses": {
-      "category": "other_courses",
-      "course_instances": []
-    }
-  },
-  "instances": {},
-  "events": {
-    "course_create_event": {
-      "name": "course_create_event",
-      "trigger": "TIME"
-    },
-    "course_update_event": {
-      "name": "course_update_event",
-      "trigger": "TIME"
-    },
-    "results_create_event": {
-      "name": "results_create_event",
-      "trigger": "TIME"
-    },
-    "results_update_event": {
-      "name": "results_update_event",
-      "trigger": "TIME"
-    }
-  }
-}
-```
+Deze Python modules genereren een set van statische html-pagina's op basis van gegevens uit Canvas. De basis zijn de Canvas opdrachten (Assignments). 
 # De workflow
 Er wordt gebruik gemaakt van verschillende stappen om tot het dashboard te komen.
 ![Activity Diagram](dashboard.png)
 ## Stap 1 - Genereren nieuwe instance (tenant)
 Om een nieuwe course omgeving te maken:
 - run het Python script `generate_start.py`
+Gebruik wordt gemaakt van het `course_instances.json`. Als dit bestand nog niet bestaat wordt deze gemaakt in de directory `.\courses`
 
 Er wordt gevraagd naar een naam van de `instance` bijvoorbeeld `inno-sep24`. De `category` moet opgegeven worden, bijvoorbeeld `inno_courses`. Geef ook het `canvas_course_id` op.
 Hier worden attributen in JSON formaat opgegeven:
