@@ -89,7 +89,10 @@ def main(instance_name):
                         total_group_points += canvas_assignment.points_possible
                         points_possible = canvas_assignment.points_possible
                     # print(f"C64 - [{canvas_assignment.grading_type}] points_possible {points_possible}")
-                elif canvas_assignment.grading_type == "pass_fail" or canvas_assignment.grading_type == 'letter_grade':
+                elif canvas_assignment.grading_type == "pass_fail":
+                    points_possible = 2
+                    total_group_points += points_possible
+                elif canvas_assignment.grading_type == 'letter_grade':
                     points_possible = int(canvas_assignment.points_possible)
                     total_group_points += points_possible
                     # print(f"C65 - {canvas_assignment.grading_type} points_possible {points_possible}")
