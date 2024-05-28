@@ -1,7 +1,7 @@
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import numpy as np
-from lib.lib_plotly import peil_levels, hover_style, peil_labels
+from lib.lib_plotly import peil_levels, hover_style, peil_moments
 
 
 def plot_progress_history(a_fig, a_row, a_col, a_progress_history, a_perspective_name, a_start, a_course, a_labels_colors):
@@ -91,7 +91,7 @@ def plot_peilingen(a_fig, a_row, a_col, student_totals, a_start, a_course, a_lab
         y_counts = []
         x_labels = []
         y_hover = []
-        for label in peil_labels:
+        for label in peil_moments:
             x_labels.append(label)
             y_counts.append(student_totals[a_start.progress.name][label]["overall"][level])
             y_hover.append(label+" "+a_labels_colors.level_series[a_start.progress.levels].levels[str(level)].label+" "+str(student_totals[a_start.progress.name][label]["overall"][level]))

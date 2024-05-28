@@ -12,12 +12,19 @@ from model.WorkloadHistory import WorkloadHistory
 from model.instance.CourseInstances import CourseInstances
 from model.perspective.LevelSeries import LevelSeries
 
+ENVIRONMENT_FILE_NAME = ".\courses\course_instances.json"
+
 
 def read_course_instance():
-    print("read_start", "course_instances.json")
-    with open("course_instances.json", mode='r', encoding="utf-8") as file_course_instances:
-        data = json.load(file_course_instances)
-        course_instances = CourseInstances.from_dict(data)
+    print("read_start", ENVIRONMENT_FILE_NAME)
+    if os.path.isfile(ENVIRONMENT_FILE_NAME):
+        with open(ENVIRONMENT_FILE_NAME, mode='r', encoding="utf-8") as file_course_instances:
+            data = json.load(file_course_instances)
+            course_instances = CourseInstances.from_dict(data)
+            return course_instances
+    else:
+        course_instances = CourseInstances("")
+        course_instances.new_environment()
         return course_instances
 
 

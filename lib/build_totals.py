@@ -1,5 +1,5 @@
 from lib.lib_date import date_to_day
-from lib.lib_plotly import peil_labels
+from lib.lib_plotly import peil_moments
 
 
 def student_total(a_perspective):
@@ -23,7 +23,7 @@ def count_student(a_start, a_student_totals, a_student):
     a_student_totals[a_start.progress.name]['Actueel']['overall'][peil] += 1
     for l_perspective in a_student.perspectives.values():
         add_total(a_student_totals['perspectives'][l_perspective.name]['count'], int(student_total(l_perspective.submissions)))
-    for peil_label in peil_labels[1:]:
+    for peil_label in peil_moments[1:]:
         peil = a_student.get_peilmoment_by_query([peil_label, "overall"])
         if peil:
             a_student_totals["progress"][peil_label]['overall'][peil.score] += 1

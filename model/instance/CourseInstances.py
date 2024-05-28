@@ -9,6 +9,16 @@ class CourseInstances:
         self.instances = {}
         self.events = {}
 
+    def new_environment(self):
+        self.course_categories['inno_courses'] = CourseCatergory('inno_courses', [])
+        self.course_categories['prop_courses'] = CourseCatergory('prop_courses', [])
+        self.course_categories['other_courses'] = CourseCatergory('other_courses', [])
+        self.events['course_create_event'] = Event('course_create_event', 'TIME')
+        self.events['course_update_event'] = Event('course_update_event', 'TIME')
+        self.events['results_create_event'] = Event('results_create_event', 'TIME')
+        self.events['results_update_event'] = Event('results_update_event', 'TIME')
+
+
     def to_json(self):
         dict_result = {
             'current_instance': self.current_instance,

@@ -2,10 +2,11 @@ import json
 import os
 import shutil
 
-from lib.file import read_course_instance
+from lib.file import read_course_instance, ENVIRONMENT_FILE_NAME
 from lib.lib_date import get_date_time_obj
 from model.Role import Role
 from model.Start import Start
+from model.instance.Instance import Instance
 from model.perspective.Perspective import Perspective
 
 instances = read_course_instance()
@@ -16,17 +17,22 @@ if instances.is_instance(new_instance):
 
 for category in instances.course_categories.keys():
     print(category)
-category = input("Choose a instance category: ")
+category = input("Choose an instance category: ")
 while category not in instances.course_categories.keys():
     print("Category doesn't exist", category)
-    category = input("Choose a instance category: ")
+    category = input("Choose an instance category: ")
 print("Creating new course instance", new_instance)
 
 instances.current_instance = new_instance
 instances.course_categories[category].course_instances.append(new_instance)
 print("Instance:", instances.current_instance)
 project_path = instances.get_project_path()
+
 course_instance = instances.current_instance
+instance = Instance(course_instance, category)
+instance.new_instance()
+instances.instances[instance.name] = instance
+
 start_file_name = instances.get_start_file_name()
 
 canvas_course_id = input("Canvas course_id: ")
@@ -65,6 +71,6 @@ with open(start_file_name, 'w') as f:
     dict_result = start.to_json([])
     json.dump(dict_result, f, indent=2)
 
-with open("course_instances.json", 'w') as f:
+with open(ENVIRONMENT_FILE_NAME, 'w') as f:
     dict_result = instances.to_json()
     json.dump(dict_result, f, indent=2)

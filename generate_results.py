@@ -3,6 +3,7 @@ from canvasapi import Canvas
 import json
 
 from generate_attendance import read_attendance
+from generate_progress import generate_history
 from lib.file import read_start, read_course, read_course_instance, read_progress
 from lib.lib_progress import get_progress, get_overall_progress
 from lib.lib_submission import count_graded, add_missed_assignments, read_submissions
@@ -76,13 +77,12 @@ def main(instance_name):
         for perspective in student.perspectives.values():
             perspectives.append(perspective.progress)
         progress = get_overall_progress(perspectives)
+        # print(student.name, perspectives, progress )
         student.progress = progress
         progress_day.progress[str(progress)] += 1
     progress_history.append_day(progress_day)
+
     # progress_history = generate_history(results)
-    with open(start.results_file_name, 'w') as f:
-        dict_result = results.to_json(['perspectives'])
-        json.dump(dict_result, f, indent=2)
 
     with open(start.progress_file_name, 'w') as f:
         dict_result = progress_history.to_json()

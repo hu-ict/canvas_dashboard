@@ -5,7 +5,7 @@ from lib.build_totals import build_totals
 from lib.build_bootstrap import build_bootstrap_general
 from lib.build_late import build_late_list
 from lib.lib_date import get_actual_date
-from lib.lib_plotly import peil_labels
+from lib.lib_plotly import peil_moments
 from lib.plot_totals import plot_werkvoorraad, plot_voortgang
 from lib.file import read_course, read_start, read_results, read_progress, read_levels, read_course_instance, read_workload
 from model.WorkloadDay import WorkloadDay
@@ -101,7 +101,7 @@ def main(instance_name):
 
     # if start.progress_perspective:
     peilen = {}
-    for peil in peil_labels:
+    for peil in peil_moments:
         peilen[peil] = {
             'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
             'team': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
@@ -109,7 +109,7 @@ def main(instance_name):
             'kennis': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
         }
 
-    if instances.is_instance_of("inno_courses") or instances.is_instance_of("inno_courses_new"):
+    if instances.is_instance_of("inno_courses"):
         student_totals = {
             'student_count': 0,
             'perspectives': {
