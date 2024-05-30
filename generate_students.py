@@ -52,7 +52,7 @@ def get_section_students(canvas_course, start, course):
         else:
             print("GS24 -", "Section not found", course_section.name)
 
-def add_perspectives_to_students(course):
+def add_perspectives_to_students(start, course):
     # StudentProgress toevoegen aan Students
     for student in course.students:
         student.student_progress = StudentProgress(course.progress.name, course.progress.assignment_groups)
@@ -70,6 +70,8 @@ def add_perspectives_to_students(course):
                 student.perspectives[perspective.name] = StudentPerspective(perspective.name, 0, 0, 0)
                 assignment_group_id = course.perspectives[perspective.name].assignment_groups[0]
                 student.perspectives[perspective.name].assignment_groups.append(assignment_group_id)
+            elif start.attendance_perspective == perspective.name:
+                student.perspectives[perspective.name] = StudentPerspective(perspective.name, 0, 0, 0)
             else:
                 print("GS31 - ERROR: geen assignment_group for perspective")
 
@@ -120,7 +122,7 @@ def main(instance_name):
             course.students.remove(student)
     course.student_count = len(course.students)
 
-    add_perspectives_to_students(course)
+    add_perspectives_to_students(start, course)
 
     # Students en StudentGroups koppelen
     canvas_group_categories = canvas_course.get_group_categories()
