@@ -122,7 +122,7 @@ def main(instance_name):
     canvas_group_categories = canvas_course.get_group_categories()
     for canvas_group_category in canvas_group_categories:
         print(canvas_group_category)
-        # ophalen projectgroepen
+        # ophalen secties projectgroepen
         if canvas_group_category.name == start.projects_groep_name:
             canvas_groups = canvas_group_category.get_groups()
             for canvas_group in canvas_groups:

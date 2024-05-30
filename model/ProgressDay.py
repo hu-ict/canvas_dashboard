@@ -1,11 +1,10 @@
 class ProgressDay:
-    def __init__(self, day):
+    def __init__(self, day, perspectives):
         self.day = day
         self.progress = {"-2": 0, "-1": 0, "0": 0, "1": 0, "2": 0, "3": 0}
         self.perspective = {}
-        self.perspective["team"] = {"-2": 0, "-1": 0, "0": 0, "1": 0, "2": 0, "3": 0}
-        self.perspective["gilde"] = {"-2": 0, "-1": 0, "0": 0, "1": 0, "2": 0, "3": 0}
-        self.perspective["kennis"] = {"-2": 0, "-1": 0, "0": 0, "1": 0, "2": 0, "3": 0}
+        for perspective in perspectives:
+            self.perspective[perspective] = {"-2": 0, "-1": 0, "0": 0, "1": 0, "2": 0, "3": 0}
 
     def to_json(self):
         return {
@@ -19,7 +18,7 @@ class ProgressDay:
 
     @staticmethod
     def from_dict(data_dict):
-        new = ProgressDay(data_dict['day'])
+        new = ProgressDay(data_dict['day'], {})
         new.progress = data_dict['progress']
         if "-2" not in new.progress.keys():
             new.progress["-2"] = 0

@@ -1,5 +1,5 @@
 peil_moments = ["Actueel", "Sprint 4", "Sprint 7", "Beoordeling"]
-peil_levels = [-2, -1, 0, 1, 2, 3]
+# peil_levels = [-2, -1, 0, 1, 2, 3]
 peil_history = {}
 
 hover_style=dict(
@@ -8,35 +8,35 @@ hover_style=dict(
         font_family="Helvetica"
 )
 
-score_binair_dict = {
-    -2:{'niveau': 'Open', 'color': 'cornflowerblue'},
-    -1:{'niveau': 'Leeg', 'color': '#cccccc'},
-    0: {'niveau': 'Niet voldaan', 'color': '#f2a529'},
-    1: {'niveau': 'Voldaan', 'color': '#85e043'}
-}
+# score_binair_dict = {
+#     -2:{'niveau': 'Open', 'color': 'cornflowerblue'},
+#     -1:{'niveau': 'Leeg', 'color': '#cccccc'},
+#     0: {'niveau': 'Niet voldaan', 'color': '#f2a529'},
+#     1: {'niveau': 'Voldaan', 'color': '#85e043'}
+# }
 
-def get_score_bin_dict(course_instances):
-    if course_instances.is_instance_of('prop_courses'):
-        return {"project": score_binair_dict, "final": score_binair_dict, "toets": score_binair_dict}
-    elif course_instances.is_instance_of('inno_courses'):
-        return {"kennis": score_binair_dict}
-    else:
-        return {"project": score_binair_dict, "kennis": score_binair_dict}
+# def get_score_bin_dict(course_instances):
+#     if course_instances.is_instance_of('prop_courses'):
+#         return {"project": score_binair_dict, "final": score_binair_dict, "toets": score_binair_dict}
+#     elif course_instances.is_instance_of('inno_courses'):
+#         return {"kennis": score_binair_dict}
+#     else:
+#         return {"project": score_binair_dict, "kennis": score_binair_dict}
 
 
-def fraction_to_level5(a_fraction):
-    if a_fraction < 0.10:
-        return 0
-    elif a_fraction < 0.40:
-        return 1
-    elif a_fraction < 0.60:
-        return 2
-    elif a_fraction < 0.75:
-        return 3
-    elif a_fraction < 0.85:
-        return 4
-    else:
-        return 5
+# def fraction_to_level5(a_fraction):
+#     if a_fraction < 0.10:
+#         return 0
+#     elif a_fraction < 0.40:
+#         return 1
+#     elif a_fraction < 0.60:
+#         return 2
+#     elif a_fraction < 0.75:
+#         return 3
+#     elif a_fraction < 0.85:
+#         return 4
+#     else:
+#         return 5
 
 def attendance_to_level(a_fraction):
     if a_fraction < 0.10:
@@ -49,11 +49,11 @@ def attendance_to_level(a_fraction):
         return 3
 
 
-def fraction_to_bin_level(a_fraction):
-    if a_fraction < 0.5:
-        return 0
-    else:
-        return 1
+# def fraction_to_bin_level(a_fraction):
+#     if a_fraction < 0.5:
+#         return 0
+#     else:
+#         return 1
 
 
 def get_marker_size(graded):

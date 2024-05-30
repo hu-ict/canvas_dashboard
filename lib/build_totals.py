@@ -33,17 +33,22 @@ def count_student(a_start, a_student_totals, a_student):
 
 def check_for_late(a_instances, a_course, a_student_totals, a_student, a_submission, a_perspective, a_actual_day):
     if not a_submission.graded:
-        if a_student.coach != "None":
+        print("BT81", a_student.name, a_student.coach)
+        if a_student.coach > 0:
+            print("BT82", a_student.name, a_student.coach)
             if a_perspective == 'team':
                 l_selector = a_course.find_teacher(a_student.coach).initials
             else:
                 l_selector = a_student.role
         else:
-            if a_instances.is_instance_of("inno_courses") or a_instances.is_instance_of("inno_courses_new"):
+            if a_instances.is_instance_of("inno_courses"):
                 l_selector = a_student.role
             else:
-                l_selector = a_course.find_student_group(a_student.group_id).name
+                print("Group id", a_student.group_id)
+                group = a_course.find_student_group(a_student.group_id)
+                l_selector = group.name
         late_days = a_actual_day - a_submission.submitted_day
+        print("BT85", a_perspective, l_selector)
         a_student_totals['perspectives'][a_perspective]['list'][l_selector].append(a_submission.to_json())
         if late_days <= 7:
             a_student_totals['perspectives'][a_perspective]['pending'][l_selector] += 1

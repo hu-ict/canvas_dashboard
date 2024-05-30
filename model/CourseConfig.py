@@ -4,6 +4,7 @@ from model.Role import Role
 from model.Section import Section
 from model.Student import Student
 from model.StudentGroup import StudentGroup
+from model.StudentLink import StudentLink
 from model.Teacher import Teacher
 from model.perspective.Level import Level
 from model.perspective.Perspective import Perspective
@@ -68,6 +69,12 @@ class CourseConfig:
     def find_student_group(self, group_id):
         for group in self.student_groups:
             if group.id == group_id:
+                return group
+        return None
+
+    def find_student_group_by_name(self, group_name):
+        for group in self.student_groups:
+            if group.name == group_name:
                 return group
         return None
 

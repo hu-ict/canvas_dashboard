@@ -101,7 +101,7 @@
       "fraction": 1.0
     }
   },
-  "bin": {
+  "bin2": {
     "-2": {
       "label": "Leeg",
       "color": "cornflowerblue"
@@ -111,12 +111,19 @@
       "color": "#aaaaaa"
     },
     "0": {
-      "label": "Niet voldaan",
-      "color": "#f25829"
+      "label": "Niet zichtbaar",
+      "color": "#f25829",
+      "fraction": 0.0
     },
     "1": {
+      "label": "Niet voldaan",
+      "color": "#f2a529",
+      "fraction": 0.5
+    },
+    "2": {
       "label": "Voldaan",
-      "color": "#85e043"
+      "color": "#2bad4e",
+      "fraction": 1.0
     }
   },
   "attendance": {

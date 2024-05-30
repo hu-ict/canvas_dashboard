@@ -9,7 +9,7 @@ from lib.lib_progress import get_progress, get_overall_progress
 from lib.lib_submission import count_graded, add_missed_assignments, read_submissions
 from model.ProgressDay import ProgressDay
 from model.Result import *
-from lib.lib_date import get_actual_date, API_URL, get_assignment_date
+from lib.lib_date import get_actual_date, API_URL
 
 
 def main(instance_name):
@@ -40,7 +40,7 @@ def main(instance_name):
             add_missed_assignments(start, course, results, perspective)
 
     if len(start.attendance_perspective) > 0:
-        attendances = read_attendance(start.attendance_report)
+        attendances = read_attendance(start)
         not_found = set()
         for student in results.students:
             student.perspectives[start.attendance_perspective].submissions = []
@@ -65,13 +65,16 @@ def main(instance_name):
     results.submission_count, results.not_graded_count = count_graded(results)
 
     progress_history = read_progress(start.progress_file_name)
-    progress_day = ProgressDay(results.actual_day)
+    progress_day = ProgressDay(results.actual_day, course.perspectives.keys())
 
+    # Bepaal voortgang per perspectief
     for student in results.students:
         for perspective in student.perspectives.values():
             get_progress(start, course, results, perspective)
+            print(perspective.name, progress_day.perspective.keys())
+            # if perspective.name in progress_day.perspective.keys():
             progress_day.perspective[perspective.name][str(perspective.progress)] += 1
-    # bepaal de totaal voortgang
+    # Bepaal de totaal voortgang
     for student in results.students:
         perspectives = []
         for perspective in student.perspectives.values():

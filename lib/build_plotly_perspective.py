@@ -4,7 +4,7 @@ import plotly.graph_objs as go
 
 from lib.lib_bandwidth import calc_dev
 from lib.lib_date import date_to_day, get_date_time_loc
-from lib.lib_plotly import get_marker_size, hover_style, fraction_to_bin_level, get_score_bin_dict
+from lib.lib_plotly import get_marker_size, hover_style
 
 from lib.lib_submission import NOT_GRADED, NO_DATA
 
@@ -288,7 +288,6 @@ def plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
     l_assignment_group = a_course.find_assignment_group(a_perspective.assignment_groups[0])
     l_perspective = a_course.find_perspective_by_name(a_perspective.name)
     l_submissions = sorted(a_perspective.submissions, key=lambda s: s.submitted_day)
-    score_bin_dict = get_score_bin_dict(a_instances)
     x_submission = [0]
     if l_perspective.show_flow:
         y_submission = [0.5]
@@ -312,22 +311,12 @@ def plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
                 cum_score += submission.score
             if submission.points == 0:
                 submission.points = 1
-            if submission.points <= 1.1:
-                y_colors.append(score_bin_dict[a_perspective.name][fraction_to_bin_level(submission.score / submission.points)]['color'])
-                level = score_bin_dict[a_perspective.name][fraction_to_bin_level(submission.score / submission.points)]['niveau']
-                l_hover += get_hover_grade(a_levels, a_course, a_perspective, level, submission)
-            elif a_perspective.name == a_start.attendance_perspective:
-                # print(submission.flow, submission.score, submission.points)
-                y_colors.append(a_levels.level_series[a_course.perspectives[a_perspective.name].levels].levels[str(int(submission.score))].color)
-                l_label = a_levels.level_series[a_course.perspectives[a_perspective.name].levels].levels[str(int(submission.score))].label
-                l_hover += "<br><b>" + l_label + "</b>, score: " + str(submission.score) + ", datum " + get_date_time_loc(submission.submitted_date)
-            else:
-                level = a_levels.level_series[a_course.perspectives[a_perspective.name].levels].get_level_by_fraction(submission.score / submission.points)
-                y_colors.append(a_levels.level_series[a_course.perspectives[a_perspective.name].levels].levels[str(level)].color)
-                l_hover += get_hover_grade(a_levels, a_course, a_perspective, level, submission)
+            level = a_levels.level_series[a_course.perspectives[a_perspective.name].levels].get_level_by_fraction(submission.score / submission.points)
+            y_colors.append(a_levels.level_series[a_course.perspectives[a_perspective.name].levels].levels[str(level)].color)
+            l_hover += get_hover_grade(a_levels, a_course, a_perspective, level, submission)
         else:
             y_colors.append(a_levels.level_series[a_course.perspectives[a_perspective.name].levels].levels["-2"].color)
-            l_hover += get_hover_grade(a_levels, a_course, a_perspective, level, submission)
+            l_hover += get_hover_grade(a_levels, a_course, a_perspective, "", submission)
         l_hover += get_hover_comments(submission.comments)
         l_hover += get_hover_rubrics_comments(a_course, submission, a_levels)
         y_hover.append(l_hover)
@@ -409,7 +398,8 @@ def plot_perspective(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
     for l_submission in a_perspective.submissions:
         l_assignments = remove_assignment(l_assignments, l_submission)
     plot_bandbreedte_colored(a_row, a_col, a_fig, a_course.days_in_semester, assignment_group, a_course.find_perspective_by_name(a_perspective.name).show_flow)
-    if a_start.progress is not None:
+    if a_start.progress is not None and len(a_peil_construction) > 0:
+        print(a_perspective.name, a_peil_construction)
         plot_progress(a_row, a_col, a_fig, a_start, a_course, a_peil_construction[a_perspective.name], a_levels)
     plot_day_bar(a_row, a_col, a_fig, a_start, assignment_group.total_points, a_actual_day, a_actual_date, a_perspective.progress, a_levels)
     plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_perspective, a_levels)

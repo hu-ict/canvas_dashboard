@@ -1,15 +1,14 @@
-# Haalt de studenten en de projecten op. Maakt een JSON waarin de url's naar de daily wordt opgeslagen.
 import csv
 import sys
 import json
 from lib.file import read_start, read_results, read_course_instance
-from lib.lib_date import get_actual_date, get_date_time_obj_alt
+from lib.lib_date import get_actual_date, get_date_time_obj_alt, date_to_day
 from model.Submission import Submission
 
-def read_attendance(attendance_file_name):
-    print("read_attendance", attendance_file_name)
+def read_attendance(start):
+    print("read_attendance", start.attendance_report)
     appendances = []
-    with open(attendance_file_name, mode='r', encoding="utf-8") as attendance_file:
+    with open(start.attendance_report, mode='r', encoding="utf-8") as attendance_file:
         DictReader_obj = csv.DictReader(attendance_file, delimiter=",")
         for item in DictReader_obj:
             if item["Attendance"] == "present":
@@ -19,9 +18,11 @@ def read_attendance(attendance_file_name):
             else:
                 score = 1
             l_date = get_date_time_obj_alt(item["Class Date"])
-            l_submission = Submission(0, 72500, 0, int(item["Student ID"]), "Attendance", l_date, l_date, True, score, 2, 0)
+            l_day = date_to_day(start.start_date, l_date),
+            l_submission = Submission(0, 72500, 0, int(item["Student ID"]), "Attendance", l_date, l_day, l_date, l_day, True, "Attendance", l_date, score, 2, 0)
             appendances.append(l_submission)
     return appendances
+
 
 def main(instance_name):
     g_actual_date = get_actual_date()

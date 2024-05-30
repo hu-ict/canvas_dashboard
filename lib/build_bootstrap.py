@@ -4,6 +4,8 @@ from lib.translation_table import translation_table
 
 def build_student_button(start, course, student, templates, labels_colors):
     role = course.get_role(student.role)
+    if not role:
+        return ""
     color = role.btn_color
     file_name = "./plotly/" + student.name.replace(" ", "%20") + ".html"
 #       file_name = plot_path + student.name + ".html"
@@ -16,6 +18,7 @@ def build_student_button(start, course, student, templates, labels_colors):
 
 def build_bootstrap_overzicht(a_templates, a_student_totals):
     team_html_string = ""
+
     for selector in a_student_totals["perspectives"]["team"]["list"].keys():
         # print(selector)
         team_html_string += a_templates["selector"].substitute(

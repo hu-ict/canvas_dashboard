@@ -75,9 +75,9 @@ class Student:
         # print("Student.from_dict", data_dict)
         new = Student(data_dict['id'], data_dict['group_id'], data_dict['name'], data_dict['sortable_name'], data_dict['coach'],
             data_dict['role'], data_dict['email'], data_dict[ 'site'], data_dict['progress'])
-        if data_dict['student_progress']:
+        if 'student_progress' in data_dict.keys():
             new.student_progress = StudentProgress.from_dict(data_dict['student_progress'])
-        if data_dict['perspectives']:
+        if 'perspectives' in data_dict.keys():
             for key in data_dict['perspectives'].keys():
                 new.perspectives[key] = StudentPerspective.from_dict(data_dict['perspectives'][key])
         else:

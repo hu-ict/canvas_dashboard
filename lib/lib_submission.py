@@ -2,6 +2,7 @@ from lib.lib_date import get_date_time_obj, date_to_day
 from model.Comment import Comment
 from model.CriteriumScore import CriteriumScore
 from model.Submission import Submission
+from random import randrange
 
 NOT_GRADED = "Nog niet beoordeeld."
 NO_SUBMISSION = "Niets ingeleverd voor de deadline"
@@ -69,7 +70,7 @@ def get_rubric_score(rubrics_submission, student):
                     rubric_score += points
                 except:
                     print(
-                        f"R41 Fout in criterium_score criterium {canvas_criterium} canvas_submission {rubrics_submission} student {student.name}")
+                        f"R41 Fout in criterium_score: student {student.name} criterium {canvas_criterium} canvas_submission {rubrics_submission}")
                     points = 0.00
 
                 rating_id = canvas_criterium[1]['rating_id']

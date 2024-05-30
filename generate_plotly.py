@@ -68,7 +68,7 @@ def main(instance_name):
 
     def peil_construct(a_start, a_course):
         l_peilingen = {}
-        if a_start.progress is None:
+        if a_start.progress is None or len(a_course.progress.assignment_groups) == 0:
             return l_peilingen
         for perspective in a_course.perspectives.values():
             l_peilingen[perspective.name] = []
@@ -88,7 +88,7 @@ def main(instance_name):
         if instances.is_instance_of('inno_courses'):
             fig = make_subplots(rows=2, cols=6, subplot_titles=titles, specs=specs, vertical_spacing=0.10, horizontal_spacing=0.08)
         else:
-            fig = make_subplots(rows=2, cols=2, subplot_titles=titles, specs=specs, vertical_spacing=0.10, horizontal_spacing=0.08)
+            fig = make_subplots(rows=2, cols=6, subplot_titles=titles, specs=specs, vertical_spacing=0.10, horizontal_spacing=0.08)
 
         fig.update_layout(height=900, width=1200, showlegend=False)
         for perspective in a_student.perspectives.values():

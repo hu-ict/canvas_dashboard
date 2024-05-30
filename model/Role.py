@@ -1,4 +1,5 @@
 from model.Student import Student
+from model.StudentLink import StudentLink
 
 
 class Role:
@@ -29,5 +30,5 @@ class Role:
         new_role = Role(data_dict['short'], data_dict['name'], data_dict['btn_color'])
         # new_role.sections = list(map(lambda s: s, data_dict['sections']))
         new_role.assignment_groups = data_dict['assignment_groups']
-        new_role.students = list(map(lambda s: Student.from_dict(s), data_dict['students']))
+        new_role.students = list(map(lambda s: StudentLink.from_dict(s), data_dict['students']))
         return new_role

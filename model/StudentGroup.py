@@ -1,4 +1,5 @@
 from model.Student import Student
+from model.StudentLink import StudentLink
 
 
 class StudentGroup:
@@ -26,6 +27,6 @@ class StudentGroup:
     def from_dict(data_dict):
         new_student_group = StudentGroup(data_dict['id'], data_dict['name'])
         new_student_group.teachers = data_dict['teachers']
-        new_student_group.students = list(map(lambda s: Student.from_dict(s), data_dict['students']))
+        new_student_group.students = list(map(lambda s: StudentLink.from_dict(s), data_dict['students']))
         return new_student_group
 
