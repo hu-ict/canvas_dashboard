@@ -6,7 +6,7 @@ from generate_attendance import read_attendance
 from lib.file import read_start, read_course, read_results, read_course_instance, read_progress
 from lib.lib_progress import get_progress, get_overall_progress
 from lib.lib_submission import submission_builder, count_graded, add_missed_assignments, read_submissions
-from lib.lib_date import API_URL, get_assignment_date, get_actual_date
+from lib.lib_date import API_URL, get_actual_date
 from model.ProgressDay import ProgressDay
 
 

@@ -5,7 +5,7 @@ import plotly.graph_objs as go
 from lib.build_plotly_perspective import plot_bandbreedte_colored, plot_open_assignments
 from lib.file import read_start, read_course, read_course_instance, read_levels
 from lib.lib_bandwidth import bandwidth_builder
-from lib.lib_date import get_actual_date
+from lib.lib_date import get_actual_date, get_date_time_loc
 from lib.translation_table import translation_table
 
 
@@ -29,8 +29,8 @@ def main(instance_name):
             continue
         fig = go.Figure()
         plot_bandbreedte_colored(0, 0, fig, course.days_in_semester, assignment_group, False)
-        fig.update_layout(title = assignment_group.name+ ", strategy " + assignment_group.strategy, showlegend=False)
-
+        actual_date = get_date_time_loc(g_actual_date)
+        fig.update_layout(title = f"{assignment_group.name}, strategy {assignment_group.strategy}, versie {actual_date}", showlegend=False)
         if False:
             fig.update_yaxes(title_text="Voortgang", range=[0, 1], dtick=1)
         # elif a_perspective.name == a_start.attendance_perspective:
