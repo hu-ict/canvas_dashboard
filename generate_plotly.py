@@ -99,7 +99,7 @@ def main(instance_name):
 
         if a_instances.is_instance_of('inno_courses'):
             # Peil overall drie peilmomenten
-            for peil in peil_moments[1:]:
+            for peil in peil_moments:
                 peil_moment = a_student.get_peilmoment_by_query([peil, "overall"])
                 if peil_moment:
                     # ingevuld

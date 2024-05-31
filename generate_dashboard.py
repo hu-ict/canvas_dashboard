@@ -99,17 +99,15 @@ def main(instance_name):
     results = read_results(start.results_file_name)
     level_series = read_levels("levels.json")
 
-    # if start.progress_perspective:
-    peilen = {}
-    for peil in peil_moments:
-        peilen[peil] = {
-            'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
-            'team': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
-            'gilde': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
-            'kennis': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
-        }
-
     if instances.is_instance_of("inno_courses"):
+        peilen = {}
+        for peil in peil_moments:
+            peilen[peil] = {
+                'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+                'team': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+                'gilde': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+                'kennis': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+            }
         student_totals = {
             'student_count': 0,
             'perspectives': {
@@ -120,11 +118,25 @@ def main(instance_name):
             'progress': peilen,
             'late': {'count': []}
         }
+    elif instances.is_instance_of("prop_courses"):
+        student_totals = {
+            'student_count': 0,
+            'perspectives': {},
+            'progress': {},
+            'late': {'count': []}
+        }
+        for perspective in course.perspectives.keys():
+            student_totals["perspectives"][perspective] = {'count': [], 'pending': init_sections_count(course), 'late': init_sections_count(course), 'to_late': init_sections_count(course), 'list': init_sections_list(course)}
+        for peil in peil_moments:
+            student_totals["progess"][peil] = {'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}}
+            for perspective in course.perspectives.keys():
+                student_totals["progess"][peil][perspective] = {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+
     else:
         student_totals = {
             'student_count': 0,
             'perspectives': {},
-            'progress': peilen,
+            'progress': {},
             'late': {'count': []}
         }
         for perspective in course.perspectives:

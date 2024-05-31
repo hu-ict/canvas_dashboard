@@ -63,7 +63,7 @@ def main(instance_name):
     results.submission_count, results.not_graded_count = count_graded(results)
 
     progress_history = read_progress(start.progress_file_name)
-    progress_day = ProgressDay(results.actual_day)
+    progress_day = ProgressDay(results.actual_day, course.perspectives.keys())
 
     for student in results.students:
         for perspective in student.perspectives.values():

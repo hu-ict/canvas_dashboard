@@ -39,7 +39,7 @@ def main(instance_name):
     course = read_course(start.course_file_name)
     results = read_results(start.results_file_name)
     progress_history = read_progress(start.progress_file_name)
-    progress_day = ProgressDay(results.actual_day)
+    progress_day = ProgressDay(results.actual_day, course.perspectives.keys())
 
     for student in results.students:
         for perspective in student.perspectives.values():

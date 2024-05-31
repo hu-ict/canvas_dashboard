@@ -24,28 +24,29 @@ def main(instance_name):
             assignment_group.bandwidth = None
         else:
             assignment_group.bandwidth = bandwidth_builder(assignment_group, course.days_in_semester)
-    for assignment_group in course.assignment_groups:
-        if assignment_group.strategy == "NONE":
-            continue
-        fig = go.Figure()
-        plot_bandbreedte_colored(0, 0, fig, course.days_in_semester, assignment_group, False)
-        actual_date = get_date_time_loc(g_actual_date)
-        fig.update_layout(title = f"{assignment_group.name}, strategy {assignment_group.strategy}, versie {actual_date}", showlegend=False)
-        if False:
-            fig.update_yaxes(title_text="Voortgang", range=[0, 1], dtick=1)
-        # elif a_perspective.name == a_start.attendance_perspective:
-        #     a_fig.update_yaxes(title_text="Percentage aanwezig", range=[0, l_assignment_group.total_points], row=a_row,
-        #                        col=a_col)
-        else:
-            fig.update_yaxes(title_text="Punten", range=[0, assignment_group.total_points])
-        fig.update_xaxes(title_text="Dagen in onderwijsperiode", range=[0, course.days_in_semester])
+    for perspective in course.perspectives.values():
+        for assignment_group_id in perspective.assignment_groups:
+            assignment_group = course.find_assignment_group(assignment_group_id)
+            if assignment_group.strategy == "NONE":
+                continue
+            fig = go.Figure()
+            plot_bandbreedte_colored(0, 0, fig, course.days_in_semester, assignment_group, False)
+            actual_date = get_date_time_loc(g_actual_date)
+            fig.update_layout(title=f"{assignment_group.name}, strategy {assignment_group.strategy}, versie {actual_date}", showlegend=False)
+            if False:
+                fig.update_yaxes(title_text="Voortgang", range=[0, 1], dtick=1)
+            if perspective.name == start.attendance_perspective:
+                a_fig.update_yaxes(title_text="Percentage aanwezig", range=[0, l_assignment_group.total_points], row=a_row, col=a_col)
+            else:
+                fig.update_yaxes(title_text="Punten", range=[0, assignment_group.total_points])
+            fig.update_xaxes(title_text="Dagen in onderwijsperiode", range=[0, course.days_in_semester])
 
-        plot_open_assignments(0, 0, fig, start, True, assignment_group.assignments, labels_colors)
+            plot_open_assignments(0, 0, fig, start, True, assignment_group.assignments, labels_colors)
 
-        file_name = instances.get_test_path() + assignment_group.name.lower()
-        asci_file_name = file_name.translate(translation_table)
-        fig.write_html(asci_file_name + ".html", include_plotlyjs="cdn")
-        fig.write_image(asci_file_name + ".jpeg")
+            file_name = instances.get_test_path() + assignment_group.name.lower()
+            asci_file_name = file_name.translate(translation_table)
+            fig.write_html(asci_file_name + ".html", include_plotlyjs="cdn")
+            fig.write_image(asci_file_name + ".jpeg")
 
     with open(start.course_file_name, 'w') as f:
         dict_result = course.to_json(["assignment"])

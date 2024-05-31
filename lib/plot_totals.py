@@ -64,35 +64,12 @@ def plot_workload_history(a_fig, a_row, a_col, a_workload_history):
         ), a_row, a_col)
 
 
-def plot_actuals(a_fig, a_row, a_col, a_progress_history, a_course, a_levels):
-    for level in a_levels["peil"]:
-        y_counts = []
-        x_labels = []
-        y_hover = []
-        for day in a_progress_history.days:
-            x_labels.append(day.day)
-            y_counts.append(day.progress[str(level)])
-            l_label = a_levels.level_series[a_course.perspectives[a_course.progress_perspective].levels].levels[str(level)].label
-            l_color = a_levels.level_series[a_course.perspectives[a_course.progress_perspective].levels].levels[str(level)].color
-            y_hover.append("Dag: "+str(day.day) + ", " + l_label + ", aantal: " + str(day.progress[str(level)]))
-        a_fig.add_trace(go.Bar(x=x_labels, y=y_counts,
-                               name=l_label,
-                               hoverinfo="text",
-                               hovertext=y_hover,
-                               hoverlabel=hover_style,
-                               text=y_counts,
-                               marker=dict(color=l_color)), a_row, a_col)
-    y_axis = len(a_course.students)
-    a_fig.update_yaxes(title_text="Aantal", range=[0, y_axis], row=a_row, col=a_col)
-
-
 def plot_peilingen(a_fig, a_row, a_col, student_totals, a_start, a_course, a_progress_levels):
     for level in a_progress_levels.levels.keys():
         y_counts = []
         x_labels = []
         y_hover = []
         for label in peil_moments[1:]:
-            print(level, label)
             x_labels.append(label)
             y_counts.append(student_totals[a_start.progress.name][label]["overall"][int(level)])
             y_hover.append(label+" "+a_progress_levels.levels[str(level)].label+" "+str(student_totals[a_start.progress.name][label]["overall"][int(level)]))
@@ -108,11 +85,13 @@ def plot_peilingen(a_fig, a_row, a_col, student_totals, a_start, a_course, a_pro
 
 
 def plot_voortgang(a_instances, a_start, a_course, student_totals, a_progress_history, a_progress_levels):
-    titles = ['Dagelijkse voortgang <b>studenten</b>', 'Peilingen', "", "Team", "Gilde", "Kennis"]
+    if a_instances.is_instance_of("inno_courses"):
+        titles = ['Dagelijkse voortgang <b>studenten</b>', 'Peilingen', "", "Team", "Gilde", "Kennis"]
+    else:
+        titles = ['Dagelijkse voortgang <b>studenten</b>', 'Peilingen', "Kennis", "Oriëntatie", "Professional Skill", "Aanwezigheid"]
     specs = [
         [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
         [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}]
-
     ]
     fig = make_subplots(rows=2, cols=3, specs=specs, subplot_titles=titles, vertical_spacing=0.15, horizontal_spacing=0.08)
     fig.update_layout(height=700, width=1200, showlegend=False)
@@ -136,25 +115,23 @@ def plot_voortgang(a_instances, a_start, a_course, student_totals, a_progress_hi
     fig.write_html(file_name, include_plotlyjs="cdn")
 
 def plot_werkvoorraad(a_instances, a_start, a_course, student_totals, a_workload_history):
+    specs = [
+        [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
+        [{'type': 'bar'}, {'type': 'xy'}, {'type': 'bar'}]
+    ]
     if a_instances.is_instance_of("inno_courses"):
         titles = ['Team', 'Gilde','Kennis',
                   'Dagelijkse werkvoorraad <b>docenten</b>', 'Vertraging']
-        specs = [
-            [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
-            [{'type': 'bar'}, {'type': 'xy'}, {'type': 'bar'}]
-        ]
-        fig = make_subplots(rows=2, cols=3, specs=specs, subplot_titles=titles, vertical_spacing=0.14, horizontal_spacing=0.08)
-        fig.update_layout(height=700, width=1200, showlegend=False)
+    elif a_instances.is_instance_of("prop_courses"):
+        titles = ['Kennis', 'Oriëntatie', 'Professional Skills',
+                  'Dagelijkse werkvoorraad <b>docenten</b>', 'Vertraging']
     else:
         titles = ['Project', 'Finals', 'Toets',
                   'Dagelijkse werkvoorraad <b>docenten</b>', 'Vertraging']
 
-        specs = [
-            [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
-            [{'type': 'bar'}, {'type': 'xy'}, {'type': 'bar'}]
-        ]
-        fig = make_subplots(rows=2, cols=3, specs=specs, subplot_titles=titles)
-        fig.update_layout(height=800, width=1200, showlegend=False)
+    fig = make_subplots(rows=2, cols=3, specs=specs, subplot_titles=titles)
+    fig.update_layout(height=800, width=1200, showlegend=False)
+
     fig.update_layout(
         title_text='Werkvoorraad',  # title of plot
         xaxis_title_text='Pending',  # xaxis perspective
@@ -173,7 +150,7 @@ def plot_werkvoorraad(a_instances, a_start, a_course, student_totals, a_workload
     col = 0
     for l_perspective in a_course.perspectives:
         if l_perspective != "aanwezig":
-            print(l_perspective)
+            print("PT01", l_perspective)
             col += 1
             x_team = list(student_totals['perspectives'][l_perspective]['pending'].keys())
             y_counts = list(student_totals['perspectives'][l_perspective]['pending'].values())

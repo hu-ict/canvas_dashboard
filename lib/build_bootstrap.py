@@ -16,25 +16,45 @@ def build_student_button(start, course, student, templates, labels_colors):
             'student_role': role.name, 'student_file': asci_file_name})
 
 
-def build_bootstrap_overzicht(a_templates, a_student_totals):
+def build_bootstrap_overzicht(a_instances, a_templates, a_student_totals):
     team_html_string = ""
+    if a_instances.is_instance_of('prop_courses'):
+        for selector in a_student_totals["perspectives"]["kennis"]["list"].keys():
+            # print(selector)
+            team_html_string += a_templates["selector"].substitute(
+                {'selector_file': "late_" + "team" + "_" + selector + ".html", 'selector': selector})
 
-    for selector in a_student_totals["perspectives"]["team"]["list"].keys():
-        # print(selector)
-        team_html_string += a_templates["selector"].substitute(
-            {'selector_file': "late_"+"team"+"_"+selector+".html", 'selector': selector})
+        gilde_html_string = ""
+        for selector in a_student_totals['perspectives']["gilde"]['list'].keys():
+            gilde_html_string += a_templates["selector"].substitute(
+                {'selector_file': "late_" + "gilde" + "_" + selector + ".html", 'selector': selector})
 
-    gilde_html_string = ""
-    for selector in a_student_totals['perspectives']["gilde"]['list'].keys():
-        gilde_html_string += a_templates["selector"].substitute(
-            {'selector_file': "late_"+"gilde"+"_"+selector+".html", 'selector': selector})
+        kennis_html_string = ""
+        for selector in a_student_totals['perspectives']["kennis"]['list'].keys():
+            kennis_html_string += a_templates["selector"].substitute(
+                {'selector_file': "late_" + "kennis" + "_" + selector + ".html", 'selector': selector})
 
-    kennis_html_string = ""
-    for selector in a_student_totals['perspectives']["kennis"]['list'].keys():
-        kennis_html_string += a_templates["selector"].substitute(
-            {'selector_file': "late_"+"kennis"+"_"+selector+".html", 'selector': selector})
+        overzicht_html_string = a_templates["overzicht"].substitute(
+            {'team_buttons': team_html_string, 'gilde_buttons': gilde_html_string,
+             'kennis_buttons': kennis_html_string})
 
-    overzicht_html_string = a_templates["overzicht"].substitute({'team_buttons': team_html_string, 'gilde_buttons': gilde_html_string, 'kennis_buttons': kennis_html_string})
+    else:
+        for selector in a_student_totals["perspectives"]["team"]["list"].keys():
+            # print(selector)
+            team_html_string += a_templates["selector"].substitute(
+                {'selector_file': "late_"+"team"+"_"+selector+".html", 'selector': selector})
+
+        gilde_html_string = ""
+        for selector in a_student_totals['perspectives']["gilde"]['list'].keys():
+            gilde_html_string += a_templates["selector"].substitute(
+                {'selector_file': "late_"+"gilde"+"_"+selector+".html", 'selector': selector})
+
+        kennis_html_string = ""
+        for selector in a_student_totals['perspectives']["kennis"]['list'].keys():
+            kennis_html_string += a_templates["selector"].substitute(
+                {'selector_file': "late_"+"kennis"+"_"+selector+".html", 'selector': selector})
+
+        overzicht_html_string = a_templates["overzicht"].substitute({'team_buttons': team_html_string, 'gilde_buttons': gilde_html_string, 'kennis_buttons': kennis_html_string})
     return overzicht_html_string
 
 def build_bootstrap_project(a_start, a_course, a_results, a_templates, a_labels_colors):
@@ -156,7 +176,7 @@ def build_bootstrap_general(a_instances, a_start, a_course, a_results, a_coaches
     student_groups_html_string = build_bootstrap_project(a_start, a_course, a_results, l_templates, a_labels_colors)
     role_groups_html_string = build_bootstrap_role(a_start, a_course, a_results, l_templates, a_labels_colors)
     progress_groups_html_string = build_bootstrap_progress(a_start, a_course, a_results, l_templates, a_labels_colors)
-    overicht_html_string = build_bootstrap_overzicht(l_templates, a_totals)
+    overicht_html_string = build_bootstrap_overzicht(a_instances, l_templates, a_totals)
 
     coaches_html_string = ''
     for coach in a_coaches.values():

@@ -392,14 +392,14 @@ def plot_perspective(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
     # slechts één assignment_group
     assignment_group = a_course.find_assignment_group(a_perspective.assignment_groups[0])
     if assignment_group is None:
-        print("could not find assignment_group", a_perspective.assignment_groups[0])
+        print("BPP01 - could not find assignment_group", a_perspective.assignment_groups[0])
         return
     l_assignments = assignment_group.assignments[:]
     for l_submission in a_perspective.submissions:
         l_assignments = remove_assignment(l_assignments, l_submission)
     plot_bandbreedte_colored(a_row, a_col, a_fig, a_course.days_in_semester, assignment_group, a_course.find_perspective_by_name(a_perspective.name).show_flow)
     if a_start.progress is not None and len(a_peil_construction) > 0:
-        print(a_perspective.name, a_peil_construction)
+        # print("BPP02 ", a_perspective.name, a_peil_construction)
         plot_progress(a_row, a_col, a_fig, a_start, a_course, a_peil_construction[a_perspective.name], a_levels)
     plot_day_bar(a_row, a_col, a_fig, a_start, assignment_group.total_points, a_actual_day, a_actual_date, a_perspective.progress, a_levels)
     plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_perspective, a_levels)
