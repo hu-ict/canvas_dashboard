@@ -56,7 +56,7 @@ def get_hover_peiling(a_peil_submissions, a_start, a_course, a_levels):
         if "beoordeling".lower() in a_peil_submissions.assignment_name.lower():
             hover += a_levels.level_series[a_start.grade_levels].levels[str(int(score))].label
         else:
-            hover += a_levels.level_series[a_start.progress.levels].levels[str(int(score))].label
+            hover += a_levels.level_series[a_start.level_moments.levels].levels[str(int(score))].label
         if score > -1:
             hover += ", bepaald door " + str(a_peil_submissions.grader_name) + " op " + get_date_time_loc(a_peil_submissions.graded_date)
             hover += get_hover_comments(a_peil_submissions.comments)
@@ -131,7 +131,7 @@ def plot_progress(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_level
             if "beoordeling" in pleiling['assignment'].name.lower():
                 series['color'].append(a_levels.level_series[a_start.grade_levels].levels[str(int(pleiling['submission'].score))].color)
             else:
-                series['color'].append(a_levels.level_series[a_start.progress.levels].levels[str(int(pleiling['submission'].score))].color)
+                series['color'].append(a_levels.level_series[a_start.level_moments.levels].levels[str(int(pleiling['submission'].score))].color)
         else:
             #Heeft nog geen beoordeling
             series['size'].append(get_marker_size(False)+2)
@@ -140,7 +140,7 @@ def plot_progress(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_level
             if "beoordeling" in pleiling['assignment'].name.lower():
                 series['color'].append(a_levels.level_series[a_start.grade_levels].levels["-1"].color)
             else:
-                series['color'].append(a_levels.level_series[a_start.progress.levels].levels["-1"].color)
+                series['color'].append(a_levels.level_series[a_start.level_moments.levels].levels["-1"].color)
     a_fig.add_trace(
         go.Scatter(
             x=series['x'],
@@ -201,8 +201,8 @@ def plot_open_assignments(a_row, a_col, a_fig, a_start, a_show_points, a_assignm
 def plot_day_bar(a_row, a_col, a_fig, a_start, a_total_points, a_actual_day, a_actual_date, a_progress, a_levels):
     if a_total_points <= 0:
         return
-    l_label = a_levels.level_series[a_start.progress.levels].levels[str(a_progress)].label
-    l_color = a_levels.level_series[a_start.progress.levels].levels[str(a_progress)].color
+    l_label = a_levels.level_series[a_start.level_moments.levels].levels[str(a_progress)].label
+    l_color = a_levels.level_series[a_start.level_moments.levels].levels[str(a_progress)].color
     l_hover = get_hover_day_bar(l_label, a_actual_day, a_actual_date)
     a_fig.add_trace(
         go.Scatter(
@@ -287,28 +287,21 @@ def plot_bandbreedte_colored(a_row, a_col, a_fig, a_days, a_assignment_group, a_
 def plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_perspective, a_levels):
     l_assignment_group = a_course.find_assignment_group(a_perspective.assignment_groups[0])
     l_perspective = a_course.find_perspective_by_name(a_perspective.name)
-    l_submissions = sorted(a_perspective.submissions, key=lambda s: s.submitted_day)
     x_submission = [0]
     if l_perspective.show_flow:
         y_submission = [0.5]
     else:
         y_submission = [0]
     y_hover = ['<b>Start</b> '+get_date_time_loc(a_start.start_date)]
-    y_colors = [a_levels.level_series[a_start.progress.levels].levels["-1"].color]
+    y_colors = [a_levels.level_series[a_start.level_moments.levels].levels["-1"].color]
     y_size = [get_marker_size(False)]
     cum_score = 0
-    l_last_graded_day = 0
-    for submission in l_submissions:
+    for submission in a_perspective.submissions:
         y_size.append(get_marker_size(submission.graded))
-        x_submission.append(submission.submitted_day)
+        x_submission.append(submission.assignment_day)
         l_hover = get_hover_assignment(l_perspective.show_points, submission)
         if submission.graded:
-            if submission.submitted_day > l_last_graded_day:
-                l_last_graded_day = submission.submitted_day
-            if a_perspective.name == a_start.attendance_perspective:
-                cum_score = submission.flow
-            else:
-                cum_score += submission.score
+            cum_score += submission.score
             if submission.points == 0:
                 submission.points = 1
             level = a_levels.level_series[a_course.perspectives[a_perspective.name].levels].get_level_by_fraction(submission.score / submission.points)
@@ -347,7 +340,7 @@ def plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
     )
     if l_perspective.show_flow:
         a_fig.update_yaxes(title_text="Voortgang", range=[0, 1], dtick=1, row=a_row, col=a_col)
-    elif a_perspective.name == a_start.attendance_perspective:
+    elif a_perspective.name == "attendance":
         a_fig.update_yaxes(title_text="Percentage aanwezig", range=[0, l_assignment_group.total_points], row=a_row, col=a_col)
     else:
         a_fig.update_yaxes(title_text="Punten", range=[0, l_assignment_group.total_points], row=a_row, col=a_col)
@@ -369,8 +362,8 @@ def plot_overall_peilingen(a_fig, a_row, a_col, a_start, a_course, a_peiling, a_
         label = a_levels.level_series[a_start.grade_levels].levels[str(int(a_peiling.score))].label
         color = a_levels.level_series[a_start.grade_levels].levels[str(int(a_peiling.score))].color
     else:
-        label = a_levels.level_series[a_start.progress.levels].levels[str(int(a_peiling.score))].label
-        color = a_levels.level_series[a_start.progress.levels].levels[str(int(a_peiling.score))].color
+        label = a_levels.level_series[a_start.level_moments.levels].levels[str(int(a_peiling.score))].label
+        color = a_levels.level_series[a_start.level_moments.levels].levels[str(int(a_peiling.score))].color
     if a_peiling.score <= 0:
         y_niveau = [0.2]
     else:
@@ -398,7 +391,7 @@ def plot_perspective(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
     for l_submission in a_perspective.submissions:
         l_assignments = remove_assignment(l_assignments, l_submission)
     plot_bandbreedte_colored(a_row, a_col, a_fig, a_course.days_in_semester, assignment_group, a_course.find_perspective_by_name(a_perspective.name).show_flow)
-    if a_start.progress is not None and len(a_peil_construction) > 0:
+    if a_start.level_moments is not None and len(a_peil_construction) > 0:
         # print("BPP02 ", a_perspective.name, a_peil_construction)
         plot_progress(a_row, a_col, a_fig, a_start, a_course, a_peil_construction[a_perspective.name], a_levels)
     plot_day_bar(a_row, a_col, a_fig, a_start, assignment_group.total_points, a_actual_day, a_actual_date, a_perspective.progress, a_levels)

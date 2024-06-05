@@ -13,7 +13,6 @@ def main(instance_name):
     start = read_start(instances.get_start_file_name())
     course = read_course(start.course_file_name)
     for assignment_group in course.assignment_groups:
-        assignment_group.assignments = sorted(assignment_group.assignments, key=lambda a: a.assignment_day)
         if assignment_group.strategy == "NONE":
             assignment_group.bandwidth = None
         else:

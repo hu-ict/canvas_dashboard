@@ -1,7 +1,3 @@
-from model.perspective.StudentProgress import StudentProgress
-from model.perspective.StudentPerspective import StudentPerspective
-
-
 class StudentLink:
     def __init__(self, a_student_id, a_name, a_sortable_name):
         self.id = a_student_id

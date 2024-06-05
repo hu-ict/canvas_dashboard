@@ -4,11 +4,11 @@ import sys
 from canvasapi import Canvas
 from lib.lib_bandwidth import bandwidth_builder
 from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
-from lib.file import read_start, read_config, read_course_instance
+from lib.file import read_start, read_config, read_course_instance, read_course
 from model.Student import Student
 from model.StudentLink import StudentLink
 from model.perspective.StudentPerspective import StudentPerspective
-from model.perspective.StudentProgress import StudentProgress
+from model.perspective.StudentLevelMoments import StudentLevelMoments
 
 
 def link_teachers(config):
@@ -42,8 +42,11 @@ def get_section_students(canvas_course, start, course):
                             student_group = course.find_student_group_by_name(section.name)
                             if student_group:
                                 student.group_id = student_group.id
-                                student_group.students.append(student)
-
+                                if len(student_group.teachers) > 0:
+                                    student.coach = student_group.teachers[0]
+                                student_link = StudentLink.from_student(student)
+                                # print("GS41 -", student_link)
+                                student_group.students.append(student_link)
                         student.role = section.role
                     else:
                         print("GS22 -", "Student not found", section_student["id"])
@@ -54,8 +57,13 @@ def get_section_students(canvas_course, start, course):
 
 def add_perspectives_to_students(start, course):
     # StudentProgress toevoegen aan Students
-    for student in course.students:
-        student.student_progress = StudentProgress(course.progress.name, course.progress.assignment_groups)
+    if course.level_moments is not None:
+        for student in course.students:
+            student.student_level_moments = StudentLevelMoments(course.level_moments.name, course.level_moments.assignment_groups)
+    if course.attendance is not None:
+        for student in course.students:
+            student.attendance = StudentPerspective(course.attendance.name, 0, 0, 0)
+            student.attendance.assignment_groups = course.attendance.assignment_groups
     # Perspectives toevoegen aan Students
     for student in course.students:
         student.perspectives = {}
@@ -70,8 +78,6 @@ def add_perspectives_to_students(start, course):
                 student.perspectives[perspective.name] = StudentPerspective(perspective.name, 0, 0, 0)
                 assignment_group_id = course.perspectives[perspective.name].assignment_groups[0]
                 student.perspectives[perspective.name].assignment_groups.append(assignment_group_id)
-            elif start.attendance_perspective == perspective.name:
-                student.perspectives[perspective.name] = StudentPerspective(perspective.name, 0, 0, 0)
             else:
                 print("GS31 - ERROR: geen assignment_group for perspective")
 
@@ -83,7 +89,7 @@ def main(instance_name):
         instances.current_instance = instance_name
     print("GS01 -", "Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
-    course = read_config(start.course_file_name)
+    course = read_course(start.course_file_name)
     # print("GS02 -", "Config", course)
     # Initialize a new Canvas object
     print(API_URL, start.api_key)
@@ -134,18 +140,18 @@ def main(instance_name):
             canvas_groups = canvas_group_category.get_groups()
             for canvas_group in canvas_groups:
                 print("GS40 -", canvas_group)
-                studentGroup = course.find_student_group(canvas_group.id)
-                if studentGroup:
+                student_group = course.find_student_group(canvas_group.id)
+                if student_group:
                     canvas_users = canvas_group.get_users()
                     for canvas_user in canvas_users:
                         student = course.find_student(canvas_user.id)
                         if student:
-                            student.group_id = studentGroup.id
-                            if len(studentGroup.teachers) > 0:
-                                student.coach = studentGroup.teachers[0]
+                            student.group_id = student_group.id
+                            if len(student_group.teachers) > 0:
+                                student.coach = student_group.teachers[0]
                             student_link = StudentLink.from_student(student)
-                            print("GS41 -", student_link)
-                            studentGroup.students.append(student_link)
+                            # print("GS41 -", student_link)
+                            student_group.students.append(student_link)
                         else:
                             print("GS42 - Student in Canvas project group not found", canvas_user.id)
         # Link students to slb_groups
@@ -161,7 +167,7 @@ def main(instance_name):
                         student = course.find_student(canvas_user.id)
                         if student:
                             student_link = StudentLink.from_student(student)
-                            print("GS48 -", student_link)
+                            # print("GS48 -", student_link)
                             slb_group.students.append(student_link)
                         else:
                             print("GS49 - Student in Canvas slb group not found", canvas_user.id)
@@ -171,7 +177,7 @@ def main(instance_name):
         students = course.find_students_by_role(role.short)
         for student in students:
             student_link = StudentLink.from_student(student)
-            print("GS53 -", student_link)
+            # print("GS53 -", student_link)
             role.students.append(student_link)
 
     for student_group in course.student_groups:

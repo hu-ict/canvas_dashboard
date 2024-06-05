@@ -19,7 +19,6 @@ def main(instance_name):
     course = read_course(start.course_file_name)
     labels_colors = read_levels("levels.json")
     for assignment_group in course.assignment_groups:
-        assignment_group.assignments = sorted(assignment_group.assignments, key=lambda a: a.assignment_day)
         if assignment_group.strategy == "NONE":
             assignment_group.bandwidth = None
         else:
@@ -35,10 +34,7 @@ def main(instance_name):
             fig.update_layout(title=f"{assignment_group.name}, strategy {assignment_group.strategy}, versie {actual_date}", showlegend=False)
             if False:
                 fig.update_yaxes(title_text="Voortgang", range=[0, 1], dtick=1)
-            if perspective.name == start.attendance_perspective:
-                a_fig.update_yaxes(title_text="Percentage aanwezig", range=[0, l_assignment_group.total_points], row=a_row, col=a_col)
-            else:
-                fig.update_yaxes(title_text="Punten", range=[0, assignment_group.total_points])
+            fig.update_yaxes(title_text="Punten", range=[0, assignment_group.total_points])
             fig.update_xaxes(title_text="Dagen in onderwijsperiode", range=[0, course.days_in_semester])
 
             plot_open_assignments(0, 0, fig, start, True, assignment_group.assignments, labels_colors)
@@ -47,6 +43,7 @@ def main(instance_name):
             asci_file_name = file_name.translate(translation_table)
             fig.write_html(asci_file_name + ".html", include_plotlyjs="cdn")
             fig.write_image(asci_file_name + ".jpeg")
+    # genereer ook attendance
 
     with open(start.course_file_name, 'w') as f:
         dict_result = course.to_json(["assignment"])

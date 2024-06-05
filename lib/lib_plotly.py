@@ -1,5 +1,3 @@
-peil_moments = ["Actueel", "Sprint 4", "Sprint 7", "Beoordeling"]
-
 hover_style=dict(
         bgcolor="#eeeeee",
         font_size=16,

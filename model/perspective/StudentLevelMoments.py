@@ -1,7 +1,7 @@
 from model.Submission import Submission
 
 
-class StudentProgress:
+class StudentLevelMoments:
     def __init__(self, name, assignment_groups):
         self.name = name
         self.assignment_groups = assignment_groups
@@ -15,7 +15,7 @@ class StudentProgress:
         }
 
     def __str__(self):
-        line = f' StudentPerspective({self.name}, {self.assignment_groups})\n'
+        line = f' StudentLevelMoments({self.name}, {self.assignment_groups})\n'
         for submission in self.submissions:
             line += " s " + str(submission) + "\n"
         return line
@@ -43,7 +43,7 @@ class StudentProgress:
     @staticmethod
     def from_dict(data_dict):
         # print("StudentPerspective.from_dict", data_dict)
-        new = StudentProgress(data_dict['name'], data_dict['assignment_groups'])
+        new = StudentLevelMoments(data_dict['name'], data_dict['assignment_groups'])
         if 'submissions' in data_dict.keys():
             new.submissions = list(map(lambda s: Submission.from_dict(s), data_dict['submissions']))
         return new

@@ -2,10 +2,9 @@ import sys
 from canvasapi import Canvas
 import json
 
-from generate_attendance import read_attendance
-from generate_progress import generate_history
 from lib.file import read_start, read_course, read_course_instance, read_progress
-from lib.lib_progress import get_progress, get_overall_progress
+from lib.lib_attendance import process_attendance
+from lib.lib_progress import get_progress, get_overall_progress, get_attendance_progress
 from lib.lib_submission import count_graded, add_missed_assignments, read_submissions
 from model.ProgressDay import ProgressDay
 from model.Result import *
@@ -39,28 +38,14 @@ def main(instance_name):
             # Perspective aanvullen met missed Assignments (niets ingeleverd)
             add_missed_assignments(start, course, results, perspective)
 
-    if len(start.attendance_perspective) > 0:
-        attendances = read_attendance(start)
-        not_found = set()
-        for student in results.students:
-            student.perspectives[start.attendance_perspective].submissions = []
-        for attendance in attendances:
-            student = results.find_student(int(attendance.student_id))
-            if student:
-                student.perspectives[start.attendance_perspective].submissions.append(attendance)
-            else:
-                not_found.add(attendance.student_id)
-                # print("Student niet gevonden", attendance.student_id)
-        print("Students not found", not_found)
-        with open(start.results_file_name, 'w') as f:
-            dict_result = results.to_json([])
-            json.dump(dict_result, f, indent=2)
+    if start.attendance is not None:
+        process_attendance(start, results)
     else:
-        print("No attendance")
+        print("GR10 - No attendance")
 
     for student in results.students:
         for perspective in student.perspectives.values():
-            perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_date)
+            perspective.submissions = sorted(perspective.submissions, key=lambda s: s.assignment_day)
 
     results.submission_count, results.not_graded_count = count_graded(results)
 
@@ -69,10 +54,11 @@ def main(instance_name):
 
     # Bepaal voortgang per perspectief
     for student in results.students:
+        if start.attendance is not None:
+            get_attendance_progress(start, course, results, student.attendance)
+            progress_day.perspective[start.attendance.name][str(student.attendance.progress)] += 1
         for perspective in student.perspectives.values():
             get_progress(start, course, results, perspective)
-            print(perspective.name, progress_day.perspective.keys())
-            # if perspective.name in progress_day.perspective.keys():
             progress_day.perspective[perspective.name][str(perspective.progress)] += 1
     # Bepaal de totaal voortgang
     for student in results.students:

@@ -1,4 +1,4 @@
-from model.perspective.StudentProgress import StudentProgress
+from model.perspective.StudentLevelMoments import StudentLevelMoments
 from model.perspective.StudentPerspective import StudentPerspective
 
 
@@ -13,8 +13,9 @@ class Student:
         self.site = a_site
         self.progress = a_progress
         self.role = a_role
-        self.student_progress = {}
-        self.perspectives = {}
+        self.student_level_moments = None
+        self.attendance = None
+        self.perspectives = None
 
     def get_perspective(self, name):
         for perspective in self.perspectives:
@@ -23,13 +24,13 @@ class Student:
         return None
 
     def get_peilmoment(self, assigment_id):
-        for peilmoment in self.student_progress.submissions:
+        for peilmoment in self.student_level_moments.submissions:
             if peilmoment.assignment_id == assigment_id:
                 return peilmoment
         return None
 
-    def get_peilmoment_by_query(self, a_query):
-        for submission in self.student_progress.submissions:
+    def get_peilmoment_submission_by_query(self, a_query):
+        for submission in self.student_level_moments.submissions:
             condition = 0
             for selector in a_query:
                 if selector.lower() in submission.assignment_name.lower():
@@ -39,9 +40,9 @@ class Student:
         return None
 
     def get_judgement(self, perspective_name):
-        for peilmoment in self.student_progress.submissions:
-            if perspective_name in peilmoment.assignment_name.lower() and "beoordeling" in peilmoment.assignment_name.lower():
-                return int(peilmoment.score)
+        for level_moment in self.student_level_moments.submissions:
+            if perspective_name in level_moment.assignment_name.lower() and "beoordeling" in level_moment.assignment_name.lower():
+                return int(level_moment.score)
         return None
 
 
@@ -56,9 +57,12 @@ class Student:
             'site': self.site,
             'role': self.role,
             'progress': self.progress,
-            'student_progress': self.student_progress.to_json(),
             'perspectives': {}
         }
+        if self.student_level_moments is not None:
+            dict_result['student_level_moments'] = self.student_level_moments.to_json()
+        if self.attendance is not None:
+            dict_result['attendance'] = self.attendance.to_json()
         if "perspectives" in scope:
             for key in self.perspectives:
                 dict_result['perspectives'][key] = self.perspectives[key].to_json()
@@ -75,11 +79,12 @@ class Student:
         # print("Student.from_dict", data_dict)
         new = Student(data_dict['id'], data_dict['group_id'], data_dict['name'], data_dict['sortable_name'], data_dict['coach'],
             data_dict['role'], data_dict['email'], data_dict[ 'site'], data_dict['progress'])
-        if 'student_progress' in data_dict.keys():
-            new.student_progress = StudentProgress.from_dict(data_dict['student_progress'])
+        if 'student_level_moments' in data_dict.keys() and data_dict['student_level_moments'] is not None:
+            new.student_level_moments = StudentLevelMoments.from_dict(data_dict['student_level_moments'])
+        if 'attendance' in data_dict.keys() and data_dict['attendance'] is not None:
+            new.attendance = StudentPerspective.from_dict(data_dict['attendance'])
+        new.perspectives = {}
         if 'perspectives' in data_dict.keys():
             for key in data_dict['perspectives'].keys():
                 new.perspectives[key] = StudentPerspective.from_dict(data_dict['perspectives'][key])
-        else:
-            new.perspectives = {}
         return new

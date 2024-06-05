@@ -1,5 +1,5 @@
 import sys
-from lib.lib_progress import get_overall_progress
+from lib.lib_progress import get_overall_progress, get_attendance_progress
 import json
 from lib.file import read_start, read_course, read_progress, read_results, read_course_instance
 from lib.lib_date import get_actual_date
@@ -42,6 +42,9 @@ def main(instance_name):
     progress_day = ProgressDay(results.actual_day, course.perspectives.keys())
 
     for student in results.students:
+        if start.attendance is not None:
+            get_attendance_progress(start, course, results, student.attendance)
+            progress_day.perspective[start.attendance.name][str(student.attendance.progress)] += 1
         for perspective in student.perspectives.values():
             get_progress(start, course, results, perspective)
             progress_day.perspective[perspective.name][str(perspective.progress)] += 1

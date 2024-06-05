@@ -7,6 +7,7 @@ from model.StudentGroup import StudentGroup
 from model.StudentLink import StudentLink
 from model.Teacher import Teacher
 from model.perspective.Level import Level
+from model.perspective.LevelMoments import LevelMoments
 from model.perspective.Perspective import Perspective
 from model.perspective.Perspectives import Perspectives
 
@@ -17,7 +18,8 @@ class CourseConfig:
         self.student_count = student_count
         self.days_in_semester = days_in_semester
         self.sections = []
-        self.progress = None
+        self.level_moments = None
+        self.attendance = None
         self.perspectives = {}
         self.roles = []
         self.teachers = []
@@ -51,19 +53,26 @@ class CourseConfig:
             'name': self.name,
             'student_count': self.student_count,
             'days_in_semester': self.days_in_semester,
-            'sections': list(map(lambda s: s.to_json(), self.sections)),
-            'progress': self.progress.to_json(),
-            'perspectives': {},
-            'roles': list(map(lambda r: r.to_json([]), self.roles)),
-            'teachers': list(map(lambda t: t.to_json(), self.teachers)),
-            'assignment_groups': list(map(lambda ag: ag.to_json(scope), self.assignment_groups)),
-            'student_groups': list(map(lambda sg: sg.to_json([]), self.student_groups)),
-            'slb_groups': list(map(lambda sg: sg.to_json([]), self.slb_groups)),
-            'students': list(map(lambda s: s.to_json(['perspectives']), self.students)),
+            'sections': list(map(lambda s: s.to_json(), self.sections))
         }
-
+        if self.attendance is not None:
+            dict_result['attendance'] = self.attendance.to_json()
+        else:
+            dict_result['attendance'] = None
+        if self.level_moments is not None:
+            dict_result['level_moments'] = self.level_moments.to_json()
+        else:
+            dict_result['level_moments'] = None
+        dict_result['perspectives'] = {}
         for key in self.perspectives:
             dict_result['perspectives'][key] = self.perspectives[key].to_json()
+        dict_result['roles'] = list(map(lambda r: r.to_json([]), self.roles))
+        dict_result['teachers'] = list(map(lambda t: t.to_json(), self.teachers))
+        dict_result['assignment_groups'] = list(map(lambda ag: ag.to_json(scope), self.assignment_groups))
+        dict_result['student_groups'] = list(map(lambda sg: sg.to_json([]), self.student_groups))
+        dict_result['slb_groups'] = list(map(lambda sg: sg.to_json([]), self.slb_groups))
+        dict_result['students'] = list(map(lambda s: s.to_json(['perspectives']), self.students))
+
         return dict_result
 
     def find_student_group(self, group_id):
@@ -135,6 +144,9 @@ class CourseConfig:
                 return section
         return None
 
+    def get_submission_perspectives(self):
+        return None
+
     def find_perspective_by_name(self, name):
         for perspective in self.perspectives.values():
             if name == perspective.name:
@@ -145,8 +157,8 @@ class CourseConfig:
         for perspective in self.perspectives.values():
             if group_id in perspective.assignment_groups:
                 return perspective
-        if group_id in self.progress.assignment_groups:
-            return "peil"
+        if group_id in self.level_moments.assignment_groups:
+            return "level_moments"
         return None
 
     def find_assignment_group_by_name(self, group_name):
@@ -179,8 +191,8 @@ class CourseConfig:
                 return self.find_assignment_group(role.assignment_group_id)
         return None
 
-    def get_peilmoment_by_query(self, a_query):
-        for assignment_group_id in self.progress.assignment_groups:
+    def get_level_moments_by_query(self, a_query):
+        for assignment_group_id in self.level_moments.assignment_groups:
             assignment_group = self.find_assignment_group(assignment_group_id)
             for assignment in assignment_group.assignments:
                 condition = 0
@@ -215,9 +227,17 @@ class CourseConfig:
             data_dict['name'],
             data_dict['days_in_semester'],
             data_dict['student_count'])
+        new.perspectives = {}
+        if 'level_moments' in data_dict.keys() and data_dict['level_moments'] is not None:
+            new.level_moments = LevelMoments.from_dict(data_dict['level_moments'])
+        if 'attendance' in data_dict.keys() and data_dict['attendance'] is not None:
+            new.attendance = Perspective.from_dict(data_dict['attendance'])
+        if 'perspectives' in data_dict.keys():
+            for key in data_dict['perspectives'].keys():
+                new.perspectives[key] = Perspective.from_dict(data_dict['perspectives'][key])
         new.sections = list(map(lambda s: Section.from_dict(s), data_dict['sections']))
         new.teachers = list(map(lambda t: Teacher.from_dict(t), data_dict['teachers']))
-        new.perspectives = {}
+
         new.judgement = {}
         new.roles = list(map(lambda r: Role.from_dict(r), data_dict['roles']))
         new.assignment_groups = list(
@@ -225,10 +245,4 @@ class CourseConfig:
         new.student_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['student_groups']))
         new.slb_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['slb_groups']))
         new.students = list(map(lambda s: Student.from_dict(s), data_dict['students']))
-        if data_dict['progress']:
-            new.progress = Perspective.from_dict(data_dict['progress'])
-
-        if 'perspectives' in data_dict.keys():
-            for key in data_dict['perspectives'].keys():
-                new.perspectives[key] = Perspective.from_dict(data_dict['perspectives'][key])
         return new

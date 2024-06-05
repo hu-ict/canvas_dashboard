@@ -5,7 +5,6 @@ from lib.build_totals import build_totals
 from lib.build_bootstrap import build_bootstrap_general
 from lib.build_late import build_late_list
 from lib.lib_date import get_actual_date
-from lib.lib_plotly import peil_moments
 from lib.plot_totals import plot_werkvoorraad, plot_voortgang
 from lib.file import read_course, read_start, read_results, read_progress, read_levels, read_course_instance, read_workload
 from model.WorkloadDay import WorkloadDay
@@ -101,7 +100,7 @@ def main(instance_name):
 
     if instances.is_instance_of("inno_courses"):
         peilen = {}
-        for peil in peil_moments:
+        for peil in course.level_moments.moments:
             peilen[peil] = {
                 'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
                 'team': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
@@ -115,28 +114,28 @@ def main(instance_name):
                 'gilde': {'count': [], 'pending': init_roles_count(course), 'late': init_roles_count(course), 'to_late': init_roles_count(course), 'list': init_roles_list(course)},
                 'kennis': {'count': [], 'pending': init_roles_count(course), 'late': init_roles_count(course), 'to_late': init_roles_count(course), 'list': init_roles_list(course)}
             },
-            'progress': peilen,
+            'level_moments': peilen,
             'late': {'count': []}
         }
     elif instances.is_instance_of("prop_courses"):
         student_totals = {
             'student_count': 0,
             'perspectives': {},
-            'progress': {},
+            'level_moments': {},
             'late': {'count': []}
         }
         for perspective in course.perspectives.keys():
             student_totals["perspectives"][perspective] = {'count': [], 'pending': init_sections_count(course), 'late': init_sections_count(course), 'to_late': init_sections_count(course), 'list': init_sections_list(course)}
-        for peil in peil_moments:
-            student_totals["progess"][peil] = {'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}}
+        for peil in course.level_moments.moments:
+            student_totals["level_moments"][peil] = {'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}}
             for perspective in course.perspectives.keys():
-                student_totals["progess"][peil][perspective] = {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+                student_totals["level_moments"][peil][perspective] = {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
 
     else:
         student_totals = {
             'student_count': 0,
             'perspectives': {},
-            'progress': {},
+            'level_moments': {},
             'late': {'count': []}
         }
         for perspective in course.perspectives:
@@ -170,7 +169,7 @@ def main(instance_name):
         json.dump(dict_result, f, indent=2)
 
     plot_werkvoorraad(instances, start, course, student_totals, workload_history)
-    plot_voortgang(instances, start, course, student_totals, read_progress(start.progress_file_name), level_series.level_series[start.progress.levels])
+    plot_voortgang(instances, start, course, student_totals, read_progress(start.progress_file_name), level_series.level_series[start.level_moments.levels])
     print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 
 

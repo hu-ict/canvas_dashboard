@@ -37,12 +37,12 @@ def main(instance_name):
         print(team)
         student_channels = get_channels(msteams_api.my_token, team_id)
         channel_count += len(student_channels)
-        # for channel in student_channels:
-        #     if channel in student_sites.keys():
-        #         print("Has site:", channel)
-        #         print(student_sites[channel])
-        #     else:
-        #         print("Has NO site", channel)
+        for channel in student_channels:
+            if channel in student_sites.keys():
+                print("Has site:", channel)
+                print(student_sites[channel])
+            else:
+                print("Has NO site", channel)
     print("Channels:", channel_count, "Sites:", len(student_sites))
 
 

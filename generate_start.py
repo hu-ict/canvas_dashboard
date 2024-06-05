@@ -7,6 +7,7 @@ from lib.lib_date import get_date_time_obj
 from model.Role import Role
 from model.Start import Start
 from model.instance.Instance import Instance
+from model.perspective.LevelMoments import LevelMoments
 from model.perspective.Perspective import Perspective
 
 instances = read_course_instance()
@@ -38,7 +39,7 @@ start_file_name = instances.get_start_file_name()
 canvas_course_id = input("Canvas course_id: ")
 
 
-start = Start(canvas_course_id, "Project Groups", "", "aanwezig", get_date_time_obj("2024-09-02T00:00:00Z"), get_date_time_obj("2025-01-31T23:59:59Z"),
+start = Start(canvas_course_id, "Project Groups", "", get_date_time_obj("2024-09-02T00:00:00Z"), get_date_time_obj("2025-01-31T23:59:59Z"),
               project_path + "templates//", "onedrive", "onedrive",
               project_path + "config_" + course_instance + ".json",
               project_path + "course_" + course_instance + ".json",
@@ -46,9 +47,9 @@ start = Start(canvas_course_id, "Project Groups", "", "aanwezig", get_date_time_
               project_path + "progress_" + course_instance + ".json",
               project_path + "workload_" + course_instance + ".json",
               project_path + "attendance_report.csv",
-              "", "grade", Perspective("progress", "progress", True, False))
-
-perspective = Perspective("project", "samen", True, False)
+              "", "grade")
+start.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", [])
+perspective = Perspective("project", "Project", "samen", True, False)
 start.perspectives[perspective.name] = perspective
 role = Role("role", "Student", "border-dark")
 start.roles.append(role)

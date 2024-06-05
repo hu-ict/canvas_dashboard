@@ -70,12 +70,12 @@ def get_rubric_score(rubrics_submission, student):
                     rubric_score += points
                 except:
                     print(
-                        f"R41 Fout in criterium_score: student {student.name} criterium {canvas_criterium} canvas_submission {rubrics_submission}")
+                        f"LS41 Fout in criterium_score: student {student.name}, canvas_submission {canvas_criterium}")
                     points = 0.00
 
                 rating_id = canvas_criterium[1]['rating_id']
                 comments = canvas_criterium[1]['comments']
-                criterium_score = CriteriumScore(id,rating_id, points, comments)
+                criterium_score = CriteriumScore(id, rating_id, points, comments)
                 # print(criterium_score)
                 criterium_scores.append(criterium_score)
         # except:
@@ -127,7 +127,11 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
                     rubrics_scores, rubric_score = get_rubric_score(rubrics_assessment, a_student)
                     if submission_score != rubric_score:
                         if rubric_score > 0:
-                            score = rubric_score
+                            if a_assignment.id == 295123:
+                                # uitzondering voor opdracht CSC - MITRE ATTACK
+                                score = submission_score
+                            else:
+                                score = rubric_score
                         else:
                             score = submission_score
                     else:
@@ -176,8 +180,6 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
 
 
 def add_missed_assignments(start, course, results, perspective):
-    if perspective.name == start.attendance_perspective:
-        return
     if len(perspective.assignment_groups) == 1:
         l_assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
         if l_assignment_group is None:
@@ -228,8 +230,12 @@ def read_submissions(a_canvas_course, a_start, a_course, a_results, a_total_refr
                         if l_submission is not None:
                             l_perspective = a_course.find_perspective_by_assignment_group(l_submission.assignment_group_id)
                             if l_perspective:
-                                if l_perspective == "peil":
-                                    student.student_progress.put_submission(l_submission)
+                                if l_perspective == "level_moments":
+                                    if a_total_refresh:
+                                        student.student_level_moments.submissions.append(l_submission)
+                                    else:
+                                        student.student_level_moments.put_submission(l_submission)
+                                    # print("LS21 - PERSPECTIVE level_moments")
                                 else:
                                     this_perspective = student.perspectives[l_perspective.name]
                                     if this_perspective:
@@ -239,10 +245,11 @@ def read_submissions(a_canvas_course, a_start, a_course, a_results, a_total_refr
                                             this_perspective.put_submission(l_submission)
 
                             else:
-                                print(f"R21 clould not find perspective for assignment_group {assignment_group.name}")
+                                print(f"LS21 clould not find perspective for assignment_group {assignment_group.name}")
                         # else:
                         #     print(f"R22 Error creating submission {assignment.name} for student {student.name}")
+
                     # else:
                     #     print("R23 Could not find student", canvas_submission.user_id)
             else:
-                print("R25 Could not find assignment", canvas_assignment.id, "within group", assignment_group.id)
+                print("LS25 Could not find assignment", canvas_assignment.id, "within group", assignment_group.id)

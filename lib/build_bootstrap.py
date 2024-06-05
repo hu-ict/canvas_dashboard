@@ -2,6 +2,7 @@ from string import Template
 
 from lib.translation_table import translation_table
 
+
 def build_student_button(start, course, student, templates, labels_colors):
     role = course.get_role(student.role)
     if not role:
@@ -10,54 +11,24 @@ def build_student_button(start, course, student, templates, labels_colors):
     file_name = "./plotly/" + student.name.replace(" ", "%20") + ".html"
 #       file_name = plot_path + student.name + ".html"
     asci_file_name = file_name.translate(translation_table)
-    l_progress_color = labels_colors.level_series[start.progress.levels].levels[str(student.progress)].color
+    l_progress_color = labels_colors.level_series[start.level_moments.levels].levels[str(student.progress)].color
     return templates['student'].substitute(
             {'btn_color': color, 'progress_color': l_progress_color, 'student_name': student.name,
             'student_role': role.name, 'student_file': asci_file_name})
 
 
-def build_bootstrap_overzicht(a_instances, a_templates, a_student_totals):
-    team_html_string = ""
-    if a_instances.is_instance_of('prop_courses'):
-        for selector in a_student_totals["perspectives"]["kennis"]["list"].keys():
+def build_bootstrap_canvas_overzicht(a_templates, a_perspectives, a_student_totals):
+    overzicht_html_string = ""
+    for perspective in a_perspectives:
+        list_html_string = ""
+        for selector in a_student_totals["perspectives"][perspective]["list"].keys():
             # print(selector)
-            team_html_string += a_templates["selector"].substitute(
-                {'selector_file': "late_" + "team" + "_" + selector + ".html", 'selector': selector})
-
-        gilde_html_string = ""
-        for selector in a_student_totals['perspectives']["gilde"]['list'].keys():
-            gilde_html_string += a_templates["selector"].substitute(
-                {'selector_file': "late_" + "gilde" + "_" + selector + ".html", 'selector': selector})
-
-        kennis_html_string = ""
-        for selector in a_student_totals['perspectives']["kennis"]['list'].keys():
-            kennis_html_string += a_templates["selector"].substitute(
-                {'selector_file': "late_" + "kennis" + "_" + selector + ".html", 'selector': selector})
-
-        overzicht_html_string = a_templates["overzicht"].substitute(
-            {'team_buttons': team_html_string, 'gilde_buttons': gilde_html_string,
-             'kennis_buttons': kennis_html_string})
-
-    else:
-        for selector in a_student_totals["perspectives"]["team"]["list"].keys():
-            # print(selector)
-            team_html_string += a_templates["selector"].substitute(
-                {'selector_file': "late_"+"team"+"_"+selector+".html", 'selector': selector})
-
-        gilde_html_string = ""
-        for selector in a_student_totals['perspectives']["gilde"]['list'].keys():
-            gilde_html_string += a_templates["selector"].substitute(
-                {'selector_file': "late_"+"gilde"+"_"+selector+".html", 'selector': selector})
-
-        kennis_html_string = ""
-        for selector in a_student_totals['perspectives']["kennis"]['list'].keys():
-            kennis_html_string += a_templates["selector"].substitute(
-                {'selector_file': "late_"+"kennis"+"_"+selector+".html", 'selector': selector})
-
-        overzicht_html_string = a_templates["overzicht"].substitute({'team_buttons': team_html_string, 'gilde_buttons': gilde_html_string, 'kennis_buttons': kennis_html_string})
+            list_html_string += a_templates["selector"].substitute({'selector_file': "late_" + perspective + "_" + selector + ".html", 'selector': selector})
+        overzicht_html_string += a_templates["overzicht"].substitute({'perspective': perspective, 'buttons': list_html_string})
     return overzicht_html_string
 
-def build_bootstrap_project(a_start, a_course, a_results, a_templates, a_labels_colors):
+
+def build_bootstrap_group(a_start, a_course, a_results, a_templates, a_labels_colors):
     # coaches = {}
     groups_html_string = ''
     for group in a_course.student_groups:
@@ -86,6 +57,7 @@ def build_bootstrap_project(a_start, a_course, a_results, a_templates, a_labels_
 
     return groups_html_string
 
+
 def build_bootstrap_role(a_start, a_course, a_results, a_templates, a_labels_colors):
     roles_html_string = ''
     for role in a_course.roles:
@@ -98,6 +70,7 @@ def build_bootstrap_role(a_start, a_course, a_results, a_templates, a_labels_col
         roles_html_string += role_html_string
     return roles_html_string
 
+
 def build_bootstrap_progress(a_start, a_course, a_results, a_templates, a_labels_colors):
     progress_html_string = ''
     for level in a_labels_colors.level_series['progress'].levels:
@@ -109,6 +82,7 @@ def build_bootstrap_progress(a_start, a_course, a_results, a_templates, a_labels
         level_html_string = a_templates['group'].substitute({'selector_type': 'progress_view', 'selector': 'level',  'student_group_name': titel, 'students': students_html_string})
         progress_html_string += level_html_string
     return progress_html_string
+
 
 def build_bootstrap_slb(a_start, a_course, a_results, a_templates, a_labels_colors):
     l_groups_html_string = ''
@@ -162,7 +136,54 @@ def load_templates(template_path):
             string_selector_html = file_selector_template.read()
             templates["selector"] = Template(string_selector_html)
 
+    with open(template_path + 'template_students_tabs.html', mode='r', encoding="utf-8") as file_students_tabs_template:
+            string_students_tabs_html = file_students_tabs_template.read()
+            templates["students_tabs"] = Template(string_students_tabs_html)
+
+    with open(template_path + 'template_students_tab.html', mode='r', encoding="utf-8") as file_students_tab_template:
+            string_students_tab_html = file_students_tab_template.read()
+            templates["students_tab"] = Template(string_students_tab_html)
+
+    with open(template_path + 'template_overzichten.html', mode='r', encoding="utf-8") as file_students_tab_template:
+            string_students_tab_html = file_students_tab_template.read()
+            templates["overzichten"] = Template(string_students_tab_html)
+
     return templates
+
+
+def build_bootstrap_students_tabs(a_start, a_course, a_results, a_templates, a_labels_colors, a_totals):
+    tabs = ["Groepen"]
+    if len(a_course.roles) > 1:
+        tabs.append("Rollen")
+    tabs.append("Voortgang")
+    if a_start.slb_groep_name:
+        tabs.append("SLB")
+    tabs.append("Overzichten")
+    html_tabs = ""
+    for tab in tabs:
+        if tab == "Groepen":
+            students_html_string = build_bootstrap_group(a_start, a_course, a_results, a_templates, a_labels_colors)
+        elif tab == "Rollen":
+            students_html_string = build_bootstrap_role(a_start, a_course, a_results, a_templates, a_labels_colors)
+        elif tab == "Voortgang":
+            students_html_string = build_bootstrap_progress(a_start, a_course, a_results, a_templates, a_labels_colors)
+        elif tab == "SLB":
+            students_html_string = build_bootstrap_slb(a_start, a_course, a_results, a_templates, a_labels_colors)
+        else:
+            students_html_string = a_templates['overzichten'].template
+            perspectives = []
+            for perspective in a_course.perspectives.keys():
+                perspectives.append(perspective)
+            students_html_string += build_bootstrap_canvas_overzicht(a_templates, perspectives, a_totals)
+
+        html_tab = ""
+        for tab1 in tabs:
+            if tab == tab1:
+                html_tab += a_templates['students_tab'].substitute({'tab': tab1, 'active': 'active', 'aria': 'page'})
+            else:
+                html_tab += a_templates['students_tab'].substitute({'tab': tab1, 'active': '', 'aria': 'false'})
+        html_tabs += a_templates['students_tabs'].substitute({'tab': tab, 'tabs': html_tab, 'students': students_html_string})
+    return html_tabs
 
 
 def get_initials(item):
@@ -172,11 +193,18 @@ def get_initials(item):
 def build_bootstrap_general(a_instances, a_start, a_course, a_results, a_coaches, a_labels_colors, a_totals):
     l_semester_day = (a_results.actual_date - a_start.start_date).days
     l_templates = load_templates(a_start.template_path)
+    tabs_html_string = build_bootstrap_students_tabs(a_start, a_course, a_results, l_templates, a_labels_colors, a_totals)
 
-    student_groups_html_string = build_bootstrap_project(a_start, a_course, a_results, l_templates, a_labels_colors)
-    role_groups_html_string = build_bootstrap_role(a_start, a_course, a_results, l_templates, a_labels_colors)
-    progress_groups_html_string = build_bootstrap_progress(a_start, a_course, a_results, l_templates, a_labels_colors)
-    overicht_html_string = build_bootstrap_overzicht(a_instances, l_templates, a_totals)
+    # student_groups_html_string = build_bootstrap_group(a_start, a_course, a_results, l_templates, a_labels_colors)
+    # role_groups_html_string = build_bootstrap_role(a_start, a_course, a_results, l_templates, a_labels_colors)
+    # progress_groups_html_string = build_bootstrap_progress(a_start, a_course, a_results, l_templates, a_labels_colors)
+    # slb_groups_html_string = build_bootstrap_slb(a_start, a_course, a_results, l_templates, a_labels_colors)
+
+    # perspectives = []
+    # for perspective in a_course.perspectives.keys():
+    #     if perspective != a_start.attendance_perspective:
+    #         perspectives.append(perspective)
+    # overicht_html_string = build_bootstrap_overzicht(a_instances, l_templates, perspectives, a_totals)
 
     coaches_html_string = ''
     for coach in a_coaches.values():
@@ -189,7 +217,7 @@ def build_bootstrap_general(a_instances, a_start, a_course, a_results, a_coaches
             {'button': role.btn_color, 'role': role.short})
     percentage = str(l_semester_day / a_course.days_in_semester * 100) + "%"
     actual_date_str = a_results.actual_date.strftime("%d-%m-%Y %H:%M")
-    slb_groups_html_string = build_bootstrap_slb(a_start, a_course, a_results, l_templates, a_labels_colors)
+
     index_html_string = l_templates['index'].substitute(
         {'course_name': a_course.name, 'aantal_studenten': a_course.student_count, 'aantal_teams': len(a_course.student_groups),
          'submission_count': a_results.submission_count, 'not_graded_count': a_results.not_graded_count,
@@ -197,11 +225,13 @@ def build_bootstrap_general(a_instances, a_start, a_course, a_results, a_coaches
          'percentage': percentage,
          'roles': roles_string,
          'coaches': coaches_html_string,
-         'student_groups': student_groups_html_string,
-         'slb_groups': slb_groups_html_string,
-         'role_groups': role_groups_html_string,
-         'progress_groups': progress_groups_html_string,
-         'overzicht': overicht_html_string})
+         'tabs_html_string': tabs_html_string})
+
+         # 'student_groups': student_groups_html_string,
+         # 'slb_groups': slb_groups_html_string,
+         # 'role_groups': role_groups_html_string,
+         # 'progress_groups': progress_groups_html_string,
+         # 'overzicht': overicht_html_string})
 
     with open(a_instances.get_html_path() + 'index.html', mode='w', encoding="utf-8") as file_index:
         file_index.write(index_html_string)

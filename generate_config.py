@@ -137,7 +137,8 @@ def main(instance_name):
                 course_config.slb_groups.append(studentGroup)
                 print(canvas_group)
 
-    course_config.progress = start.progress
+    course_config.level_moments = start.level_moments
+    course_config.attendance = course_config.attendance
     course_config.perspectives = start.perspectives
     course_config.roles = start.roles
     with open(start.config_file_name, 'w') as f:

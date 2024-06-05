@@ -40,18 +40,21 @@ def get_rubrics(canvas_rubrics):
 
 def get_uses_assignment_groups(config):
     uses_assignment_groups = []
-    if len(config.progress.assignment_groups) > 0:
-        uses_assignment_groups += config.progress.assignment_groups
+    if config.level_moments is not None:
+        if len(config.level_moments.assignment_groups) > 0:
+            uses_assignment_groups += config.level_moments.assignment_groups
+        else:
+            print("GC01 - WARNING no assignments_group for level_moments perspective ", config.level_moments.name)
     else:
-        print("GC01 - WARNING no assignments_group for progress perspective ", config.progress.name)
+        print("GC03 - NO level_moments perspective ")
 
     for perspective in config.perspectives.values():
         if len(perspective.assignment_groups) > 0:
             uses_assignment_groups += perspective.assignment_groups
         else:
-            print("GC02 - WARNING no assignments_group for perspective ", perspective.name)
+            print("GC05 - WARNING no assignments_group for perspective ", perspective.name)
 
-    print("GC03 - Used assignment_groups", uses_assignment_groups)
+    print("GC07 - Used assignment_groups", uses_assignment_groups)
     return uses_assignment_groups
 
 

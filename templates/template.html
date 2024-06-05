@@ -208,128 +208,7 @@
                     <!-- Content Row -->
 
                     <div class="row">
-                        <div class="col-lg-4 dashboard_view groups">
-                            <ul class="nav nav-tabs">
-                                <li class="nav-item">
-                                    <a onclick="setView('groups')" class="nav-link active" aria-current="page" href="#">Groepen</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('roles')" class="nav-link" href="#">Rollen</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('voortgang')" class="nav-link" href="#">Voortgang</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('slb')" class="nav-link" href="#">SLB</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('overzicht')" class="nav-link" href="#">Overzicht</a>
-                                </li>
-                            </ul>
-                            $student_groups
-                        </div>
-                        <div class="col-lg-4 dashboard_view roles">
-                            <ul class="nav nav-tabs">
-                                <li class="nav-item">
-                                    <a onclick="setView('groups')" class="nav-link"href="#">Groepen</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('roles')" class="nav-link active" aria-current="page"  href="#">Rollen</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('voortgang')" class="nav-link" href="#">Voortgang</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('slb')" class="nav-link" href="#">SLB</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('overzicht')" class="nav-link" href="#">Overzicht</a>
-                                </li>
-                            </ul>
-                            $role_groups
-                        </div>
-
-                        <div class="col-lg-4 dashboard_view voortgang">
-                            <ul class="nav nav-tabs">
-                                <li class="nav-item">
-                                    <a onclick="setView('groups')" class="nav-link"href="#">Groepen</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('roles')" class="nav-link"  href="#">Rollen</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('voortgang')" class="nav-link active" aria-current="page" href="#">Voortgang</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('slb')" class="nav-link" href="#">SLB</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('overzicht')" class="nav-link" href="#">Overzicht</a>
-                                </li>
-                            </ul>
-                            $progress_groups
-                        </div>
-
-                        <div class="col-lg-4 dashboard_view slb">
-                            <ul class="nav nav-tabs">
-                                <li class="nav-item">
-                                    <a onclick="setView('groups')" class="nav-link" href="#">Groepen</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('roles')" class="nav-link " href="#">Rollen</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('voortgang')" class="nav-link" href="#">Voortgang</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('slb')" class="nav-link active" aria-current="page" href="#">SLB</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('overzicht')" class="nav-link" href="#">Overzicht</a>
-                                </li>
-                            </ul>
-                            $slb_groups
-                        </div>
-
-                        <div class="col-lg-4 dashboard_view overzicht">
-                            <ul class="nav nav-tabs">
-                                <li class="nav-item">
-                                    <a onclick="setView('groups')" class="nav-link" href="#">Groepen</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('roles')" class="nav-link " href="#">Rollen</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('voortgang')" class="nav-link" href="#">Voortgang</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('slb')" class="nav-link"  href="#">SLB</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a onclick="setView('overzicht')" class="nav-link active"  aria-current="page" href="#">Overzicht</a>
-                                </li>
-                            </ul>
-                            <div class="card shadow mb-4">
-                                <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Overzicht</h6>
-                                </div>
-                                <div class="card-body">
-                                    <a onclick="setDetailName('', '')"
-                                        target="iframe_a"
-                                        href="./plotly/totals_werkvoorraad.html"
-                                        class="btn btn-outline-dark btn-sm">
-                                        <span class="text">Werkvoorraad</span>
-                                    </a>
-                                    <a onclick="setDetailName('', '')"
-                                        target="iframe_a"
-                                        href="./plotly/totals_voortgang.html"
-                                        class="btn btn-outline-dark btn-sm">
-                                        <span class="text">Voortgang</span>
-                                    </a>
-                                </div>
-                            </div>
-                            $overzicht
-                        </div>
+                        $tabs_html_string
                         <div class="col-lg-8">
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3">
@@ -344,7 +223,7 @@
                                 </div>
                             </div>
                         </div>
-                        <script>setView("groups")</script>
+                        <script>setView("Groepen")</script>
                     </div>
 
                 </div>

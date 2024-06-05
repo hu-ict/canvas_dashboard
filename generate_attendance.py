@@ -2,26 +2,8 @@ import csv
 import sys
 import json
 from lib.file import read_start, read_results, read_course_instance
-from lib.lib_date import get_actual_date, get_date_time_obj_alt, date_to_day
-from model.Submission import Submission
-
-def read_attendance(start):
-    print("read_attendance", start.attendance_report)
-    appendances = []
-    with open(start.attendance_report, mode='r', encoding="utf-8") as attendance_file:
-        DictReader_obj = csv.DictReader(attendance_file, delimiter=",")
-        for item in DictReader_obj:
-            if item["Attendance"] == "present":
-                score = 2
-            elif item["Attendance"] == "absent":
-                score = 0
-            else:
-                score = 1
-            l_date = get_date_time_obj_alt(item["Class Date"])
-            l_day = date_to_day(start.start_date, l_date),
-            l_submission = Submission(0, 72500, 0, int(item["Student ID"]), "Attendance", l_date, l_day, l_date, l_day, True, "Attendance", l_date, score, 2, 0)
-            appendances.append(l_submission)
-    return appendances
+from lib.lib_attendance import read_attendance, process_attendance
+from lib.lib_date import get_actual_date
 
 
 def main(instance_name):
@@ -31,23 +13,9 @@ def main(instance_name):
         instances.current_instance = instance_name
     print("Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
-    if start.attendance_report is not None or start.attendance_perspective is not None:
-        results = read_results(start.results_file_name)
-        attendances = read_attendance(start.attendance_report)
-        not_found = set()
-        for student in results.students:
-            student.perspectives[start.attendance_perspective].submissions = []
-        for attendance in attendances:
-            student = results.find_student(int(attendance.student_id))
-            if student:
-                student.perspectives[start.attendance_perspective].submissions.append(attendance)
-            else:
-                not_found.add(attendance.student_id)
-                # print("Student niet gevonden", attendance.student_id)
-        print("Students not found", not_found)
-        with open(start.results_file_name, 'w') as f:
-            dict_result = results.to_json([])
-            json.dump(dict_result, f, indent=2)
+    results = read_results(start.results_file_name)
+    if start.attendance is not None:
+        process_attendance(start, results)
     else:
         print("No attendance")
 

@@ -1,12 +1,12 @@
 {
   "samen": {
     "-2": {
-      "label": "Leeg",
+      "label": "Nog niet gewaardeerd",
       "color": "cornflowerblue",
       "fraction": null
     },
     "-1": {
-      "label": "Leeg",
+      "label": "Niet bepaald",
       "color": "#aaaaaa",
       "fraction": null
     },
@@ -37,7 +37,7 @@
       "color": "cornflowerblue"
     },
     "-1": {
-      "label": "Leeg",
+      "label": "Niet bepaald",
       "color": "#aaaaaa"
     },
     "0": {
@@ -72,7 +72,7 @@
       "fraction": null
     },
     "-1": {
-      "label": "Leeg",
+      "label": "Niet bepaald",
       "color": "#aaaaaa",
       "fraction": null
 

@@ -1,10 +1,10 @@
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import numpy as np
-from lib.lib_plotly import hover_style, peil_moments
+from lib.lib_plotly import hover_style
 
 
-def plot_progress_history(a_fig, a_row, a_col, a_progress_history, a_perspective_name, a_start, a_course, a_progress_levels):
+def plot_progress_history(a_fig, a_row, a_col, a_progress_history, a_perspective_name, a_course, a_progress_levels):
     x = []
     for day in a_progress_history.days:
         x.append(day.day)
@@ -69,10 +69,10 @@ def plot_peilingen(a_fig, a_row, a_col, student_totals, a_start, a_course, a_pro
         y_counts = []
         x_labels = []
         y_hover = []
-        for label in peil_moments[1:]:
+        for label in a_course.level_moments.moments:
             x_labels.append(label)
-            y_counts.append(student_totals[a_start.progress.name][label]["overall"][int(level)])
-            y_hover.append(label+" "+a_progress_levels.levels[str(level)].label+" "+str(student_totals[a_start.progress.name][label]["overall"][int(level)]))
+            y_counts.append(student_totals[a_start.level_moments.name][label]["overall"][int(level)])
+            y_hover.append(label+" "+a_progress_levels.levels[str(level)].label+" "+str(student_totals[a_start.level_moments.name][label]["overall"][int(level)]))
         a_fig.add_trace(go.Bar(x=x_labels, y=y_counts,
                                name=a_progress_levels.levels[level].label,
                                hoverinfo="text",
@@ -88,7 +88,7 @@ def plot_voortgang(a_instances, a_start, a_course, student_totals, a_progress_hi
     if a_instances.is_instance_of("inno_courses"):
         titles = ['Dagelijkse voortgang <b>studenten</b>', 'Peilingen', "", "Team", "Gilde", "Kennis"]
     else:
-        titles = ['Dagelijkse voortgang <b>studenten</b>', 'Peilingen', "Kennis", "Oriëntatie", "Professional Skill", "Aanwezigheid"]
+        titles = ['Dagelijkse voortgang <b>studenten</b>', 'Peilingen', "", "Kennis", "Oriëntatie", "Professional Skill"]
     specs = [
         [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
         [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}]
@@ -104,11 +104,13 @@ def plot_voortgang(a_instances, a_start, a_course, student_totals, a_progress_hi
         bargroupgap=0.1,  # gap between bars of the same location coordinates
         barmode='stack'
     )
-    plot_progress_history(fig, 1, 1, a_progress_history, "overall", a_start, a_course, a_progress_levels)
-    row = 1
+    plot_progress_history(fig, 1, 1, a_progress_history, "overall", a_course, a_progress_levels)
+    col = 1
     for perspective in a_start.perspectives.keys():
-        plot_progress_history(fig, 2, row, a_progress_history, perspective, a_start, a_course, a_progress_levels)
-        row += 1
+        plot_progress_history(fig, 2, col, a_progress_history, perspective, a_course, a_progress_levels)
+        col += 1
+        if col > 3:
+            break
     if a_instances.is_instance_of("inno_courses_new") or a_instances.is_instance_of("inno_courses"):
         plot_peilingen(fig, 1, 2, student_totals, a_start, a_course, a_progress_levels)
     file_name = a_instances.get_plot_path() + "totals_voortgang" + ".html"

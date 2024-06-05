@@ -2,9 +2,9 @@ import sys
 from canvasapi import Canvas
 import json
 
-from generate_attendance import read_attendance
 from lib.file import read_start, read_course, read_results, read_course_instance, read_progress
-from lib.lib_progress import get_progress, get_overall_progress
+from lib.lib_attendance import process_attendance
+from lib.lib_progress import get_progress, get_overall_progress, get_attendance_progress
 from lib.lib_submission import submission_builder, count_graded, add_missed_assignments, read_submissions
 from lib.lib_date import API_URL, get_actual_date
 from model.ProgressDay import ProgressDay
@@ -37,28 +37,14 @@ def main(instance_name):
         for perspective in student.perspectives.values():
             add_missed_assignments(start, course, results, perspective)
 
-    if len(start.attendance_perspective) > 1:
-        attendances = read_attendance(start.attendance_report)
-        not_found = set()
-        for student in results.students:
-            student.perspectives[start.attendance_perspective].submissions = []
-        for attendance in attendances:
-            student = results.find_student(int(attendance.student_id))
-            if student:
-                student.perspectives[start.attendance_perspective].submissions.append(attendance)
-            else:
-                not_found.add(attendance.student_id)
-                # print("Student niet gevonden", attendance.student_id)
-        print("Students not found", not_found)
-        with open(start.results_file_name, 'w') as f:
-            dict_result = results.to_json([])
-            json.dump(dict_result, f, indent=2)
+    if start.attendance is not None:
+        process_attendance(start)
     else:
         print("No attendance")
 
     for student in results.students:
         for perspective in student.perspectives.values():
-            perspective.submissions = sorted(perspective.submissions, key=lambda s: s.submitted_date)
+            perspective.submissions = sorted(perspective.submissions, key=lambda s: s.assignment_day)
 
     results.submission_count, results.not_graded_count = count_graded(results)
 
@@ -66,6 +52,9 @@ def main(instance_name):
     progress_day = ProgressDay(results.actual_day, course.perspectives.keys())
 
     for student in results.students:
+        if start.attendance is not None:
+            get_attendance_progress(start, course, results, student.attendance)
+            progress_day.perspective[start.attendance.name][str(student.attendance.progress)] += 1
         for perspective in student.perspectives.values():
             get_progress(start, course, results, perspective)
             progress_day.perspective[perspective.name][str(perspective.progress)] += 1
