@@ -4,7 +4,7 @@ from lib.lib_date import get_date_time_obj_alt, date_to_day
 from model.Submission import Submission
 
 
-def read_attendance(start):
+def read_attendance(start, course):
     print("read_attendance", start.attendance_report)
     appendances = []
     with open(start.attendance_report, mode='r', encoding="utf-8") as attendance_file:
@@ -12,19 +12,28 @@ def read_attendance(start):
         for item in DictReader_obj:
             if item["Attendance"] == "present":
                 score = 2
+            elif item["Attendance"] == "late":
+                score = 1
             elif item["Attendance"] == "absent":
                 score = 0
             else:
-                score = 1
+                score = -1
             l_date = get_date_time_obj_alt(item["Class Date"])
+            l_teacher_id = item["Teacher ID"]
+            l_teacher_name = item["Teacher Name"]
             l_day = date_to_day(start.start_date, l_date),
-            l_submission = Submission(0, 72500, 0, int(item["Student ID"]), "Attendance", l_date, l_day, l_date, l_day, True, "Attendance", l_date, score, 2, 0)
+            if len(course.attendance.assignment_groups) != 1:
+                assignment_groups_id = 0
+                print("LA06 Attendace has no or more assignment_group attached")
+            else:
+                assignment_groups_id = course.attendance.assignment_groups[0]
+            l_submission = Submission(0, assignment_groups_id, 0, int(item["Student ID"]), "Attendance", l_date, l_day, l_date, l_day, True, l_teacher_name, l_date, score, 2, 0)
             appendances.append(l_submission)
     return appendances
 
 
-def process_attendance(start, results):
-    attendances = read_attendance(start)
+def process_attendance(start, course, results):
+    attendances = read_attendance(start, course)
     not_found = set()
     for student in results.students:
         student.attendance.submissions = []

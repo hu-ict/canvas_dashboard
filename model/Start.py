@@ -9,11 +9,12 @@ class Start:
                  start_date, end_date,
                  template_path, target_path, target_slb_path, config_file_name, course_file_name,
                  results_file_name, progress_file_name, workload_file_name, attendance_report,
-                 api_key, a_grade_levels):
+                 api_key, a_progress_levels, a_grade_levels):
         self.canvas_course_id = canvas_course_id
         self.api_key = api_key
         self.perspectives = {}
         self.roles = []
+        self.progress_levels = a_progress_levels
         self.grade_levels = a_grade_levels
         self.projects_groep_name = projects_groep_name
         self.slb_groep_name = slb_groep_name
@@ -32,12 +33,13 @@ class Start:
         self.attendance = None
 
     def __str__(self):
-        return f'Start({self.canvas_course_id}, {self.projects_groep_name}, {self.slb_groep_name}, {self.level_moments}, {self.attendance},  {self.start_date}, {self.end_date}, {self.config_file_name}, {self.course_file_name}, {self.results_file_name}, {self.progress_file_name}, {self.api_key})\n'
+        return f'Start({self.canvas_course_id}, {self.projects_groep_name}, {self.slb_groep_name}, {self.progress_levels}, {self.grade_levels}, {self.level_moments}, {self.attendance},  {self.start_date}, {self.end_date}, {self.config_file_name}, {self.course_file_name}, {self.results_file_name}, {self.progress_file_name}, {self.api_key})\n'
 
     def to_json(self, scope):
         dict_result = {
             'api_key': self.api_key,
             'canvas_course_id': self.canvas_course_id,
+            'progress_levels': self.progress_levels,
             'grade_levels': self.grade_levels,
             'projects_groep_name': self.projects_groep_name,
             "slb_groep_name": self.slb_groep_name,
@@ -81,6 +83,7 @@ class Start:
                     data_dict['results_file_name'], data_dict['progress_file_name'], data_dict['workload_file_name'],
                     data_dict['attendance_report'],
                     data_dict['api_key'],
+                    data_dict['progress_levels'],
                     data_dict['grade_levels'])
         if 'level_moments' in data_dict.keys() and data_dict['level_moments'] is not None:
             new.level_moments = LevelMoments.from_dict(data_dict['level_moments'])

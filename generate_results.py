@@ -39,7 +39,7 @@ def main(instance_name):
             add_missed_assignments(start, course, results, perspective)
 
     if start.attendance is not None:
-        process_attendance(start, results)
+        process_attendance(start, course, results)
     else:
         print("GR10 - No attendance")
 
@@ -56,7 +56,7 @@ def main(instance_name):
     for student in results.students:
         if start.attendance is not None:
             get_attendance_progress(start, course, results, student.attendance)
-            progress_day.perspective[start.attendance.name][str(student.attendance.progress)] += 1
+            progress_day.attendance[str(student.attendance.progress)] += 1
         for perspective in student.perspectives.values():
             get_progress(start, course, results, perspective)
             progress_day.perspective[perspective.name][str(perspective.progress)] += 1

@@ -201,8 +201,8 @@ def plot_open_assignments(a_row, a_col, a_fig, a_start, a_show_points, a_assignm
 def plot_day_bar(a_row, a_col, a_fig, a_start, a_total_points, a_actual_day, a_actual_date, a_progress, a_levels):
     if a_total_points <= 0:
         return
-    l_label = a_levels.level_series[a_start.level_moments.levels].levels[str(a_progress)].label
-    l_color = a_levels.level_series[a_start.level_moments.levels].levels[str(a_progress)].color
+    l_label = a_levels.level_series[a_start.progress_levels].levels[str(a_progress)].label
+    l_color = a_levels.level_series[a_start.progress_levels].levels[str(a_progress)].color
     l_hover = get_hover_day_bar(l_label, a_actual_day, a_actual_date)
     a_fig.add_trace(
         go.Scatter(
@@ -293,7 +293,7 @@ def plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
     else:
         y_submission = [0]
     y_hover = ['<b>Start</b> '+get_date_time_loc(a_start.start_date)]
-    y_colors = [a_levels.level_series[a_start.level_moments.levels].levels["-1"].color]
+    y_colors = [a_levels.level_series[a_start.progress_levels.levels].levels["-1"].color]
     y_size = [get_marker_size(False)]
     cum_score = 0
     for submission in a_perspective.submissions:

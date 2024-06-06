@@ -38,7 +38,7 @@ def main(instance_name):
             add_missed_assignments(start, course, results, perspective)
 
     if start.attendance is not None:
-        process_attendance(start)
+        process_attendance(start, course)
     else:
         print("No attendance")
 
