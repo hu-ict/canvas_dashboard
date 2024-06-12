@@ -168,7 +168,7 @@ Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica
 ```
 - `strategy` kent meerdere opties: `NONE`, `EXP_POINTS`, `LIN_POINTS`, `POINTS`, `LINEAIR`, `EXPONENTIAL`, `CONSTANT`, `FIXED`, `ATTENDANCE`.
 ### Strategy
-De strategiën `EXP_POINTS`, `LIN_POINTS`, `POINTS` en `CONSTANT` worden het meest gebruikt. De strategie `ATTENDANCE` lijkt veel op `CONSTANT.
+De strategiën `EXP_POINTS`, `LIN_POINTS`, `POINTS` en `CONSTANT` worden het meest gebruikt. De strategie `ATTENDANCE` lijkt veel op `CONSTANT`.
 
 Met de constanten `lower_points` en `upper_points` worden de einddoelen van de onderwijseenheid bepaald. Wanneer de student onder `lower_points` scoort heeft de student niet het verwachtte niveau en zal het perspectief niet halen. Wanneer de student boven `upper_points` scoort gaat deze het boven niveau het perspectief afronden. Daar tussen in wordt het op niveau. Deze einddoelen worden volgens een bepaalde strategie terug geinterpoleerd, daardoor ontstaat er een bandbreedte in de tijd.
 
