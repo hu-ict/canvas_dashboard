@@ -293,7 +293,7 @@ def plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
     else:
         y_submission = [0]
     y_hover = ['<b>Start</b> '+get_date_time_loc(a_start.start_date)]
-    y_colors = [a_levels.level_series[a_start.progress_levels.levels].levels["-1"].color]
+    y_colors = [a_levels.level_series[a_start.progress_levels].levels["-1"].color]
     y_size = [get_marker_size(False)]
     cum_score = 0
     for submission in a_perspective.submissions:

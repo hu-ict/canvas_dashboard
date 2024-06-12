@@ -16,7 +16,7 @@ def main(instance_name):
     instances = read_course_instance()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    print("Instance:", instances.current_instance)
+    print("GR02 - Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
     course = read_course(start.course_file_name)
     # Initialize a new Canvas object
@@ -44,6 +44,8 @@ def main(instance_name):
         print("GR10 - No attendance")
 
     for student in results.students:
+        if start.attendance is not None:
+            student.attendance.submissions = sorted(student.attendance.submissions, key=lambda s: s.assignment_day)
         for perspective in student.perspectives.values():
             perspective.submissions = sorted(perspective.submissions, key=lambda s: s.assignment_day)
 
@@ -81,10 +83,10 @@ def main(instance_name):
         dict_result = results.to_json(["perspectives"])
         json.dump(dict_result, f, indent=2)
 
-    print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
+    print("GR99 Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 
 if __name__ == "__main__":
-    print("generate_results.py")
+    print("GR01 - generate_results.py")
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:

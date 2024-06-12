@@ -29,22 +29,12 @@ def generate_history(results):
     return progress_history
 
 
-def main(instance_name):
-    g_actual_date = get_actual_date()
-    instances = read_course_instance()
-    if len(instance_name) > 0:
-        instances.current_instance = instance_name
-    print("Instance:", instances.current_instance)
-    start = read_start(instances.get_start_file_name())
-    course = read_course(start.course_file_name)
-    results = read_results(start.results_file_name)
-    progress_history = read_progress(start.progress_file_name)
+def process_progress(start, course, results, progress_history):
     progress_day = ProgressDay(results.actual_day, course.perspectives.keys())
-
     for student in results.students:
         if start.attendance is not None:
             get_attendance_progress(start, course, results, student.attendance)
-            progress_day.perspective[start.attendance.name][str(student.attendance.progress)] += 1
+            progress_day.attendance[str(student.attendance.progress)] += 1
         for perspective in student.perspectives.values():
             get_progress(start, course, results, perspective)
             progress_day.perspective[perspective.name][str(perspective.progress)] += 1
@@ -57,7 +47,22 @@ def main(instance_name):
         student.progress = progress
         progress_day.progress[str(progress)] += 1
     progress_history.append_day(progress_day)
+
+
+def main(instance_name):
+    g_actual_date = get_actual_date()
+    instances = read_course_instance()
+    if len(instance_name) > 0:
+        instances.current_instance = instance_name
+    print("GP02 - Instance:", instances.current_instance)
+    start = read_start(instances.get_start_file_name())
+    course = read_course(start.course_file_name)
+    results = read_results(start.results_file_name)
+    progress_history = read_progress(start.progress_file_name)
+
     # progress_history = generate_history(results)
+    process_progress(start, course, results, progress_history)
+
     with open(start.results_file_name, 'w') as f:
         dict_result = results.to_json(['perspectives'])
         json.dump(dict_result, f, indent=2)
@@ -66,11 +71,11 @@ def main(instance_name):
         dict_result = progress_history.to_json()
         json.dump(dict_result, f, indent=2)
 
-    print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
+    print("GP99 - Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":
-    print("generate_progress.py")
+    print("GP01 - generate_progress.py")
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:

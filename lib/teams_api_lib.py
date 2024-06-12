@@ -135,7 +135,7 @@ def get_sites(a_token, a_query):
     if response.status_code == 200:
         result = response.json()
         values = result['value']
-        print("Aantal sites:",len(values))
+        print("TA41 - Aantal sites:",len(values))
         names = {}
         for value in values:
             # "INNO - Sep23 - Studenten - Kyrill Westdorp"
@@ -147,10 +147,10 @@ def get_sites(a_token, a_query):
                 names[l_student_name] =  value['id']
                 # print("Student:", l_student_name)
             else:
-                print("DisplayName doesn't contain a student name")
+                print("TA43 - DisplayName doesn't contain a student name")
         return names
     else:
-        print(f"Error getting token: {response.json()}")
+        print(f"TA44 - Error getting token: {response.json()}")
         return None
 
 
@@ -230,7 +230,7 @@ def create_channel(a_token, a_team_id, a_diplay_name):
         with open('teams-api/dump.json', 'w') as f:
             json.dump(l_result, f, indent=2)
         return l_result["id"]
-    print(f"Response: {response.json()}")
+    print(f"TA04 - Response: {response.json()}")
     return None
 
 
@@ -250,7 +250,7 @@ def add_member_to_team(a_token, a_team_id, a_member_login):
     if response.status_code == 201:
         return response.json()
     else:
-        print(f"Error response: {response.json()}")
+        print(f"TA05 - Error response: {response.json()}")
         return None
 
 
@@ -270,12 +270,12 @@ def add_member_to_channel(a_token, a_team_id, a_channel_id, a_member_login):
     if response.status_code == 201:
         return response.json()
     else:
-        print(f"Error response: {response.json()}")
+        print(f"TA14 - Error response: {response.json()}")
         return None
 
 def get_channels(a_token, a_team_id):
     url = f"https://graph.microsoft.com/v1.0/teams/{a_team_id}/channels"
-    print(url)
+    print("TA21 -", url)
     headers = {
         "Authorization": "Bearer " + a_token,
         "Content-Type": "application/json"
@@ -289,12 +289,12 @@ def get_channels(a_token, a_team_id):
             channels.append(value['displayName'])
         return channels
     else:
-        print(f"Error getting token: {response.json()}")
+        print(f"TA24 - Error getting token: {response.json()}")
     return None
 
 def get_team(a_token, a_team_id):
     url = f"https://graph.microsoft.com/v1.0/teams/{a_team_id}"
-    print(url)
+    print("TA36 -", url)
     headers = {
         "Authorization": "Bearer " + a_token,
         "Content-Type": "application/json"
@@ -304,5 +304,5 @@ def get_team(a_token, a_team_id):
         result = response.json()
         return {"displayName": result['displayName'], "members": result['summary']['membersCount']}
     else:
-        print(f"Error getting token: {response.json()}")
+        print(f"TA38 - Error getting token: {response.json()}")
     return None

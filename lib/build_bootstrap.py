@@ -32,7 +32,7 @@ def build_bootstrap_group(a_start, a_course, a_results, a_templates, a_labels_co
     # coaches = {}
     groups_html_string = ''
     for group in a_course.student_groups:
-        print(group.name, len(group.students))
+        # print(group.name, len(group.students))
         students_html_string = ''
         coaches_string = ""
         if len(group.teachers) > 0:

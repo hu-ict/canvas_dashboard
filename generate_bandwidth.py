@@ -9,7 +9,7 @@ def main(instance_name):
     instances = read_course_instance()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    print("Instance:", instances.current_instance)
+    print("GB02 - Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
     course = read_course(start.course_file_name)
     for assignment_group in course.assignment_groups:
@@ -20,11 +20,11 @@ def main(instance_name):
     with open(start.course_file_name, 'w') as f:
         dict_result = course.to_json(["assignment"])
         json.dump(dict_result, f, indent=2)
-    print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
+    print("GB99 - Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":
-    print("generate_bandwidth.py")
+    print("GB01 - generate_bandwidth.py")
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:

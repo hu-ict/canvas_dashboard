@@ -47,7 +47,7 @@ start = Start(canvas_course_id, "Project Groups", "", get_date_time_obj("2024-09
               project_path + "progress_" + course_instance + ".json",
               project_path + "workload_" + course_instance + ".json",
               project_path + "attendance_report.csv",
-              "", "grade")
+              "", "progress", "grade")
 start.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", [])
 perspective = Perspective("project", "Project", "samen", True, False)
 start.perspectives[perspective.name] = perspective

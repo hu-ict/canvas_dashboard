@@ -159,7 +159,7 @@ def main(instance_name):
 
 
 if __name__ == "__main__":
-    print("GC00 generate_course.py")
+    print("GC01 generate_course.py")
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:

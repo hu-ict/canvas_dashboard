@@ -13,7 +13,7 @@ def main(instance_name):
     instances = read_course_instance()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    print("Instance:", instances.current_instance)
+    print("GP02 - Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
     course = read_course(start.course_file_name)
     results = read_results(start.results_file_name)
@@ -135,14 +135,14 @@ def main(instance_name):
     for student in results.students:
         l_peil_construction = find_submissions(student, peil_construction)
         # print(l_peil_construction)
-        print(student.name)
+        print("GP90 -", student.name)
         plot_student(instances, start, course, student, results.actual_date, l_peil_construction)
 
-    print("Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
+    print("GP99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":
-    print("generate_plotly.py")
+    print("GP01 - generate_plotly.py")
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:

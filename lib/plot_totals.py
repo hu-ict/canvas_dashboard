@@ -152,7 +152,7 @@ def plot_werkvoorraad(a_instances, a_start, a_course, student_totals, a_workload
     col = 0
     for l_perspective in a_course.perspectives:
         if l_perspective != "aanwezig":
-            print("PT01", l_perspective)
+            # print("PT01", l_perspective)
             col += 1
             x_team = list(student_totals['perspectives'][l_perspective]['pending'].keys())
             y_counts = list(student_totals['perspectives'][l_perspective]['pending'].values())

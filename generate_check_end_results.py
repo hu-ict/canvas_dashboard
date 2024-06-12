@@ -45,7 +45,7 @@ def main(instance_name):
     #     dict_result = results.to_json([])
     #     json.dump(dict_result, f, indent=2)
 
-    print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
+    print("GC99 Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":

@@ -21,7 +21,7 @@ def read_attendance(start, course):
             l_date = get_date_time_obj_alt(item["Class Date"])
             l_teacher_id = item["Teacher ID"]
             l_teacher_name = item["Teacher Name"]
-            l_day = date_to_day(start.start_date, l_date),
+            l_day = date_to_day(start.start_date, l_date)
             if len(course.attendance.assignment_groups) != 1:
                 assignment_groups_id = 0
                 print("LA06 Attendace has no or more assignment_group attached")

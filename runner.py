@@ -32,7 +32,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:
-        main("feb24_inno", "results_create_event")
+        main("feb24_inno", "results_update_event")
         # main("")
 
     seconds = (get_actual_date() - l_actual_date).seconds

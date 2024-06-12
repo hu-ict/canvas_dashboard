@@ -17,6 +17,12 @@ class Student:
         self.attendance = None
         self.perspectives = None
 
+    def __str__(self):
+        line = f'Student({self.id}, {self.group_id}, {self.name}, {self.coach}, {self.role}, {self.email}, {self.progress})\n'
+        for perspective in self.perspectives:
+            line += " p "+str(self.perspectives[perspective])
+        return line
+
     def get_perspective(self, name):
         for perspective in self.perspectives:
             if perspective.name == name:
@@ -67,12 +73,6 @@ class Student:
             for key in self.perspectives:
                 dict_result['perspectives'][key] = self.perspectives[key].to_json()
         return dict_result
-
-    def __str__(self):
-        line = f'Student({self.id}, {self.group_id}, {self.name}, {self.coach}, {self.role}, {self.email}, {self.progress})\n'
-        for perspective in self.perspectives:
-            line += " p "+str(self.perspectives[perspective])
-        return line
 
     @staticmethod
     def from_dict(data_dict):

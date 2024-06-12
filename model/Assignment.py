@@ -16,11 +16,8 @@ class Assignment:
         self.assignment_day = assignment_day
         self.rubrics = []
 
-    def get_criterion(self, criterion_id):
-        for criterion in self.rubrics:
-            if criterion.id == criterion_id:
-                return criterion
-        return None
+    def __str__(self):
+        return f'Assignment({self.id}, {self.name}, {self.group_id}, {self.section_id}, {self.grading_type}, {self.grading_standard_id}, {self.points}, {get_date_time_str(self.assignment_date)}, {self.assignment_day})'
 
     def to_json(self):
         return {
@@ -37,8 +34,11 @@ class Assignment:
             'rubrics': list(map(lambda r: r.to_json(), self.rubrics)),
         }
 
-    def __str__(self):
-        return f'Assignment({self.id}, {self.name}, {self.group_id}, {self.section_id}, {self.grading_type}, {self.grading_standard_id}, {self.points}, {get_date_time_str(self.assignment_date)}, {self.assignment_day})'
+    def get_criterion(self, criterion_id):
+        for criterion in self.rubrics:
+            if criterion.id == criterion_id:
+                return criterion
+        return None
 
     @staticmethod
     def from_dict(data_dict):

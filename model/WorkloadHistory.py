@@ -5,6 +5,17 @@ class WorkloadHistory:
     def __init__(self):
         self.days = []
 
+    def __str__(self):
+        line = f'WorkloadHistory()\n'
+        for d in self.days:
+            line += " " + str(d)
+        return line
+
+    def to_json(self):
+        return {
+            'days': list(map(lambda d: d.to_json(), self.days))
+        }
+
     def find_day_index(self, day):
         i = 0
         for d in self.days:
@@ -21,17 +32,6 @@ class WorkloadHistory:
         else:
             # vervang
             self.days[index] = workload_day
-
-    def to_json(self):
-        return {
-            'days': list(map(lambda d: d.to_json(), self.days))
-        }
-
-    def __str__(self):
-        line = f'WorkloadHistory()\n'
-        for d in self.days:
-            line += " " + str(d)
-        return line
 
     @staticmethod
     def from_dict(data_dict):

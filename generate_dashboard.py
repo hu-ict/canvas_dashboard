@@ -91,7 +91,7 @@ def main(instance_name):
     instances = read_course_instance()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    print("Instance:", instances.current_instance, instances.get_category(instances.current_instance))
+    print("GD02 - Instance:", instances.current_instance, instances.get_category(instances.current_instance))
     start = read_start(instances.get_start_file_name())
 
     course = read_course(start.course_file_name)
@@ -126,10 +126,10 @@ def main(instance_name):
         }
         for perspective in course.perspectives.keys():
             student_totals["perspectives"][perspective] = {'count': [], 'pending': init_sections_count(course), 'late': init_sections_count(course), 'to_late': init_sections_count(course), 'list': init_sections_list(course)}
-        for peil in course.level_moments.moments:
-            student_totals["level_moments"][peil] = {'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}}
+        for moment in course.level_moments.moments:
+            student_totals["level_moments"][moment] = {'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}}
             for perspective in course.perspectives.keys():
-                student_totals["level_moments"][peil][perspective] = {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+                student_totals["level_moments"][moment][perspective] = {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
 
     else:
         student_totals = {
@@ -146,17 +146,17 @@ def main(instance_name):
     #     dict_result = json.dumps(student_totals, indent = 4)
     #     json.dump(student_totals, f, indent=2)
 
-    print(student_totals)
-    print("build_totals(start, course, results, student_totals, gilde, team_coaches)")
+    # print("GD04", student_totals)
+    print("GD05 - build_totals(start, course, results, student_totals, gilde, team_coaches)")
     build_totals(instances, start, course, results, student_totals)
-    print("build_bootstrap_general(start, course, results, team_coaches, labels_colors)")
+    print("GD06 - build_bootstrap_general(start, course, results, team_coaches, labels_colors)")
     build_bootstrap_general(instances, start, course, results, team_coaches, level_series, student_totals)
 
-    if instances.is_instance_of("inno_courses") or instances.is_instance_of("inno_courses_new"):
+    if instances.is_instance_of("inno_courses"):
         # with open("dump.json", 'w') as f:
         #     # dict_result = json.dumps(student_totals, indent = 4)
         #     json.dump(student_totals, f, indent=2)
-        print("build_late(start, results, student_totals)")
+        print("GD07 - build_late(instances, start, results, student_totals)")
         build_late_list(instances, start, results, student_totals)
 
     workload_history = read_workload(start.workload_file_name)
@@ -170,11 +170,11 @@ def main(instance_name):
 
     plot_werkvoorraad(instances, start, course, student_totals, workload_history)
     plot_voortgang(instances, start, course, student_totals, read_progress(start.progress_file_name), level_series.level_series[start.level_moments.levels])
-    print("Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
+    print("GD99 - Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":
-    print("generate_dashboard.py")
+    print("GD01 - generate_dashboard.py")
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:

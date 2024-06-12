@@ -87,7 +87,7 @@ def main(instance_name):
     instances = read_course_instance()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    print("GS01 -", "Instance:", instances.current_instance)
+    print("GS02 - Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
     course = read_course(start.course_file_name)
     # print("GS02 -", "Config", course)
@@ -98,7 +98,7 @@ def main(instance_name):
     print("GS03 -", user.name)
     canvas_course = canvas.get_course(start.canvas_course_id)
     # Ophalen Students
-    print("GS04 -", "Ophalen studenten")
+    print("GS04 - Retrieve students")
     users = canvas_course.get_users(enrollment_type=['student'])
     # cleanup students in list roles, slb and project_groups
     course.students = []
@@ -117,12 +117,13 @@ def main(instance_name):
             student = Student(user.id, 0, user.name, user.sortable_name, 0, "", user.login_id, "", 0)
             course.students.append(student)
             student_count += 1
-
+        if instances.current_instance == "sep23_prop_a" and student_count > 10:
+            break
     link_teachers(course)
 
     get_section_students(canvas_course, start, course)
 
-    print("GS07 -", "Opschonen studenten zonder Role")
+    print("GS07 - Opschonen studenten zonder Role")
     for student in course.students:
         if len(student.role) == 0:
             course.students.remove(student)
@@ -190,9 +191,11 @@ def main(instance_name):
         dict_result = course.to_json(["assignment"])
         json.dump(dict_result, f, indent=2)
 
+    print("GS99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
+
 
 if __name__ == "__main__":
-    print("generate_students.py")
+    print("GS01 - generate_students.py")
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:
