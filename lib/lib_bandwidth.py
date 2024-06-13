@@ -72,14 +72,14 @@ def bandwidth_builder(assignment_group, days_in_semester):
         upper_c = float(assignment_group.upper_c)
         upper_b = 1 / const
         upper_a = (assignment_group.upper_points - upper_c - assignment_group.total_points / const) / (assignment_group.total_points * assignment_group.total_points)
-        print(f"LB02 lower_points {assignment_group.lower_points} upper_points {assignment_group.upper_points} total_points {assignment_group.total_points}")
-        print(f"LB03 lower a {lower_a:8.5} b {lower_b:5.2} c {lower_c:5.2}")
-        print(f"LB04 upper a {upper_a:8.5} b {upper_b:5.2} c {upper_c:5.2}")
+        print(f"LB02 - lower_points {assignment_group.lower_points} upper_points {assignment_group.upper_points} total_points {assignment_group.total_points}")
+        print(f"LB03 - lower a {lower_a:8.5} b {lower_b:5.2} c {lower_c:5.2}")
+        print(f"LB04 - upper a {upper_a:8.5} b {upper_b:5.2} c {upper_c:5.2}")
         serie = {0: {"day": 0, "value_day": 0, "lower": 0, "upper": int(assignment_group.total_points/30)}}
         total_points = 0
         lower_y = lower_c
         upper_y = upper_c
-        output = f"LB06 Day points;  0;  0;  0;{lower_y:5.2f};{upper_y:5.2f}"
+        output = f"LB06 - Day points;  0;  0;  0;{lower_y:5.2f};{upper_y:5.2f}"
         output = output.replace('.', ',')
         print(output)
         # print(assignment.assignment_day, assignment.points, "value_day", total_points, "lower =", lower_y, "upper =", upper_y)
@@ -88,7 +88,7 @@ def bandwidth_builder(assignment_group, days_in_semester):
             total_points += assignment.points
             lower_y = lower_a * total_points * total_points + lower_b * total_points + lower_c
             upper_y = upper_a * total_points * total_points + upper_b * total_points + upper_c
-            output = f"LB08 Day points; {assignment.points:2};{assignment.assignment_day:3};{total_points:>3};{lower_y:5.2f};{upper_y:5.2f}"
+            output = f"LB08 - Day points; {assignment.points:2};{assignment.assignment_day:3};{total_points:>3};{lower_y:5.2f};{upper_y:5.2f}"
             output = output.replace('.',',')
             print(output)
             # print(assignment.assignment_day, assignment.points, "value_day", total_points, "lower =", lower_y, "upper =", upper_y)

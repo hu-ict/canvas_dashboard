@@ -69,10 +69,19 @@ def plot_peilingen(a_fig, a_row, a_col, student_totals, a_start, a_course, a_pro
         y_counts = []
         x_labels = []
         y_hover = []
-        for label in a_course.level_moments.moments:
-            x_labels.append(label)
-            y_counts.append(student_totals[a_start.level_moments.name][label]["overall"][int(level)])
-            y_hover.append(label+" "+a_progress_levels.levels[str(level)].label+" "+str(student_totals[a_start.level_moments.name][label]["overall"][int(level)]))
+
+        x_labels.append('Actueel')
+        y_counts.append(student_totals['actual_progress']["overall"][int(level)])
+        y_hover.append("Actueel " + a_progress_levels.levels[str(level)].label + " " + str(
+            student_totals['actual_progress']["overall"][int(level)]))
+
+        if a_course.level_moments is not None:
+            for label in a_course.level_moments.moments:
+                # print("PT10 moment", label, level, student_totals[a_start.level_moments.name][label])
+                x_labels.append(label)
+                y_counts.append(student_totals["level_moments"][label]["overall"][int(level)])
+                y_hover.append(label+" "+a_progress_levels.levels[str(level)].label+" "+str(student_totals["level_moments"][label]["overall"][int(level)]))
+
         a_fig.add_trace(go.Bar(x=x_labels, y=y_counts,
                                name=a_progress_levels.levels[level].label,
                                hoverinfo="text",
@@ -85,10 +94,9 @@ def plot_peilingen(a_fig, a_row, a_col, student_totals, a_start, a_course, a_pro
 
 
 def plot_voortgang(a_instances, a_start, a_course, student_totals, a_progress_history, a_progress_levels):
-    if a_instances.is_instance_of("inno_courses"):
-        titles = ['Dagelijkse voortgang <b>studenten</b>', 'Peilingen', "", "Team", "Gilde", "Kennis"]
-    else:
-        titles = ['Dagelijkse voortgang <b>studenten</b>', 'Peilingen', "", "Kennis", "Oriëntatie", "Professional Skill"]
+    titles = ['Dagelijkse voortgang <b>studenten</b>', 'Peilingen', ""]
+    for perspective in a_course.perspectives.values():
+        titles.append(perspective.title)
     specs = [
         [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
         [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}]
@@ -111,26 +119,21 @@ def plot_voortgang(a_instances, a_start, a_course, student_totals, a_progress_hi
         col += 1
         if col > 3:
             break
-    if a_instances.is_instance_of("inno_courses_new") or a_instances.is_instance_of("inno_courses"):
-        plot_peilingen(fig, 1, 2, student_totals, a_start, a_course, a_progress_levels)
+    # if a_instances.is_instance_of("inno_courses"):
+    plot_peilingen(fig, 1, 2, student_totals, a_start, a_course, a_progress_levels)
     file_name = a_instances.get_plot_path() + "totals_voortgang" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")
 
 def plot_werkvoorraad(a_instances, a_start, a_course, student_totals, a_workload_history):
     specs = [
         [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
-        [{'type': 'bar'}, {'type': 'xy'}, {'type': 'bar'}]
+        [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}]
     ]
-    if a_instances.is_instance_of("inno_courses"):
-        titles = ['Team', 'Gilde','Kennis',
-                  'Dagelijkse werkvoorraad <b>docenten</b>', 'Vertraging']
-    elif a_instances.is_instance_of("prop_courses"):
-        titles = ['Kennis', 'Oriëntatie', 'Professional Skills',
-                  'Dagelijkse werkvoorraad <b>docenten</b>', 'Vertraging']
-    else:
-        titles = ['Project', 'Finals', 'Toets',
-                  'Dagelijkse werkvoorraad <b>docenten</b>', 'Vertraging']
-
+    titles = []
+    for perspective in a_course.perspectives.values():
+        titles.append(perspective.title)
+    titles.append('Dagelijkse werkvoorraad <b>docenten</b>')
+    titles.append("Vertraging")
     fig = make_subplots(rows=2, cols=3, specs=specs, subplot_titles=titles)
     fig.update_layout(height=800, width=1200, showlegend=False)
 
@@ -151,18 +154,16 @@ def plot_werkvoorraad(a_instances, a_start, a_course, student_totals, a_workload
 
     col = 0
     for l_perspective in a_course.perspectives:
-        if l_perspective != "aanwezig":
-            # print("PT01", l_perspective)
-            col += 1
-            x_team = list(student_totals['perspectives'][l_perspective]['pending'].keys())
-            y_counts = list(student_totals['perspectives'][l_perspective]['pending'].values())
-            fig.add_trace(go.Bar(x=x_team, y=y_counts, name="Pending", marker=dict(color="#4e73df")), 1, col)
-            x_team = list(student_totals['perspectives'][l_perspective]['late'].keys())
-            y_counts = list(student_totals['perspectives'][l_perspective]['late'].values())
-            fig.add_trace(go.Bar(x=x_team, y=y_counts, name="Late", marker=dict(color="#e74a3b")), 1, col)
-            x_team = list(student_totals['perspectives'][l_perspective]['to_late'].keys())
-            y_counts = list(student_totals['perspectives'][l_perspective]['to_late'].values())
-            fig.add_trace(go.Bar(x=x_team, y=y_counts, name="To Late", marker=dict(color="#555555")), 1, col)
+        col += 1
+        x_team = list(student_totals['perspectives'][l_perspective]['pending'].keys())
+        y_counts = list(student_totals['perspectives'][l_perspective]['pending'].values())
+        fig.add_trace(go.Bar(x=x_team, y=y_counts, name="Pending", marker=dict(color="#4e73df")), 1, col)
+        x_team = list(student_totals['perspectives'][l_perspective]['late'].keys())
+        y_counts = list(student_totals['perspectives'][l_perspective]['late'].values())
+        fig.add_trace(go.Bar(x=x_team, y=y_counts, name="Late", marker=dict(color="#e74a3b")), 1, col)
+        x_team = list(student_totals['perspectives'][l_perspective]['to_late'].keys())
+        y_counts = list(student_totals['perspectives'][l_perspective]['to_late'].values())
+        fig.add_trace(go.Bar(x=x_team, y=y_counts, name="To Late", marker=dict(color="#555555")), 1, col)
     plot_workload_history(fig, 2, 1, a_workload_history)
     data = go.Histogram(x=np.array(student_totals['late']['count']))
     fig.add_trace(data, 2, 2)

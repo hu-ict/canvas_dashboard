@@ -28,9 +28,9 @@ def main(instance_name):
     for perspective in course.perspectives.values():
         subplot_titles.append(perspective.title)
     if instances.is_instance_of('prop_courses'):
-        positions = {'kennis': {'row': 1, 'col': 1},
-                     'oriëntatie': {'row': 1, 'col': 4},
-                     'PS en project': {'row': 2, 'col': 1},
+        positions = {'project': {'row': 1, 'col': 1},
+                     'finals': {'row': 1, 'col': 4},
+                     'toets': {'row': 2, 'col': 1},
                      'aanwezig': {'row': 2, 'col': 4}
                      }
         specs = [
@@ -102,7 +102,7 @@ def main(instance_name):
 
         if a_instances.is_instance_of('inno_courses'):
             # Peil overall drie peilmomenten
-            for peil in a_course.level_moments.moments[1:]:
+            for peil in a_course.level_moments.moments:
                 # print("GP21 - Peilmoment", peil, "overall")
                 level_moment = a_student.get_peilmoment_submission_by_query([peil, "overall"])
                 if level_moment is not None:

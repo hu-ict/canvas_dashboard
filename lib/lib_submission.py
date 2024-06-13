@@ -70,7 +70,7 @@ def get_rubric_score(rubrics_submission, student):
                     rubric_score += points
                 except:
                     print(
-                        f"LS41 Fout in criterium_score: student {student.name}, canvas_submission {canvas_criterium}")
+                        f"LS41 - Fout in criterium_score: student {student.name}, canvas_submission {canvas_criterium}")
                     points = 0.00
 
                 rating_id = canvas_criterium[1]['rating_id']
@@ -119,7 +119,7 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
             if graded:
                 if a_canvas_submission.score == None:
                     print(a_canvas_submission, a_canvas_submission.score)
-                    print(f"S02 WARNING Submission score is empty {a_assignment.grading_type} for assignment {a_assignment.name}, student: {a_student.name}")
+                    print(f"LS02 WARNING Submission score is empty {a_assignment.grading_type} for assignment {a_assignment.name}, student: {a_student.name}")
                     score = 0.00
                 else:
                     submission_score = round(a_canvas_submission.score, 2)
@@ -139,7 +139,7 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
             else:
                 score = 0.00
         else:
-            print(f"S04 ERROR Unknown grading_type {a_assignment.grading_type} for assignment {a_assignment.name}")
+            print(f"LS04 - ERROR Unknown grading_type {a_assignment.grading_type} for assignment {a_assignment.name}")
         if a_canvas_submission.grader_id and a_canvas_submission.grader_id > 0:
             teacher = a_course.find_teacher(a_canvas_submission.grader_id)
             if teacher:
@@ -183,7 +183,7 @@ def add_missed_assignments(start, course, results, perspective):
     if len(perspective.assignment_groups) == 1:
         l_assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
         if l_assignment_group is None:
-            print("S06 Assignment_group for perspective not found in course", perspective.assignment_groups[0])
+            print("LS06 - Assignment_group for perspective not found in course", perspective.assignment_groups[0])
             return
         l_assignments = l_assignment_group.assignments[:]
         # remove already submitted
@@ -201,16 +201,16 @@ def add_missed_assignments(start, course, results, perspective):
                 l_submission.comments.append(Comment(0, "Systeem", l_assignment.assignment_date, NO_SUBMISSION))
                 perspective.submissions.append(l_submission)
     elif len(perspective.assignment_groups) > 1:
-        print("S07 Perspective has more then one assignment_groups attached", perspective.name,
+        print("LS07 - Perspective has more then one assignment_groups attached", perspective.name,
               perspective.assignment_groups)
     else:
-        print("S08 Perspective has no assignment_groups attached", perspective.name, perspective.assignment_groups)
+        print("LS08 - Perspective has no assignment_groups attached", perspective.name, perspective.assignment_groups)
 
 
 def read_submissions(a_canvas_course, a_start, a_course, a_results, a_total_refresh):
     for assignment_group in a_course.assignment_groups:
         for assignment in assignment_group.assignments:
-            print("Processing Assignment {0:6} - {1} {2}".format(assignment.id, assignment_group.name, assignment.name))
+            print("LS10 - Processing Assignment {0:6} - {1} {2}".format(assignment.id, assignment_group.name, assignment.name))
             if not a_total_refresh and ((a_results.actual_date - assignment.assignment_date).days > 10):
                 # deadline langer dan twee weken geleden. Alle feedback is gegeven.
                 continue
@@ -230,13 +230,14 @@ def read_submissions(a_canvas_course, a_start, a_course, a_results, a_total_refr
                         if l_submission is not None:
                             l_perspective = a_course.find_perspective_by_assignment_group(l_submission.assignment_group_id)
                             if l_perspective:
-                                if l_perspective == "level_moments":
+                                if l_perspective.name == "level_moments":
                                     if a_total_refresh:
                                         student.student_level_moments.submissions.append(l_submission)
                                     else:
                                         student.student_level_moments.put_submission(l_submission)
-                                    # print("LS21 - PERSPECTIVE level_moments")
+                                    # print("LS18 - PERSPECTIVE level_moments")
                                 else:
+                                    # print("LS19 -", student.perspectives.keys())
                                     this_perspective = student.perspectives[l_perspective.name]
                                     if this_perspective:
                                         if a_total_refresh:
@@ -245,11 +246,10 @@ def read_submissions(a_canvas_course, a_start, a_course, a_results, a_total_refr
                                             this_perspective.put_submission(l_submission)
 
                             else:
-                                print(f"LS21 clould not find perspective for assignment_group {assignment_group.name}")
-                        # else:
-                        #     print(f"R22 Error creating submission {assignment.name} for student {student.name}")
-
+                                print(f"LS21 - Warning, could not find perspective for assignment_group {assignment_group.name}")
+                        else:
+                            print(f"R22 - Error creating submission {assignment.name} for student {student.name}")
                     # else:
                     #     print("R23 Could not find student", canvas_submission.user_id)
             else:
-                print("LS25 Could not find assignment", canvas_assignment.id, "within group", assignment_group.id)
+                print("LS25 - Could not find assignment", canvas_assignment.id, "within group", assignment_group.id)

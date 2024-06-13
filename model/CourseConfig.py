@@ -153,12 +153,14 @@ class CourseConfig:
                 return perspective
         return None
 
-    def find_perspective_by_assignment_group(self, group_id):
+    def find_perspective_by_assignment_group(self, assignment_group_id):
         for perspective in self.perspectives.values():
-            if group_id in perspective.assignment_groups:
+            if assignment_group_id in perspective.assignment_groups:
                 return perspective
-        if group_id in self.level_moments.assignment_groups:
-            return "level_moments"
+        if self.level_moments is not None and assignment_group_id in self.level_moments.assignment_groups:
+            return self.level_moments
+        if self.attendance is not None and assignment_group_id in self.attendance.assignment_groups:
+            return self.attendance
         return None
 
     def find_assignment_group_by_name(self, group_name):

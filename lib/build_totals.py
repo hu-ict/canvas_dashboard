@@ -19,15 +19,16 @@ def get_submitted_at(item):
 def count_student(a_course, a_student_totals, a_student):
     peil = a_student.progress
     # print(a_student.name, peil)
-    a_student_totals[a_course.level_moments.name]['Actueel']['overall'][peil] += 1
+    a_student_totals['actual_progress']['overall'][peil] += 1
     for l_perspective in a_student.perspectives.values():
         add_total(a_student_totals['perspectives'][l_perspective.name]['count'], int(student_total(l_perspective.submissions)))
-    for peil_label in a_course.level_moments.moments[1:]:
-        submission = a_student.get_peilmoment_submission_by_query([peil_label, "overall"])
-        if submission:
-            a_student_totals["level_moments"][peil_label]['overall'][submission.score] += 1
-        else:
-            a_student_totals["level_moments"][peil_label]['overall'][-1] += 1
+    if a_course.level_moments is not None:
+        for peil_label in a_course.level_moments.moments:
+            submission = a_student.get_peilmoment_submission_by_query([peil_label, "overall"])
+            if submission:
+                a_student_totals["level_moments"][peil_label]['overall'][submission.score] += 1
+            else:
+                a_student_totals["level_moments"][peil_label]['overall'][-1] += 1
 
 
 def check_for_late(a_instances, a_course, a_student_totals, a_student, a_submission, a_perspective, a_actual_day):
@@ -37,6 +38,9 @@ def check_for_late(a_instances, a_course, a_student_totals, a_student, a_submiss
             # print("BT82", a_student.name, a_student.coach)
             if a_perspective == 'team':
                 l_selector = a_course.find_teacher(a_student.coach).initials
+            elif a_instances.is_instance_of("prop_courses"):
+                group = a_course.find_student_group(a_student.group_id)
+                l_selector = group.name
             else:
                 l_selector = a_student.role
         else:

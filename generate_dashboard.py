@@ -115,21 +115,31 @@ def main(instance_name):
                 'kennis': {'count': [], 'pending': init_roles_count(course), 'late': init_roles_count(course), 'to_late': init_roles_count(course), 'list': init_roles_list(course)}
             },
             'level_moments': peilen,
+            'actual_progress': {
+                'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+                'team': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+                'gilde': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+                'kennis': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+            },
             'late': {'count': []}
         }
     elif instances.is_instance_of("prop_courses"):
         student_totals = {
             'student_count': 0,
             'perspectives': {},
-            'level_moments': {},
+            'level_moments': None,
             'late': {'count': []}
         }
         for perspective in course.perspectives.keys():
             student_totals["perspectives"][perspective] = {'count': [], 'pending': init_sections_count(course), 'late': init_sections_count(course), 'to_late': init_sections_count(course), 'list': init_sections_list(course)}
-        for moment in course.level_moments.moments:
-            student_totals["level_moments"][moment] = {'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}}
-            for perspective in course.perspectives.keys():
-                student_totals["level_moments"][moment][perspective] = {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+        if course.level_moments is not None:
+            for moment in course.level_moments.moments:
+                student_totals["level_moments"][moment] = {'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}}
+                for perspective in course.perspectives.keys():
+                    student_totals["level_moments"][moment][perspective] = {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+        student_totals["actual_progress"] = {'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}}
+        for perspective in course.perspectives.keys():
+            student_totals["actual_progress"][perspective] = {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
 
     else:
         student_totals = {
@@ -140,6 +150,10 @@ def main(instance_name):
         }
         for perspective in course.perspectives:
             student_totals['perspectives'][perspective] = {'count': [], 'pending': init_sections_count(course), 'late': init_sections_count(course), 'to_late': init_sections_count(course), 'list': init_sections_list(course)}
+
+    with open("student_totals.json", 'w') as f:
+        dict_result = student_totals
+        json.dump(dict_result, f, indent=2)
 
     team_coaches = init_coaches_dict(course)
     # with open("dump.json", 'w') as f:
@@ -152,12 +166,16 @@ def main(instance_name):
     print("GD06 - build_bootstrap_general(start, course, results, team_coaches, labels_colors)")
     build_bootstrap_general(instances, start, course, results, team_coaches, level_series, student_totals)
 
-    if instances.is_instance_of("inno_courses"):
+    # if instances.is_instance_of("inno_courses"):
         # with open("dump.json", 'w') as f:
         #     # dict_result = json.dumps(student_totals, indent = 4)
         #     json.dump(student_totals, f, indent=2)
-        print("GD07 - build_late(instances, start, results, student_totals)")
-        build_late_list(instances, start, results, student_totals)
+    print("GD07 - build_late(instances, start, results, student_totals)")
+    build_late_list(instances, start, results, student_totals)
+
+    with open("student_totals.json", 'w') as f:
+        dict_result = student_totals
+        json.dump(dict_result, f, indent=2)
 
     workload_history = read_workload(start.workload_file_name)
     workload_day = WorkloadDay(results.actual_day)
@@ -169,7 +187,7 @@ def main(instance_name):
         json.dump(dict_result, f, indent=2)
 
     plot_werkvoorraad(instances, start, course, student_totals, workload_history)
-    plot_voortgang(instances, start, course, student_totals, read_progress(start.progress_file_name), level_series.level_series[start.level_moments.levels])
+    plot_voortgang(instances, start, course, student_totals, read_progress(start.progress_file_name), level_series.level_series['progress'])
     print("GD99 - Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 
 

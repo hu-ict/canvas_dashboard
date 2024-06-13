@@ -11,7 +11,7 @@ def build_student_button(start, course, student, templates, labels_colors):
     file_name = "./plotly/" + student.name.replace(" ", "%20") + ".html"
 #       file_name = plot_path + student.name + ".html"
     asci_file_name = file_name.translate(translation_table)
-    l_progress_color = labels_colors.level_series[start.level_moments.levels].levels[str(student.progress)].color
+    l_progress_color = labels_colors.level_series['progress'].levels[str(student.progress)].color
     return templates['student'].substitute(
             {'btn_color': color, 'progress_color': l_progress_color, 'student_name': student.name,
             'student_role': role.name, 'student_file': asci_file_name})
@@ -124,6 +124,14 @@ def load_templates(template_path):
         string_role_html = file_role_template.read()
         templates["role"]  = Template(string_role_html)
 
+    with open(template_path + 'template_roles_card.html', mode='r', encoding="utf-8") as file_roles_card_template:
+        string_roles_card_html = file_roles_card_template.read()
+        templates["roles_card"]  = Template(string_roles_card_html)
+
+    with open(template_path + 'template_coaches_card.html', mode='r', encoding="utf-8") as file_coaches_card_template:
+        string_coaches_card_html = file_coaches_card_template.read()
+        templates["coaches_card"] = Template(string_coaches_card_html)
+
     with open(template_path + 'template_student.html', mode='r', encoding="utf-8") as file_student_template:
         string_student_html = file_student_template.read()
         templates["student"] = Template(string_student_html)
@@ -195,17 +203,6 @@ def build_bootstrap_general(a_instances, a_start, a_course, a_results, a_coaches
     l_templates = load_templates(a_start.template_path)
     tabs_html_string = build_bootstrap_students_tabs(a_start, a_course, a_results, l_templates, a_labels_colors, a_totals)
 
-    # student_groups_html_string = build_bootstrap_group(a_start, a_course, a_results, l_templates, a_labels_colors)
-    # role_groups_html_string = build_bootstrap_role(a_start, a_course, a_results, l_templates, a_labels_colors)
-    # progress_groups_html_string = build_bootstrap_progress(a_start, a_course, a_results, l_templates, a_labels_colors)
-    # slb_groups_html_string = build_bootstrap_slb(a_start, a_course, a_results, l_templates, a_labels_colors)
-
-    # perspectives = []
-    # for perspective in a_course.perspectives.keys():
-    #     if perspective != a_start.attendance_perspective:
-    #         perspectives.append(perspective)
-    # overicht_html_string = build_bootstrap_overzicht(a_instances, l_templates, perspectives, a_totals)
-
     coaches_html_string = ''
     for coach in a_coaches.values():
         coaches_html_string += l_templates["coach"].substitute(
@@ -218,20 +215,22 @@ def build_bootstrap_general(a_instances, a_start, a_course, a_results, a_coaches
     percentage = str(l_semester_day / a_course.days_in_semester * 100) + "%"
     actual_date_str = a_results.actual_date.strftime("%d-%m-%Y %H:%M")
 
+    if len(a_course.roles)> 1:
+        roles_card_html_string = l_templates['roles_card'].substitute({'roles': roles_string, 'colums': '3'})
+        coaches_card_html_string = l_templates['coaches_card'].substitute({'coaches': coaches_html_string, 'colums': '3'})
+    else:
+        roles_card_html_string = ""
+        coaches_card_html_string = l_templates['coaches_card'].substitute({'coaches': coaches_html_string, 'colums': '6'})
+
     index_html_string = l_templates['index'].substitute(
         {'course_name': a_course.name, 'aantal_studenten': a_course.student_count, 'aantal_teams': len(a_course.student_groups),
          'submission_count': a_results.submission_count, 'not_graded_count': a_results.not_graded_count,
          'actual_date': actual_date_str, 'semester_day': l_semester_day,
          'percentage': percentage,
-         'roles': roles_string,
-         'coaches': coaches_html_string,
+         'roles_card': roles_card_html_string,
+         'coaches_card': coaches_card_html_string,
          'tabs_html_string': tabs_html_string})
 
-         # 'student_groups': student_groups_html_string,
-         # 'slb_groups': slb_groups_html_string,
-         # 'role_groups': role_groups_html_string,
-         # 'progress_groups': progress_groups_html_string,
-         # 'overzicht': overicht_html_string})
 
     with open(a_instances.get_html_path() + 'index.html', mode='w', encoding="utf-8") as file_index:
         file_index.write(index_html_string)
