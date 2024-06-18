@@ -12,6 +12,7 @@ class Criterion:
         for rating in self.ratings:
             if rating.id == rating_id:
                 return rating
+        print("CR01", rating_id)
         return None
 
     def to_json(self):
@@ -23,7 +24,10 @@ class Criterion:
         }
 
     def __str__(self):
-        return f'Criterion({self.id}, {self.points}, {self.description}'
+        str_ratings = ""
+        for rating in self.ratings:
+            str_ratings += "\n"+str(rating)
+        return f'Criterion(Id: {self.id}, {self.points}, {self.description})'+str_ratings
 
     @staticmethod
     def from_dict(data_dict):

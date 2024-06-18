@@ -82,20 +82,32 @@ def get_hover_rubrics_comments(course, submission, levels):
         return ""
     l_hover = "<br><b>Criteria:</b>"
     for criterion_score in submission.rubrics:
-        criterion = course.find_assignment(submission.assignment_id).get_criterion(criterion_score.id)
+        # print("BP10 -", submission.assignment_id, criterion_score)
+        assignment_criterion = course.find_assignment(submission.assignment_id).get_criterion(criterion_score.id)
+        # if submission.assignment_id ==  298261 and submission.student_id == 148369:
+        # print("BP11 -", assignment_criterion, criterion_score)
         if criterion_score.rating_id:
-            l_hover += "<br>- " + criterion.description + " <b>" + criterion.get_rating(criterion_score.rating_id).description + "</b>"
+            l_hover += "<br>- " + assignment_criterion.description + " <b>" + assignment_criterion.get_rating(criterion_score.rating_id).description + "</b>"
+            # if submission.assignment_id == 298261 and submission.student_id == 148369:
+            #     print("BP14 -", l_hover)
         else:
             if criterion_score.score == 0:
-                l_hover += "<br>- " + criterion.description + " <b>"+levels.level_series["niveau"].levels[str(int(criterion_score.score))].label+"</b>"
+                l_hover += "<br>- " + assignment_criterion.description + " <b>"+levels.level_series["niveau"].levels[str(int(criterion_score.score))].label+"</b>"
+                # if submission.assignment_id == 298261 and submission.student_id == 148369:
+                #     print("BP15 -", l_hover)
             else:
-                l_hover += "<br>- " + criterion.description + " <b>"+str(criterion_score.score)+"</b>"
+                l_hover += "<br>- " + assignment_criterion.description + " <b>"+str(criterion_score.score)+"</b>"
+                # if submission.assignment_id == 298261 and submission.student_id == 148369:
+                #     print("BP16 -", l_hover)
+
         if criterion_score.comment:
             value = "<i>" + criterion_score.comment + "</i>"
             wrapper = textwrap.TextWrapper(width=125)
             word_list = wrapper.wrap(text=value)
             for line in word_list:
                 l_hover += "<br>" + line
+        # if submission.assignment_id == 298261 and submission.student_id == 148369:
+        #     print("BP20 -", l_hover)
     return l_hover
 
 

@@ -23,8 +23,7 @@ def process_bandwidth(a_instances, a_start, a_course, a_perspective, a_labels_co
         fig = go.Figure()
         plot_bandbreedte_colored(0, 0, fig, a_course.days_in_semester, assignment_group, False)
 
-        fig.update_layout(title=f"{assignment_group.name}, strategy {assignment_group.strategy}",
-                          showlegend=False)
+        fig.update_layout(title=f"{assignment_group.name}, strategy {assignment_group.strategy}", showlegend=False)
         if False:
             fig.update_yaxes(title_text="Voortgang", range=[0, 1], dtick=1)
         fig.update_yaxes(title_text="Punten", range=[0, assignment_group.total_points])
@@ -49,12 +48,14 @@ def main(instance_name):
     course = read_course(start.course_file_name)
     labels_colors = read_levels("levels.json")
     for assignment_group in course.assignment_groups:
+        print("TB11 -", assignment_group.name)
         if assignment_group.strategy == "NONE":
             assignment_group.bandwidth = None
         else:
             assignment_group.bandwidth = bandwidth_builder(assignment_group, course.days_in_semester)
 
-    process_bandwidth(instances, start, course, course.attendance, labels_colors)
+    if course.attendance is not None:
+        process_bandwidth(instances, start, course, course.attendance, labels_colors)
     for perspective in course.perspectives.values():
         process_bandwidth(instances, start, course, perspective, labels_colors)
 

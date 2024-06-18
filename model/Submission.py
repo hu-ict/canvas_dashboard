@@ -29,6 +29,8 @@ class Submission:
         return self.to_json()
 
     def to_json(self):
+        if self.score is None:
+            self.score = 0.0
         return {
             'id': self.id,
             'assignment_group_id': self.assignment_group_id,

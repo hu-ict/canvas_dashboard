@@ -47,15 +47,26 @@ def bandwidth_builder(assignment_group, days_in_semester):
         band_lower = calc_dev(days_in_semester, x_reparatie_periode, lower_a, 0.00, 0)
         band_upper = calc_dev(days_in_semester, x_reparatie_periode, upper_a, 0.00, y_start*3)
     elif assignment_group.strategy == "LIN_POINTS":
+        lower_a = 0
+        upper_a = 0
         lower_b = assignment_group.lower_points / assignment_group.total_points
         upper_b = assignment_group.upper_points / assignment_group.total_points
-
+        lower_c = 0
+        upper_c = 0
         serie = {0: {"day": 0, "sum": 0}}
         total_points = 0
         y = 0
+        print(
+            f"LB02 - lower_points {assignment_group.lower_points} upper_points {assignment_group.upper_points} total_points {assignment_group.total_points}")
+        print(f"LB03 - lower a {lower_a:5} b {lower_b:5.3} c {lower_c:5}")
+        print(f"LB04 - upper a {upper_a:5} b {upper_b:5.3} c {upper_c:5}")
+        total_points = 0
         for assignment in assignment_group.assignments:
             total_points += assignment.points
             serie[assignment.assignment_day] = {"day": assignment.assignment_day, "sum": total_points}
+            output = f"LB08 - Day points; {assignment.points:3};{assignment.assignment_day:4};{total_points:>4}"
+            output = output.replace('.', ',')
+            print(output)
         band_lower = []
         band_upper = []
         for x in x_time:
@@ -65,6 +76,7 @@ def bandwidth_builder(assignment_group, days_in_semester):
             band_lower.append(y * lower_b)
             band_upper.append(y * upper_b)
     elif assignment_group.strategy == "EXP_POINTS":
+        print("LB61 -", assignment_group)
         const = 7
         lower_c = float(assignment_group.lower_c)
         lower_b = 1 / const
@@ -72,14 +84,14 @@ def bandwidth_builder(assignment_group, days_in_semester):
         upper_c = float(assignment_group.upper_c)
         upper_b = 1 / const
         upper_a = (assignment_group.upper_points - upper_c - assignment_group.total_points / const) / (assignment_group.total_points * assignment_group.total_points)
-        print(f"LB02 - lower_points {assignment_group.lower_points} upper_points {assignment_group.upper_points} total_points {assignment_group.total_points}")
-        print(f"LB03 - lower a {lower_a:8.5} b {lower_b:5.2} c {lower_c:5.2}")
-        print(f"LB04 - upper a {upper_a:8.5} b {upper_b:5.2} c {upper_c:5.2}")
+        print(f"LB62 - lower_points {assignment_group.lower_points} upper_points {assignment_group.upper_points} total_points {assignment_group.total_points}")
+        print(f"LB63 - lower a {lower_a:8.5} b {lower_b:5.2} c {lower_c:5.2}")
+        print(f"LB64 - upper a {upper_a:8.5} b {upper_b:5.2} c {upper_c:5.2}")
         serie = {0: {"day": 0, "value_day": 0, "lower": 0, "upper": int(assignment_group.total_points/30)}}
         total_points = 0
         lower_y = lower_c
         upper_y = upper_c
-        output = f"LB06 - Day points;  0;  0;  0;{lower_y:5.2f};{upper_y:5.2f}"
+        output = f"LB66 - Day points;  0;  0;  0;{lower_y:5.2f};{upper_y:5.2f}"
         output = output.replace('.', ',')
         print(output)
         # print(assignment.assignment_day, assignment.points, "value_day", total_points, "lower =", lower_y, "upper =", upper_y)
@@ -88,7 +100,7 @@ def bandwidth_builder(assignment_group, days_in_semester):
             total_points += assignment.points
             lower_y = lower_a * total_points * total_points + lower_b * total_points + lower_c
             upper_y = upper_a * total_points * total_points + upper_b * total_points + upper_c
-            output = f"LB08 - Day points; {assignment.points:2};{assignment.assignment_day:3};{total_points:>3};{lower_y:5.2f};{upper_y:5.2f}"
+            output = f"LB68 - Day points; {assignment.points:2};{assignment.assignment_day:3};{total_points:>3};{lower_y:5.2f};{upper_y:5.2f}"
             output = output.replace('.',',')
             print(output)
             # print(assignment.assignment_day, assignment.points, "value_day", total_points, "lower =", lower_y, "upper =", upper_y)

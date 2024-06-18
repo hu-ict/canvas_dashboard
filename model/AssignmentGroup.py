@@ -69,5 +69,6 @@ class AssignmentGroup:
         new_assignment_group = AssignmentGroup(data_dict['id'], data_dict['name'],
                                                # data_dict['teachers'],
                                                data_dict['role'], data_dict['strategy'], data_dict['lower_c'], data_dict['upper_c'], data_dict['total_points'], data_dict['lower_points'], data_dict['upper_points'], new_bandwidth)
-        new_assignment_group.assignments = list(map(lambda a: Assignment.from_dict(a), data_dict['assignments']))
+        if 'assignments' in data_dict.keys():
+            new_assignment_group.assignments = list(map(lambda a: Assignment.from_dict(a), data_dict['assignments']))
         return new_assignment_group

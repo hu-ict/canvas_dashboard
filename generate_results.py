@@ -57,7 +57,7 @@ def main(instance_name):
     # Bepaal voortgang per perspectief
     for student in results.students:
         if start.attendance is not None:
-            get_attendance_progress(start, course, results, student.attendance)
+            get_attendance_progress(course, results, student.attendance)
             progress_day.attendance[str(student.attendance.progress)] += 1
         for perspective in student.perspectives.values():
             get_progress(start, course, results, perspective)

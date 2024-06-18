@@ -53,7 +53,7 @@ def main(instance_name):
 
     for student in results.students:
         if start.attendance is not None:
-            get_attendance_progress(start, course, results, student.attendance)
+            get_attendance_progress(course, results, student.attendance)
             progress_day.perspective[start.attendance.name][str(student.attendance.progress)] += 1
         for perspective in student.perspectives.values():
             get_progress(start, course, results, perspective)
