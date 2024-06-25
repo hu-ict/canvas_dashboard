@@ -1,5 +1,6 @@
 from string import Template
 
+from lib.lib_date import get_date_time_obj, get_date_time_loc
 from lib.translation_table import translation_table
 
 
@@ -115,15 +116,23 @@ def write_release_planning(a_start, a_templates, a_assignment_group, a_file_name
     for assignment in a_assignment_group.assignments:
         url = "https://canvas.hu.nl/courses/" + str(a_start.canvas_course_id) + "/assignments/" + str(assignment.id)
         print(assignment.name)
+        rubric_points = 0
+        rubric_count = 0
+        for criterion in assignment.rubrics:
+            rubric_points += criterion.points
+            rubric_count += 1
+        if rubric_count == 0:
+            rubrics_str = "Geen criteria"
+        else:
+            rubrics_str = str(int(rubric_points))+" ["+str(rubric_count)+"]"
         list_html_string += a_templates["assignment"].substitute({'assignment_name': assignment.name,
-                                                                  'assignment_unlock_date': assignment.unlock_date,
-                                                                  'assignment_lock_date': assignment.assignment_date,
+                                                                  'assignment_unlock_date': get_date_time_loc(assignment.unlock_date),
+                                                                  'assignment_lock_date': get_date_time_loc(assignment.assignment_date),
                                                                   'assignment_grading_type': assignment.grading_type,
-                                                                  'assignment_sections': assignment.section_id,
                                                                   'assignment_points': assignment.points,
-                                                                  'rubrics_points': '0',
+                                                                  'rubrics_points': rubrics_str,
                                                                   'url': url})
-    file_html_string = a_templates["release_planning_list"].substitute({'assignments': list_html_string})
+    file_html_string = a_templates["release_planning_list"].substitute({'total_points': int(a_assignment_group.total_points), 'lower_points': a_assignment_group.lower_points, 'upper_points': a_assignment_group.upper_points, 'strategie': a_assignment_group.strategy, 'assignments': list_html_string})
 
     with open(a_file_name, mode='w', encoding="utf-8") as file_list:
         file_list.write(file_html_string)
@@ -133,11 +142,11 @@ def build_bootstrap_release_planning(a_instances, a_start, a_course, a_templates
     html_string = ""
     buttons_html_string = ""
     for assignment_group in a_course.assignment_groups:
-        file_name = a_instances.get_html_path() + "release_planning_" + str(assignment_group.id) + ".html"
+        file_name = "release_planning_" + str(assignment_group.id) + ".html"
         buttons_html_string += a_templates["selector"].substitute(
             {'selector_file': file_name,
              'selector': assignment_group.name}) + "<br>"
-        write_release_planning(a_start, a_templates, assignment_group, file_name)
+        write_release_planning(a_start, a_templates, assignment_group, a_instances.get_html_path() + file_name)
 
     html_string += a_templates["release_planning"].substitute({'buttons': buttons_html_string})
     return html_string
