@@ -2,6 +2,8 @@ import json
 import sys
 
 import plotly.graph_objs as go
+from plotly.subplots import make_subplots
+
 from lib.build_plotly_perspective import plot_bandbreedte_colored, plot_open_assignments
 from lib.file import read_start, read_course, read_course_instance, read_levels
 from lib.lib_bandwidth import bandwidth_builder
@@ -9,32 +11,44 @@ from lib.lib_date import get_actual_date, get_date_time_loc
 from lib.translation_table import translation_table
 
 
-def process_bandwidth(a_instances, a_start, a_course, a_perspective, a_labels_colors):
-    for assignment_group_id in a_perspective.assignment_groups:
-        assignment_group = a_course.find_assignment_group(assignment_group_id)
-        if assignment_group is None:
-            print("TB05 - ERROR assignment_group not found", assignment_group_id, "for perspective", a_perspective.name)
-            return
-        if assignment_group.strategy == "NONE":
-            print("TB06 - No strategy defined for", assignment_group_id, "in perspective", a_perspective.name)
-            continue
-        print("TB07 - Processing", assignment_group_id, "in perspective", a_perspective.name, "strategy", assignment_group.strategy)
+def process_bandwidth(a_instances, a_start, a_course, a_assignment_group, a_labels_colors):
+    if a_assignment_group.strategy == "NONE":
+        print("TB06 - No strategy defined for", a_assignment_group.id, "in perspective", a_assignment_group.name)
+    print("TB07 - Processing", a_assignment_group.name, "strategy", a_assignment_group.strategy)
 
-        fig = go.Figure()
-        plot_bandbreedte_colored(0, 0, fig, a_course.days_in_semester, assignment_group, False)
+    # fig = go.Figure()
+    # Create figure with secondary y-axis
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-        fig.update_layout(title=f"{assignment_group.name}, strategy {assignment_group.strategy}", showlegend=False)
-        if False:
-            fig.update_yaxes(title_text="Voortgang", range=[0, 1], dtick=1)
-        fig.update_yaxes(title_text="Punten", range=[0, assignment_group.total_points])
-        fig.update_xaxes(title_text="Dagen in onderwijsperiode", range=[0, a_course.days_in_semester])
 
-        plot_open_assignments(0, 0, fig, a_start, True, assignment_group.assignments, a_labels_colors)
+    # Add figure title
+    fig.update_layout(
+        title_text="Double Y Axis Example"
+    )
 
-        file_name = a_instances.get_test_path() + assignment_group.name.lower()
-        asci_file_name = file_name.translate(translation_table)
-        fig.write_html(asci_file_name + ".html", include_plotlyjs="cdn")
-        fig.write_image(asci_file_name + ".jpeg")
+    # Set x-axis title
+    fig.update_xaxes(title_text="xaxis title")
+
+    # Set y-axes titles
+    fig.update_yaxes(title_text="<b>primary</b> yaxis title", secondary_y=False)
+    fig.update_yaxes(title_text="<b>secondary</b> yaxis title", secondary_y=True)
+
+
+    fig.update_layout(height=800, width=1200, showlegend=False)
+    plot_bandbreedte_colored(0, 0, fig, a_course.days_in_semester, a_assignment_group, False)
+
+    fig.update_layout(title=f"{a_assignment_group.name}, strategy {a_assignment_group.strategy}", showlegend=False)
+    if False:
+        fig.update_yaxes(title_text="Voortgang", range=[0, 1], dtick=1)
+    fig.update_yaxes(title_text="Punten", range=[0, a_assignment_group.total_points])
+    fig.update_xaxes(title_text="Dagen in onderwijsperiode", range=[0, a_course.days_in_semester])
+
+    plot_open_assignments(0, 0, fig, a_start, a_course, True, a_assignment_group.assignments, a_labels_colors)
+
+    file_name = a_instances.get_html_path() + "bandwidth_"+str(a_assignment_group.id)
+    asci_file_name = file_name.translate(translation_table)
+    fig.write_html(asci_file_name + ".html", include_plotlyjs="cdn")
+    fig.write_image(asci_file_name + ".jpeg")
 
 
 def main(instance_name):
@@ -53,11 +67,9 @@ def main(instance_name):
             assignment_group.bandwidth = None
         else:
             assignment_group.bandwidth = bandwidth_builder(assignment_group, course.days_in_semester)
-
+            process_bandwidth(instances, start, course, assignment_group, labels_colors)
     if course.attendance is not None:
         process_bandwidth(instances, start, course, course.attendance, labels_colors)
-    for perspective in course.perspectives.values():
-        process_bandwidth(instances, start, course, perspective, labels_colors)
 
     print("TB99 - Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 

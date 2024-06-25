@@ -2,6 +2,7 @@ from string import Template
 
 from lib.lib_date import get_date_time_obj, get_date_time_loc
 from lib.translation_table import translation_table
+from test_bandwidth import process_bandwidth
 
 
 def build_student_button(start, course, student, templates, labels_colors):
@@ -138,17 +139,26 @@ def write_release_planning(a_start, a_templates, a_assignment_group, a_file_name
         file_list.write(file_html_string)
 
 
-def build_bootstrap_release_planning(a_instances, a_start, a_course, a_templates):
+def build_bootstrap_release_planning(a_instances, a_start, a_course, a_templates, a_labels_colors):
     html_string = ""
-    buttons_html_string = ""
+    buttons_planning_html_string = ""
     for assignment_group in a_course.assignment_groups:
         file_name = "release_planning_" + str(assignment_group.id) + ".html"
-        buttons_html_string += a_templates["selector"].substitute(
+        buttons_planning_html_string += a_templates["selector"].substitute(
             {'selector_file': file_name,
              'selector': assignment_group.name}) + "<br>"
         write_release_planning(a_start, a_templates, assignment_group, a_instances.get_html_path() + file_name)
 
-    html_string += a_templates["release_planning"].substitute({'buttons': buttons_html_string})
+    buttons_flow_html_string = ""
+    for assignment_group in a_course.assignment_groups:
+        file_name = "bandwidth_" + str(assignment_group.id) + ".html"
+        buttons_flow_html_string += a_templates["selector"].substitute(
+            {'selector_file': file_name,
+             'selector': assignment_group.name}) + "<br>"
+        process_bandwidth(a_instances, a_start, a_course, assignment_group, a_labels_colors)
+
+
+    html_string += a_templates["release_planning"].substitute({'buttons_planning': buttons_planning_html_string, 'buttons_flow': buttons_flow_html_string})
     return html_string
 
 
@@ -248,7 +258,7 @@ def build_bootstrap_students_tabs(a_instances, a_start, a_course, a_results, a_t
                 perspectives.append(perspective)
             students_html_string += build_bootstrap_canvas_overzicht(a_templates, perspectives, a_totals)
         elif tab == "Release Planning":
-            students_html_string = build_bootstrap_release_planning(a_instances, a_start, a_course, a_templates)
+            students_html_string = build_bootstrap_release_planning(a_instances, a_start, a_course, a_templates, a_labels_colors)
         else:
             pass
         html_tab = ""
