@@ -28,9 +28,9 @@ def main(instance_name):
     for perspective in course.perspectives.values():
         subplot_titles.append(perspective.title)
     if instances.is_instance_of('prop_courses'):
-        positions = {'project': {'row': 1, 'col': 1},
-                     'finals': {'row': 1, 'col': 4},
-                     'toets': {'row': 2, 'col': 1},
+        positions = {'kennis': {'row': 1, 'col': 1},
+                     'verbreding': {'row': 1, 'col': 4},
+                     'skills': {'row': 2, 'col': 1},
                      'aanwezig': {'row': 2, 'col': 4}
                      }
         specs = [
@@ -58,7 +58,7 @@ def main(instance_name):
     else:
         subplot_titles = ["Kennis", "Project"]
         positions = {'kennis': {'row': 1, 'col': 1},
-                     'project': {'row': 1, 'col': 4}
+                     'skills': {'row': 1, 'col': 4}
                      }
         specs = [
             [

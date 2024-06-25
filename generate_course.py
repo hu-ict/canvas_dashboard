@@ -67,6 +67,8 @@ def main(instance_name):
     print("GC02 -", "Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
     config = read_config(start.config_file_name)
+    # for teacher in config.teachers:
+    #     print("GC04 -", teacher)
     # print("GC02 -", "Config", config)
     # Initialize a new Canvas object
     canvas = Canvas(API_URL, start.api_key)
@@ -79,33 +81,34 @@ def main(instance_name):
     for canvas_assignment_group in canvas_assignment_groups:
         # use only relevant assignment_groups
         assignment_group = config.find_assignment_group(canvas_assignment_group.id)
-        print("GC21 -", "assignment_group", canvas_assignment_group.id)
+        # print("GC21 -", "assignment_group", canvas_assignment_group.id)
         if assignment_group and assignment_group.id in uses_assignment_groups:
             print(f"GC22 - assignment_group {assignment_group.name} is used with strategy {assignment_group.strategy}")
-            total_rubrics_points = 0
-            has_no_rubric = False
             for c_assignment in canvas_assignment_group.assignments:
                 canvas_assignment = canvas_course.get_assignment(c_assignment['id'], include=['overrides', 'online_quiz'])
                 # print("GC23 -", canvas_assignment.name, "grading_type:", canvas_assignment.grading_type, "grading_standard_id:", canvas_assignment.grading_standard_id)
+                points_possible = 0
                 if canvas_assignment.grading_type == "points":
-                    points_possible = 0
                     if canvas_assignment.points_possible:
                         points_possible = canvas_assignment.points_possible
-                    # print(f"C64 - [{canvas_assignment.grading_type}] points_possible {points_possible}")
+                    else:
+                        print(f"GC64 - WARNING [{canvas_assignment.grading_type}] points_possible is not set for", canvas_assignment.name)
                 elif canvas_assignment.grading_type == "pass_fail":
                     points_possible = 2
                 elif canvas_assignment.grading_type == 'letter_grade':
-                    points_possible = int(canvas_assignment.points_possible)
-                    # print(f"C65 - {canvas_assignment.grading_type} points_possible {points_possible}")
+                    if canvas_assignment.points_possible:
+                        points_possible = canvas_assignment.points_possible
+                    else:
+                        print(f"GC65 - WARNING [{canvas_assignment.grading_type}] points_possible is not set for", canvas_assignment.name)
                 else:
                     print(f"GC26 - ERROR - {canvas_assignment.grading_type} AFGEWEZEN grading_type {canvas_assignment.name} points_possible {canvas_assignment.points_possible}")
                     continue
                 if canvas_assignment.overrides:
                     for overrides in canvas_assignment.overrides:
                         unlock_date, assignment_date = get_dates(start, overrides)
-                        try:
+                        if hasattr(overrides, "course_section_id"):
                             section_id = overrides.course_section_id
-                        except:
+                        else:
                             section_id = 0
                 else:
                     unlock_date, assignment_date = get_dates(start, canvas_assignment)
@@ -122,38 +125,23 @@ def main(instance_name):
                     if hasattr(canvas_assignment, "rubric"):
                         assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
                         assignment.points = rubrics_points
-                        total_rubrics_points += rubrics_points
                         # print("GC31 - ",len(assignment.rubrics))
                     else:
-                        has_no_rubric = True
-                        print("GC32 - No rubric", canvas_assignment.name)
+                        print("GC32 - INFO No rubric", assignment.name, "grading_type", assignment.grading_type)
                 elif assignment.grading_type == "points":
                     if hasattr(canvas_assignment, "rubric"):
                         assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
                         if assignment.points > 0 and assignment.points != rubrics_points:
-                            print("GC33 - WARNING inconsistency in ", assignment.name, "assignment points", assignment.points, "rubrics points", rubrics_points)
-                        else:
-                            assignment.points = rubrics_points
-                            # print("GC34 -", assignment.name, "points", assignment.points, "criteria aantal", len(assignment.rubrics))
-                        total_rubrics_points += rubrics_points
+                            print("GC33 - WARNING inconsistency in", assignment.name, "assignment points", assignment.points, "rubrics points", rubrics_points)
                     else:
-                        print("GC35 - WARNING No rubric", canvas_assignment.name)
+                        print("GC34 - WARNING No rubric", assignment.name, "grading_type", assignment.grading_type)
                 else:
                     print("GC37 - ERROR Unsupported grading_type", assignment.grading_type)
-
-
             total_group_points = 0
             for assignment in assignment_group.assignments:
-                total_group_points += assignment.points
-            if has_no_rubric:
-                print("GC41 - has_no_rubric == True", assignment_group.name, total_group_points, total_rubrics_points)
-                assignment_group.total_points = total_group_points
-            else:
-                print("GC42 - has_no_rubric == False", assignment_group.name, total_group_points, total_rubrics_points)
-                assignment_group.total_points = total_rubrics_points
-            if total_group_points != total_rubrics_points:
-                    print("GC40 - WARNING", assignment_group.name, "total_group_points", total_group_points, "total_rubrics_points", total_rubrics_points)
-                # assignment_group.total_points = group_points_possible
+                 total_group_points += assignment.points
+            assignment_group.total_points = total_group_points
+            print("GC51 -", assignment_group.name, "punten:", assignment.points)
         else:
             print(f"GC41 - assignment_group {canvas_assignment_group.name} is not used")
 
@@ -161,6 +149,8 @@ def main(instance_name):
         assignment_group.assignments = sorted(assignment_group.assignments, key=lambda a: a.assignment_day)
         if assignment_group.strategy == "NONE":
             assignment_group.bandwidth = None
+        elif assignment_group.total_points == 0:
+            print("GC81 - ERROR Couldn't calculate bandwidth for assignment_group", assignment_group.name, "total_points is zero")
         else:
             assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
 

@@ -111,10 +111,10 @@ def get_hover_rubrics_comments(course, submission, levels):
     return l_hover
 
 
-def get_hover_day_bar(l_label, a_actual_day, a_actual_date):
+def get_hover_day_bar(l_label, a_actual_day, a_actual_date, a_show_points, a_score):
     l_hover = f"<b>{l_label}</b>"
     l_hover += f"<br>dag {a_actual_day} in onderwijsperiode [{a_actual_date}]"
-    if False:
+    if a_show_points:
         l_hover += f"<br>{int(a_score)} {get_punten_str(int(a_score))}"
     return l_hover
 
@@ -210,12 +210,13 @@ def plot_open_assignments(a_row, a_col, a_fig, a_start, a_show_points, a_assignm
     return
 
 
-def plot_day_bar(a_row, a_col, a_fig, a_start, a_total_points, a_actual_day, a_actual_date, a_progress, a_levels):
+def plot_day_bar(a_row, a_col, a_fig, a_start, a_total_points, a_actual_day, a_actual_date, a_progress, a_levels, a_show_points, a_actual_points):
     if a_total_points <= 0:
         return
     l_label = a_levels.level_series[a_start.progress_levels].levels[str(a_progress)].label
     l_color = a_levels.level_series[a_start.progress_levels].levels[str(a_progress)].color
-    l_hover = get_hover_day_bar(l_label, a_actual_day, a_actual_date)
+    l_hover = get_hover_day_bar(l_label, a_actual_day, a_actual_date, a_show_points, a_actual_points)
+
     a_fig.add_trace(
         go.Scatter(
             x=[a_actual_day, a_actual_day+2, a_actual_day+2, a_actual_day, a_actual_day],
@@ -399,6 +400,7 @@ def plot_perspective(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
     if assignment_group is None:
         print("BPP01 - could not find assignment_group", a_perspective.assignment_groups[0])
         return
+    show_points = a_course.find_perspective_by_assignment_group(assignment_group.id).show_points
     l_assignments = assignment_group.assignments[:]
     for l_submission in a_perspective.submissions:
         l_assignments = remove_assignment(l_assignments, l_submission)
@@ -406,6 +408,6 @@ def plot_perspective(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
     if a_start.level_moments is not None and len(a_peil_construction) > 0:
         # print("BPP02 ", a_perspective.name, a_peil_construction)
         plot_progress(a_row, a_col, a_fig, a_start, a_course, a_peil_construction[a_perspective.name], a_levels)
-    plot_day_bar(a_row, a_col, a_fig, a_start, assignment_group.total_points, a_actual_day, a_actual_date, a_perspective.progress, a_levels)
+    plot_day_bar(a_row, a_col, a_fig, a_start, assignment_group.total_points, a_actual_day, a_actual_date, a_perspective.progress, a_levels, show_points, a_perspective.sum_score )
     plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_perspective, a_levels)
-    plot_open_assignments(a_row, a_col, a_fig, a_start, a_course.find_perspective_by_assignment_group(assignment_group.id).show_points, l_assignments, a_levels)
+    plot_open_assignments(a_row, a_col, a_fig, a_start, show_points, l_assignments, a_levels)

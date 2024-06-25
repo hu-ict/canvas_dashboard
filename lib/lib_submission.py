@@ -81,6 +81,7 @@ def get_rubric_score(rubrics_submission, student):
 
 
 def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_submission):
+    error = ""
     if a_canvas_submission.grade:
         graded = True
     else:
@@ -88,51 +89,61 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
             graded = True
         else:
             graded = False
-    if len(a_assignment.rubrics) > 0:
+    if len(a_assignment.rubrics) > 0 and graded:
         if hasattr(a_canvas_submission, "rubric_assessment"):
             rubrics_assessment = a_canvas_submission.rubric_assessment.items()
             if len(rubrics_assessment) > 0:
                 graded = True
             else:
-                print("LS51 - Error no rubric_assessment in submission for assignment", a_assignment.name,
-                      a_student.name)
+                error = f"ERROR rubrics defined in assignment [{a_assignment.name}] but not used in submission for student {a_student.name}. Teacher action required."
+                print("LS51 -", error)
                 rubrics_assessment = None
-                graded = False
+                # graded = False
+                error = ""
         else:
-            # print("LS52 - Error no rubric_assessment in submission for assignment", a_assignment.name, a_student.name)
+            error = f"ERROR rubrics defined in assignment [{a_assignment.name}] but not used in submission for student {a_student.name}. Teacher action required."
+            print("LS52 -", error)
             rubrics_assessment = None
             # graded = False
+            error = ""
     else:
         rubrics_assessment = None
     # maak een submission en voeg de commentaren toe
     canvas_comments = a_canvas_submission.submission_comments
     if not a_canvas_submission.submitted_at and len(canvas_comments) == 0 and not graded:
         return None
-    error = ""
+    # print("LS31 -", f"submission_builder [{graded}] [{a_canvas_submission.submitted_at}] grade {a_canvas_submission.grade} grader_id {a_canvas_submission.grader_id} comments {len(canvas_comments)} score {a_canvas_submission.score} grading_type {a_assignment.grading_type} and student {a_student.name}.")
     submission_score = 0.0
     if rubrics_assessment is None:
+        #Geen rubrics bij submission
         rubrics_scores = None
         # Geen rubriek dus voldaan niet voldaan wordt gebruikt bij bepalen score
         if a_assignment.grading_type == "pass_fail":
             if a_canvas_submission.grade == 'complete':
-                submission_score = 2.0
+                submission_score = 2.00
             elif a_canvas_submission.grade == 'incomplete':
-                submission_score = 1.0
+                submission_score = 1.00
             else:
-                submission_score = 0.0
+                submission_score = 0.00
         elif a_assignment.grading_type == "points":
-            submission_score = a_canvas_submission.score
+            if a_canvas_submission.score is None:
+                error = f"ERROR score is empty {a_canvas_submission.grade} {a_canvas_submission.grader_id} for assignment {a_assignment.name} and student {a_student.name}."
+                print("LS75 -", error)
+                submission_score = 0.00
+            else:
+                submission_score = round(a_canvas_submission.score, 2)
         elif a_assignment.grading_type == "letter_grade":
-            error = f"Warning grading_type {a_assignment.grading_type} for assignment {a_assignment.name} has no rubrics for {a_student.name}."
-            print("LS81 -", error, a_canvas_submission.score)
-            submission_score = a_canvas_submission.score
+            # error = f"Warning grading_type {a_assignment.grading_type} for assignment {a_assignment.name} has no rubrics for {a_student.name}."
+            # print("LS81 -", error, a_canvas_submission.score)
+            submission_score = round(a_canvas_submission.score, 2)
         else:
             error = f"ERROR Unknown grading_type {a_assignment.grading_type} for assignment {a_assignment.name}"
             print("LS82 -", error)
-            submission_score = a_canvas_submission.score
+            submission_score = round(a_canvas_submission.score, 2)
     else:
         # 'pass_fail', 'percent', 'letter_grade', 'gpa_scale', 'points'
         rubrics_scores, rubric_score, error = get_rubric_score(rubrics_assessment, a_student)
+
         if a_assignment.grading_type == "pass_fail":
             #INNO vd/nvd met rubrics voor de "echte" punten (verborgen voor studenten)
             submission_score = rubric_score
@@ -142,14 +153,13 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
             if graded:
                 if a_canvas_submission.score is not None:
                     submission_score = round(a_canvas_submission.score, 2)
-                    if submission_score != rubric_score:
+                    if submission_score != round(rubric_score, 2):
                         if a_assignment.id == 295123:
                             # uitzondering voor opdracht CSC - MITRE ATTACK
                             submission_score = submission_score
                         else:
+
                             submission_score = rubric_score
-                    else:
-                        submission_score = submission_score
                 else:
                     print(a_canvas_submission, a_canvas_submission.score)
                     error = f"WARNING Submission score is empty {a_assignment.grading_type} for assignment {a_assignment.name}, student: {a_student.name}"
@@ -186,7 +196,7 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
     for canvas_comment in canvas_comments:
         l_submission.comments.append(
             Comment(canvas_comment['author_id'], canvas_comment['author_name'],
-                    get_date_time_obj(canvas_comment['created_at']), canvas_comment['comment']))
+                get_date_time_obj(canvas_comment['created_at']), canvas_comment['comment']))
     if rubrics_scores is not None:
         l_submission.rubrics = rubrics_scores
     if len(error) > 0:

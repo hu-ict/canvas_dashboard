@@ -39,7 +39,7 @@ def main(instance_name):
     # retrieve assignments_groups and score
     canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignments', 'overrides'])
     for canvas_assignment_group in canvas_assignment_groups:
-        assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name, [], "LINEAIR",
+        assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name, [], "POINTS",
                                            0, 0, 0, 0, 0, None)
         for canvas_assignment in canvas_assignment_group.assignments:
             if canvas_assignment['points_possible']:
@@ -75,7 +75,7 @@ def main(instance_name):
                 print(canvas_group)
 
     course_config.level_moments = start.level_moments
-    course_config.attendance = course_config.attendance
+    course_config.attendance = start.attendance
     course_config.perspectives = start.perspectives
     course_config.roles = start.roles
     with open(start.config_file_name, 'w') as f:

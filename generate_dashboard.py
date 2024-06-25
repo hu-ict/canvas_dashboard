@@ -52,19 +52,17 @@ def init_roles_dict(course):
     return l_list
 
 
-def init_coaches_count(course):
+def init_coaches_count(coaches):
     team_count = {}
-    for teacher in course.teachers:
-        if len(teacher.projects) > 0:
-            team_count[teacher.initials] = 0
+    for coach in coaches.values():
+        team_count[coach["teacher"].initials] = 0
     return team_count
 
 
-def init_coaches_list(course):
+def init_coaches_list(coaches):
     team_list = {}
-    for teacher in course.teachers:
-        if len(teacher.projects) > 0:
-            team_list[teacher.initials] = []
+    for coach in coaches.values():
+        team_list[coach["teacher"].initials] = []
     return team_list
 
 
@@ -98,6 +96,10 @@ def main(instance_name):
     results = read_results(start.results_file_name)
     level_series = read_levels("levels.json")
 
+    team_coaches = init_coaches_dict(course)
+    for team_coach in team_coaches.values():
+        print("GD04 -", team_coach["teacher"])
+
     if instances.is_instance_of("inno_courses"):
         peilen = {}
         for peil in course.level_moments.moments:
@@ -110,7 +112,7 @@ def main(instance_name):
         student_totals = {
             'student_count': 0,
             'perspectives': {
-                'team': {'count': [], 'pending': init_coaches_count(course), 'late': init_coaches_count(course), 'to_late': init_coaches_count(course), 'list': init_coaches_list(course)},
+                'team': {'count': [], 'pending': init_coaches_count(team_coaches), 'late': init_coaches_count(team_coaches), 'to_late': init_coaches_count(team_coaches), 'list': init_coaches_list(team_coaches)},
                 'gilde': {'count': [], 'pending': init_roles_count(course), 'late': init_roles_count(course), 'to_late': init_roles_count(course), 'list': init_roles_list(course)},
                 'kennis': {'count': [], 'pending': init_roles_count(course), 'late': init_roles_count(course), 'to_late': init_roles_count(course), 'list': init_roles_list(course)}
             },
@@ -133,6 +135,7 @@ def main(instance_name):
         for perspective in course.perspectives.keys():
             student_totals["perspectives"][perspective] = {'count': [], 'pending': init_sections_count(course), 'late': init_sections_count(course), 'to_late': init_sections_count(course), 'list': init_sections_list(course)}
         if course.level_moments is not None:
+            student_totals["level_moments"] = {}
             for moment in course.level_moments.moments:
                 student_totals["level_moments"][moment] = {'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}}
                 for perspective in course.perspectives.keys():
@@ -155,7 +158,7 @@ def main(instance_name):
         dict_result = student_totals
         json.dump(dict_result, f, indent=2)
 
-    team_coaches = init_coaches_dict(course)
+
     # with open("dump.json", 'w') as f:
     #     dict_result = json.dumps(student_totals, indent = 4)
     #     json.dump(student_totals, f, indent=2)
@@ -166,10 +169,10 @@ def main(instance_name):
     print("GD06 - build_bootstrap_general(start, course, results, team_coaches, labels_colors)")
     build_bootstrap_general(instances, start, course, results, team_coaches, level_series, student_totals)
 
-    # if instances.is_instance_of("inno_courses"):
-        # with open("dump.json", 'w') as f:
-        #     # dict_result = json.dumps(student_totals, indent = 4)
-        #     json.dump(student_totals, f, indent=2)
+    if instances.is_instance_of("inno_courses"):
+        with open("dump.json", 'w') as f:
+            # dict_result = json.dumps(student_totals, indent = 4)
+            json.dump(student_totals, f, indent=2)
     print("GD07 - build_late(instances, start, results, student_totals)")
     build_late_list(instances, start, results, student_totals)
 

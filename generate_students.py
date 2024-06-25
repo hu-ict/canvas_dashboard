@@ -16,7 +16,7 @@ def link_teachers(config):
     for teacher in config.teachers:
         for studentGroupId in teacher.projects:
             studentGroup = config.find_student_group(studentGroupId)
-            if studentGroup:
+            if studentGroup is not None:
                 studentGroup.teachers.append(teacher.id)
         for assignmentGroupId in teacher.assignment_groups:
             assignmentGroup = config.find_assignment_group(assignmentGroupId)

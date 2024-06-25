@@ -34,35 +34,43 @@
   "samen5": {
     "-2": {
       "label": "Leeg",
-      "color": "cornflowerblue"
+      "color": "cornflowerblue",
+      "fraction": null
     },
     "-1": {
       "label": "Niet bepaald",
-      "color": "#aaaaaa"
+      "color": "#aaaaaa",
+      "fraction": null
     },
     "0": {
       "label": "Niet zichtbaar",
-      "color": "#EDF8F0"
+      "color": "#EDF8F0",
+      "fraction": 0.1
     },
     "1": {
       "label": "Startend",
-      "color": "#c8ead1"
+      "color": "#c8ead1",
+      "fraction": 0.3
     },
     "2": {
       "label": "Bijna Samenwerkend",
-      "color": "#a4dbb1"
+      "color": "#a4dbb1",
+      "fraction": 0.5
     },
     "3": {
       "label": "Samenwerkend",
-      "color": "#80cb90"
+      "color": "#80cb90",
+      "fraction": 0.6
     },
     "4": {
       "label": "Bijna Excellerend",
-      "color": "#5abb6f"
+      "color": "#5abb6f",
+      "fraction": 0.7
     },
     "5": {
       "label": "Excellerend",
-      "color": "#2bad4e"
+      "color": "#2bad4e",
+      "fraction": 1.0
     }
   },
   "niveau": {
