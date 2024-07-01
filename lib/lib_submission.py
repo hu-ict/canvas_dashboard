@@ -120,9 +120,9 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
         # Geen rubriek dus voldaan niet voldaan wordt gebruikt bij bepalen score
         if a_assignment.grading_type == "pass_fail":
             if a_canvas_submission.grade == 'complete':
-                submission_score = 2.00
+                submission_score = a_assignment.points
             elif a_canvas_submission.grade == 'incomplete':
-                submission_score = 1.00
+                submission_score = round(a_canvas_submission.scorea_assignment.points/2, 2)
             else:
                 submission_score = 0.00
         elif a_assignment.grading_type == "points":

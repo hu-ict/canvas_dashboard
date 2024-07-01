@@ -94,8 +94,10 @@ def main(instance_name):
                     else:
                         print(f"GC64 - WARNING [{canvas_assignment.grading_type}] points_possible is not set for", canvas_assignment.name)
                 elif canvas_assignment.grading_type == "pass_fail":
-                    print("GC71 - Possible points", canvas_assignment.points_possible)
-                    points_possible = 2
+                    if canvas_assignment.points_possible == 0:
+                        points_possible = 2
+                    else:
+                        points_possible = canvas_assignment.points_possible
                 elif canvas_assignment.grading_type == 'letter_grade':
                     if canvas_assignment.points_possible:
                         points_possible = canvas_assignment.points_possible
@@ -127,17 +129,20 @@ def main(instance_name):
                         assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
                         assignment.points = rubrics_points
                         # print("GC31 - ",len(assignment.rubrics))
+                        if assignment.points > 0 and assignment.points != rubrics_points:
+                            print("GC33 - WARNING inconsistency in", assignment.name, "assignment points", assignment.points, "rubrics points", rubrics_points)
                     else:
-                        print("GC32 - INFO No rubric", assignment.name, "grading_type", assignment.grading_type)
+                        print("GC34 - INFO No rubric", assignment.name, "grading_type", assignment.grading_type)
+
                 elif assignment.grading_type == "points":
                     if hasattr(canvas_assignment, "rubric"):
                         assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
                         if assignment.points > 0 and assignment.points != rubrics_points:
-                            print("GC33 - WARNING inconsistency in", assignment.name, "assignment points", assignment.points, "rubrics points", rubrics_points)
+                            print("GC36 - WARNING inconsistency in", assignment.name, "assignment points", assignment.points, "rubrics points", rubrics_points)
                     else:
-                        print("GC34 - WARNING No rubric", assignment.name, "grading_type", assignment.grading_type)
+                        print("GC38 - WARNING No rubric", assignment.name, "grading_type", assignment.grading_type)
                 else:
-                    print("GC37 - ERROR Unsupported grading_type", assignment.grading_type)
+                    print("GC40 - ERROR Unsupported grading_type", assignment.grading_type)
             total_group_points = 0
             for assignment in assignment_group.assignments:
                  total_group_points += assignment.points
