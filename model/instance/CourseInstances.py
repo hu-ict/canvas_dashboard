@@ -44,20 +44,45 @@ class CourseInstances:
             line += f'{self.events[key]}'
         return line
 
-    def get_project_path(self):
-        return ".//courses//" + self.current_instance + "//"
+    @staticmethod
+    def get_project_path(instance):
+        return ".//courses//" + instance + "//"
 
     def get_test_path(self):
-        return self.get_project_path() + "test//"
+        return CourseInstances.get_project_path(self.current_instance) + "test//"
 
     def get_plot_path(self):
-        return self.get_project_path() + "dashboard_" + self.current_instance + "//plotly//"
+        return CourseInstances.get_project_path(self.current_instance) + "dashboard_" + self.current_instance + "//plotly//"
 
     def get_html_path(self):
-        return self.get_project_path() +"dashboard_" + self.current_instance + "//"
+        return CourseInstances.get_project_path(self.current_instance) +"dashboard_" + self.current_instance + "//"
 
     def get_start_file_name(self):
-        return self.get_project_path() + "start_" + self.current_instance + ".json"
+        return CourseInstances.get_project_path(self.current_instance) + "start_" + self.current_instance + ".json"
+
+    @staticmethod
+    def get_template_path():
+        return ".//templates//"
+
+    @staticmethod
+    def get_config_file_name(instance_name):
+        return CourseInstances.get_project_path(instance_name) + "config_"+instance_name+".json"
+
+    @staticmethod
+    def get_course_file_name(instance_name):
+        return CourseInstances.get_project_path(instance_name) + "course_"+instance_name+".json"
+
+    @staticmethod
+    def get_result_file_name(instance_name):
+        return CourseInstances.get_project_path(instance_name) + "result_"+instance_name+".json"
+
+    @staticmethod
+    def get_progress_file_name(instance_name):
+        return CourseInstances.get_project_path(instance_name) + "progress_"+instance_name+".json"
+
+    @staticmethod
+    def get_workload_file_name(instance_name):
+        return CourseInstances.get_project_path(instance_name) + "workload_"+instance_name+".json"
 
     def get_category(self, instance_name):
         for category in self.course_categories.values():

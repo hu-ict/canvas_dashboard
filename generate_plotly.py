@@ -15,8 +15,8 @@ def main(instance_name):
         instances.current_instance = instance_name
     print("GP02 - Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
-    course = read_course(start.course_file_name)
-    results = read_results(start.results_file_name)
+    course = read_course(instances.get_course_file_name(instances.current_instance))
+    results = read_results(instances.get_result_file_name(instances.current_instance))
     levels = read_levels("levels.json")
 
     if results.actual_day > course.days_in_semester:
@@ -43,7 +43,7 @@ def main(instance_name):
         ]
     elif instances.is_instance_of('inno_courses'):
         subplot_titles.append("Halfweg")
-        subplot_titles.append("Ná sprint 7")
+        subplot_titles.append("Sprint 7")
         subplot_titles.append("Eindbeoordeling")
         positions = {'team': {'row': 1, 'col': 1},
                      'gilde': {'row': 1, 'col': 4},

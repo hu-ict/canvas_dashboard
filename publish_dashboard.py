@@ -13,7 +13,7 @@ def main(instance_name):
     print("PB02 - Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
     print("PB04 - Copy files to OneDrive docenten")
-    file_names = read_file_list(instances.get_project_path() + 'file_list.json')
+    file_names = read_file_list(instances.get_project_path(instances.current_instance) + 'file_list.json')
     file_names.append("index.html")
     for file_name in file_names:
         shutil.copyfile(instances.get_html_path() + file_name, start.target_path + file_name)

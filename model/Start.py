@@ -7,8 +7,7 @@ from model.perspective.Perspective import Perspective
 class Start:
     def __init__(self, canvas_course_id, projects_groep_name, slb_groep_name,
                  start_date, end_date,
-                 template_path, target_path, target_slb_path, config_file_name, course_file_name,
-                 results_file_name, progress_file_name, workload_file_name, attendance_report,
+                 target_path, target_slb_path, attendance_report,
                  api_key, a_progress_levels, a_grade_levels):
         self.canvas_course_id = canvas_course_id
         self.api_key = api_key
@@ -20,20 +19,14 @@ class Start:
         self.slb_groep_name = slb_groep_name
         self.start_date = start_date
         self.end_date = end_date
-        self.template_path = template_path
         self.target_path = target_path
         self.target_slb_path = target_slb_path
-        self.config_file_name = config_file_name
-        self.course_file_name = course_file_name
-        self.results_file_name = results_file_name
-        self.progress_file_name = progress_file_name
-        self.workload_file_name = workload_file_name
         self.attendance_report = attendance_report
         self.level_moments = None
         self.attendance = None
 
     def __str__(self):
-        return f'Start({self.canvas_course_id}, {self.projects_groep_name}, {self.slb_groep_name}, {self.progress_levels}, {self.grade_levels}, {self.level_moments}, {self.attendance},  {self.start_date}, {self.end_date}, {self.config_file_name}, {self.course_file_name}, {self.results_file_name}, {self.progress_file_name}, {self.api_key})\n'
+        return f'Start({self.canvas_course_id}, {self.projects_groep_name}, {self.slb_groep_name}, {self.progress_levels}, {self.grade_levels}, {self.level_moments}, {self.attendance},  {self.start_date}, {self.end_date}, {self.progress_file_name}, {self.api_key})\n'
 
     def to_json(self, scope):
         dict_result = {
@@ -45,14 +38,8 @@ class Start:
             "slb_groep_name": self.slb_groep_name,
             'start_date': get_date_time_str(self.start_date),
             'end_date': get_date_time_str(self.end_date),
-            'template_path': self.template_path,
             'target_path': self.target_path,
             'target_slb_path': self.target_slb_path,
-            'config_file_name': self.config_file_name,
-            'course_file_name': self.course_file_name,
-            'results_file_name': self.results_file_name,
-            'progress_file_name': self.progress_file_name,
-            'workload_file_name': self.workload_file_name,
             'attendance_report': self.attendance_report,
             'perspectives': {},
             'roles': []
@@ -71,6 +58,7 @@ class Start:
             dict_result['roles'].append(role.to_json([]))
         return dict_result
 
+
     @staticmethod
     def from_dict(data_dict):
         new = Start(data_dict['canvas_course_id'],
@@ -78,9 +66,7 @@ class Start:
                     data_dict['slb_groep_name'],
                     get_date_time_obj(data_dict['start_date']),
                     get_date_time_obj(data_dict['end_date']),
-                    data_dict['template_path'], data_dict['target_path'], data_dict['target_slb_path'],
-                    data_dict['config_file_name'], data_dict['course_file_name'],
-                    data_dict['results_file_name'], data_dict['progress_file_name'], data_dict['workload_file_name'],
+                    data_dict['target_path'], data_dict['target_slb_path'],
                     data_dict['attendance_report'],
                     data_dict['api_key'],
                     data_dict['progress_levels'],

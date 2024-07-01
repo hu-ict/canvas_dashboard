@@ -18,7 +18,7 @@ def main(instance_name):
         instances.current_instance = instance_name
     print("GR02 - Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
-    course = read_course(start.course_file_name)
+    course = read_course(instances.get_course_file_name(instances.current_instance))
     # Initialize a new Canvas object
     canvas = Canvas(API_URL, start.api_key)
     user = canvas.get_current_user()
@@ -26,6 +26,8 @@ def main(instance_name):
     canvas_course = canvas.get_course(start.canvas_course_id)
     if g_actual_date > start.end_date:
         results = Result(start.canvas_course_id, course.name, start.end_date, (start.end_date - start.start_date).days - 1, 0, 0)
+    elif g_actual_date < start.start_date:
+        results = Result(start.canvas_course_id, course.name, start.start_date, 1, 0, 0)
     else:
         results = Result(start.canvas_course_id, course.name, g_actual_date, (g_actual_date - start.start_date).days, 0, 0)
 
@@ -51,7 +53,7 @@ def main(instance_name):
 
     results.submission_count, results.not_graded_count = count_graded(results)
 
-    progress_history = read_progress(start.progress_file_name)
+    progress_history = read_progress(instances.get_progress_file_name(instances.current_instance))
     progress_day = ProgressDay(results.actual_day, course.perspectives.keys())
 
     # Bepaal voortgang per perspectief
@@ -75,11 +77,11 @@ def main(instance_name):
 
     # progress_history = generate_history(results)
 
-    with open(start.progress_file_name, 'w') as f:
+    with open(instances.get_progress_file_name(instances.current_instance), 'w') as f:
         dict_result = progress_history.to_json()
         json.dump(dict_result, f, indent=2)
 
-    with open(start.results_file_name, 'w') as f:
+    with open(instances.get_result_file_name(instances.current_instance), 'w') as f:
         dict_result = results.to_json(["perspectives"])
         json.dump(dict_result, f, indent=2)
 

@@ -9,9 +9,10 @@ from lib.teams_api_lib import upload_file_html, upload_file_jpeg
 def main(instance_name):
     g_actual_date = get_actual_date()
     instances = read_course_instance()
+    if len(instance_name) > 0:
+        instances.current_instance = instance_name
     print("PS01 Instance:", instances.current_instance)
-    start = read_start(instances.get_start_file_name())
-    course = read_course(start.course_file_name)
+    course = read_course(instances.get_course_file_name(instances.current_instance))
     msteams_api = read_msteams_api("msteams_api.json")
     if len(instance_name) > 0:
         instances.current_instance = instance_name

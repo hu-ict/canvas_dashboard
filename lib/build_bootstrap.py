@@ -278,7 +278,7 @@ def get_initials(item):
 
 def build_bootstrap_general(a_instances, a_start, a_course, a_results, a_coaches, a_labels_colors, a_totals):
     l_semester_day = (a_results.actual_date - a_start.start_date).days
-    l_templates = load_templates(a_start.template_path)
+    l_templates = load_templates(a_instances.get_template_path())
     tabs_html_string = build_bootstrap_students_tabs(a_instances, a_start, a_course, a_results, l_templates, a_labels_colors,
                                                      a_totals)
 

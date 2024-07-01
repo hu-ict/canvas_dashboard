@@ -89,7 +89,7 @@ def main(instance_name):
         instances.current_instance = instance_name
     print("GS02 - Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
-    course = read_course(start.course_file_name)
+    course = read_course(instances.get_course_file_name(instances.current_instance))
     # print("GS02 -", "Config", course)
     # Initialize a new Canvas object
     print(API_URL, start.api_key)
@@ -187,7 +187,7 @@ def main(instance_name):
     for role in course.roles:
         role.students = sorted(role.students, key=lambda s: s.sortable_name)
 
-    with open(start.course_file_name, 'w') as f:
+    with open(instances.get_course_file_name(instances.current_instance), 'w') as f:
         dict_result = course.to_json(["assignment"])
         json.dump(dict_result, f, indent=2)
 

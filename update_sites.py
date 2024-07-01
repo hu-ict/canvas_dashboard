@@ -25,7 +25,7 @@ def main(instance_name):
         print("US04 - No student channels defined for this course")
         return
     start = read_start(instances.get_start_file_name())
-    course = read_course(start.course_file_name)
+    course = read_course(instances.get_course_file_name(instances.current_instance))
     msteams_api = read_msteams_api("msteams_api.json")
 
     student_sites = get_sites(msteams_api.my_token, "Feb24")
@@ -51,7 +51,7 @@ def main(instance_name):
         else:
             print("US14 - Student from channel name not found", student.name)
 
-    with open(start.course_file_name, 'w') as f:
+    with open(instances.get_course_file_name(instances.current_instance), 'w') as f:
         dict_result = course.to_json(["assignment"])
         json.dump(dict_result, f, indent=2)
 

@@ -64,7 +64,7 @@ def plot_workload_history(a_fig, a_row, a_col, a_workload_history):
         ), a_row, a_col)
 
 
-def plot_peilingen(a_fig, a_row, a_col, student_totals, a_start, a_course, a_progress_levels):
+def plot_peilingen(a_fig, a_row, a_col, student_totals, a_course, a_progress_levels):
     for level in a_progress_levels.levels.keys():
         y_counts = []
         x_labels = []
@@ -93,7 +93,7 @@ def plot_peilingen(a_fig, a_row, a_col, student_totals, a_start, a_course, a_pro
     a_fig.update_yaxes(title_text="Aantal", range=[0, y_axis], row=a_row, col=a_col)
 
 
-def plot_voortgang(a_instances, a_start, a_course, student_totals, a_progress_history, a_progress_levels):
+def plot_voortgang(a_instances, a_course, student_totals, a_progress_history, a_progress_levels):
     titles = ['Dagelijkse voortgang <b>studenten</b>', 'Peilingen', ""]
     for perspective in a_course.perspectives.values():
         titles.append(perspective.title)
@@ -114,13 +114,13 @@ def plot_voortgang(a_instances, a_start, a_course, student_totals, a_progress_hi
     )
     plot_progress_history(fig, 1, 1, a_progress_history, "overall", a_course, a_progress_levels)
     col = 1
-    for perspective in a_start.perspectives.keys():
+    for perspective in a_course.perspectives.keys():
         plot_progress_history(fig, 2, col, a_progress_history, perspective, a_course, a_progress_levels)
         col += 1
         if col > 3:
             break
     # if a_instances.is_instance_of("inno_courses"):
-    plot_peilingen(fig, 1, 2, student_totals, a_start, a_course, a_progress_levels)
+    plot_peilingen(fig, 1, 2, student_totals, a_course, a_progress_levels)
     file_name = a_instances.get_plot_path() + "totals_voortgang" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")
 

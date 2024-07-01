@@ -66,7 +66,7 @@ def main(instance_name):
         instances.current_instance = instance_name
     print("GC02 -", "Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
-    config = read_config(start.config_file_name)
+    config = read_config(instances.get_config_file_name(instances.current_instance))
     # for teacher in config.teachers:
     #     print("GC04 -", teacher)
     # print("GC02 -", "Config", config)
@@ -86,7 +86,7 @@ def main(instance_name):
             print(f"GC22 - assignment_group {assignment_group.name} is used with strategy {assignment_group.strategy}")
             for c_assignment in canvas_assignment_group.assignments:
                 canvas_assignment = canvas_course.get_assignment(c_assignment['id'], include=['overrides', 'online_quiz'])
-                # print("GC23 -", canvas_assignment.name, "grading_type:", canvas_assignment.grading_type, "grading_standard_id:", canvas_assignment.grading_standard_id)
+                print("GC23 -", canvas_assignment.name, "grading_type:", canvas_assignment.grading_type, "grading_standard_id:", canvas_assignment.grading_standard_id)
                 points_possible = 0
                 if canvas_assignment.grading_type == "points":
                     if canvas_assignment.points_possible:
@@ -94,6 +94,7 @@ def main(instance_name):
                     else:
                         print(f"GC64 - WARNING [{canvas_assignment.grading_type}] points_possible is not set for", canvas_assignment.name)
                 elif canvas_assignment.grading_type == "pass_fail":
+                    print("GC71 - Possible points", canvas_assignment.points_possible)
                     points_possible = 2
                 elif canvas_assignment.grading_type == 'letter_grade':
                     if canvas_assignment.points_possible:
@@ -154,7 +155,7 @@ def main(instance_name):
         else:
             assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
 
-    with open(start.course_file_name, 'w') as f:
+    with open(instances.get_course_file_name(instances.current_instance), 'w') as f:
         dict_result = config.to_json(["assignment"])
         json.dump(dict_result, f, indent=2)
 

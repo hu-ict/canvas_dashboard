@@ -443,4 +443,4 @@ def plot_perspective(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
         plot_progress(a_row, a_col, a_fig, a_start, a_course, a_peil_construction[a_perspective.name], a_levels)
     plot_day_bar(a_row, a_col, a_fig, a_start, assignment_group.total_points, a_actual_day, a_actual_date, a_perspective.progress, a_levels, show_points, a_perspective.sum_score )
     plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_perspective, a_levels)
-    plot_open_assignments(a_row, a_col, a_fig, a_start, show_points, l_assignments, a_levels)
+    plot_open_assignments(a_row, a_col, a_fig, a_start, a_course, show_points, l_assignments, a_levels)

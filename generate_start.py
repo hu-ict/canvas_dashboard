@@ -39,15 +39,9 @@ start_file_name = instances.get_start_file_name()
 canvas_course_id = input("Canvas course_id: ")
 
 
-start = Start(canvas_course_id, "Project Groups", "", get_date_time_obj("2024-09-02T00:00:00Z"), get_date_time_obj("2025-01-31T23:59:59Z"),
-              project_path + "templates//", "onedrive", "onedrive",
-              project_path + "config_" + course_instance + ".json",
-              project_path + "course_" + course_instance + ".json",
-              project_path + "result_" + course_instance + ".json",
-              project_path + "progress_" + course_instance + ".json",
-              project_path + "workload_" + course_instance + ".json",
-              project_path + "attendance_report.csv",
-              "", "progress", "grade")
+start = Start(instance.name, canvas_course_id, "Project Groups", "", get_date_time_obj("2024-09-02T00:00:00Z"), get_date_time_obj("2025-01-31T23:59:59Z"),
+              "onedrive", "onedrive",
+              project_path + "attendance_report.csv", "", "progress", "grade")
 start.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", [])
 perspective = Perspective("project", "Project", "samen", True, False)
 start.perspectives[perspective.name] = perspective
@@ -66,7 +60,7 @@ for dir_name in dir_names:
     shutil.copytree(".//dashboard - lokaal//" + dir_name, project_path +"dashboard_" + course_instance + "//" + dir_name, copy_function=shutil.copy2, ignore_dangling_symlinks=False,
                     dirs_exist_ok=True)
 
-shutil.copytree(".//templates//", start.template_path, copy_function=shutil.copy2, ignore_dangling_symlinks=False, dirs_exist_ok=True)
+#shutil.copytree(".//templates//", start.template_path, copy_function=shutil.copy2, ignore_dangling_symlinks=False, dirs_exist_ok=True)
 
 with open(start_file_name, 'w') as f:
     dict_result = start.to_json([])

@@ -64,7 +64,7 @@ class Bandwidth:
                 return 3
 
     def get_progress_range(self, day, score):
-        if day == 0:
+        if day <= 0:
             return -1
         elif score == 0:
             return 0

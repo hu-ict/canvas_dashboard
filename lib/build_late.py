@@ -12,23 +12,23 @@ def build_late_list(a_instances, a_start, a_result, a_student_totals):
             # with open("late_"+l_perspective+"_"+l_selector+".json", 'w') as f:
             #     json.dump(late_list, f, indent=2)
 
-    with open(a_start.template_path+'template_late.html', mode='r', encoding="utf-8") as file_late_template:
+    with open(a_instances.get_template_path()+'template_late.html', mode='r', encoding="utf-8") as file_late_template:
         string_late_html = file_late_template.read()
         late_html_template = Template(string_late_html)
 
-    with open(a_start.template_path+'template_late_perspective.html', mode='r', encoding="utf-8") as file_late_perspective_template:
+    with open(a_instances.get_template_path()+'template_late_perspective.html', mode='r', encoding="utf-8") as file_late_perspective_template:
         string_late_perspective_html = file_late_perspective_template.read()
         late_perspective_html_template = Template(string_late_perspective_html)
 
-    with open(a_start.template_path+'template_late_list.html', mode='r', encoding="utf-8") as file_late_list_template:
+    with open(a_instances.get_template_path()+'template_late_list.html', mode='r', encoding="utf-8") as file_late_list_template:
         string_late_list_html = file_late_list_template.read()
         late_list_html_template = Template(string_late_list_html)
 
-    with open(a_start.template_path+'template_submission.html', mode='r', encoding="utf-8") as file_submission_template:
+    with open(a_instances.get_template_path()+'template_submission.html', mode='r', encoding="utf-8") as file_submission_template:
         string_submission_html = file_submission_template.read()
         submission_html_template = Template(string_submission_html)
 
-    with open(a_start.template_path+'template_selector.html', mode='r', encoding="utf-8") as file_selector_template:
+    with open(a_instances.get_template_path()+'template_selector.html', mode='r', encoding="utf-8") as file_selector_template:
         string_selector_html = file_selector_template.read()
         selector_html_template = Template(string_selector_html)
 
@@ -44,7 +44,7 @@ def build_late_list(a_instances, a_start, a_result, a_student_totals):
         all_late_substitute += late_perspective_html_template.substitute({"perspective": perspective, "buttons": late_substitute})
     late_html_string = late_html_template.substitute({"perspectives": all_late_substitute})
 
-    with open(a_instances.get_project_path()+'file_list.json', 'w') as f:
+    with open(a_instances.get_project_path(a_instances.current_instance)+'file_list.json', 'w') as f:
         dict_result = file_list
         json.dump(dict_result, f, indent=2)
 

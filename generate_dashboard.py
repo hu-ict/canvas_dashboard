@@ -92,8 +92,8 @@ def main(instance_name):
     print("GD02 - Instance:", instances.current_instance, instances.get_category(instances.current_instance))
     start = read_start(instances.get_start_file_name())
 
-    course = read_course(start.course_file_name)
-    results = read_results(start.results_file_name)
+    course = read_course(instances.get_course_file_name(instances.current_instance))
+    results = read_results(instances.get_result_file_name(instances.current_instance))
     level_series = read_levels("levels.json")
 
     team_coaches = init_coaches_dict(course)
@@ -180,17 +180,17 @@ def main(instance_name):
         dict_result = student_totals
         json.dump(dict_result, f, indent=2)
 
-    workload_history = read_workload(start.workload_file_name)
+    workload_history = read_workload(instances.get_workload_file_name(instances.current_instance))
     workload_day = WorkloadDay(results.actual_day)
     workload_day.from_late_list(student_totals["late"]["count"])
     workload_history.append_day(workload_day)
 
-    with open(start.workload_file_name, 'w') as f:
+    with open(instances.get_workload_file_name(instances.current_instance), 'w') as f:
         dict_result = workload_history.to_json()
         json.dump(dict_result, f, indent=2)
 
     plot_werkvoorraad(instances, start, course, student_totals, workload_history)
-    plot_voortgang(instances, start, course, student_totals, read_progress(start.progress_file_name), level_series.level_series['progress'])
+    plot_voortgang(instances, course, student_totals, read_progress(instances.get_progress_file_name(instances.current_instance)), level_series.level_series['progress'])
     print("GD99 - Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 
 

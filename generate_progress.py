@@ -59,18 +59,18 @@ def main(instance_name):
         instances.current_instance = instance_name
     print("GP02 - Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
-    course = read_course(start.course_file_name)
-    results = read_results(start.results_file_name)
-    progress_history = read_progress(start.progress_file_name)
+    course = read_course(instances.get_course_file_name(instances.current_instance))
+    results = read_results(instances.get_result_file_name(instances.current_instance))
+    progress_history = read_progress(instances.get_progress_file_name(instances.current_instance))
 
     # progress_history = generate_history(results)
     process_progress(start, course, results, progress_history)
 
-    with open(start.results_file_name, 'w') as f:
+    with open(instances.get_result_file_name(instances.current_instance), 'w') as f:
         dict_result = results.to_json(['perspectives'])
         json.dump(dict_result, f, indent=2)
 
-    with open(start.progress_file_name, 'w') as f:
+    with open(instances.get_progress_file_name(instances.current_instance), 'w') as f:
         dict_result = progress_history.to_json()
         json.dump(dict_result, f, indent=2)
 

@@ -10,6 +10,8 @@ from model.CourseConfig import CourseConfig
 from model.Section import Section
 from model.StudentGroup import StudentGroup
 from model.Teacher import Teacher
+from model.instance.CourseInstances import CourseInstances
+
 
 def main(instance_name):
     g_actual_date = get_actual_date()
@@ -78,7 +80,8 @@ def main(instance_name):
     course_config.attendance = start.attendance
     course_config.perspectives = start.perspectives
     course_config.roles = start.roles
-    with open(start.config_file_name, 'w') as f:
+    print("GC98 - ConfigFileName:",CourseInstances.get_config_file_name(instances.current_instance))
+    with open(CourseInstances.get_config_file_name(instances.current_instance), 'w') as f:
         dict_result = course_config.to_json([])
         json.dump(dict_result, f, indent=2)
 
