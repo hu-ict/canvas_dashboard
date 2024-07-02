@@ -241,7 +241,7 @@ Aanmaken teams in MSTeams. Je hebt voor elke max 30 studenten een team nodig.
 Privé kanalen worden aangemaakt binnen een bestaand team. Er geldt een maximum van 30 privékanalen in ieder team. Het script:
 - `generate_channels.py`
 
-Het `team_id` wordt verkregen met de GraphQL MSTeams interface. De `team_id`s worden in de lijst boven in het schript toegevoegd.
+Het `team_id` wordt verkregen met de GraphQL MSTeams interface. De `team_id`s worden in de lijst boven in het script toegevoegd.
 - `teams = ["b7cf78ae-8c6f-460d-a47a-d4bc2b8b2f18"]`
 
 De lijst van studenten wordt uit `course.json` gehaald.
