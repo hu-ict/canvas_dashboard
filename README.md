@@ -238,10 +238,17 @@ Bovenstaande stappen kunnen ook gemodelleerd worden met de
 ## Stap 1 Aanmaken teams
 Aanmaken teams in MSTeams. Je hebt voor elke max 30 studenten een team nodig.
 ## Stap 2 Aanmaken kanalen
-Privé kanalen worden aangemaakt binnen een bestaand team. Het `team_id` wordt verkregen met de GrapgQL MSTeams interface. Er geldt een maximum van 30 privékanalen in eden team. Het script:
+Privé kanalen worden aangemaakt binnen een bestaand team. Er geldt een maximum van 30 privékanalen in ieder team. Het script:
 - `generate_channels.py`
 
+Het `team_id` wordt verkregen met de GraphQL MSTeams interface. De `team_id`s worden in de lijst boven in het script toegevoegd.
+- `teams = ["b7cf78ae-8c6f-460d-a47a-d4bc2b8b2f18"]`
+
+De lijst van studenten wordt uit `course.json` gehaald.
+
 Dit script maakt een privékanaal en en voegt de de gebruiker (student) toe aan het team én het kanaal. Het json `msteams_api.json` bestand wordt gebruikt voor het opslaan en uitlezen van de api_keys. De api_key verloopt binnen een dag. Ik werk met een update van de key via de Graph Explorer. De api_key wordt in het api bestand gezet onder `gen_token`.
+
+Als je de naam van de `student_group` als `team_name` wilt gebruiken moet je het script aanpassen.
 ## Stap 3 Uilezen kanaal UID
 Met het volgende script worden de id's van de kanalen gekoppeld aan de studenten in de `course.json`. Het json `msteams_api.json` bestand wordt gebruikt voor het opslaan en uitlezen van de api_keys.
 - `update_sites.py`
