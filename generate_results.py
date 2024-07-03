@@ -30,24 +30,21 @@ def main(instance_name):
         results = Result(start.canvas_course_id, course.name, start.start_date, 1, 0, 0)
     else:
         results = Result(start.canvas_course_id, course.name, g_actual_date, (g_actual_date - start.start_date).days, 0, 0)
-
     results.students = course.students
-
     read_submissions(canvas_course, start, course, results, True)
-
     for student in results.students:
         for perspective in student.perspectives.values():
             # Perspective aanvullen met missed Assignments (niets ingeleverd)
             add_missed_assignments(start, course, results, perspective)
-
     if start.attendance is not None:
         process_attendance(start, course, results)
     else:
         print("GR10 - No attendance")
 
+    # sorteer de sattendance en submissions
     for student in results.students:
         if start.attendance is not None:
-            student.attendance.submissions = sorted(student.attendance.submissions, key=lambda s: s.assignment_day)
+            student.attendance_perspective.attendance_submissions = sorted(student.attendance_perspective.attendance_submissions, key=lambda s: s.day)
         for perspective in student.perspectives.values():
             perspective.submissions = sorted(perspective.submissions, key=lambda s: s.assignment_day)
 
@@ -59,8 +56,8 @@ def main(instance_name):
     # Bepaal voortgang per perspectief
     for student in results.students:
         if start.attendance is not None:
-            get_attendance_progress(course, results, student.attendance)
-            progress_day.attendance[str(student.attendance.progress)] += 1
+            get_attendance_progress(course, results, student.attendance_perspective)
+            progress_day.attendance[str(student.attendance_perspective.progress)] += 1
         for perspective in student.perspectives.values():
             get_progress(start, course, results, perspective)
             progress_day.perspective[perspective.name][str(perspective.progress)] += 1

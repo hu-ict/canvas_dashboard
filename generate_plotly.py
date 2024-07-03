@@ -1,6 +1,8 @@
 import sys
 
 from plotly.subplots import make_subplots
+
+from lib.build_plotly_attendance import plot_attendance
 from lib.build_plotly_perspective import plot_perspective, find_submissions, plot_overall_peilingen
 from lib.lib_date import get_date_time_loc, get_actual_date
 from lib.file import read_start, read_course, read_results, read_levels, read_course_instance
@@ -31,7 +33,7 @@ def main(instance_name):
         positions = {'kennis': {'row': 1, 'col': 1},
                      'verbreding': {'row': 1, 'col': 4},
                      'skills': {'row': 2, 'col': 1},
-                     'aanwezig': {'row': 2, 'col': 4}
+                     'attendance': {'row': 2, 'col': 4}
                      }
         specs = [
             [
@@ -99,6 +101,10 @@ def main(instance_name):
             col = positions[perspective.name]['col']
             plot_perspective(row, col, fig, a_instances, a_start, a_course, perspective, a_peil_construction,
                               results.actual_day, get_date_time_loc(a_actual_date), levels)
+        if a_course.attendance is not None:
+            row = positions["attendance"]['row']
+            col = positions["attendance"]['col']
+            plot_attendance(row, col, fig, a_instances, a_start, a_course, a_course.attendance, a_student.attendance_perspective, results.actual_day, get_date_time_loc(a_actual_date), levels)
 
         if a_instances.is_instance_of('inno_courses'):
             # Peil overall drie peilmomenten

@@ -30,34 +30,24 @@ def get_overall_progress(a_progress):
     return -1
 
 
-def get_attendance_progress(course, results, attendance):
+def get_attendance_progress(course, results, attendance_perspective):
     # bepaal de voortgang
-    if len(attendance.assignment_groups) == 1:
-        assignment_group = course.find_assignment_group(attendance.assignment_groups[0])
-        if assignment_group is None:
-            return
-        attendance.submissions = sorted(attendance.submissions, key=lambda s: s.assignment_day)
-        total_score = 0
-        total_count = 0
-        last_flow = 0.5
-        for submission in attendance.submissions:
-            if submission.graded:
-                attendance.last_score = submission.submitted_day
-                total_score += submission.score
-                total_count += 1
-                submission.flow = total_score / total_count * 100 / 2
-                # print(submission.flow)
-                attendance.sum_score = total_score
-                last_flow = submission.flow
-            else:
-                submission.flow = last_flow
-        if assignment_group.bandwidth is not None and total_count > 0:
-            attendance.progress = assignment_group.bandwidth.get_progress(assignment_group.strategy,
-                                                                       results.actual_day,
-                                                                       attendance.last_score,
-                                                                       total_score / total_count * 100 / 2)
+    attendance_perspective.attendance_submissions = sorted(attendance_perspective.attendance_submissions, key=lambda s: s.day)
+    total_score = 0
+    total_count = 0
+    last_flow = 1.0
+    for submission in attendance_perspective.attendance_submissions:
+        if submission.graded:
+            attendance_perspective.last_score = submission.day
+            total_score += submission.score
+            total_count += 1
+            submission.flow = total_score / total_count / 2
+            # print(submission.flow)
+            attendance_perspective.sum_score = total_score
+            last_flow = submission.flow
         else:
-            attendance.progress = -1
+            submission.flow = last_flow
+
 
 def get_progress(start, course, results, perspective):
     # bepaal de voortgang

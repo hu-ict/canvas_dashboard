@@ -2,12 +2,13 @@ import json
 import sys
 
 from canvasapi import Canvas
-from lib.lib_bandwidth import bandwidth_builder
+from lib.lib_bandwidth import bandwidth_builder, bandwidth_builder_attendance
 from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
 from lib.file import read_start, read_config, read_course_instance
 from model.Assignment import Assignment
 from model.Criterion import Criterion
 from model.Rating import Rating
+from model.perspective.AttendanceMoment import AttendanceMoment
 
 
 def get_dates(start, input):
@@ -59,6 +60,27 @@ def get_uses_assignment_groups(config):
     return uses_assignment_groups
 
 
+def get_attendance(attendance):
+    starting_days = attendance.policy.starting_days
+    if len(starting_days) == 0:
+        print("GC81 - ERROR - Geen starting_days opgegeven in attendance.policy")
+        return None
+    if "WEEKLY" not in attendance.policy.recurring:
+        print(f"GC81 - ERROR - Ongeldige recurring [{attendance.policy.recurring}] opgegeven in attendance.policy")
+        return None
+    if len(starting_days) == 1:
+        moments = []
+        for week in range(0, attendance.policy.times):
+            if week+1 in attendance.policy.exceptions:
+                continue
+            day = starting_days[0] + week*7
+            points = 2
+            moment = AttendanceMoment(day, points)
+            print(day, moment)
+            attendance.attendance_moments.append(moment)
+    return attendance
+
+
 def main(instance_name):
     g_actual_date = get_actual_date()
     instances = read_course_instance()
@@ -67,6 +89,10 @@ def main(instance_name):
     print("GC02 -", "Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
     config = read_config(instances.get_config_file_name(instances.current_instance))
+    if config.attendance is not None:
+        attendance = get_attendance(config.attendance)
+        if attendance is not None:
+            config.attendance = attendance
     # for teacher in config.teachers:
     #     print("GC04 -", teacher)
     # print("GC02 -", "Config", config)
@@ -145,7 +171,10 @@ def main(instance_name):
                     print("GC40 - ERROR Unsupported grading_type", assignment.grading_type)
             total_group_points = 0
             for assignment in assignment_group.assignments:
-                 total_group_points += assignment.points
+                if "verbeter" in assignment.name.lower():
+                    pass
+                else:
+                    total_group_points += assignment.points
             assignment_group.total_points = total_group_points
             print("GC51 -", assignment_group.name, "punten:", assignment.points)
         else:
@@ -159,6 +188,8 @@ def main(instance_name):
             print("GC81 - ERROR Couldn't calculate bandwidth for assignment_group", assignment_group.name, "total_points is zero")
         else:
             assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
+    if config.attendance is not None:
+        config.attendance.bandwidth = bandwidth_builder_attendance(config.attendance.lower_points, config.attendance.upper_points, config.attendance.total_points, config.days_in_semester)
 
     with open(instances.get_course_file_name(instances.current_instance), 'w') as f:
         dict_result = config.to_json(["assignment"])

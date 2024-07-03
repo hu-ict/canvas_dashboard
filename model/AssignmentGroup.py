@@ -30,7 +30,7 @@ class AssignmentGroup:
                 'total_points': self.total_points,
                 'lower_points': self.lower_points,
                 'upper_points': self.upper_points,
-                'bandwidth': check(self.bandwidth),
+                'bandwidth': check(self.bandwidth)
             }
         if "assignment" in scope:
             json_string['assignments'] = list(map(lambda a: a.to_json(), self.assignments))

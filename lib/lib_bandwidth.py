@@ -184,3 +184,21 @@ def bandwidth_builder(assignment_group, days_in_semester):
     new.points = points
 
     return new
+
+def bandwidth_builder_attendance(a_lower_points, a_upper_points, a_total_points, days_in_semester):
+    points = []
+    x_reparatie_periode = 14
+    y_start = a_upper_points/25
+    x_time = calc_dev(days_in_semester, 0, 0, 1, 0)
+    # propedeuse perspectieven
+    band_lower = calc_dev(days_in_semester, x_reparatie_periode, 0, 0, a_lower_points)
+    band_upper = calc_dev(days_in_semester, x_reparatie_periode, 0, 0, a_upper_points)
+    for i in range(len(x_time)):
+        if i < len(band_lower):
+            points.append(Point(x_time[i], band_lower[i], band_upper[i]))
+    new = Bandwidth()
+    new.days = x_time
+    new.lowers = band_lower
+    new.uppers = band_upper
+    new.points = points
+    return new

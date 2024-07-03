@@ -14,8 +14,9 @@ def main(instance_name):
     print("GA02 Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
     if start.attendance is not None:
-        course = read_course(start.course_file_name)
-        results = read_results(start.results_file_name)
+
+        course = read_course(instances.get_course_file_name(instances.current_instance))
+        results = read_results(instances.get_result_file_name(instances.current_instance))
         process_attendance(start, course, results)
     else:
         print("GA04 No attendance")

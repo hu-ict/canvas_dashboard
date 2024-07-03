@@ -34,6 +34,25 @@ if len(teams) > 0:
             add_member_to_channel(msteams_api.gen_token, team_id, channel_id, student.email)
         student_count += 1
 
+    teams = {"TICT-ICT-V1A-24": {'id': "b7cf78ae-8c6f-460d-a47a-d4bc2b8b2f18"}}
+
+    for group in course.student_groups:
+        if len(group.students) > 30:
+            print("GC11 - ERROR - Te veel studenten in de groep (", group.name, "). Maximaal 30 studenten, gevonden", len(group.students), "studenten")
+        else:
+            print("GC12 - Voor groep (", group.name, ")", len(group.students), "studenten gevonden")
+            for student_link in group.students:
+                student = course.find_student(student_link.id)
+                if student is not None:
+                    team = teams[group.name].values()
+                    team_id = team['id']
+                    channel_id = create_channel(msteams_api.gen_token, team_id, student.name)
+                    if channel_id:
+                        print(channel_id, student.email)
+                        add_member_to_team(msteams_api.gen_token, team_id, student.email)
+                        add_member_to_channel(msteams_api.gen_token, team_id, channel_id, student.email)
+                    student_count += 1
+
     with open(start.course_file_name, 'w') as f:
         dict_result = course.to_json(["assignment"])
         json.dump(dict_result, f, indent=2)

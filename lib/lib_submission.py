@@ -122,7 +122,7 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
             if a_canvas_submission.grade == 'complete':
                 submission_score = a_assignment.points
             elif a_canvas_submission.grade == 'incomplete':
-                submission_score = round(a_canvas_submission.scorea_assignment.points/2, 2)
+                submission_score = round(a_assignment.points/2, 2)
             else:
                 submission_score = 0.00
         elif a_assignment.grading_type == "points":

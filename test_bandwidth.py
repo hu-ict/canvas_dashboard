@@ -35,7 +35,7 @@ def process_bandwidth(a_instances, a_start, a_course, a_assignment_group, a_labe
 
 
     fig.update_layout(height=800, width=1200, showlegend=False)
-    plot_bandbreedte_colored(0, 0, fig, a_course.days_in_semester, a_assignment_group, False)
+    plot_bandbreedte_colored(0, 0, fig, a_course.days_in_semester, a_assignment_group.bandwidth, False, a_assignment_group.total_points)
 
     fig.update_layout(title=f"{a_assignment_group.name}, strategy {a_assignment_group.strategy}", showlegend=False)
     if False:

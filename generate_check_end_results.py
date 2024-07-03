@@ -16,27 +16,26 @@ def main(instance_name):
         instances.current_instance = instance_name
     print("Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
-    course = read_course(start.course_file_name)
-    results = read_results(start.results_file_name)
+    # course = read_course(instances.course_file_name)
+    results = read_results(instances.get_result_file_name(instances.current_instance))
 
     for student in results.students:
         # print(student.name, student.get_judgement("overall"))
         perspectives = StudentPerspectives()
         for perspective in student.perspectives.values():
-            if perspective.name != "peil":
-                # print(perspective.name, "eind", student.get_judgement(perspective.name), "calc", perspective.progress)
-                perspectives.perspectives[perspective.name] = StudentPerspective(perspective.name, student.get_judgement(perspective.name), 0, 0)
-                if student.get_judgement(perspective.name) != perspective.progress:
-                    print(student.name)
-                    print("- In perspectief", perspective.name,
-                          "is eindbeoordeling", student.get_judgement(perspective.name),
-                          "inconsistent met berekende voortgang", perspective.progress)
-        judgement = get_overall_progress(perspectives.perspectives)
+            # print(perspective.name, "eind", student.get_judgement(perspective.name), "calc", perspective.progress)
+            perspectives.perspectives[perspective.name] = StudentPerspective(perspective.name, student.get_judgement(perspective.name), 0, 0)
+            if student.get_judgement(perspective.name) != perspective.progress:
+                print(f"GCR2 - Voor {student.name} in perspectief {perspective.name} is eindbeoordeling {student.get_judgement(perspective.name)} inconsistent met berekende voortgang {perspective.progress}")
+        perspectives = []
+        for perspective in student.perspectives.values():
+            perspectives.append(perspective.progress)
+
+        judgement = get_overall_progress(perspectives)
         if student.get_judgement("overall") == judgement == student.progress:
             pass
         else:
-            print(student.name)
-            print("- Overall is de eindbeoordeling", student.get_judgement("overall"),
+            print(f"GCR3 - Voor {student.name} overall is de eindbeoordeling", student.get_judgement("overall"),
                   "inconsistent met de bepaalde beoordeling", judgement,
                   "of de berekende", student.progress, "voortgang")
 

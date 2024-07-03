@@ -50,7 +50,7 @@ def get_date_time_loc(a_date_time_obj):
 
 def date_to_day(a_start_date, a_actual_date):
     if a_actual_date:
-        return (a_actual_date - a_start_date).days
+        return (a_actual_date - a_start_date).days + 1
     return 1
 
 

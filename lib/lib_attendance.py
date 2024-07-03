@@ -2,6 +2,7 @@ import csv
 
 from lib.lib_date import get_date_time_obj_alt, date_to_day
 from model.Submission import Submission
+from model.perspective.AttendanceSubmission import AttendanceSubmission
 
 
 def read_attendance(start, course):
@@ -22,13 +23,10 @@ def read_attendance(start, course):
             l_teacher_id = item["Teacher ID"]
             l_teacher_name = item["Teacher Name"]
             l_day = date_to_day(start.start_date, l_date)
-            if len(course.attendance.assignment_groups) != 1:
-                assignment_groups_id = 0
-                print("LA06 Attendace has no or more assignment_group attached")
-            else:
-                assignment_groups_id = course.attendance.assignment_groups[0]
-            l_submission = Submission(0, assignment_groups_id, 0, int(item["Student ID"]), "Attendance", l_date, l_day, l_date, l_day, True, l_teacher_name, l_date, score, 2, 0)
-            appendances.append(l_submission)
+            attendance_submission = AttendanceSubmission("Attendance", int(item["Student ID"]), l_date, l_day, True, l_teacher_name, score, 2, 0)
+            if attendance_submission.student_id == 994:
+                print("LA05 -", attendance_submission)
+            appendances.append(attendance_submission)
     return appendances
 
 
@@ -36,11 +34,11 @@ def process_attendance(start, course, results):
     attendances = read_attendance(start, course)
     not_found = set()
     for student in results.students:
-        student.attendance.submissions = []
+        student.attendance_perspective.attendance_submissions = []
     for attendance in attendances:
-        student = results.find_student(int(attendance.student_id))
+        student = results.find_student(attendance.student_id)
         if student:
-            student.attendance.submissions.append(attendance)
+            student.attendance_perspective.attendance_submissions.append(attendance)
         else:
             not_found.add(attendance.student_id)
             # print("Student niet gevonden", attendance.student_id)

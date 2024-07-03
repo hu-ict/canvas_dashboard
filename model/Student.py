@@ -1,3 +1,4 @@
+from model.perspective.AttendancePerspective import AttendancePerspective
 from model.perspective.StudentLevelMoments import StudentLevelMoments
 from model.perspective.StudentPerspective import StudentPerspective
 
@@ -14,7 +15,7 @@ class Student:
         self.progress = a_progress
         self.role = a_role
         self.student_level_moments = None
-        self.attendance = None
+        self.attendance_perspective = None
         self.perspectives = None
 
     def __str__(self):
@@ -67,8 +68,8 @@ class Student:
         }
         if self.student_level_moments is not None:
             dict_result['student_level_moments'] = self.student_level_moments.to_json()
-        if self.attendance is not None:
-            dict_result['attendance'] = self.attendance.to_json()
+        if self.attendance_perspective is not None:
+            dict_result['attendance_perspective'] = self.attendance_perspective.to_json()
         if "perspectives" in scope:
             for key in self.perspectives:
                 dict_result['perspectives'][key] = self.perspectives[key].to_json()
@@ -81,8 +82,8 @@ class Student:
             data_dict['role'], data_dict['email'], data_dict[ 'site'], data_dict['progress'])
         if 'student_level_moments' in data_dict.keys() and data_dict['student_level_moments'] is not None:
             new.student_level_moments = StudentLevelMoments.from_dict(data_dict['student_level_moments'])
-        if 'attendance' in data_dict.keys() and data_dict['attendance'] is not None:
-            new.attendance = StudentPerspective.from_dict(data_dict['attendance'])
+        if 'attendance_perspective' in data_dict.keys() and data_dict['attendance_perspective'] is not None:
+            new.attendance_perspective = AttendancePerspective.from_dict(data_dict['attendance_perspective'])
         new.perspectives = {}
         if 'perspectives' in data_dict.keys():
             for key in data_dict['perspectives'].keys():

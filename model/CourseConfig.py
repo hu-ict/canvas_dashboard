@@ -6,6 +6,7 @@ from model.Student import Student
 from model.StudentGroup import StudentGroup
 from model.StudentLink import StudentLink
 from model.Teacher import Teacher
+from model.perspective.Attendance import Attendance
 from model.perspective.Level import Level
 from model.perspective.LevelMoments import LevelMoments
 from model.perspective.Perspective import Perspective
@@ -233,7 +234,7 @@ class CourseConfig:
         if 'level_moments' in data_dict.keys() and data_dict['level_moments'] is not None:
             new.level_moments = LevelMoments.from_dict(data_dict['level_moments'])
         if 'attendance' in data_dict.keys() and data_dict['attendance'] is not None:
-            new.attendance = Perspective.from_dict(data_dict['attendance'])
+            new.attendance = Attendance.from_dict(data_dict['attendance'])
         if 'perspectives' in data_dict.keys():
             for key in data_dict['perspectives'].keys():
                 new.perspectives[key] = Perspective.from_dict(data_dict['perspectives'][key])

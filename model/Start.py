@@ -1,5 +1,6 @@
 from lib.lib_date import get_date_time_obj, get_date_time_str
 from model.Role import Role
+from model.perspective.Attendance import Attendance
 from model.perspective.LevelMoments import LevelMoments
 from model.perspective.Perspective import Perspective
 
@@ -75,7 +76,7 @@ class Start:
             new.level_moments = LevelMoments.from_dict(data_dict['level_moments'])
         if 'attendance' in data_dict.keys() and data_dict['attendance'] is not None:
             print('Attendance', data_dict['attendance'])
-            new.attendance = Perspective.from_dict(data_dict['attendance'])
+            new.attendance = Attendance.from_dict(data_dict['attendance'])
         if data_dict['perspectives']:
             for key in data_dict['perspectives'].keys():
                 new.perspectives[key] = Perspective.from_dict(data_dict['perspectives'][key])

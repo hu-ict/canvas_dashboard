@@ -135,11 +135,15 @@
     }
   },
   "attendance": {
+    "-2": {
+      "label": "Leeg",
+      "color": "cornflowerblue",
+      "fraction": null
+    },
     "-1": {
       "label": "Niet zichtbaar",
       "color": "#EDF8F0",
       "fraction": null
-
     },
     "0": {
       "label": "Niet aanwezig",
