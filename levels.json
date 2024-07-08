@@ -126,7 +126,7 @@
     "1": {
       "label": "Niet voldaan",
       "color": "#f2a529",
-      "fraction": 0.5
+      "fraction": 0.99
     },
     "2": {
       "label": "Voldaan",

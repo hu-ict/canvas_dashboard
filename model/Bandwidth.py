@@ -37,7 +37,7 @@ class Bandwidth:
             line += str(point)
         return line
 
-    def get_progress(self, strategy, this_day, day, score):
+    def get_progress(self, day, score):
         if day == 0:
             return -1
         elif score == 0:
@@ -45,11 +45,9 @@ class Bandwidth:
         else:
             pass
         try:
-            if strategy == "FIXED":
-                day = this_day
-            if type(day) == str:
-                day = int(day)
+            day = int(day)
             if score < self.points[day].lower:
+                # print(score, "<", self.points[day].lower, 1)
                 return 1
             elif score < self.points[day].upper:
                 return 2
@@ -57,6 +55,7 @@ class Bandwidth:
                 return 3
         except IndexError:
             if score < self.points[len(self.points)-1].lower:
+                # print(score, "<", self.points[day].lower, 1, "exception")
                 return 1
             elif score < self.points[len(self.points)-1].upper:
                 return 2

@@ -1,7 +1,7 @@
 import plotly.graph_objs as go
 
 from lib.build_plotly_hover import get_hover_attendance
-from lib.build_plotly_perspective import plot_bandbreedte_colored
+from lib.build_plotly_perspective import plot_bandbreedte_colored, plot_day_bar
 from lib.lib_date import date_to_day, get_date_time_loc
 from lib.lib_plotly import get_marker_size, hover_style
 
@@ -62,7 +62,7 @@ def plot_attendance(a_row, a_col, a_fig, a_instances, a_start, a_course, a_atten
     # print("BP67", a_attendance_perspective.attendance_submissions)
 
     plot_bandbreedte_colored(a_row, a_col, a_fig, a_course.days_in_semester, a_attendance.bandwidth, a_attendance.show_flow, a_attendance.total_points)
-    # plot_day_bar(a_row, a_col, a_fig, a_start, total_points, a_actual_day, a_actual_date, a_attendance_perspective.progress, a_levels, show_points, a_attendance_perspective.sum_score )
+    plot_day_bar(a_row, a_col, a_fig, a_start, a_attendance.total_points, a_actual_day, a_actual_date, a_attendance_perspective.progress, a_levels, a_attendance.show_points, a_attendance_perspective.sum_score )
     plot_attendance_submissions(a_row, a_col, a_fig, a_start, a_course, a_attendance, a_attendance_perspective.attendance_submissions, a_levels)
     # plot_open_assignments(a_row, a_col, a_fig, a_start, a_course, show_points, l_assignments, a_levels)
     a_fig.update_yaxes(title_text="Percentage aanwezig", range=[0, a_course.attendance.total_points], row=a_row, col=a_col)

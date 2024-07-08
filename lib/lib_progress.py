@@ -30,7 +30,7 @@ def get_overall_progress(a_progress):
     return -1
 
 
-def get_attendance_progress(course, results, attendance_perspective):
+def get_attendance_progress(attendance, results, attendance_perspective):
     # bepaal de voortgang
     attendance_perspective.attendance_submissions = sorted(attendance_perspective.attendance_submissions, key=lambda s: s.day)
     total_score = 0
@@ -43,10 +43,20 @@ def get_attendance_progress(course, results, attendance_perspective):
             total_count += 1
             submission.flow = total_score / total_count / 2
             # print(submission.flow)
-            attendance_perspective.sum_score = total_score
+            attendance_perspective.sum_score = submission.flow
             last_flow = submission.flow
         else:
             submission.flow = last_flow
+    if total_count == 0:
+        # Niet te bepalen
+        attendance_perspective.progress = -1
+    elif attendance_perspective.last_score != 0:
+        # print(f"LP55 - Laatste dag {attendance_perspective.last_score}, laatste waarde {attendance_perspective.sum_score}")
+        attendance_perspective.progress = attendance.bandwidth.get_progress(attendance_perspective.last_score,  attendance_perspective.sum_score*100)
+        print(f"LP55 - Laatste dag {attendance_perspective.last_score}, laatste waarde {attendance_perspective.sum_score*100}, voortgang {attendance_perspective.progress}")
+    else:
+        # Niet te bepalen
+        attendance_perspective.progress = -1
 
 
 def get_progress(start, course, results, perspective):
@@ -76,9 +86,7 @@ def get_progress(start, course, results, perspective):
                         # Niet te bepalen
                         perspective.progress = -1
                     elif perspective.last_score != 0:
-                        perspective.progress = assignment_group.bandwidth.get_progress(assignment_group.strategy,
-                                                                                       results.actual_day,
-                                                                                       perspective.last_score,
+                        perspective.progress = assignment_group.bandwidth.get_progress(perspective.last_score,
                                                                                        perspective.sum_score)
                     else:
                         # Niet te bepalen

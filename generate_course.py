@@ -10,6 +10,13 @@ from model.Criterion import Criterion
 from model.Rating import Rating
 from model.perspective.AttendanceMoment import AttendanceMoment
 
+def get_tag(name):
+    pos = name.find("#") + 1
+    str = name[pos:].strip()
+    if str[-1] == ")":
+        str = str[:-1]
+    return str
+
 
 def get_dates(start, input):
     if input.due_at:
@@ -76,7 +83,7 @@ def get_attendance(attendance):
             day = starting_days[0] + week*7
             points = 2
             moment = AttendanceMoment(day, points)
-            print(day, moment)
+            # print(day, moment)
             attendance.attendance_moments.append(moment)
     return attendance
 
@@ -108,7 +115,9 @@ def main(instance_name):
         # use only relevant assignment_groups
         assignment_group = config.find_assignment_group(canvas_assignment_group.id)
         # print("GC21 -", "assignment_group", canvas_assignment_group.id)
+
         if assignment_group and assignment_group.id in uses_assignment_groups:
+            tags = []
             print(f"GC22 - assignment_group {assignment_group.name} is used with strategy {assignment_group.strategy}")
             for c_assignment in canvas_assignment_group.assignments:
                 canvas_assignment = canvas_course.get_assignment(c_assignment['id'], include=['overrides', 'online_quiz'])
@@ -171,12 +180,18 @@ def main(instance_name):
                     print("GC40 - ERROR Unsupported grading_type", assignment.grading_type)
             total_group_points = 0
             for assignment in assignment_group.assignments:
-                if "verbeter" in assignment.name.lower():
-                    pass
+                if "#" in assignment.name:
+                    tag = get_tag(assignment.name)
+                    if tag in tags:
+                        pass
+                    else:
+                        total_group_points += assignment.points
+                        tags.append(tag)
                 else:
                     total_group_points += assignment.points
             assignment_group.total_points = total_group_points
-            print("GC51 -", assignment_group.name, "punten:", assignment.points)
+            print("GC47 -", tags)
+            print("GC51 -", assignment_group.name, "punten:", assignment_group.total_points)
         else:
             print(f"GC41 - assignment_group {canvas_assignment_group.name} is not used")
 
