@@ -59,29 +59,29 @@ def get_attendance_progress(attendance, results, attendance_perspective):
         attendance_perspective.progress = -1
 
 
-def get_progress(start, course, results, perspective):
+def get_progress(course, perspective):
     # bepaal de voortgang
     if len(perspective.assignment_groups) == 1:
         assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
         if assignment_group is not None:
             if assignment_group.bandwidth is not None:
-                if len(perspective.submissions) > 0:
+                if len(perspective.submission_sequences) > 0:
                     total_score = 0
                     total_count = 0
                     last_flow = 0.5
-                    for submission in perspective.submissions:
-                        if submission.graded:
-                            perspective.last_score = submission.assignment_day
-                            total_score += submission.score
+                    for submission_sequence in perspective.submission_sequences:
+                        if submission_sequence.is_graded():
+                            perspective.last_score = submission_sequence.get_day()
+                            total_score += submission_sequence.get_score()
                             total_count += 1
-                            submission.flow = assignment_group.bandwidth.get_progress_range(perspective.last_score, total_score)
+                            submission_sequence.flow = assignment_group.bandwidth.get_progress_range(perspective.last_score, total_score)
                             # print(submission.flow)
                             perspective.sum_score = total_score
-                            last_flow = submission.flow
+                            last_flow = submission_sequence.flow
                             # print("Graded")
                         else:
-                            submission.flow = last_flow
-                            # print("Not graded")
+                            submission_sequence.flow = last_flow
+                                # print("Not graded")
                     if total_count == 0:
                         # Niet te bepalen
                         perspective.progress = -1

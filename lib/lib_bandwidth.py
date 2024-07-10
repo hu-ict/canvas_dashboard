@@ -61,10 +61,10 @@ def bandwidth_builder(assignment_group, days_in_semester):
         print(f"LB03 - lower a {lower_a:5} b {lower_b:5.3} c {lower_c:5}")
         print(f"LB04 - upper a {upper_a:5} b {upper_b:5.3} c {upper_c:5}")
         total_points = 0
-        for assignment in assignment_group.assignments:
-            total_points += assignment.points
-            serie[assignment.assignment_day] = {"day": assignment.assignment_day, "sum": total_points}
-            output = f"LB08 - Day points; {assignment.points:3};{assignment.assignment_day:4};{total_points:>4}"
+        for assignment_sequence in assignment_group.assignment_sequences:
+            total_points += assignment_sequence.points
+            serie[assignment_sequence.get_day()] = {"day": assignment_sequence.get_day(), "sum": total_points}
+            output = f"LB08 - Day points; {assignment_sequence.points:3};{assignment_sequence.get_day():4};{total_points:>4}"
             output = output.replace('.', ',')
             print(output)
         band_lower = []
@@ -96,15 +96,15 @@ def bandwidth_builder(assignment_group, days_in_semester):
         print(output)
         # print(assignment.assignment_day, assignment.points, "value_day", total_points, "lower =", lower_y, "upper =", upper_y)
         serie[0] = {"day": 0, "value_day": 0, "lower": lower_y, "upper": upper_y}
-        for assignment in assignment_group.assignments:
-            total_points += assignment.points
+        for assignment_sequence in assignment_group.assignment_sequences:
+            total_points += assignment_sequence.points
             lower_y = lower_a * total_points * total_points + lower_b * total_points + lower_c
             upper_y = upper_a * total_points * total_points + upper_b * total_points + upper_c
-            output = f"LB68 - Day points; {assignment.points:2};{assignment.assignment_day:3};{total_points:>3};{lower_y:5.2f};{upper_y:5.2f}"
+            output = f"LB68 - Day points; {assignment_sequence.points:2};{assignment_sequence.get_day():3};{total_points:>3};{lower_y:5.2f};{upper_y:5.2f}"
             output = output.replace('.',',')
             print(output)
             # print(assignment.assignment_day, assignment.points, "value_day", total_points, "lower =", lower_y, "upper =", upper_y)
-            serie[assignment.assignment_day] = {"day": assignment.assignment_day, "value_day": total_points, "lower": lower_y, "upper": upper_y}
+            serie[assignment_sequence.get_day()] = {"day": assignment_sequence.get_day(), "value_day": total_points, "lower": lower_y, "upper": upper_y}
         band_lower = []
         band_upper = []
         for x in x_time:
@@ -142,9 +142,9 @@ def bandwidth_builder(assignment_group, days_in_semester):
         y = 0
         lower_fraction = assignment_group.lower_points/assignment_group.total_points
         upper_fraction = assignment_group.upper_points/assignment_group.total_points
-        for assignment in assignment_group.assignments:
-            total_points += assignment.points
-            serie[assignment.assignment_day] = {"day": assignment.assignment_day, "sum": total_points}
+        for assignment_sequence in assignment_group.assignment_sequences:
+            total_points += assignment_sequence.points
+            serie[assignment_sequence.get_day()] = {"day": assignment_sequence.get_day(), "sum": total_points}
         band_lower = []
         band_upper = []
         for x in x_time:
@@ -158,9 +158,9 @@ def bandwidth_builder(assignment_group, days_in_semester):
         total_points = 0
         y = 0
         lower_fraction = assignment_group.lower_points/assignment_group.total_points
-        for assignment in assignment_group.assignments:
-            total_points += assignment.points
-            serie[assignment.assignment_day] = {"day": assignment.assignment_day+7, "sum": total_points}
+        for assignment_sequence in assignment_group.assignment_sequences:
+            total_points += assignment_sequence.points
+            serie[assignment_sequence.get_day()] = {"day": assignment_sequence.get_day(), "sum": total_points}
         print(serie.items())
         band_lower = []
         band_upper = []

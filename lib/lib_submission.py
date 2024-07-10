@@ -25,11 +25,12 @@ def count_graded(results):
     l_not_graded = 0
     for student in results.students:
         for perspective in student.perspectives.values():
-            for submission in perspective.submissions:
-                if submission.graded:
-                    l_graded += 1
-                else:
-                    l_not_graded += 1
+            for submission_sequence in perspective.submission_sequences:
+                for submission in submission_sequence.submissions:
+                    if submission.graded:
+                        l_graded += 1
+                    else:
+                        l_not_graded += 1
     return l_graded + l_not_graded, l_not_graded
 
 
@@ -143,10 +144,15 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
     else:
         # 'pass_fail', 'percent', 'letter_grade', 'gpa_scale', 'points'
         rubrics_scores, rubric_score, error = get_rubric_score(rubrics_assessment, a_student)
-
         if a_assignment.grading_type == "pass_fail":
-            #INNO vd/nvd met rubrics voor de "echte" punten (verborgen voor studenten)
-            submission_score = rubric_score
+            if a_canvas_submission.score is not None:
+                #INNO vd/nvd met rubrics voor de "echte" punten (verborgen voor studenten)
+                if a_canvas_submission.score == 0:
+                    submission_score = rubric_score
+                else:
+                    submission_score = round(a_canvas_submission.score, 2)
+            else:
+                submission_score = rubric_score
         elif a_assignment.grading_type == "letter_grade":
             submission_score = rubric_score
         elif a_assignment.grading_type == "points":
@@ -158,7 +164,6 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
                             # uitzondering voor opdracht CSC - MITRE ATTACK
                             submission_score = submission_score
                         else:
-
                             submission_score = rubric_score
                 else:
                     print(a_canvas_submission, a_canvas_submission.score)
@@ -217,27 +222,27 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
     return l_submission
 
 
-def add_missed_assignments(start, course, results, perspective):
+def add_missed_assignments(course, actual_day, perspective):
     if len(perspective.assignment_groups) == 1:
-        l_assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
-        if l_assignment_group is None:
+        assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
+        if assignment_group is None:
             print("LS06 - Assignment_group for perspective not found in course", perspective.assignment_groups[0])
             return
-        l_assignments = l_assignment_group.assignments[:]
-        # remove already submitted
-        for l_submission in perspective.submissions:
-            l_assignments = remove_assignment(l_assignments, l_submission)
-        # open assignments na deadline
-        for l_assignment in l_assignments:
-            if l_assignment.assignment_day < results.actual_day:
-                l_submission = Submission(0, l_assignment.group_id, l_assignment.id, 0, l_assignment.name,
-                                          l_assignment.assignment_date,
-                                          l_assignment.assignment_day,
-                                          l_assignment.assignment_date,
-                                          l_assignment.assignment_day,
-                                          True, "System", l_assignment.assignment_date, 0, l_assignment.points, 0)
-                l_submission.comments.append(Comment(0, "System", l_assignment.assignment_date, NO_SUBMISSION))
-                perspective.submissions.append(l_submission)
+        # maak een deep-copy van de lijst
+        for assignment_sequence in assignment_group.assignment_sequences:
+            # remove already submitted
+            # perspective.get_is_submitted(assignment_sequence)
+            if perspective.get_submitted(assignment_sequence, actual_day) is None:
+                assignment = assignment_sequence.get_last_passed_assignment(actual_day)
+                if assignment is not None:
+                    l_submission = Submission(0, assignment.group_id, assignment.id, 0, assignment.name,
+                                              assignment.assignment_date,
+                                              assignment.assignment_day,
+                                              assignment.assignment_date,
+                                              assignment.assignment_day,
+                                              True, "System", assignment.assignment_date, 0, assignment.points, 0)
+                    l_submission.comments.append(Comment(0, "System", assignment.assignment_date, NO_SUBMISSION))
+                    perspective.put_submission(assignment_sequence, l_submission)
     elif len(perspective.assignment_groups) > 1:
         print("LS07 - Perspective has more then one assignment_groups attached", perspective.name,
               perspective.assignment_groups)
@@ -247,47 +252,45 @@ def add_missed_assignments(start, course, results, perspective):
 
 def read_submissions(a_canvas_course, a_start, a_course, a_results, a_total_refresh):
     for assignment_group in a_course.assignment_groups:
-        for assignment in assignment_group.assignments:
-            print("LS10 - Processing Assignment {0:6} - {1} {2}".format(assignment.id, assignment_group.name, assignment.name))
-            if not a_total_refresh and ((a_results.actual_date - assignment.assignment_date).days > 10):
-                # deadline langer dan twee weken geleden. Alle feedback is gegeven.
-                continue
-            if assignment.unlock_date:
-                if assignment.unlock_date > a_results.actual_date:
-                    # volgende assignment
+        for assignment_sequence in assignment_group.assignment_sequences:
+            for assignment in assignment_sequence.assignments:
+                print("LS10 - Processing Assignment {0:6} - {1} - {2}".format(assignment.id, assignment_group.name, assignment.name))
+                if not a_total_refresh and ((a_results.actual_date - assignment.assignment_date).days > 10):
+                    # deadline langer dan twee weken geleden. Alle feedback is gegeven.
                     continue
-            canvas_assignment = a_canvas_course.get_assignment(assignment.id, include=['submissions'])
-            if canvas_assignment is not None:
-                canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments', 'rubric_assessment'])
-                for canvas_submission in canvas_submissions:
-                    student = a_results.find_student(canvas_submission.user_id)
-                    if student is not None:
-                        # voeg een submission toe aan een van de perspectieven
-                        # print(f"R31 Submission for {student.name}")
-                        l_submission = submission_builder(a_start, a_course, student, assignment, canvas_submission)
-                        if l_submission is not None:
-                            l_perspective = a_course.find_perspective_by_assignment_group(l_submission.assignment_group_id)
-                            if l_perspective:
-                                if l_perspective.name == "level_moments":
-                                    if a_total_refresh:
-                                        student.student_level_moments.submissions.append(l_submission)
-                                    else:
-                                        student.student_level_moments.put_submission(l_submission)
-                                    # print("LS18 - PERSPECTIVE level_moments")
-                                else:
-                                    # print("LS19 -", student.perspectives.keys())
-                                    this_perspective = student.perspectives[l_perspective.name]
-                                    if this_perspective:
+                if assignment.unlock_date:
+                    if assignment.unlock_date > a_results.actual_date:
+                        # volgende assignment
+                        continue
+                canvas_assignment = a_canvas_course.get_assignment(assignment.id, include=['submissions'])
+                if canvas_assignment is not None:
+                    canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments', 'rubric_assessment'])
+                    for canvas_submission in canvas_submissions:
+                        student = a_results.find_student(canvas_submission.user_id)
+                        if student is not None:
+                            # voeg een submission toe aan een van de perspectieven
+                            # print(f"R31 Submission for {student.name}")
+                            l_submission = submission_builder(a_start, a_course, student, assignment, canvas_submission)
+                            if l_submission is not None:
+                                l_perspective = a_course.find_perspective_by_assignment_group(l_submission.assignment_group_id)
+                                if l_perspective:
+                                    if l_perspective.name == "level_moments":
                                         if a_total_refresh:
-                                            this_perspective.submissions.append(l_submission)
+                                            student.student_level_moments.submissions.append(l_submission)
                                         else:
-                                            this_perspective.put_submission(l_submission)
+                                            student.student_level_moments.put_submission(l_submission)
+                                        # print("LS18 - PERSPECTIVE level_moments")
+                                    else:
+                                        # print("LS19 -", student.perspectives.keys())
+                                        this_perspective = student.perspectives[l_perspective.name]
+                                        if this_perspective is not None:
+                                            this_perspective.put_submission(assignment_sequence, l_submission)
 
-                            else:
-                                print(f"LS21 - Warning, could not find perspective for assignment_group {assignment_group.name}")
+                                else:
+                                    print(f"LS21 - Warning, could not find perspective for assignment_group {assignment_group.name}")
+                            # else:
+                            #     print(f"R22 - Error creating submission {assignment.name} for student {student.name}")
                         # else:
-                        #     print(f"R22 - Error creating submission {assignment.name} for student {student.name}")
-                    # else:
-                    #     print("R23 Could not find student", canvas_submission.user_id)
-            else:
-                print("LS25 - Could not find assignment", canvas_assignment.id, "within group", assignment_group.id)
+                        #     print("R23 Could not find student", canvas_submission.user_id)
+                else:
+                    print("LS25 - Could not find assignment", canvas_assignment.id, "within group", assignment_group.id)

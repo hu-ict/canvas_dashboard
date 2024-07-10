@@ -35,7 +35,7 @@ def main(instance_name):
     for student in results.students:
         for perspective in student.perspectives.values():
             # Perspective aanvullen met missed Assignments (niets ingeleverd)
-            add_missed_assignments(start, course, results, perspective)
+            add_missed_assignments(course, results.actual_day, perspective)
     if start.attendance is not None:
         process_attendance(start, course, results)
     else:
@@ -46,7 +46,9 @@ def main(instance_name):
         if start.attendance is not None:
             student.attendance_perspective.attendance_submissions = sorted(student.attendance_perspective.attendance_submissions, key=lambda s: s.day)
         for perspective in student.perspectives.values():
-            perspective.submissions = sorted(perspective.submissions, key=lambda s: s.assignment_day)
+            for submission_sequence in perspective.submission_sequences:
+                submission_sequence.submissions = sorted(submission_sequence.submissions, key=lambda s: s.assignment_day)
+            perspective.submission_sequences = sorted(perspective.submission_sequences, key=lambda s: s.get_day())
 
     results.submission_count, results.not_graded_count = count_graded(results)
 
@@ -59,7 +61,7 @@ def main(instance_name):
             get_attendance_progress(course.attendance, results, student.attendance_perspective)
             progress_day.attendance[str(student.attendance_perspective.progress)] += 1
         for perspective in student.perspectives.values():
-            get_progress(start, course, results, perspective)
+            get_progress(course, perspective)
             progress_day.perspective[perspective.name][str(perspective.progress)] += 1
     # Bepaal de totaal voortgang
     for student in results.students:

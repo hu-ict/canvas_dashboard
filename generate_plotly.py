@@ -78,14 +78,15 @@ def main(instance_name):
         for perspective in a_course.perspectives.values():
             l_peilingen[perspective.name] = []
         assignment_group = a_course.find_assignment_group(a_course.level_moments.assignment_groups[0])
-        for assignment in assignment_group.assignments:
-            #zoek de juiste Assignment
-            for peil_label in a_course.level_moments.moments:
-                if peil_label.lower() in assignment.name.lower():
-                    #zoek het juiste Perspective
-                    for perspective_name in l_peilingen:
-                        if perspective_name.lower() in assignment.name.lower():
-                            l_peilingen[perspective_name].append({'assignment': assignment, 'submission': None})
+        for assignment_sequence in assignment_group.assignment_sequences:
+            for assignment in assignment_sequence.assignments:
+                #zoek de juiste Assignment
+                for peil_label in a_course.level_moments.moments:
+                    if peil_label.lower() in assignment.name.lower():
+                        #zoek het juiste Perspective
+                        for perspective_name in l_peilingen:
+                            if perspective_name.lower() in assignment.name.lower():
+                                l_peilingen[perspective_name].append({'assignment': assignment, 'submission': None})
         return l_peilingen
 
 

@@ -3,8 +3,8 @@ from lib.lib_date import date_to_day
 
 def student_total(a_perspective):
     cum_score = 0
-    for l_submission in a_perspective:
-        cum_score += l_submission.score
+    for submission_sequence in a_perspective.submission_sequences:
+        cum_score += submission_sequence.get_score()
     return cum_score
 
 
@@ -21,7 +21,7 @@ def count_student(a_course, a_student_totals, a_student):
     # print(a_student.name, peil)
     a_student_totals['actual_progress']['overall'][peil] += 1
     for l_perspective in a_student.perspectives.values():
-        add_total(a_student_totals['perspectives'][l_perspective.name]['count'], int(student_total(l_perspective.submissions)))
+        add_total(a_student_totals['perspectives'][l_perspective.name]['count'], int(student_total(l_perspective)))
     if a_course.level_moments is not None:
         for peil_label in a_course.level_moments.moments:
             submission = a_student.get_peilmoment_submission_by_query([peil_label, "overall"])
@@ -66,6 +66,7 @@ def build_totals(a_instances, a_start, a_course, a_results, a_student_totals):
     for l_student in a_results.students:
         count_student(a_course, a_student_totals, l_student)
         for l_perspective in l_student.perspectives.values():
-            for l_submission in l_perspective.submissions:
-                check_for_late(a_instances, a_course, a_student_totals, l_student, l_submission, l_perspective.name,
-                               date_to_day(a_start.start_date,  a_results.actual_date))
+            for submission_sequence in l_perspective.submission_sequences:
+                for submission in submission_sequence.submissions:
+                    check_for_late(a_instances, a_course, a_student_totals, l_student, submission, l_perspective.name,
+                                   date_to_day(a_start.start_date,  a_results.actual_date))

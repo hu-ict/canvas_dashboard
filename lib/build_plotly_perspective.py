@@ -66,27 +66,27 @@ def plot_progress(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_level
     )
 
 
-def plot_open_assignments(a_row, a_col, a_fig, a_start, a_course, a_show_points, a_assignments, a_levels):
+def plot_open_assignments(a_row, a_col, a_fig, a_start, a_course, a_show_points, a_assignment_sequences, a_levels):
     series = {"color": [], "size": [], "size2": [], 'x': [], 'x2': [], 'y': [], 'y2': [], 'hover': []}
     cum_points = 0
     y2 = {}
     for day in range(1,a_course.days_in_semester):
         y2[str(day // 7+1)] = 0
-    for assignment in a_assignments:
-        y2[str(assignment.assignment_day // 7+1)] += assignment.points
+    for assignment_sequence in a_assignment_sequences:
+        y2[str(assignment_sequence.get_day() // 7+1)] += assignment_sequence.points
     for punt in y2:
         series['x2'].append(int(punt)*7)
         series['y2'].append(y2[punt])
         series['size2'].append(get_marker_size(True))
 
     y2_max = max(series['y2'])
-    for assignment in a_assignments:
+    for assignment_sequence in a_assignment_sequences:
         series['size'].append(get_marker_size(False))
-        series['x'].append(assignment.assignment_day)
-        cum_points += assignment.points
+        series['x'].append(assignment_sequence.get_day())
+        cum_points += assignment_sequence.points
         series['y'].append(cum_points)
         series['color'].append(a_levels.level_series[a_start.grade_levels].levels["-1"].color)
-        series['hover'].append(get_hover_assignment(a_show_points, assignment))
+        series['hover'].append(get_hover_assignment(a_show_points, assignment_sequence))
 
 
     open_assignments = go.Scatter(
@@ -164,7 +164,7 @@ def plot_day_bar(a_row, a_col, a_fig, a_start, a_total_points, a_actual_day, a_a
 
 
 
-def plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_perspective, a_levels):
+def plot_submissions(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_levels):
     l_assignment_group = a_course.find_assignment_group(a_perspective.assignment_groups[0])
     l_perspective = a_course.find_perspective_by_name(a_perspective.name)
     x_submission = [0]
@@ -176,25 +176,33 @@ def plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
     y_colors = [a_levels.level_series[a_start.progress_levels].levels["-1"].color]
     y_size = [get_marker_size(False)]
     cum_score = 0
-    for submission in a_perspective.submissions:
-        y_size.append(get_marker_size(submission.graded))
-        x_submission.append(submission.assignment_day)
-        l_hover = get_hover_assignment(l_perspective.show_points, submission)
-        if submission.graded:
-            cum_score += submission.score
-            if submission.points == 0:
-                submission.points = 1
-            level = a_levels.level_series[a_course.perspectives[a_perspective.name].levels].get_level_by_fraction(submission.score / submission.points)
+    for submission_sequence in a_perspective.submission_sequences:
+        y_size.append(get_marker_size(submission_sequence.is_graded()))
+        x_submission.append(submission_sequence.get_day())
+        if submission_sequence.is_graded():
+            cum_score += submission_sequence.get_score()
+            if submission_sequence.points == 0:
+                # lelijke hack
+                submission_sequence.points = 1
+            level = a_levels.level_series[a_course.perspectives[a_perspective.name].levels].get_level_by_fraction(submission_sequence.get_score() / submission_sequence.points)
             y_colors.append(a_levels.level_series[a_course.perspectives[a_perspective.name].levels].levels[str(level)].color)
-            l_hover += get_hover_grade(a_levels, a_course, a_perspective, level, submission)
         else:
             y_colors.append(a_levels.level_series[a_course.perspectives[a_perspective.name].levels].levels["-2"].color)
-            l_hover += get_hover_grade(a_levels, a_course, a_perspective, "", submission)
-        l_hover += get_hover_comments(submission.comments)
-        l_hover += get_hover_rubrics_comments(a_course, submission, a_levels)
+
+        l_hover = ""
+        for submission in submission_sequence.submissions:
+            level = a_levels.level_series[a_course.perspectives[a_perspective.name].levels].get_level_by_fraction(submission.score / submission_sequence.points)
+            l_hover += get_hover_assignment(l_perspective.show_points, submission)
+            if submission_sequence.is_graded():
+                l_hover += get_hover_grade(a_levels, a_course, a_perspective, level, submission)
+            else:
+                l_hover += get_hover_grade(a_levels, a_course, a_perspective, "", submission)
+            l_hover += get_hover_comments(submission.comments)
+            l_hover += get_hover_rubrics_comments(a_course, submission, a_levels)
+            l_hover += "<br>"
         y_hover.append(l_hover)
         if l_perspective.show_flow:
-            y_submission.append(submission.flow)
+            y_submission.append(submission_sequence.flow)
         else:
             y_submission.append(cum_score)
 
@@ -266,13 +274,14 @@ def plot_perspective(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
         print("BPP01 - could not find assignment_group", a_perspective.assignment_groups[0])
         return
     show_points = a_course.find_perspective_by_assignment_group(assignment_group.id).show_points
-    l_assignments = assignment_group.assignments[:]
-    for l_submission in a_perspective.submissions:
-        l_assignments = remove_assignment(l_assignments, l_submission)
+
     plot_bandbreedte_colored(a_row, a_col, a_fig, a_course.days_in_semester, assignment_group.bandwidth, a_course.find_perspective_by_name(a_perspective.name).show_flow, assignment_group.total_points)
     if a_start.level_moments is not None and len(a_peil_construction) > 0:
         # print("BPP02 ", a_perspective.name, a_peil_construction)
         plot_progress(a_row, a_col, a_fig, a_start, a_course, a_peil_construction[a_perspective.name], a_levels)
     plot_day_bar(a_row, a_col, a_fig, a_start, assignment_group.total_points, a_actual_day, a_actual_date, a_perspective.progress, a_levels, show_points, a_perspective.sum_score )
-    plot_submissions(a_row, a_col, a_fig, a_instances, a_start, a_course, a_perspective, a_levels)
-    plot_open_assignments(a_row, a_col, a_fig, a_start, a_course, show_points, l_assignments, a_levels)
+    plot_submissions(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_levels)
+    # l_assignments = assignment_group.assignments[:]
+    # for l_submission in a_perspective.submissions:
+    #     l_assignments = remove_assignment(l_assignments, l_submission)
+    # plot_open_assignments(a_row, a_col, a_fig, a_start, a_course, show_points, l_assignments, a_levels)

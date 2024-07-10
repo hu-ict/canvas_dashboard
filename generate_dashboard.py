@@ -169,13 +169,9 @@ def main(instance_name):
     print("GD06 - build_bootstrap_general(start, course, results, team_coaches, labels_colors)")
     build_bootstrap_general(instances, start, course, results, team_coaches, level_series, student_totals)
 
-    if instances.is_instance_of("inno_courses"):
-        with open("dump.json", 'w') as f:
-            # dict_result = json.dumps(student_totals, indent = 4)
-            json.dump(student_totals, f, indent=2)
+
     print("GD07 - build_late(instances, start, results, student_totals)")
     build_late_list(instances, start, results, student_totals)
-
     with open("student_totals.json", 'w') as f:
         dict_result = student_totals
         json.dump(dict_result, f, indent=2)

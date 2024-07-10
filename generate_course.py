@@ -118,6 +118,7 @@ def main(instance_name):
 
         if assignment_group and assignment_group.id in uses_assignment_groups:
             tags = []
+
             print(f"GC22 - assignment_group {assignment_group.name} is used with strategy {assignment_group.strategy}")
             for c_assignment in canvas_assignment_group.assignments:
                 canvas_assignment = canvas_course.get_assignment(c_assignment['id'], include=['overrides', 'online_quiz'])
@@ -158,7 +159,11 @@ def main(instance_name):
                                         points_possible, assignment_date,
                                         unlock_date, date_to_day(start.start_date, assignment_date))
                 # print(assignment)
-                assignment_group.append_assignment(assignment)
+                if "#" in assignment.name:
+                    tag = get_tag(assignment.name)
+                else:
+                    tag = str(assignment.id)
+
                 if assignment.grading_type == "pass_fail" or assignment.grading_type == "letter_grade":
                     if hasattr(canvas_assignment, "rubric"):
                         assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
@@ -178,17 +183,12 @@ def main(instance_name):
                         print("GC38 - WARNING No rubric", assignment.name, "grading_type", assignment.grading_type)
                 else:
                     print("GC40 - ERROR Unsupported grading_type", assignment.grading_type)
+                assignment_group.append_assignment(tag, assignment)
+
+
             total_group_points = 0
-            for assignment in assignment_group.assignments:
-                if "#" in assignment.name:
-                    tag = get_tag(assignment.name)
-                    if tag in tags:
-                        pass
-                    else:
-                        total_group_points += assignment.points
-                        tags.append(tag)
-                else:
-                    total_group_points += assignment.points
+            for assignment_sequence in assignment_group.assignment_sequences:
+                total_group_points += assignment_sequence.points
             assignment_group.total_points = total_group_points
             print("GC47 -", tags)
             print("GC51 -", assignment_group.name, "punten:", assignment_group.total_points)
@@ -196,7 +196,7 @@ def main(instance_name):
             print(f"GC41 - assignment_group {canvas_assignment_group.name} is not used")
 
     for assignment_group in config.assignment_groups:
-        assignment_group.assignments = sorted(assignment_group.assignments, key=lambda a: a.assignment_day)
+        assignment_group.assignment_sequences = sorted(assignment_group.assignment_sequences, key=lambda a: a.get_day())
         if assignment_group.strategy == "NONE":
             assignment_group.bandwidth = None
         elif assignment_group.total_points == 0:

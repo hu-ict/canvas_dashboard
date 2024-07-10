@@ -109,9 +109,10 @@ class CourseConfig:
 
     def find_assignment(self, assignment_id):
         for assignment_group in self.assignment_groups:
-            for assignment in assignment_group.assignments:
-                if assignment.id == assignment_id:
-                    return assignment
+            for assignment_sequence in assignment_group.assignment_sequences:
+                for assignment in assignment_sequence.assignments:
+                    if assignment.id == assignment_id:
+                        return assignment
         return None
 
     def find_student(self, student_id):

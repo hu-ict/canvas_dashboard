@@ -37,7 +37,7 @@ def main(instance_name):
 
     for student in results.students:
         for perspective in student.perspectives.values():
-            add_missed_assignments(start, course, results, perspective)
+            add_missed_assignments(course, results.actual_day, perspective)
 
     if start.attendance is not None:
         process_attendance(start, course)
@@ -58,7 +58,7 @@ def main(instance_name):
             get_attendance_progress(course.attendance, results, student.attendance_perspective)
             progress_day.perspective[start.attendance.name][str(student.attendance_perspective.progress)] += 1
         for perspective in student.perspectives.values():
-            get_progress(start, course, results, perspective)
+            get_progress(course, perspective)
             progress_day.perspective[perspective.name][str(perspective.progress)] += 1
     # bepaal de totaal voortgang
     for student in results.students:
