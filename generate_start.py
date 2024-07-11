@@ -49,7 +49,10 @@ start.perspectives[perspective.name] = perspective
 role = Role("role", "Student", "border-dark")
 start.roles.append(role)
 policy = Policy([1], "WEEKLY", 19, [9, 17, 18])
-start.attendance = Attendance("attendance", "Aanwezigheid", "attendance", True, False, policy)
+
+
+
+start.attendance = Attendance("attendance", "Aanwezigheid", "attendance", True, False, "ATTENDANCE", 100, 75, 90, [], policy)
 os.makedirs(os.path.dirname(project_path), exist_ok=True)
 os.makedirs(os.path.dirname(project_path +"dashboard_" + course_instance + "//"), exist_ok=True)
 os.makedirs(os.path.dirname(project_path +"dashboard_" + course_instance + "//plotly//"), exist_ok=True)

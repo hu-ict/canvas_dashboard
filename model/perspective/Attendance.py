@@ -31,7 +31,6 @@ class Attendance:
             'lower_points': self.lower_points,
             'upper_points': self.upper_points,
             'attendance_moments': list(map(lambda m: m.to_json(), self.attendance_moments)),
-            'bandwidth': self.bandwidth.to_json(),
             'policy': self.policy.to_json()
 
         }
