@@ -54,19 +54,18 @@ def bandwidth_builder(assignment_group, days_in_semester):
         lower_c = 0
         upper_c = 0
         serie = {0: {"day": 0, "sum": 0}}
-        total_points = 0
         y = 0
-        print(
-            f"LB02 - lower_points {assignment_group.lower_points} upper_points {assignment_group.upper_points} total_points {assignment_group.total_points}")
+        print(f"LB02 - lower_points {assignment_group.lower_points} upper_points {assignment_group.upper_points} total_points {assignment_group.total_points}")
         print(f"LB03 - lower a {lower_a:5} b {lower_b:5.3} c {lower_c:5}")
         print(f"LB04 - upper a {upper_a:5} b {upper_b:5.3} c {upper_c:5}")
         total_points = 0
         for assignment_sequence in assignment_group.assignment_sequences:
-            total_points += assignment_sequence.points
-            serie[assignment_sequence.get_day()] = {"day": assignment_sequence.get_day(), "sum": total_points}
-            output = f"LB08 - Day points; {assignment_sequence.points:3};{assignment_sequence.get_day():4};{total_points:>4}"
-            output = output.replace('.', ',')
-            print(output)
+            if "Aanvullend" not in assignment_sequence.name:
+                total_points += assignment_sequence.points
+                serie[assignment_sequence.get_day()] = {"day": assignment_sequence.get_day(), "sum": total_points}
+                output = f"LB08 - Day points; {assignment_sequence.points:3};{assignment_sequence.get_day():4};{total_points:>4}"
+                output = output.replace('.', ',')
+                print(output)
         band_lower = []
         band_upper = []
         for x in x_time:
@@ -97,14 +96,15 @@ def bandwidth_builder(assignment_group, days_in_semester):
         # print(assignment.assignment_day, assignment.points, "value_day", total_points, "lower =", lower_y, "upper =", upper_y)
         serie[0] = {"day": 0, "value_day": 0, "lower": lower_y, "upper": upper_y}
         for assignment_sequence in assignment_group.assignment_sequences:
-            total_points += assignment_sequence.points
-            lower_y = lower_a * total_points * total_points + lower_b * total_points + lower_c
-            upper_y = upper_a * total_points * total_points + upper_b * total_points + upper_c
-            output = f"LB68 - Day points; {assignment_sequence.points:2};{assignment_sequence.get_day():3};{total_points:>3};{lower_y:5.2f};{upper_y:5.2f}"
-            output = output.replace('.',',')
-            print(output)
-            # print(assignment.assignment_day, assignment.points, "value_day", total_points, "lower =", lower_y, "upper =", upper_y)
-            serie[assignment_sequence.get_day()] = {"day": assignment_sequence.get_day(), "value_day": total_points, "lower": lower_y, "upper": upper_y}
+            if "Aanvullend" not in assignment_sequence.name:
+                total_points += assignment_sequence.points
+                lower_y = lower_a * total_points * total_points + lower_b * total_points + lower_c
+                upper_y = upper_a * total_points * total_points + upper_b * total_points + upper_c
+                output = f"LB68 - Day points; {assignment_sequence.points:2};{assignment_sequence.get_day():3};{total_points:>3};{lower_y:5.2f};{upper_y:5.2f}"
+                output = output.replace('.',',')
+                print(output)
+                # print(assignment.assignment_day, assignment.points, "value_day", total_points, "lower =", lower_y, "upper =", upper_y)
+                serie[assignment_sequence.get_day()] = {"day": assignment_sequence.get_day(), "value_day": total_points, "lower": lower_y, "upper": upper_y}
         band_lower = []
         band_upper = []
         for x in x_time:

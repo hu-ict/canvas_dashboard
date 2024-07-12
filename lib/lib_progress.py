@@ -74,6 +74,7 @@ def get_progress(course, perspective):
                             perspective.last_score = submission_sequence.get_day()
                             total_score += submission_sequence.get_score()
                             total_count += 1
+                            print("LP61 -", submission_sequence.name, perspective.last_score, total_score)
                             submission_sequence.flow = assignment_group.bandwidth.get_progress_range(perspective.last_score, total_score)
                             # print(submission.flow)
                             perspective.sum_score = total_score

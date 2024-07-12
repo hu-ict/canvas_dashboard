@@ -96,13 +96,13 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
             if len(rubrics_assessment) > 0:
                 graded = True
             else:
-                error = f"ERROR rubrics defined in assignment [{a_assignment.name}] but not used in submission for student {a_student.name}. Teacher action required."
+                error = f"WARNING rubrics defined in assignment [{a_assignment.name}] but not used in submission for student {a_student.name}. Teacher action required."
                 print("LS51 -", error)
                 rubrics_assessment = None
                 # graded = False
                 error = ""
         else:
-            error = f"ERROR rubrics defined in assignment [{a_assignment.name}] but not used in submission for student {a_student.name}. Teacher action required."
+            error = f"WARNING rubrics defined in assignment [{a_assignment.name}] but not used in submission for student {a_student.name}. Teacher action required."
             print("LS52 -", error)
             rubrics_assessment = None
             # graded = False

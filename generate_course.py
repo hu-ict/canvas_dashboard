@@ -188,7 +188,8 @@ def main(instance_name):
 
             total_group_points = 0
             for assignment_sequence in assignment_group.assignment_sequences:
-                total_group_points += assignment_sequence.points
+                if "Aanvullende" not in assignment_sequence.name:
+                    total_group_points += assignment_sequence.points
             assignment_group.total_points = total_group_points
             print("GC47 -", tags)
             print("GC51 -", assignment_group.name, "punten:", assignment_group.total_points)
@@ -196,11 +197,16 @@ def main(instance_name):
             print(f"GC41 - assignment_group {canvas_assignment_group.name} is not used")
 
     for assignment_group in config.assignment_groups:
+        assignment_group.bandwidth = None
         assignment_group.assignment_sequences = sorted(assignment_group.assignment_sequences, key=lambda a: a.get_day())
         if assignment_group.strategy == "NONE":
-            assignment_group.bandwidth = None
+            pass
         elif assignment_group.total_points == 0:
             print("GC81 - ERROR Couldn't calculate bandwidth for assignment_group", assignment_group.name, "total_points is zero")
+        elif assignment_group.lower_points == 0:
+            print("GC82 - ERROR Couldn't calculate bandwidth for assignment_group", assignment_group.name, "lower_points is zero")
+        elif assignment_group.upper_points == 0:
+            print("GC83 - ERROR Couldn't calculate bandwidth for assignment_group", assignment_group.name, "upper_points is zero")
         else:
             assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
     if config.attendance is not None:

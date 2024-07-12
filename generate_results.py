@@ -52,6 +52,10 @@ def main(instance_name):
 
     results.submission_count, results.not_graded_count = count_graded(results)
 
+    with open(instances.get_result_file_name(instances.current_instance), 'w') as f:
+        dict_result = results.to_json(["perspectives"])
+        json.dump(dict_result, f, indent=2)
+
     progress_history = read_progress(instances.get_progress_file_name(instances.current_instance))
     progress_day = ProgressDay(results.actual_day, course.perspectives.keys())
 
@@ -61,6 +65,7 @@ def main(instance_name):
             get_attendance_progress(course.attendance, results, student.attendance_perspective)
             progress_day.attendance[str(student.attendance_perspective.progress)] += 1
         for perspective in student.perspectives.values():
+            print("GR20 -", student.name, perspective.name)
             get_progress(course, perspective)
             progress_day.perspective[perspective.name][str(perspective.progress)] += 1
     # Bepaal de totaal voortgang

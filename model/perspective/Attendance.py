@@ -34,6 +34,10 @@ class Attendance:
             'policy': self.policy.to_json()
 
         }
+        if self.bandwidth is not None:
+            dict_result['bandwidth'] = self.bandwidth.to_json()
+        else:
+            dict_result['bandwidth'] = None
         return dict_result
 
     def __str__(self):

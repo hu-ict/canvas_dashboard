@@ -74,6 +74,7 @@ class Bandwidth:
         if day > len(self.points)-1:
             day = len(self.points)-1
         width = self.points[day].upper - self.points[day].lower
+        print("BW03 -", self.points[day].upper, self.points[day].lower)
         if score < self.points[day].lower:
             return score / self.points[day].lower * 3/10
         elif score < self.points[day].upper:

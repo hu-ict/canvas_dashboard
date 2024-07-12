@@ -47,7 +47,7 @@ def check_for_late(a_instances, a_course, a_student_totals, a_student, a_submiss
             if a_instances.is_instance_of("inno_courses"):
                 l_selector = a_student.role
             else:
-                # print("BT83 Group id", a_student.group_id)
+                print("BT83 Group id", a_student.group_id)
                 group = a_course.find_student_group(a_student.group_id)
                 l_selector = group.name
         late_days = a_actual_day - a_submission.submitted_day
