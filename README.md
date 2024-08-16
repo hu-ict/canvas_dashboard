@@ -102,6 +102,24 @@ Hier worden attributen in JSON formaat opgegeven:
   ]
 }
 ```
+Als attendance gebruikt wordt kan het volgende stukje JSON toegevoegd worden:
+```json
+  "attendance": {
+    "name": "attendance",
+    "title": "Aanwezigheid",
+    "show_points": true,
+    "show_flow": false,
+    "assignment_groups": [74430],
+    "levels": "attendance",
+    "policy": {
+      "starting_days": [1],
+      "recurring": "WEEKLY",
+      "times": 19,
+      "exception": [9, 17, 18]
+    }
+  },
+```
+  
 ## Stap 2 - Aanpassen start.json
 Ontwerp de perspectieven en rollen door de `start.json` aan te passen.
 ## Stap 3 - Genereren configuratie
