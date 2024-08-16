@@ -13,30 +13,25 @@ Er wordt gevraagd naar een naam van de `instance` bijvoorbeeld `inno-sep24`. De 
 Hier worden attributen in JSON formaat opgegeven:
 ```json 
 {
-  "api_key": "api_key from Canvas",
-  "canvas_course_id": 39869,
+  "api_key": "api-key",
+  "canvas_course_id": "44847",
+  "progress_levels": "progress",
   "grade_levels": "grade",
   "projects_groep_name": "Project Groups",
   "slb_groep_name": "SLB Groep",
-  "start_date": "2024-02-12T00:00:00Z",
-  "end_date": "2024-07-12T23:59:59Z",
-  "progress": {
-      "name": "progress",
-      "levels": "progress",
-      "show_points": true,
-      "assignment_groups": [
-      ]
-  },
-  "attendance_perspective": "",
-  "template_path": ".//courses//feb24_inno//templates//",
+  "start_date": "2024-09-02T00:00:00Z",
+  "end_date": "2025-01-31T23:59:59Z",
   "target_path": "C://Users//berend.wilkens//OneDrive - Stichting Hogeschool Utrecht//General//dashboard//",
   "target_slb_path": "C://Users//berend.wilkens//Stichting Hogeschool Utrecht//INNO - SLB - General//INNO dashboard - SLB//",
-  "config_file_name": ".//courses//feb24_inno//config_feb24_inno.json",
-  "course_file_name": ".//courses//feb24_inno//course_feb24_inno.json",
-  "results_file_name": ".//courses//feb24_inno//result_feb24_inno.json",
-  "progress_file_name": ".//courses//feb24_inno//progress_feb24_inno.json",
-  "workload_file_name": ".//courses//feb24_inno//workload_feb24_inno.json",
-  "attendance_report": ".//courses//feb24_inno//attendance_report.csv",
+  "attendance_report": ".//courses//sep24_inno//attendance_report.csv",
+  "level_moments": {
+      "name": "level_moments",
+      "title": "Peilmomenten",
+      "levels": "progress",
+      "moments": ["Sprint 4", "Sprint 7", "Beoordeling"],
+      "assignment_groups": [
+      ]
+  }
   "perspectives": {
     "team": {
       "name": "team",
@@ -72,7 +67,7 @@ Hier worden attributen in JSON formaat opgegeven:
     {
       "short": "CSC-C",
       "name": "Cloud",
-      "btn_color": "btn-danger",
+      "btn_color": "btn-light",
       "assignment_groups": [],
       "students": []
     },
