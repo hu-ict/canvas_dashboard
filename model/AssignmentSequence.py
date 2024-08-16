@@ -17,6 +17,11 @@ class AssignmentSequence:
             return self.assignments[0].assignment_day
         return 0
 
+    def get_date(self):
+        if len(self.assignments) > 0:
+            return self.assignments[0].assignment_date
+        return 0
+
     def get_passed_assignments(self, actual_day):
         passed_assignments = []
         for assignment in self.assignments:

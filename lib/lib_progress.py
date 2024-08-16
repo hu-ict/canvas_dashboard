@@ -99,10 +99,10 @@ def get_progress(course, perspective):
                 # Niet te bepalen
                 perspective.progress = -1
         else:
-            print("Could not find assignment_group with id", perspective.assignment_groups[0])
+            print("LP63 - Perspective assignment_group is not set [None]")
     elif len(perspective.assignment_groups) > 1:
-        print("Perspective has more then one assignment_groups attached", perspective.name,
+        print("LP64 - Perspective has more then one assignment_groups attached", perspective.name,
               perspective.assignment_groups)
     else:
-        print("Perspective has no assignment_groups attached", perspective.name, perspective.assignment_groups)
+        print("LP65 - Perspective has no assignment_groups attached", perspective.name, perspective.assignment_groups)
 

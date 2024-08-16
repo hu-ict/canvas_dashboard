@@ -100,7 +100,7 @@ def main(instance_name):
         for perspective in a_student.perspectives.values():
             row = positions[perspective.name]['row']
             col = positions[perspective.name]['col']
-            plot_perspective(row, col, fig, a_instances, a_start, a_course, perspective, a_peil_construction,
+            plot_perspective(row, col, fig, a_start, a_course, perspective, a_peil_construction,
                               results.actual_day, get_date_time_loc(a_actual_date), levels)
         if a_course.attendance is not None:
             row = positions["attendance"]['row']
@@ -118,7 +118,7 @@ def main(instance_name):
                 else:
                     # nog niet ingevuld
                     l_assignment = a_course.get_level_moments_by_query([peil, "overall"])
-                    l_level_moment = Submission(0, 0, 0, 0, l_assignment.name, l_assignment.assignment_date, l_assignment.assignment_day,
+                    l_level_moment = Submission(0, 0, 0, 0, l_assignment.name, l_assignment.get_date(), l_assignment.get_day(),
                                                None, None, False, None, None, -1, 3, 0)
                     plot_overall_peilingen(fig, positions[peil]['row'], positions[peil]['col'], a_start, a_course, l_level_moment, levels)
 

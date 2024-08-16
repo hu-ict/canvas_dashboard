@@ -198,7 +198,7 @@ class CourseConfig:
     def get_level_moments_by_query(self, a_query):
         for assignment_group_id in self.level_moments.assignment_groups:
             assignment_group = self.find_assignment_group(assignment_group_id)
-            for assignment in assignment_group.assignments:
+            for assignment in assignment_group.assignment_sequences:
                 condition = 0
                 for selector in a_query:
                     if selector.lower() in assignment.name.lower():

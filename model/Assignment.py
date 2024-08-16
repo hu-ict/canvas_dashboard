@@ -14,6 +14,7 @@ class Assignment:
         self.assignment_date = assignment_date
         self.unlock_date = unlock_date
         self.assignment_day = assignment_day
+        self.messages = []
         self.rubrics = []
 
     def __str__(self):
@@ -31,6 +32,7 @@ class Assignment:
             'assignment_date': get_date_time_str(self.assignment_date),
             'assignment_day': self.assignment_day,
             'points': int(self.points),
+            'messages': self.messages,
             'rubrics': list(map(lambda r: r.to_json(), self.rubrics)),
         }
 
@@ -54,4 +56,5 @@ class Assignment:
                               get_date_time_obj(data_dict['assignment_date']), get_date_time_obj("2023-02-06T00:00:00Z"),
                               get_date_time_obj(data_dict['assignment_day']))
         new.rubrics = list(map(lambda c: Criterion.from_dict(c), data_dict['rubrics']))
+        new.messages = data_dict['messages']
         return new

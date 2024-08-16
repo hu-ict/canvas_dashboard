@@ -113,6 +113,7 @@ def build_bootstrap_slb(a_course, a_templates, a_labels_colors):
 def write_release_planning(a_start, a_templates, a_assignment_group, a_file_name):
     list_html_string = ""
     for assignment_sequence in a_assignment_group.assignment_sequences:
+        messages_html_string = ""
         assignment_sequence_html_string = ""
         print(assignment_sequence.name)
         for assignment in assignment_sequence.assignments:
@@ -144,10 +145,15 @@ def write_release_planning(a_start, a_templates, a_assignment_group, a_file_name
                                                                   'rubrics' : rubrics_html_string,
                                                                   'url': url})
 
+            for message in assignment.messages:
+                messages_html_string += a_templates["message"].substitute({'message': message})
+
+
         list_html_string += a_templates["assignment_sequence"].substitute({'assignment_name': assignment_sequence.name,
                                                                            'assignment_tag': assignment_sequence.tag,
                                                                   'assignment_grading_type': assignment_sequence.grading_type,
                                                                   'assignment_points': assignment_sequence.points,
+                                                                  'messages': messages_html_string,
                                                                   'assignments': assignment_sequence_html_string})
     file_html_string = a_templates["release_planning_list"].substitute({'assignment_group': a_assignment_group.name+" "+str(a_assignment_group.id),'total_points': int(a_assignment_group.total_points), 'lower_points': a_assignment_group.lower_points, 'upper_points': a_assignment_group.upper_points, 'strategie': a_assignment_group.strategy, 'assignments': list_html_string})
 

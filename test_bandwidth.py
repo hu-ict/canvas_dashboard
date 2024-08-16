@@ -4,7 +4,7 @@ import sys
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
-from lib.build_plotly_perspective import plot_bandbreedte_colored, plot_open_assignments
+from lib.build_plotly_perspective import plot_bandbreedte_colored, plot_assignments
 from lib.file import read_start, read_course, read_course_instance, read_levels
 from lib.lib_bandwidth import bandwidth_builder
 from lib.lib_date import get_actual_date, get_date_time_loc
@@ -43,7 +43,7 @@ def process_bandwidth(a_instances, a_start, a_course, a_assignment_group, a_labe
     fig.update_yaxes(title_text="Punten", range=[0, a_assignment_group.total_points])
     fig.update_xaxes(title_text="Dagen in onderwijsperiode", range=[0, a_course.days_in_semester])
 
-    plot_open_assignments(0, 0, fig, a_start, a_course, True, a_assignment_group.assignment_sequences, a_labels_colors)
+    plot_assignments(0, 0, fig, a_start, a_course, True, a_assignment_group.assignment_sequences, a_labels_colors)
 
     file_name = a_instances.get_html_path() + "bandwidth_"+str(a_assignment_group.id)
     asci_file_name = file_name.translate(translation_table)

@@ -22,7 +22,7 @@ def find_submissions(a_student, a_peil_construction):
 
 
 def plot_progress(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_levels):
-    series = {"color": [], "size": [], 'x': [], 'y': [], 'hover': [], 'size': []}
+    series = {"color": [], "size": [], 'x': [], 'y': [], 'hover': []}
     for pleiling in a_perspective:
         series['y'].append(0)
         if pleiling['submission']:
@@ -66,11 +66,11 @@ def plot_progress(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_level
     )
 
 
-def plot_open_assignments(a_row, a_col, a_fig, a_start, a_course, a_show_points, a_assignment_sequences, a_levels):
+def plot_assignments(a_row, a_col, a_fig, a_start, a_course, a_show_points, a_assignment_sequences, a_levels):
     series = {"color": [], "size": [], "size2": [], 'x': [], 'x2': [], 'y': [], 'y2': [], 'hover': []}
     cum_points = 0
     y2 = {}
-    for day in range(1,a_course.days_in_semester):
+    for day in range(1, a_course.days_in_semester):
         y2[str(day // 7+1)] = 0
     for assignment_sequence in a_assignment_sequences:
         y2[str(assignment_sequence.get_day() // 7+1)] += assignment_sequence.points
@@ -132,6 +132,33 @@ def plot_open_assignments(a_row, a_col, a_fig, a_start, a_course, a_show_points,
         a_fig.add_trace(open_assignments, row=a_row, col=a_col)
     return
 
+def plot_future_assignments(a_row, a_col, a_fig, a_start, a_show_points, a_assignment_sequences, a_levels):
+    series = {"color": [], "size": [], 'x': [], 'y': [], 'hover': []}
+    for assignment_sequence in a_assignment_sequences:
+        series['size'].append(get_marker_size(False))
+        series['x'].append(assignment_sequence.get_day())
+        series['y'].append(0)
+        series['color'].append(a_levels.level_series[a_start.grade_levels].levels["-1"].color)
+        series['hover'].append(get_hover_assignment(a_show_points, assignment_sequence))
+    future_assignments = go.Scatter(
+        x=series['x'],
+        y=series['y'],
+        hoverinfo="text",
+        hovertext=series['hover'],
+        mode='markers',
+        marker_color=series['color'],
+        line_color="#444444",
+        hoverlabel=hover_style,
+        marker=dict(
+            size=series['size'],
+            opacity=1.0,
+            line=dict(
+                width=2
+            )
+        )
+    )
+    a_fig.add_trace(future_assignments, row=a_row, col=a_col)
+    return
 
 def plot_day_bar(a_row, a_col, a_fig, a_start, a_total_points, a_actual_day, a_actual_date, a_progress, a_levels, a_show_points, a_actual_points):
     if a_total_points <= 0:
@@ -234,12 +261,12 @@ def plot_submissions(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_le
     return {"x": x_submission, "y": y_submission}
 
 
-def remove_assignment(a_assignments, a_submission):
-    for i in range(0, len(a_assignments)):
-        if a_assignments[i].id == a_submission.assignment_id:
-            del a_assignments[i]
-            return a_assignments
-    return a_assignments
+def remove_assignment(a_assignment_sequences, a_submission_sequence):
+    for i in range(0, len(a_assignment_sequences)):
+        if a_assignment_sequences[i].id == a_submission_sequence.assignment_id:
+            del a_assignment_sequences[i]
+            return a_assignment_sequences
+    return a_assignment_sequences
 
 
 def plot_overall_peilingen(a_fig, a_row, a_col, a_start, a_course, a_peiling, a_levels):
@@ -266,7 +293,7 @@ def plot_overall_peilingen(a_fig, a_row, a_col, a_start, a_course, a_peiling, a_
     a_fig.update_yaxes(title_text="Niveau", range=[0, 3.5], dtick=1, row=a_row, col=a_col)
 
 
-def plot_perspective(a_row, a_col, a_fig, a_instances, a_start, a_course, a_perspective, a_peil_construction,
+def plot_perspective(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_peil_construction,
                      a_actual_day, a_actual_date, a_levels):
     # slechts één assignment_group
     assignment_group = a_course.find_assignment_group(a_perspective.assignment_groups[0])
@@ -281,7 +308,8 @@ def plot_perspective(a_row, a_col, a_fig, a_instances, a_start, a_course, a_pers
         plot_progress(a_row, a_col, a_fig, a_start, a_course, a_peil_construction[a_perspective.name], a_levels)
     plot_day_bar(a_row, a_col, a_fig, a_start, assignment_group.total_points, a_actual_day, a_actual_date, a_perspective.progress, a_levels, show_points, a_perspective.sum_score )
     plot_submissions(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_levels)
-    # l_assignments = assignment_group.assignments[:]
-    # for l_submission in a_perspective.submissions:
-    #     l_assignments = remove_assignment(l_assignments, l_submission)
-    # plot_open_assignments(a_row, a_col, a_fig, a_start, a_course, show_points, l_assignments, a_levels)
+    assignment_sequences = assignment_group.assignment_sequences[:]
+    # for submission_sequence in a_perspective.submission_sequences:
+    #     assignment_sequences = remove_assignment(assignment_sequences, submission_sequence)
+    print("BPP09 -", a_perspective.name, "assignment_group.assignment_sequences",  len(assignment_group.assignment_sequences))
+    plot_future_assignments(a_row, a_col, a_fig, a_start, show_points, assignment_group.assignment_sequences, a_levels)

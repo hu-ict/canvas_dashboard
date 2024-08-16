@@ -209,34 +209,33 @@ def get_initials(item):
     return item[1].initials
 
 
-def build_bootstrap_general(a_instances, a_start, a_course, a_results, a_coaches, a_labels_colors, a_totals):
+def build_bootstrap_general(a_instances, a_start, a_course, a_results, a_templates, a_coaches, a_labels_colors, a_totals):
     l_semester_day = (a_results.actual_date - a_start.start_date).days
-    l_templates = load_templates(a_instances.get_template_path())
-    tabs_html_string = build_bootstrap_students_tabs(a_instances, a_start, a_course, a_results, l_templates, a_labels_colors,
+    tabs_html_string = build_bootstrap_students_tabs(a_instances, a_start, a_course, a_results, a_templates, a_labels_colors,
                                                      a_totals)
 
     coaches_html_string = ''
     for coach in a_coaches.values():
-        coaches_html_string += l_templates["coach"].substitute(
+        coaches_html_string += a_templates["coach"].substitute(
             {'coach_name': coach['teacher'].name, 'coach_initials': coach['teacher'].initials})
 
     roles_string = ""
     for role in a_course.roles:
-        roles_string += l_templates['role'].substitute(
+        roles_string += a_templates['role'].substitute(
             {'button': role.btn_color, 'role': role.short})
     percentage = str(l_semester_day / a_course.days_in_semester * 100) + "%"
     actual_date_str = a_results.actual_date.strftime("%d-%m-%Y %H:%M")
 
     if len(a_course.roles) > 1:
-        roles_card_html_string = l_templates['roles_card'].substitute({'roles': roles_string, 'colums': '3'})
-        coaches_card_html_string = l_templates['coaches_card'].substitute(
+        roles_card_html_string = a_templates['roles_card'].substitute({'roles': roles_string, 'colums': '3'})
+        coaches_card_html_string = a_templates['coaches_card'].substitute(
             {'coaches': coaches_html_string, 'colums': '3'})
     else:
         roles_card_html_string = ""
-        coaches_card_html_string = l_templates['coaches_card'].substitute(
+        coaches_card_html_string = a_templates['coaches_card'].substitute(
             {'coaches': coaches_html_string, 'colums': '6'})
 
-    index_html_string = l_templates['index'].substitute(
+    index_html_string = a_templates['index'].substitute(
         {'course_name': a_course.name, 'aantal_studenten': a_course.student_count,
          'aantal_teams': len(a_course.student_groups),
          'submission_count': a_results.submission_count, 'not_graded_count': a_results.not_graded_count,

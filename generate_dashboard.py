@@ -4,6 +4,7 @@ import sys
 from lib.build_totals import build_totals
 from lib.build_bootstrap import build_bootstrap_general
 from lib.build_late import build_late_list
+from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_actual_date
 from lib.plot_totals import plot_werkvoorraad, plot_voortgang
 from lib.file import read_course, read_start, read_results, read_progress, read_levels, read_course_instance, read_workload
@@ -91,9 +92,9 @@ def main(instance_name):
         instances.current_instance = instance_name
     print("GD02 - Instance:", instances.current_instance, instances.get_category(instances.current_instance))
     start = read_start(instances.get_start_file_name())
-
     course = read_course(instances.get_course_file_name(instances.current_instance))
     results = read_results(instances.get_result_file_name(instances.current_instance))
+    templates = load_templates(instances.get_template_path())
     level_series = read_levels("levels.json")
 
     team_coaches = init_coaches_dict(course)
@@ -167,11 +168,9 @@ def main(instance_name):
     print("GD05 - build_totals(start, course, results, student_totals, gilde, team_coaches)")
     build_totals(instances, start, course, results, student_totals)
     print("GD06 - build_bootstrap_general(start, course, results, team_coaches, labels_colors)")
-    build_bootstrap_general(instances, start, course, results, team_coaches, level_series, student_totals)
-
-
-    print("GD07 - build_late(instances, start, results, student_totals)")
-    build_late_list(instances, start, results, student_totals)
+    build_bootstrap_general(instances, start, course, results, templates, team_coaches, level_series, student_totals)
+    print("GD07 - build_late(instances, templates, results, student_totals)")
+    build_late_list(instances, templates, results, student_totals)
     with open("student_totals.json", 'w') as f:
         dict_result = student_totals
         json.dump(dict_result, f, indent=2)

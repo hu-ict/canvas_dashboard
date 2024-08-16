@@ -76,4 +76,24 @@ def load_templates(template_path):
         string_html = file_template.read()
         templates["assignment"] = Template(string_html)
 
+    with open(template_path + 'template_message.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["message"] = Template(string_html)
+
+    with open(template_path + 'template_late.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["late"] = Template(string_html)
+
+    with open(template_path + 'template_late_perspective.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["late_perspective"] = Template(string_html)
+
+    with open(template_path+'template_late_list.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["late_list"] = Template(string_html)
+
+    with open(template_path+'template_submission.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["submission"] = Template(string_html)
+
     return templates
