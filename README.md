@@ -236,11 +236,11 @@ De volgende stap is de resultaten/submissions uitlezen uit Canvas. Er wordt inte
 - `generate_submissions.py`
 
 Als met attendance gewerkt wordt wordt het csv bestand ingelezen en gekoppeld aan het juiste perspectief. De voortgang wordt ook bepaald. Op basis van de parameters `Attendance` en `Geldidge reden` worden punten toegekend.
-`absent` 0 punten afwezig (geen geldige reden)
-`absent` 1 punt afwezig (geldige reden)
-`late` 1 punt te laat (geen geldige reden)
-`late` 2 punten te laat (geldige reden)
-`present` 2 punten aanwezig
+- `absent` 0 punten afwezig (geen geldige reden)
+- `absent` 1 punt afwezig (geldige reden)
+- `late` 1 punt te laat (geen geldige reden)
+- `late` 2 punten te laat (geldige reden)
+- `present` 2 punten aanwezig
 
 ## Stap 8 - Dashboard
 Genereer de visuals:
