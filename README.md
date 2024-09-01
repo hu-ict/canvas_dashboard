@@ -138,7 +138,7 @@ Dit bestand is ook weer een JSON-bestand met de naam `config_file_name` uit `sta
 Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica.
 ### Perspectives
 - Verwijder de niet relevante `perspectives` of voeg er toe.
-- Bepaal welke `levels` gebruikt worden, dit is een koppeling met de niveaus in het `labels_colors.json` bestand.
+- Bepaal welke `levels` gebruikt worden, dit is een koppeling met de niveaus in het `levels.json` bestand.
 - Bepaal of er punten getoond moeten worden met `show_points` in het dashboard.
 - `assignment_group` heeft een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `perspective`.
 ```
@@ -179,6 +179,7 @@ Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica
 "lower_points": 44,
 "upper_points": 56,
 ```
+Binnen een `assignment_group` hebben we `assignments`, deze kunnen gebudeld worden d.m.v. `assignment_sequence`. Dit wordt gebundeld op basis van een hashtag in de opdracht naam.
 - `strategy` kent meerdere opties: `NONE`, `EXP_POINTS`, `LIN_POINTS`, `POINTS`, `LINEAIR`, `EXPONENTIAL`, `CONSTANT`, `FIXED`, `ATTENDANCE`.
 ### Strategy
 De strategiën `EXP_POINTS`, `LIN_POINTS`, `POINTS` en `CONSTANT` worden het meest gebruikt. De strategie `ATTENDANCE` lijkt veel op `CONSTANT`.
@@ -221,12 +222,12 @@ Secties worden gebruikt voor de rol van een student of de klas- waarin de studen
 ### Teachers
 - Verwijder de niet relevante `teachers`.
 Hier worden de `projects` en `assignment_groups` aan de `teachers` gekoppeld. 
-- `projects` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`.
-- `assignment_groups` hebben ook een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`.
+- `projects` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`. Als alternatief en makkelijker optie is om een uniek deel uit de naam van de project_group mee te geven. Bijvoorbeeld de klascode (PROP) `V1A`.
+- `assignment_groups` hebben ook een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`. Optioneel
 ## Stap 5 - Lees assignments
 Door het uitvoeren van het Python script `generate_course.py` wordt het json bestand `course_file_name` gemaakt. De assignments worden gelezen en aan het perspectief gekoppeld. De bandbreedte  (onder, op en boven niveau) wordt bepaald door de `strategy`. Stap 4a moet uitgevoerd zijn.
 ## Stap 6 - Lees studenten
-Studenten worden uit Canvas gelezen. De project groepen en rollen worden gevuld. Docenten worden aan de juiste groepen gekoppeld. Start daarvoor het script: `generate_student.py`. Stap 4a, 4b en 5 moeten uitgevoerd zijn.
+Studenten worden uit Canvas gelezen. De project groepen en rollen worden gevuld. Docenten worden aan de juiste groepen gekoppeld. Start daarvoor het script: `generate_student.py`. Stap 4a, 4b en 5 moeten uitgevoerd zijn. Studenten die de cursus nog niet geaccepteerd hebben worden wél meegenomen in de studentenlijst, maar hebben nog geen login naam (email0 in Canvas.
 
 Wanneer de structuur van studenten en assigments niet wijzigd kunnen bij een snapshot stap 1 tm 6 overgeslagen worden.
 ## Stap 7 - Resultaten
@@ -234,7 +235,13 @@ De volgende stap is de resultaten/submissions uitlezen uit Canvas. Er wordt inte
 - `generate_results.py`
 - `generate_submissions.py`
 
-Als met attendance gewerkt wordt wordt het csv bestand ingelezen en gekoppeld aan het juiste perspectief. De voortgang wordt ook bepaald.
+Als met attendance gewerkt wordt wordt het csv bestand ingelezen en gekoppeld aan het juiste perspectief. De voortgang wordt ook bepaald. Op basis van de parameters `Attendance` en `Geldidge reden` worden punten toegekend.
+`absent` 0 punten afwezig (geen geldige reden)
+`absent` 1 punt afwezig (geldige reden)
+`late` 1 punt te laat (geen geldige reden)
+`late` 2 punten te laat (geldige reden)
+`present` 2 punten aanwezig
+
 ## Stap 8 - Dashboard
 Genereer de visuals:
 - `generate_plotly.py`
