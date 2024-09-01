@@ -19,6 +19,9 @@ def read_attendance(start, course):
                 score = 0
             else:
                 score = -1
+            if "Geldige reden" in item:
+                if item["Geldige reden"] == "Geldige reden" and score < 2:
+                    score += 1
             l_date = get_date_time_obj_alt(item["Class Date"])
             l_teacher_id = item["Teacher ID"]
             l_teacher_name = item["Teacher Name"]

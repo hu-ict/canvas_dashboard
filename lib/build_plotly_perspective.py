@@ -193,6 +193,10 @@ def plot_day_bar(a_row, a_col, a_fig, a_start, a_total_points, a_actual_day, a_a
 
 def plot_submissions(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_levels):
     l_assignment_group = a_course.find_assignment_group(a_perspective.assignment_groups[0])
+    # for assignment_sequence in l_assignment_group.assignment_sequences:
+    #     submission_sequence = a_perspective.get_sequence_by_tag(assignment_sequence.tag)
+    #     if submission_sequence is None:
+
     l_perspective = a_course.find_perspective_by_name(a_perspective.name)
     x_submission = [0]
     if l_perspective.show_flow:
@@ -261,10 +265,14 @@ def plot_submissions(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_le
     return {"x": x_submission, "y": y_submission}
 
 
-def remove_assignment(a_assignment_sequences, a_submission_sequence):
+def remove_assignment_sequence(a_assignment_sequences, a_submission_sequence):
     for i in range(0, len(a_assignment_sequences)):
-        if a_assignment_sequences[i].id == a_submission_sequence.assignment_id:
+        print("BPP41 -", a_assignment_sequences[i].tag, a_submission_sequence.tag)
+        if a_assignment_sequences[i].tag == a_submission_sequence.tag:
+            print("BPP42 - is gelijk", a_assignment_sequences[i].tag, a_submission_sequence.tag)
+            lengte = len(a_assignment_sequences)
             del a_assignment_sequences[i]
+            print("BPP43 - assignment_sequences", lengte, len(a_assignment_sequences))
             return a_assignment_sequences
     return a_assignment_sequences
 
@@ -309,7 +317,7 @@ def plot_perspective(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_pe
     plot_day_bar(a_row, a_col, a_fig, a_start, assignment_group.total_points, a_actual_day, a_actual_date, a_perspective.progress, a_levels, show_points, a_perspective.sum_score )
     plot_submissions(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_levels)
     assignment_sequences = assignment_group.assignment_sequences[:]
-    # for submission_sequence in a_perspective.submission_sequences:
-    #     assignment_sequences = remove_assignment(assignment_sequences, submission_sequence)
-    print("BPP09 -", a_perspective.name, "assignment_group.assignment_sequences",  len(assignment_group.assignment_sequences))
-    plot_future_assignments(a_row, a_col, a_fig, a_start, show_points, assignment_group.assignment_sequences, a_levels)
+    for submission_sequence in a_perspective.submission_sequences:
+       assignment_sequences = remove_assignment_sequence(assignment_sequences, submission_sequence)
+    print("BPP09 -", a_perspective.name, "assignment_group.assignment_sequences",  len(assignment_sequences))
+    plot_future_assignments(a_row, a_col, a_fig, a_start, show_points, assignment_sequences, a_levels)

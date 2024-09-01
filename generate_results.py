@@ -41,7 +41,9 @@ def main(instance_name):
     else:
         print("GR10 - No attendance")
 
-    # sorteer de sattendance en submissions
+    for student in results.students:
+        print("GR75", student.name)
+    # sorteer de attendance en submissions
     for student in results.students:
         if start.attendance is not None:
             student.attendance_perspective.attendance_submissions = sorted(student.attendance_perspective.attendance_submissions, key=lambda s: s.day)

@@ -19,6 +19,10 @@ def link_teachers(config):
             studentGroup = config.find_student_group(studentGroupId)
             if studentGroup is not None:
                 studentGroup.teachers.append(teacher.id)
+            else:
+                studentGroup = config.find_student_group_by_name(studentGroupId)
+                if studentGroup is not None:
+                    studentGroup.teachers.append(teacher.id)
         for assignmentGroupId in teacher.assignment_groups:
             assignmentGroup = config.find_assignment_group(assignmentGroupId)
             if assignmentGroup:
@@ -27,7 +31,7 @@ def link_teachers(config):
 
 def get_section_students(canvas_course, start, course):
     # Ophalen Secties en Roles
-    print("GS21 -", "Ophalen student secties uit Canvas deze koppelen aan Role ")
+    print("GS21 -", "Ophalen students and secties uit Canvas deze koppelen aan Role ")
     canvas_sections = canvas_course.get_sections(include=['students'])
     for course_section in canvas_sections:
         # use only relevant sections
@@ -38,9 +42,10 @@ def get_section_students(canvas_course, start, course):
                 for section_student in course_section_students:
                     student_id = section_student["id"]
                     student = course.find_student(student_id)
-                    if student:
+                    if student is not None:
                         if start.projects_groep_name == "SECTIONS":
                             student_group = course.find_student_group_by_name(section.name)
+                            print("GS24 -", section.name)
                             if student_group:
                                 student.group_id = student_group.id
                                 if len(student_group.teachers) > 0:
@@ -99,12 +104,7 @@ def main(instance_name):
     canvas = Canvas(API_URL, start.api_key)
     user = canvas.get_current_user()
     print("GS03 -", user.name)
-    canvas_course = canvas.get_course(start.canvas_course_id)
-    # Ophalen Students
-    print("GS04 - Retrieve students")
-    users = canvas_course.get_users(enrollment_type=['student'])
     # cleanup students in list roles, slb and project_groups
-    course.students = []
     for role in course.roles:
         role.students = []
     for student_group in course.student_groups:
@@ -113,18 +113,30 @@ def main(instance_name):
     for slb_group in course.slb_groups:
         slb_group.students = []
 
+
+    canvas_course = canvas.get_course(start.canvas_course_id)
+    # Ophalen Students
+    print("GS13 - Retrieve students")
+    course.students = []
+    users = canvas_course.get_users(enrollment_type=['student'], include=["enrollments"])
     student_count = 0
     for user in users:
         if hasattr(user, 'login_id'):
-            print("GS05 - Create student", user.name, user.login_id)
+            print("GS15 - Create student", user.name, user.login_id)
             student = Student(user.id, 0, user.name, user.sortable_name, 0, "", user.login_id, "", 0)
-            course.students.append(student)
-            student_count += 1
+        else:
+            print("GS16 - Create student without login_id", user.name)
+            student = Student(user.id, 0, user.name, user.sortable_name, 0, "", "", "", 0)
+        course.students.append(student)
+        student_count += 1
         if instances.current_instance == "sep23_prop_a" and student_count > 10:
             break
-    link_teachers(course)
+    print("GS18 - Aantal Canvas users", student_count)
 
     get_section_students(canvas_course, start, course)
+
+    link_teachers(course)
+
 
     print("GS07 - Opschonen studenten zonder Role")
     for student in course.students:
@@ -136,7 +148,7 @@ def main(instance_name):
 
     # Students en StudentGroups koppelen
     if start.slb_groep_name is None and start.projects_groep_name == "SECTIONS":
-        print("GS36 - Geen Canvas groepen, werken met Canvas secties.")
+        print("GS36 - Werken met Canvas secties als groepen.")
     else:
         canvas_group_categories = canvas_course.get_group_categories()
         for canvas_group_category in canvas_group_categories:

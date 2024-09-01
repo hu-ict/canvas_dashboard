@@ -54,6 +54,8 @@ def main(instance_name):
     teacher_count = 0
     for user in users:
         teacher_count += 1
+        # werkt helaas niet om de secties op te halen, wordt vervolgd ...
+        # print("GC06 -", user["enrollments"])
         teacher = Teacher(user.id, user.name)
         course_config.teachers.append(teacher)
         print("GC07", teacher)

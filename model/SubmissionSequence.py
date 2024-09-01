@@ -21,6 +21,9 @@ class SubmissionSequence:
         return None
 
     def get_score(self):
+        '''
+        Look for the highest score
+        '''
         score = 0
         for submission in self.submissions:
             if submission.score > score:
@@ -34,6 +37,9 @@ class SubmissionSequence:
         return False
 
     def get_actual_submission(self):
+        '''
+        Find de submission with the highest score
+        '''
         score = -1
         actual_submission = None
         for submission in self.submissions:

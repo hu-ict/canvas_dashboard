@@ -1,7 +1,5 @@
-import json
 import sys
 
-import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
 from lib.build_plotly_perspective import plot_bandbreedte_colored, plot_assignments
