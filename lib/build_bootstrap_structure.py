@@ -2,7 +2,6 @@ from string import Template
 
 from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_date_time_loc
-from lib.translation_table import translation_table
 from test_bandwidth import process_bandwidth
 
 

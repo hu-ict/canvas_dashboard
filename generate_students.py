@@ -20,6 +20,7 @@ def link_teachers(config):
             if studentGroup is not None:
                 studentGroup.teachers.append(teacher.id)
             else:
+                print("GS16 - studentGroupName", studentGroupId)
                 studentGroup = config.find_student_group_by_name(studentGroupId)
                 if studentGroup is not None:
                     studentGroup.teachers.append(teacher.id)

@@ -20,6 +20,10 @@ def main(instance_name):
     else:
         print("GA04 - No attendance")
 
+    with open(instances.get_result_file_name(instances.current_instance), 'w') as f:
+        dict_result = results.to_json(["perspectives"])
+        json.dump(dict_result, f, indent=2)
+
     print("GA99 Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
 if __name__ == "__main__":

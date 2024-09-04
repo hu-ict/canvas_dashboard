@@ -8,7 +8,7 @@ from lib.lib_progress import get_progress, get_overall_progress, get_attendance_
 from lib.lib_submission import count_graded, add_missed_assignments, read_submissions
 from model.ProgressDay import ProgressDay
 from model.Result import *
-from lib.lib_date import get_actual_date, API_URL
+from lib.lib_date import get_actual_date, API_URL, date_to_day
 
 
 def main(instance_name):
@@ -22,14 +22,14 @@ def main(instance_name):
     # Initialize a new Canvas object
     canvas = Canvas(API_URL, start.api_key)
     user = canvas.get_current_user()
-    print(user.name)
+    print("GR03 - Username", user.name)
     canvas_course = canvas.get_course(start.canvas_course_id)
     if g_actual_date > start.end_date:
-        results = Result(start.canvas_course_id, course.name, start.end_date, (start.end_date - start.start_date).days - 1, 0, 0)
+        results = Result(start.canvas_course_id, course.name, start.end_date, date_to_day(start.start_date, start.end_date), 0, 0)
     elif g_actual_date < start.start_date:
         results = Result(start.canvas_course_id, course.name, start.start_date, 1, 0, 0)
     else:
-        results = Result(start.canvas_course_id, course.name, g_actual_date, (g_actual_date - start.start_date).days, 0, 0)
+        results = Result(start.canvas_course_id, course.name, g_actual_date, date_to_day(start.start_date, g_actual_date), 0, 0)
     results.students = course.students
     read_submissions(canvas_course, start, course, results, True)
     for student in results.students:
@@ -67,7 +67,7 @@ def main(instance_name):
             get_attendance_progress(course.attendance, results, student.attendance_perspective)
             progress_day.attendance[str(student.attendance_perspective.progress)] += 1
         for perspective in student.perspectives.values():
-            print("GR20 -", student.name, perspective.name)
+            # print("GR20 -", student.name, perspective.name)
             get_progress(course, perspective)
             progress_day.perspective[perspective.name][str(perspective.progress)] += 1
     # Bepaal de totaal voortgang

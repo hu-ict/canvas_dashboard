@@ -69,17 +69,18 @@ def plot_progress(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_level
 def plot_assignments(a_row, a_col, a_fig, a_start, a_course, a_show_points, a_assignment_sequences, a_levels):
     series = {"color": [], "size": [], "size2": [], 'x': [], 'x2': [], 'y': [], 'y2': [], 'hover': []}
     cum_points = 0
+
     y2 = {}
-    for day in range(1, a_course.days_in_semester):
-        y2[str(day // 7+1)] = 0
+    for day in range(1, a_course.days_in_semester+2):
+        y2[(day//7)+1] = 0
     for assignment_sequence in a_assignment_sequences:
-        y2[str(assignment_sequence.get_day() // 7+1)] += assignment_sequence.points
+        y2[assignment_sequence.get_day() // 7 + 1] += assignment_sequence.points
     for punt in y2:
-        series['x2'].append(int(punt)*7)
+        series['x2'].append(punt*7)
         series['y2'].append(y2[punt])
         series['size2'].append(get_marker_size(True))
-
     y2_max = max(series['y2'])
+
     for assignment_sequence in a_assignment_sequences:
         series['size'].append(get_marker_size(False))
         series['x'].append(assignment_sequence.get_day())
@@ -87,7 +88,6 @@ def plot_assignments(a_row, a_col, a_fig, a_start, a_course, a_show_points, a_as
         series['y'].append(cum_points)
         series['color'].append(a_levels.level_series[a_start.grade_levels].levels["-1"].color)
         series['hover'].append(get_hover_assignment(a_show_points, assignment_sequence))
-
 
     open_assignments = go.Scatter(
         x=series['x'],
@@ -160,6 +160,7 @@ def plot_future_assignments(a_row, a_col, a_fig, a_start, a_show_points, a_assig
     a_fig.add_trace(future_assignments, row=a_row, col=a_col)
     return
 
+
 def plot_day_bar(a_row, a_col, a_fig, a_start, a_total_points, a_actual_day, a_actual_date, a_progress, a_levels, a_show_points, a_actual_points):
     if a_total_points <= 0:
         return
@@ -169,7 +170,7 @@ def plot_day_bar(a_row, a_col, a_fig, a_start, a_total_points, a_actual_day, a_a
 
     a_fig.add_trace(
         go.Scatter(
-            x=[a_actual_day, a_actual_day+2, a_actual_day+2, a_actual_day, a_actual_day],
+            x=[a_actual_day, a_actual_day-1, a_actual_day-1, a_actual_day, a_actual_day],
             y=[0, 0, a_total_points, a_total_points, 0],
             fill="toself",
             mode='lines',
@@ -182,7 +183,7 @@ def plot_day_bar(a_row, a_col, a_fig, a_start, a_total_points, a_actual_day, a_a
         col=a_col
     )
     a_fig.add_shape(
-        dict(type="rect", x0=a_actual_day, x1=a_actual_day+1, y0=0, y1=a_total_points,
+        dict(type="rect", x0=a_actual_day-1, x1=a_actual_day, y0=0, y1=a_total_points,
              fillcolor=l_color, line_color=l_color
              ),
         row=a_row,
@@ -267,12 +268,12 @@ def plot_submissions(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_le
 
 def remove_assignment_sequence(a_assignment_sequences, a_submission_sequence):
     for i in range(0, len(a_assignment_sequences)):
-        print("BPP41 -", a_assignment_sequences[i].tag, a_submission_sequence.tag)
+        # print("BPP41 -", a_assignment_sequences[i].tag, a_submission_sequence.tag)
         if a_assignment_sequences[i].tag == a_submission_sequence.tag:
-            print("BPP42 - is gelijk", a_assignment_sequences[i].tag, a_submission_sequence.tag)
+            # print("BPP42 - is gelijk", a_assignment_sequences[i].tag, a_submission_sequence.tag)
             lengte = len(a_assignment_sequences)
             del a_assignment_sequences[i]
-            print("BPP43 - assignment_sequences", lengte, len(a_assignment_sequences))
+            # print("BPP43 - assignment_sequences", lengte, len(a_assignment_sequences))
             return a_assignment_sequences
     return a_assignment_sequences
 
@@ -306,7 +307,7 @@ def plot_perspective(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_pe
     # slechts één assignment_group
     assignment_group = a_course.find_assignment_group(a_perspective.assignment_groups[0])
     if assignment_group is None:
-        print("BPP01 - could not find assignment_group", a_perspective.assignment_groups[0])
+        print("BPP01 - could not find assignment_group", a_perspective.assignment_groups[0], a_perspective)
         return
     show_points = a_course.find_perspective_by_assignment_group(assignment_group.id).show_points
 
@@ -319,5 +320,5 @@ def plot_perspective(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_pe
     assignment_sequences = assignment_group.assignment_sequences[:]
     for submission_sequence in a_perspective.submission_sequences:
        assignment_sequences = remove_assignment_sequence(assignment_sequences, submission_sequence)
-    print("BPP09 -", a_perspective.name, "assignment_group.assignment_sequences",  len(assignment_sequences))
+    # print("BPP09 -", a_perspective.name, "assignment_group.assignment_sequences",  len(assignment_sequences))
     plot_future_assignments(a_row, a_col, a_fig, a_start, show_points, assignment_sequences, a_levels)

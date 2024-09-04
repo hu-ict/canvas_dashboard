@@ -25,7 +25,7 @@ def main(instance_name):
     user = canvas.get_current_user()
     print(user.name)
     canvas_course = canvas.get_course(start.canvas_course_id)
-    course_config = CourseConfig(canvas_course.name, (start.end_date - start.start_date).days, 0)
+    course_config = CourseConfig(canvas_course.name, date_to_day(start.start_date, start.end_date), 0)
 
 
     # ophalen secties

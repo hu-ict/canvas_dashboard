@@ -12,8 +12,7 @@ from model.WorkloadHistory import WorkloadHistory
 from model.instance.CourseInstances import CourseInstances
 from model.perspective.LevelSeries import LevelSeries
 
-ENVIRONMENT_FILE_NAME = ".\courses\course_instances.json"
-
+ENVIRONMENT_FILE_NAME = ".//courses//course_instances.json"
 
 def read_course_instance():
     print("F001 - read_course_instance", ENVIRONMENT_FILE_NAME)
