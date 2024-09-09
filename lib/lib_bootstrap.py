@@ -96,4 +96,12 @@ def load_templates(template_path):
         string_html = file_template.read()
         templates["submission"] = Template(string_html)
 
+    with open(template_path + 'template_grading.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["grading"] = Template(string_html)
+
+    with open(template_path + 'template_explanation.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["explanation"] = Template(string_html)
+
     return templates

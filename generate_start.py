@@ -47,7 +47,7 @@ start = Start(canvas_course_id, "Project Groups", "", get_date_time_obj("2024-09
 start.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", [])
 perspective = Perspective("project", "Project", "samen", True, False)
 start.perspectives[perspective.name] = perspective
-role = Role("role", "Student", "border-dark")
+role = Role("role", "Student", "HBO-ICT", "border-dark")
 start.roles.append(role)
 policy = Policy([1], "WEEKLY", 19, [9, 17, 18])
 start.attendance = Attendance("attendance", "Aanwezigheid", "attendance", True, False, "ATTENDANCE", 100, 75, 90, Bandwidth(), policy)

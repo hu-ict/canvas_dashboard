@@ -126,7 +126,7 @@ def main(instance_name):
         asci_file_name = file_name.translate(translation_table)
         fig.write_html(asci_file_name + ".html", include_plotlyjs="cdn")
         fig.write_image(asci_file_name + ".jpeg")
-        if a_instances.current_instance == "feb24_inno":
+        if a_instances.current_instance == "sep24_inno":
             volg_nr = str(results.actual_day).zfill(3)
             file_name = "./time_lap/" + a_student.name + "_" + volg_nr + ".jpeg"
             asci_file_name = file_name.translate(translation_table)

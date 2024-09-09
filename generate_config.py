@@ -82,7 +82,7 @@ def main(instance_name):
     course_config.attendance = start.attendance
     course_config.perspectives = start.perspectives
     course_config.roles = start.roles
-    print("GC98 - ConfigFileName:",CourseInstances.get_config_file_name(instances.current_instance))
+    print("GC98 - ConfigFileName:", CourseInstances.get_config_file_name(instances.current_instance))
     with open(CourseInstances.get_config_file_name(instances.current_instance), 'w') as f:
         dict_result = course_config.to_json([])
         json.dump(dict_result, f, indent=2)
