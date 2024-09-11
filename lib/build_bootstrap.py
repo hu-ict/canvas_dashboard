@@ -104,7 +104,7 @@ def build_bootstrap_slb(a_start, a_course, a_results, a_templates, a_labels_colo
         students_html_string = ''
         for student in group.students:
             l_student = a_results.find_student(student.id)
-            students_html_string += build_student_button(a_start, a_course, l_student, a_templates, a_labels_colors)
+            students_html_string += build_student_button(a_course, l_student, a_templates, a_labels_colors)
 
         group_html_string = a_templates['group'].substitute(
             {'selector_type': 'coach', 'selector': 'Leeg', 'student_group_name': group.name,

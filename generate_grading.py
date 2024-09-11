@@ -10,7 +10,6 @@ def build_bootstrap_grading(a_instances, a_start, a_course, a_results, a_templat
     if not a_instances.is_instance_of('inno_courses'):
         return
     for student in a_results.students:
-        explanations_html_string = ""
         level_moment = student.get_peilmoment_submission_by_query(["overall","beoordeling"])
         if level_moment is None:
             continue
@@ -18,11 +17,40 @@ def build_bootstrap_grading(a_instances, a_start, a_course, a_results, a_templat
         if not level_moment.graded:
             continue
         l_grader_name = level_moment.grader_name
-        l_grade = a_levels.level_series[a_start.grade_levels].levels[str(int(level_moment.score))].label
+        l_grade_overall = a_levels.level_series[a_start.grade_levels].levels[str(int(level_moment.score))].label
         role = a_course.get_role(student.role)
+        l_explanation = ""
+        for comment in level_moment.comments:
+            if len(l_explanation) > 0:
+                l_explanation += "<br>"+comment.comment
+            else:
+                l_explanation += comment.comment
+
+        explanations_html_string = a_templates['explanation'].substitute(
+                {'perspective': 'overall',
+                'grade': l_grade_overall,
+                'grade_date': get_date_time_loc(level_moment.graded_date),
+                'examiner': level_moment.grader_name,
+                'explanation': l_explanation})
         examiners = "("
         for perspective in student.perspectives:
             level_moment = student.get_peilmoment_submission_by_query(["beoordeling", perspective])
+            if level_moment is None:
+                continue
+            l_grade = a_levels.level_series[a_start.grade_levels].levels[str(int(level_moment.score))].label
+            l_explanation = ""
+            for comment in level_moment.comments:
+                if len(l_explanation) > 0:
+                    l_explanation += "<br>" + comment.comment
+                else:
+                    l_explanation += comment.comment
+            explanations_html_string += a_templates['explanation'].substitute(
+                {'perspective': perspective,
+                'grade': l_grade,
+                'grade_date': get_date_time_loc(level_moment.graded_date),
+                'examiner': level_moment.grader_name,
+                'explanation': l_explanation})
+
             if level_moment is not None:
                 if len(examiners) > 1:
                     examiners += ", "+level_moment.grader_name
@@ -36,7 +64,7 @@ def build_bootstrap_grading(a_instances, a_start, a_course, a_results, a_templat
              'role_name': role.name,
              'student_name': student.name,
              'student_number': student.id,
-             'grade': l_grade,
+             'grade': l_grade_overall,
              'grade_date': get_date_time_loc(level_moment.graded_date),
              'examiners': l_grader_name + " " + examiners,
              'explanations': explanations_html_string})
