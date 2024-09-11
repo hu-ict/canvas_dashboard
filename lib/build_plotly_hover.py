@@ -88,7 +88,9 @@ def get_hover_rubrics_comments(course, submission, levels):
     l_hover = "<br><b>Criteria:</b>"
     for criterion_score in submission.rubrics:
         # print("BP10 -", submission.assignment_id, criterion_score)
-        assignment_criterion = course.find_assignment(submission.assignment_id).get_criterion(criterion_score.id)
+        assignment = course.find_assignment(submission.assignment_id)
+        # print("BP11 -", assignment)
+        assignment_criterion = assignment.get_criterion(criterion_score.id)
         # if submission.assignment_id ==  298261 and submission.student_id == 148369:
         # print("BP11 -", assignment_criterion, criterion_score)
         if criterion_score.rating_id:

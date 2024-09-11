@@ -25,7 +25,7 @@ def main(instance_name):
     user = canvas.get_current_user()
     print(user.name)
     canvas_course = canvas.get_course(start.canvas_course_id)
-    course_config = CourseConfig(canvas_course.name, (start.end_date - start.start_date).days, 0)
+    course_config = CourseConfig(canvas_course.name, date_to_day(start.start_date, start.end_date), 0)
 
 
     # ophalen secties
@@ -54,6 +54,8 @@ def main(instance_name):
     teacher_count = 0
     for user in users:
         teacher_count += 1
+        # werkt helaas niet om de secties op te halen, wordt vervolgd ...
+        # print("GC06 -", user["enrollments"])
         teacher = Teacher(user.id, user.name)
         course_config.teachers.append(teacher)
         print("GC07", teacher)
@@ -80,7 +82,7 @@ def main(instance_name):
     course_config.attendance = start.attendance
     course_config.perspectives = start.perspectives
     course_config.roles = start.roles
-    print("GC98 - ConfigFileName:",CourseInstances.get_config_file_name(instances.current_instance))
+    print("GC98 - ConfigFileName:", CourseInstances.get_config_file_name(instances.current_instance))
     with open(CourseInstances.get_config_file_name(instances.current_instance), 'w') as f:
         dict_result = course_config.to_json([])
         json.dump(dict_result, f, indent=2)

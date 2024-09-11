@@ -82,9 +82,16 @@ class CourseConfig:
                 return group
         return None
 
+    def exists_in_team(self, student_id):
+        for group in self.student_groups:
+            for student in group.students:
+                if student.id == student_id:
+                    return True
+        return False
+
     def find_student_group_by_name(self, group_name):
         for group in self.student_groups:
-            if group.name == group_name:
+            if group_name in group.name:
                 return group
         return None
 
@@ -104,6 +111,12 @@ class CourseConfig:
     def find_assignment_group(self, group_id):
         for group in self.assignment_groups:
             if group.id == group_id:
+                return group
+        return None
+
+    def find_assignment_group_by_name(self, group_name):
+        for group in self.assignment_groups:
+            if group_name in group.name:
                 return group
         return None
 

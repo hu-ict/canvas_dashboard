@@ -2,7 +2,6 @@ from string import Template
 
 from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_date_time_loc
-from lib.translation_table import translation_table
 from test_bandwidth import process_bandwidth
 
 
@@ -41,7 +40,7 @@ def build_bootstrap_group(a_course, a_templates, a_labels_colors):
             coaches = ""
             for coach in group.teachers:
                 teacher = a_course.find_teacher(coach)
-                coaches += " " + teacher.initials
+                coaches += " " + teacher.id
                 coaches_string += ", " + teacher.name
         else:
             coaches = None
@@ -115,7 +114,7 @@ def write_release_planning(a_start, a_templates, a_assignment_group, a_file_name
     for assignment_sequence in a_assignment_group.assignment_sequences:
         messages_html_string = ""
         assignment_sequence_html_string = ""
-        print(assignment_sequence.name)
+        # print(assignment_sequence.name)
         for assignment in assignment_sequence.assignments:
             url = "https://canvas.hu.nl/courses/" + str(a_start.canvas_course_id) + "/assignments/" + str(assignment.id)
             rubric_points = 0
@@ -225,7 +224,7 @@ def build_bootstrap_structure_index(a_instances, a_start, a_course, a_coaches, a
     coaches_html_string = ''
     for coach in a_coaches.values():
         coaches_html_string += l_templates["coach"].substitute(
-            {'coach_name': coach['teacher'].name, 'coach_initials': coach['teacher'].initials})
+            {'coach_name': coach['teacher'].name, 'coach_initials': coach['teacher'].initials, 'coach_id': coach['teacher'].id})
 
     roles_string = ""
     for role in a_course.roles:

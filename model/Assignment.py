@@ -53,8 +53,10 @@ class Assignment:
         else:
             new = Assignment(data_dict['id'], data_dict['name'], data_dict['group_id'], data_dict['section_id'],
                               data_dict['grading_type'], data_dict['grading_standard_id'], data_dict['points'],
-                              get_date_time_obj(data_dict['assignment_date']), get_date_time_obj("2023-02-06T00:00:00Z"),
-                              get_date_time_obj(data_dict['assignment_day']))
+                              get_date_time_obj(data_dict['assignment_date']),
+                              get_date_time_obj("2024-09-02T00:00:00Z"),
+                              data_dict['assignment_day'])
         new.rubrics = list(map(lambda c: Criterion.from_dict(c), data_dict['rubrics']))
-        new.messages = data_dict['messages']
+        if 'messages' in data_dict:
+            new.messages = data_dict['messages']
         return new

@@ -75,7 +75,7 @@ class Start:
         if 'level_moments' in data_dict.keys() and data_dict['level_moments'] is not None:
             new.level_moments = LevelMoments.from_dict(data_dict['level_moments'])
         if 'attendance' in data_dict.keys() and data_dict['attendance'] is not None:
-            print('Attendance', data_dict['attendance'])
+            # print('Attendance', data_dict['attendance'])
             new.attendance = Attendance.from_dict(data_dict['attendance'])
         if data_dict['perspectives']:
             for key in data_dict['perspectives'].keys():

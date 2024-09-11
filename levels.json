@@ -194,7 +194,7 @@
       "color": "cornflowerblue"
     },
     "-1": {
-      "label": "Beoordeling (nog) niet bepaald",
+      "label": "(nog) niet bepaald",
       "color": "#aaaaaa"
     },
     "0": {
@@ -202,15 +202,15 @@
       "color": "#f25829"
     },
     "1": {
-      "label": "Beoordeling onder niveau",
+      "label": "Onder niveau",
       "color": "#f2a529"
     },
     "2": {
-      "label": "Beoordeling op niveau",
+      "label": "Op niveau",
       "color": "#85e043"
     },
     "3": {
-      "label": "Beoordeling boven niveau",
+      "label": "Boven niveau",
       "color": "#2bad4e"
     }
   }

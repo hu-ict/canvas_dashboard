@@ -27,6 +27,12 @@ class StudentPerspective:
             line += " s " + str(submission_sequence) + "\n"
         return line
 
+    def get_sequence_by_tag(self, tag):
+        for submission_sequence in self.submission_sequences:
+            if submission_sequence.tag == tag:
+                return submission_sequence
+        return None
+
     def get_submission_by_assignment(self, assigment_id):
         for submission_sequence in self.submission_sequences:
             for submission in submission_sequence.submissions:
