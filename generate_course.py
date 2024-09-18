@@ -10,12 +10,14 @@ from model.Criterion import Criterion
 from model.Rating import Rating
 from model.perspective.AttendanceMoment import AttendanceMoment
 
-def get_tag(name):
-    pos = name.find("#") + 1
+
+def get_tags(name):
+    pos = name.find("(") + 1
     str = name[pos:].strip()
     if str[-1] == ")":
         str = str[:-1]
-    return str
+    tags = str.split()
+    return tags
 
 
 def get_dates(start, input):
@@ -170,11 +172,27 @@ def main(instance_name):
                 if len(message) > 0:
                     assignment.messages.append(message)
                 # print(assignment)
-                if "#" in assignment.name:
-                    tag = get_tag(assignment.name)
-                else:
-                    tag = str(assignment.id)
-
+                tag_sequence = str(assignment.id)
+                tags_lu = []
+                if "#" in assignment.name or "@" in assignment.name:
+                    tags = get_tags(assignment.name)
+                    for t in tags:
+                        print("GC60 -", t)
+                        if "#" in t[0]:
+                            if "LU" in t:
+                                tags_lu.append(t[1:])
+                            else:
+                                tag_sequence = t[1:]
+                            break
+                    for t in tags:
+                        if "@" in t[0]:
+                            tags_lu.append(t[1:])
+                for tag_lu in tags_lu:
+                    print("GC61 - LU", tag_lu)
+                    lu = config.find_learning_outcome(tag_lu)
+                    print("GC62 - LU", lu)
+                    if lu is not None:
+                        assignment.learning_outcomes.append(lu)
                 if assignment.grading_type == "pass_fail":
                     if hasattr(canvas_assignment, "rubric"):
                         assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
@@ -217,7 +235,7 @@ def main(instance_name):
                     message = f"GC40 - ERROR Unsupported grading_type {assignment.grading_type}"
                     assignment.messages.append(message)
                     print(message)
-                assignment_group.append_assignment(tag, assignment)
+                assignment_group.append_assignment(tag_sequence, assignment)
 
 
             total_group_points = 0
@@ -225,7 +243,7 @@ def main(instance_name):
                 if "Aanvullende" not in assignment_sequence.name:
                     total_group_points += assignment_sequence.points
             assignment_group.total_points = total_group_points
-            print("GC47 -", tags)
+            print("GC47 -", tags_lu)
             print("GC51 -", assignment_group.name, "punten:", assignment_group.total_points)
         else:
             print(f"GC41 - assignment_group {canvas_assignment_group.name} is not used")

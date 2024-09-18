@@ -68,5 +68,5 @@ def build_totals(a_instances, a_start, a_course, a_results, a_student_totals):
         for l_perspective in l_student.perspectives.values():
             for submission_sequence in l_perspective.submission_sequences:
                 for submission in submission_sequence.submissions:
-                    check_for_late(a_instances, a_course, a_student_totals, l_student, submission, l_perspective.name,
-                                   date_to_day(a_start.start_date,  a_results.actual_date))
+                    check_for_late(a_instances, a_course, a_student_totals, l_student, submission, l_perspective.name, a_results.actual_day)
+

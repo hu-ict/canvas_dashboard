@@ -1,5 +1,6 @@
 from lib.lib_date import get_date_time_obj, get_date_time_str
 from model.AssignmentGroup import AssignmentGroup
+from model.LearningOutcome import LearningOutcome
 from model.Role import Role
 from model.Section import Section
 from model.Student import Student
@@ -13,6 +14,7 @@ from model.perspective.Perspective import Perspective
 from model.perspective.Perspectives import Perspectives
 
 
+
 class CourseConfig:
     def __init__(self, name, days_in_semester, student_count):
         self.name = name
@@ -23,6 +25,7 @@ class CourseConfig:
         self.attendance = None
         self.perspectives = {}
         self.roles = []
+        self.learning_outcomes = []
         self.teachers = []
         self.assignment_groups = []
         self.student_groups = []
@@ -67,6 +70,7 @@ class CourseConfig:
         dict_result['perspectives'] = {}
         for key in self.perspectives:
             dict_result['perspectives'][key] = self.perspectives[key].to_json()
+        dict_result['learning_outcomes'] = list(map(lambda l: l.to_json(), self.learning_outcomes))
         dict_result['roles'] = list(map(lambda r: r.to_json([]), self.roles))
         dict_result['teachers'] = list(map(lambda t: t.to_json(), self.teachers))
         dict_result['assignment_groups'] = list(map(lambda ag: ag.to_json(scope), self.assignment_groups))
@@ -80,6 +84,12 @@ class CourseConfig:
         for group in self.student_groups:
             if group.id == group_id:
                 return group
+        return None
+
+    def find_learning_outcome(self, learning_outcome_id):
+        for learning_outcome in self.learning_outcomes:
+            if learning_outcome.id == learning_outcome_id:
+                return learning_outcome
         return None
 
     def exists_in_team(self, student_id):
@@ -247,6 +257,8 @@ class CourseConfig:
         new.perspectives = {}
         if 'level_moments' in data_dict.keys() and data_dict['level_moments'] is not None:
             new.level_moments = LevelMoments.from_dict(data_dict['level_moments'])
+        if 'learning_outcomes' in data_dict.keys() and data_dict['learning_outcomes'] is not None:
+            new.learning_outcomes = list(map(lambda l: LearningOutcome.from_dict(l), data_dict['learning_outcomes']))
         if 'attendance' in data_dict.keys() and data_dict['attendance'] is not None:
             new.attendance = Attendance.from_dict(data_dict['attendance'])
         if 'perspectives' in data_dict.keys():

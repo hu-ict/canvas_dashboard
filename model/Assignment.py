@@ -1,5 +1,6 @@
 from lib.lib_date import get_date_time_obj, get_date_time_str
 from model.Criterion import Criterion
+from model.LearningOutcome import LearningOutcome
 
 
 class Assignment:
@@ -16,6 +17,7 @@ class Assignment:
         self.assignment_day = assignment_day
         self.messages = []
         self.rubrics = []
+        self.learning_outcomes = []
 
     def __str__(self):
         return f'Assignment({self.id}, {self.name}, {self.group_id}, {self.section_id}, {self.grading_type}, {self.grading_standard_id}, {self.points}, {get_date_time_str(self.assignment_date)}, {self.assignment_day})'
@@ -34,6 +36,7 @@ class Assignment:
             'points': int(self.points),
             'messages': self.messages,
             'rubrics': list(map(lambda r: r.to_json(), self.rubrics)),
+            'learning_outcomes': list(map(lambda l: l.to_json(), self.learning_outcomes)),
         }
 
     def get_criterion(self, criterion_id):
@@ -57,6 +60,8 @@ class Assignment:
                               get_date_time_obj("2024-09-02T00:00:00Z"),
                               data_dict['assignment_day'])
         new.rubrics = list(map(lambda c: Criterion.from_dict(c), data_dict['rubrics']))
+        if 'learning_outcomes' in data_dict:
+            new.learning_outcomes = list(map(lambda l: LearningOutcome.from_dict(l), data_dict['learning_outcomes']))
         if 'messages' in data_dict:
             new.messages = data_dict['messages']
         return new

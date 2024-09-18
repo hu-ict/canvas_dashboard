@@ -42,7 +42,7 @@ def get_section_students(canvas_course, start, course):
                     if student is not None:
                         if start.projects_groep_name == "SECTIONS":
                             student_group = course.find_student_group_by_name(section.name)
-                            print("GS24 -", section.name)
+                            # print("GS24 -", section.name)
                             if student_group:
                                 student.group_id = student_group.id
                                 if len(student_group.teachers) > 0:
@@ -66,6 +66,7 @@ def add_perspectives_to_students(start, course):
         for student in course.students:
             student.student_level_moments = StudentLevelMoments(course.level_moments.name, course.level_moments.assignment_groups)
     if course.attendance is not None:
+        print("GS33 - Add attendance perspective to students")
         for student in course.students:
             student.attendance = AttendancePerspective(course.attendance.name, -1, 0, 0)
     # Perspectives toevoegen aan Students
@@ -84,7 +85,6 @@ def add_perspectives_to_students(start, course):
                 student.perspectives[perspective.name].assignment_groups.append(assignment_group_id)
             else:
                 print("GS31 - ERROR: geen assignment_group for perspective")
-        student.attendance_perspective = AttendancePerspective("attendance", -1, 0, 0)
 
 
 def main(instance_name):
@@ -119,11 +119,12 @@ def main(instance_name):
     student_count = 0
     for user in users:
         if hasattr(user, 'login_id'):
-            print("GS15 - Create student", user.name, user.login_id)
-            student = Student(user.id, 0, user.name, user.sortable_name, 0, "", user.login_id, "", 0)
+            print("GS15 - Create student", user.name, user.login_id, user.sis_user_id)
+            student = Student(user.id, 0, user.name, user.sis_user_id, user.sortable_name, 0, "", user.login_id, "", 0)
         else:
-            print("GS16 - Create student without login_id", user.name)
-            student = Student(user.id, 0, user.name, user.sortable_name, 0, "", "", "", 0)
+            print("GS16 - Create student without login_id", user.name, user.sis_user_id)
+            student = Student(user.id, 0, user.name, user.sis_user_id, user.sortable_name, 0, "", "", "", 0)
+        # print("GS17 ", student)
         course.students.append(student)
         student_count += 1
     print("GS18 - Aantal Canvas users", student_count)

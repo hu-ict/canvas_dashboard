@@ -13,8 +13,12 @@ def build_student_button(course, student, templates, labels_colors):
     asci_file_name = file_name.translate(translation_table)
     l_progress_color = labels_colors.level_series['progress'].levels[str(student.progress)].color
     return templates['student'].substitute(
-        {'btn_color': color, 'progress_color': l_progress_color, 'student_name': student.name,
-         'student_role': role.name, 'student_file': asci_file_name})
+        {'btn_color': color,
+         'progress_color': l_progress_color,
+         'student_name': student.name,
+         'student_number': student.number,
+         'student_role': role.name,
+         'student_file': asci_file_name})
 
 
 def build_bootstrap_canvas_overzicht(a_templates, a_perspectives, a_student_totals):
@@ -35,7 +39,7 @@ def build_bootstrap_group(a_start, a_course, a_results, a_templates, a_labels_co
     groups_html_string = ''
     for group in a_course.student_groups:
         # print(group.name, len(group.students))
-        students_html_string = ''
+        students_html_string = ""
         coaches_string = ""
         if len(group.teachers) > 0:
             coaches = ""
@@ -50,6 +54,7 @@ def build_bootstrap_group(a_start, a_course, a_results, a_templates, a_labels_co
             if l_student is None:
                 print("BB05 - ERROR Student not found in results", student, "re-run generate_results")
             else:
+                print('BB07 -', l_student.name, "[", l_student.number, "]")
                 students_html_string += build_student_button(a_course, l_student, a_templates, a_labels_colors)
         if coaches:
             group_html_string = a_templates['group'].substitute(

@@ -9,6 +9,23 @@ NO_SUBMISSION = "Niets ingeleverd voor de deadline"
 NO_DATA = "Geen data"
 
 
+def remove_html_tags(text):
+    """Remove html tags from a string"""
+    import re
+    clean = re.compile('<.*?>')
+    return re.sub(clean, '', text)
+
+
+def get_submission_date(a_canvas_submission, a_start, a_assignment):
+# bepaal de date/time van het datapunt
+    if a_canvas_submission.submitted_at:
+        submitted_date = get_date_time_obj(a_canvas_submission.submitted_at)
+    else:
+        submitted_date = a_assignment.assignment_date
+    submitted_day = date_to_day(a_start.start_date, submitted_date)
+    return submitted_date, submitted_day
+
+
 def get_sum_score(a_submissions, a_start_date):
     l_sum_score = 0
     l_last_score = 0
@@ -82,7 +99,7 @@ def get_rubric_score(rubrics_submission, student):
 
 
 def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_submission):
-    error = ""
+    errors = []
     if a_canvas_submission.grade:
         graded = True
     else:
@@ -90,32 +107,46 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
             graded = True
         else:
             graded = False
-    if len(a_assignment.rubrics) > 0 and graded:
-        if hasattr(a_canvas_submission, "rubric_assessment"):
-            rubrics_assessment = a_canvas_submission.rubric_assessment.items()
-            if len(rubrics_assessment) > 0:
-                graded = True
-            else:
-                error = f"WARNING rubrics defined in assignment [{a_assignment.name}] but not used in submission for student {a_student.name}. Teacher action required."
-                print("LS51 -", error)
-                rubrics_assessment = None
-                # graded = False
-                error = ""
-        else:
-            error = f"WARNING rubrics defined in assignment [{a_assignment.name}] but not used in submission for student {a_student.name}. Teacher action required."
-            print("LS52 -", error)
-            rubrics_assessment = None
-            # graded = False
-            error = ""
-    else:
-        rubrics_assessment = None
-    # maak een submission en voeg de commentaren toe
     canvas_comments = a_canvas_submission.submission_comments
     if not a_canvas_submission.submitted_at and len(canvas_comments) == 0 and not graded:
-        return None
+        return
+    # print("SB05 -", graded, a_canvas_submission.grader_id)
+    if not graded:
+        grader_name = None
+        grader_date = None
+        submission_score = 0
+        l_submission = Submission(a_canvas_submission.id, a_assignment.group_id, a_assignment.id, a_student.id,
+                                  a_assignment.name,
+                                  a_assignment.assignment_date,
+                                  a_assignment.assignment_day,
+                                  None,
+                                  None,
+                                  graded, grader_name, grader_date, submission_score,
+                                  a_assignment.points, 0)
+        for canvas_comment in canvas_comments:
+            l_submission.comments.append(
+                Comment(canvas_comment['author_id'], canvas_comment['author_name'],
+                    get_date_time_obj(canvas_comment['created_at']), canvas_comment['comment']))
+        l_submission.submitted_date, l_submission.submitted_day = get_submission_date(a_canvas_submission, a_start, a_assignment)
+        return l_submission
+
+    if len(a_assignment.rubrics) > 0:
+        if hasattr(a_canvas_submission, "rubric_assessment"):
+            canvas_submission_rubrics = a_canvas_submission.rubric_assessment.items()
+            if len(canvas_submission_rubrics) == 0:
+                errors.append(f"WARNING rubrics defined in assignment [{a_assignment.name}] but not used in submission for student {a_student.name}. Teacher action required.")
+                print("LS51 -", errors[-1])
+                canvas_submission_rubrics = None
+        else:
+            errors.append(f"WARNING rubrics defined in assignment [{a_assignment.name}] but not used in submission for student {a_student.name}. Teacher action required.")
+            print("LS52 -", errors[-1])
+            canvas_submission_rubrics = None
+    else:
+        canvas_submission_rubrics = None
+    # maak een submission en voeg de commentaren toe
     # print("LS31 -", f"submission_builder [{graded}] [{a_canvas_submission.submitted_at}] grade {a_canvas_submission.grade} grader_id {a_canvas_submission.grader_id} comments {len(canvas_comments)} score {a_canvas_submission.score} grading_type {a_assignment.grading_type} and student {a_student.name}.")
     submission_score = 0.0
-    if rubrics_assessment is None:
+    if canvas_submission_rubrics is None:
         #Geen rubrics bij submission
         rubrics_scores = None
         # Geen rubriek dus voldaan niet voldaan wordt gebruikt bij bepalen score
@@ -128,55 +159,54 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
                 submission_score = 0.00
         elif a_assignment.grading_type == "points":
             if a_canvas_submission.score is None:
-                error = f"ERROR score is empty {a_canvas_submission.grade} {a_canvas_submission.grader_id} for assignment {a_assignment.name} and student {a_student.name}."
-                print("LS75 -", error)
+                errors.append(f"ERROR score is empty {a_canvas_submission.grade} {a_canvas_submission.grader_id} for assignment {a_assignment.name} and student {a_student.name}.")
+                print("LS75 -", errors[-1])
                 submission_score = 0.00
             else:
                 submission_score = round(a_canvas_submission.score, 2)
         elif a_assignment.grading_type == "letter_grade":
             # error = f"Warning grading_type {a_assignment.grading_type} for assignment {a_assignment.name} has no rubrics for {a_student.name}."
-            # print("LS81 -", error, a_canvas_submission.score)
+            # print("LS81 -", a_assignment.grading_type, round(a_canvas_submission.score, 2))
             submission_score = round(a_canvas_submission.score, 2)
         else:
-            error = f"ERROR Unknown grading_type {a_assignment.grading_type} for assignment {a_assignment.name}"
-            print("LS82 -", error)
+            errors.append(f"ERROR Unknown grading_type {a_assignment.grading_type} for assignment {a_assignment.name}")
+            print("LS82 -", errors[-1])
             submission_score = round(a_canvas_submission.score, 2)
     else:
         # 'pass_fail', 'percent', 'letter_grade', 'gpa_scale', 'points'
-        rubrics_scores, rubric_score, error = get_rubric_score(rubrics_assessment, a_student)
+        rubrics_scores, rubric_score, error = get_rubric_score(canvas_submission_rubrics, a_student)
+        if len(error) > 0:
+            errors.append(error)
         if a_assignment.grading_type == "pass_fail":
             if a_canvas_submission.score is not None:
                 #INNO vd/nvd met rubrics voor de "echte" punten (verborgen voor studenten)
                 if a_canvas_submission.score == 0:
-                    submission_score = rubric_score
+                    submission_score = round(rubric_score, 2)
                 else:
                     submission_score = round(a_canvas_submission.score, 2)
             else:
-                submission_score = rubric_score
+                submission_score = round(rubric_score, 2)
         elif a_assignment.grading_type == "letter_grade":
-            submission_score = rubric_score
+            submission_score = round(rubric_score, 2)
         elif a_assignment.grading_type == "points":
-            if graded:
-                if a_canvas_submission.score is not None:
-                    submission_score = round(a_canvas_submission.score, 2)
-                    if submission_score != round(rubric_score, 2):
-                        if a_assignment.id == 295123:
-                            # uitzondering voor opdracht CSC - MITRE ATTACK
-                            submission_score = submission_score
-                        else:
-                            submission_score = rubric_score
-                else:
-                    print(a_canvas_submission, a_canvas_submission.score)
-                    error = f"WARNING Submission score is empty {a_assignment.grading_type} for assignment {a_assignment.name}, student: {a_student.name}"
-                    print("LS02 -", error)
-                    submission_score = 0.00
+            if a_canvas_submission.score is not None:
+                submission_score = round(a_canvas_submission.score, 2)
+                if submission_score != round(rubric_score, 2):
+                    if a_assignment.id == 295123:
+                        # uitzondering voor opdracht CSC - MITRE ATTACK
+                        submission_score = submission_score
+                    else:
+                        submission_score = round(rubric_score, 2)
             else:
+                print(a_canvas_submission, a_canvas_submission.score)
+                errors.append(f"WARNING Submission score is empty {a_assignment.grading_type} for assignment {a_assignment.name}, student: {a_student.name}")
+                print("LS02 -", errors)
                 submission_score = 0.00
         else:
-            error = f"ERROR Unknown grading_type {a_assignment.grading_type} for assignment {a_assignment.name}"
-            print("LS04 -", error)
+            errors.append(error = f"ERROR Unknown grading_type {a_assignment.grading_type} for assignment {a_assignment.name}")
+            print("LS04 -", errors[-1])
 
-    if len(error) > 0:
+    if len(errors) > 0:
         graded = False
     if a_canvas_submission.grader_id is not None and a_canvas_submission.grader_id > 0:
         teacher = a_course.find_teacher(a_canvas_submission.grader_id)
@@ -193,32 +223,22 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
     l_submission = Submission(a_canvas_submission.id, a_assignment.group_id, a_assignment.id, a_student.id,
                               a_assignment.name,
                               a_assignment.assignment_date,
-                              date_to_day(a_start.start_date, a_assignment.assignment_date),
+                              a_assignment.assignment_day,
                               None,
                               None,
                               graded, grader_name, grader_date, submission_score,
                               a_assignment.points, 0)
     for canvas_comment in canvas_comments:
-        l_submission.comments.append(
-            Comment(canvas_comment['author_id'], canvas_comment['author_name'],
-                get_date_time_obj(canvas_comment['created_at']), canvas_comment['comment']))
+        # print("LS41 -", a_student.name, canvas_comment['comment'])
+        l_submission.comments.append(Comment(canvas_comment['author_id'], canvas_comment['author_name'], get_date_time_obj(canvas_comment['created_at']), remove_html_tags(canvas_comment['comment'])))
     if rubrics_scores is not None:
         l_submission.rubrics = rubrics_scores
-    if len(error) > 0:
+    if len(errors) > 0:
         # er is een fout opgetreden, waarschijnlijk in de rubrics
-        l_submission.comments.append(
-            Comment(0, "Systeem", get_date_time_obj(get_date_time_str(get_actual_date())), error))
+        for error in errors:
+            l_submission.comments.append(Comment(0, "Systeem", get_date_time_obj(get_date_time_str(get_actual_date())), error))
     # bepaal de date/time van het datapunt
-    if a_canvas_submission.submitted_at:
-        l_submission.submitted_date = get_date_time_obj(a_canvas_submission.submitted_at)
-        l_submission.submitted_day = date_to_day(a_start.start_date, l_submission.submitted_date)
-    else:
-        if len(l_submission.comments) > 0:
-            l_submission.submitted_date = l_submission.comments[0].date
-            l_submission.submitted_day = date_to_day(a_start.start_date, l_submission.submitted_date)
-        else:
-            l_submission.submitted_date = a_assignment.assignment_date
-            l_submission.submitted_day = date_to_day(a_start.start_date, l_submission.submitted_date)
+    l_submission.submitted_date, l_submission.submitted_day = get_submission_date(a_canvas_submission, a_start, a_assignment)
     return l_submission
 
 

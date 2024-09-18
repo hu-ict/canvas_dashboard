@@ -30,7 +30,11 @@ def main(instance_name):
         results = Result(start.canvas_course_id, course.name, start.start_date, 1, 0, 0)
     else:
         results = Result(start.canvas_course_id, course.name, g_actual_date, date_to_day(start.start_date, g_actual_date), 0, 0)
+    for student in course.students:
+        print("GR05 -", student.name, student.number)
     results.students = course.students
+    for student in results.students:
+        print("GR07 -", student.name, student.number)
     read_submissions(canvas_course, start, course, results, True)
     for student in results.students:
         for perspective in student.perspectives.values():
@@ -41,8 +45,8 @@ def main(instance_name):
     else:
         print("GR10 - No attendance")
 
-    for student in results.students:
-        print("GR75", student.name)
+    # for student in results.students:
+    #     print("GR75", student.name)
     # sorteer de attendance en submissions
     for student in results.students:
         if start.attendance is not None:

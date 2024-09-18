@@ -1,5 +1,6 @@
 from lib.lib_date import date_to_day
 
+
 def flow_to_progress(flow):
     if flow < 0.01:
         return 0
@@ -66,18 +67,18 @@ def get_progress(course, perspective):
         if assignment_group is not None:
             if assignment_group.bandwidth is not None:
                 if len(perspective.submission_sequences) > 0:
-                    total_score = 0
+                    total_score = 0.00
                     total_count = 0
                     last_flow = 0.5
                     for submission_sequence in perspective.submission_sequences:
                         if submission_sequence.is_graded():
                             perspective.last_score = submission_sequence.get_day()
-                            total_score += submission_sequence.get_score()
+                            total_score += round(submission_sequence.get_score(), 2)
                             total_count += 1
-                            print("LP61 -", submission_sequence.name, perspective.last_score, total_score)
+                            # print("LP62 -", submission_sequence.name, perspective.last_score, round(total_score, 2))
                             submission_sequence.flow = assignment_group.bandwidth.get_progress_range(perspective.last_score, total_score)
                             # print(submission.flow)
-                            perspective.sum_score = total_score
+                            perspective.sum_score = round(total_score, 2)
                             last_flow = submission_sequence.flow
                             # print("Graded")
                         else:

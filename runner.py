@@ -29,8 +29,8 @@ def main(instance_name, a_event):
 
 if __name__ == "__main__":
     l_actual_date = get_actual_date()
-    if len(sys.argv) > 1:
-        main(sys.argv[1])
+    if len(sys.argv) > 2:
+        main(sys.argv[1], sys.argv[2])
     else:
         main("sep24_inno", "results_create_event")
         # main("")

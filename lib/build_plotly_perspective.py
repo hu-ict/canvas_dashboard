@@ -161,9 +161,11 @@ def plot_future_assignments(a_row, a_col, a_fig, a_start, a_show_points, a_assig
     return
 
 
-def plot_day_bar(a_row, a_col, a_fig, a_start, a_total_points, a_actual_day, a_actual_date, a_progress, a_levels, a_show_points, a_actual_points):
+def plot_day_bar(a_row, a_col, a_fig, a_start, a_total_points, a_actual_day, a_actual_date, a_progress, a_levels, a_show_points, a_show_flow, a_actual_points):
     if a_total_points <= 0:
         return
+    if a_show_flow:
+        a_total_points = 1
     l_label = a_levels.level_series[a_start.progress_levels].levels[str(a_progress)].label
     l_color = a_levels.level_series[a_start.progress_levels].levels[str(a_progress)].color
     l_hover = get_hover_day_bar(l_label, a_actual_day, a_actual_date, a_show_points, a_actual_points)
@@ -310,12 +312,12 @@ def plot_perspective(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_pe
         print("BPP01 - could not find assignment_group", a_perspective.assignment_groups[0], a_perspective)
         return
     show_points = a_course.find_perspective_by_assignment_group(assignment_group.id).show_points
-
-    plot_bandbreedte_colored(a_row, a_col, a_fig, a_course.days_in_semester, assignment_group.bandwidth, a_course.find_perspective_by_name(a_perspective.name).show_flow, assignment_group.total_points)
+    show_flow = a_course.find_perspective_by_assignment_group(assignment_group.id).show_flow
+    plot_bandbreedte_colored(a_row, a_col, a_fig, a_course.days_in_semester, assignment_group.bandwidth, show_flow, assignment_group.total_points)
     if a_start.level_moments is not None and len(a_peil_construction) > 0:
         # print("BPP02 ", a_perspective.name, a_peil_construction)
         plot_progress(a_row, a_col, a_fig, a_start, a_course, a_peil_construction[a_perspective.name], a_levels)
-    plot_day_bar(a_row, a_col, a_fig, a_start, assignment_group.total_points, a_actual_day, a_actual_date, a_perspective.progress, a_levels, show_points, a_perspective.sum_score )
+    plot_day_bar(a_row, a_col, a_fig, a_start, assignment_group.total_points, a_actual_day, a_actual_date, a_perspective.progress, a_levels, show_points, show_flow, a_perspective.sum_score )
     plot_submissions(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_levels)
     assignment_sequences = assignment_group.assignment_sequences[:]
     for submission_sequence in a_perspective.submission_sequences:

@@ -4,10 +4,11 @@ from model.perspective.StudentPerspective import StudentPerspective
 
 
 class Student:
-    def __init__(self, a_student_id, a_group_id, a_name, a_sortable_name, a_coach, a_role, a_email, a_site, a_progress):
+    def __init__(self, a_student_id, a_group_id, a_name, a_number, a_sortable_name, a_coach, a_role, a_email, a_site, a_progress):
         self.id = a_student_id
         self.group_id = a_group_id
         self.name = a_name
+        self.number = a_number
         self.sortable_name = a_sortable_name
         self.coach = a_coach
         self.email = a_email
@@ -19,9 +20,10 @@ class Student:
         self.perspectives = None
 
     def __str__(self):
-        line = f'Student({self.id}, {self.group_id}, {self.name}, {self.coach}, {self.role}, {self.email}, {self.progress})\n'
-        for perspective in self.perspectives:
-            line += " p "+str(self.perspectives[perspective])
+        line = f'Student({self.id}, {self.group_id}, {self.name}, {self.number}, {self.coach}, {self.role}, {self.email}, {self.progress})\n'
+        if self.perspectives is not None:
+            for perspective in self.perspectives:
+                line += " p "+str(self.perspectives[perspective])
         return line
 
     def get_perspective(self, name):
@@ -57,6 +59,7 @@ class Student:
         dict_result = {
             'name': self.name,
             'id': self.id,
+            'number': self.number,
             'sortable_name': self.sortable_name,
             'group_id': self.group_id,
             'coach': self.coach,
@@ -78,8 +81,13 @@ class Student:
     @staticmethod
     def from_dict(data_dict):
         # print("Student.from_dict", data_dict)
-        new = Student(data_dict['id'], data_dict['group_id'], data_dict['name'], data_dict['sortable_name'], data_dict['coach'],
+        if 'number' in data_dict.keys():
+            new = Student(data_dict['id'], data_dict['group_id'], data_dict['name'], data_dict['number'], data_dict['sortable_name'], data_dict['coach'],
             data_dict['role'], data_dict['email'], data_dict[ 'site'], data_dict['progress'])
+        else:
+            new = Student(data_dict['id'], data_dict['group_id'], data_dict['name'], "x", data_dict['sortable_name'], data_dict['coach'],
+            data_dict['role'], data_dict['email'], data_dict[ 'site'], data_dict['progress'])
+
         if 'student_level_moments' in data_dict.keys() and data_dict['student_level_moments'] is not None:
             new.student_level_moments = StudentLevelMoments.from_dict(data_dict['student_level_moments'])
         if 'attendance_perspective' in data_dict.keys() and data_dict['attendance_perspective'] is not None:
