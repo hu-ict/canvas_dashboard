@@ -68,7 +68,8 @@ def build_bootstrap_grading(a_instances, a_start, a_course, a_results, a_templat
              'grade_date': get_date_time_loc(level_moment.graded_date),
              'examiners': l_grader_name + " " + examiners,
              'explanations': explanations_html_string})
-        file_name = a_instances.get_plot_path() + "grading "+student.name
+        file_name = a_instances.get_plot_path() + student.name + " grading"
+
         asci_file_name = file_name.translate(translation_table)
         print("GG11 - Write grade for", student.name)
         with open(asci_file_name + ".html", mode='w', encoding="utf-8") as file_grade:

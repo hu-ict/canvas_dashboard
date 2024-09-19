@@ -24,6 +24,7 @@ class Student:
         if self.perspectives is not None:
             for perspective in self.perspectives:
                 line += " p "+str(self.perspectives[perspective])
+        line += " a "+str(self.attendance_perspective)
         return line
 
     def get_perspective(self, name):

@@ -58,9 +58,9 @@ def main(instance_name):
 
     results.submission_count, results.not_graded_count = count_graded(results)
 
-    with open(instances.get_result_file_name(instances.current_instance), 'w') as f:
-        dict_result = results.to_json(["perspectives"])
-        json.dump(dict_result, f, indent=2)
+    # with open(instances.get_result_file_name(instances.current_instance), 'w') as f:
+    #     dict_result = results.to_json(["perspectives"])
+    #     json.dump(dict_result, f, indent=2)
 
     progress_history = read_progress(instances.get_progress_file_name(instances.current_instance))
     progress_day = ProgressDay(results.actual_day, course.perspectives.keys())

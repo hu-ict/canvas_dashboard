@@ -59,6 +59,7 @@ class CourseConfig:
             'days_in_semester': self.days_in_semester,
             'sections': list(map(lambda s: s.to_json(), self.sections))
         }
+        # print("CC10 -", self.attendance)
         if self.attendance is not None:
             dict_result['attendance'] = self.attendance.to_json()
         else:

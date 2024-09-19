@@ -24,32 +24,30 @@
             <!-- Begin Page Content -->
             <div class="container-fluid">
                  <!-- Page Heading -->
-                <h1>Beoordeling</h1>
-                <h2>Samenvatting</h2>
+                <h1>Portfolio</h1>
+                <h2>Algemeen</h2>
                 <p>
                     Opleiding: HBO-ICT<br>
-                    Richting: $major<br>
-                    Specialisatie: $role_name<br>
-                    Semester: S5 $semester<br>
-                    Student: $student_name ($student_number)<br>
-                    Beoordeling: $grade<br>
-                    Examinatoren: $examiners<br>
-                    Datum van de beoordeling: $grade_date
+                    Semester: S1 $semester<br>
+                    Datum: $actual_date<br>
+                    Student: $student_name<br>
+                    Student email: $student_email<br>
+                    Studentnummer: $student_number<br>
+                    Klas: $student_group<br>
+                    Docenten: $teachers<br>
+                    SLBer: $coach<br>
                 </p>
-                <h2>Onderbouwing</h2>
+                <h2>Leeruitkomsten</h2>
                 <p>
                     <table class="table">
                         <thead>
                             <tr>
-                                <th scope="col">Perspectief</th>
-                                <th scope="col">Beoordeling</th>
-                                <th scope="col">Datum</th>
-                                <th scope="col">Docent</th>
-
+                                <th scope="col">Leerdoel</th>
+                                <th scope="col">Beschrijving</th>
                             </tr>
                         </thead>
                         <tbody>
-                            $explanations
+                            $learning_outcomes
                         </tbody>
                     </table>
                 </p>

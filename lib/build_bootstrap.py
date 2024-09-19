@@ -119,7 +119,6 @@ def build_bootstrap_slb(a_start, a_course, a_results, a_templates, a_labels_colo
 
     return l_groups_html_string
 
-# build_bootstrap_release_planning
 
 def write_release_planning(a_start, a_templates, a_assignment_group, a_file_name):
     list_html_string = ""
@@ -148,28 +147,32 @@ def write_release_planning(a_start, a_templates, a_assignment_group, a_file_name
         file_list.write(file_html_string)
 
 
-# def build_bootstrap_release_planning(a_instances, a_start, a_course, a_templates, a_labels_colors):
-#     html_string = ""
-#     buttons_planning_html_string = ""
-#     for assignment_group in a_course.assignment_groups:
-#         file_name = "release_planning_" + str(assignment_group.id) + ".html"
-#         buttons_planning_html_string += a_templates["selector"].substitute(
-#             {'selector_file': file_name,
-#              'selector': assignment_group.name}) + "<br>"
-#         write_release_planning(a_start, a_templates, assignment_group, a_instances.get_html_path() + file_name)
-#
-#     buttons_flow_html_string = ""
-#     for assignment_group in a_course.assignment_groups:
-#         file_name = "bandwidth_" + str(assignment_group.id) + ".html"
-#         buttons_flow_html_string += a_templates["selector"].substitute(
-#             {'selector_file': file_name,
-#              'selector': assignment_group.name}) + "<br>"
-#         process_bandwidth(a_instances, a_start, a_course, assignment_group, a_labels_colors)
-#
-#
-#     html_string += a_templates["release_planning"].substitute({'buttons_planning': buttons_planning_html_string, 'buttons_flow': buttons_flow_html_string})
-#     return html_string
-
+def build_bootstrap_portfolio(a_instances, a_course, a_student, a_actual_date, a_templates, a_levels):
+    learning_outcomes_html_string = ""
+    for learning_outcome in a_course.learning_outcomes:
+        learning_outcomes_html_string += a_templates['learning_outcome'].substitute(
+            {
+                'learning_outcome_short': learning_outcome.short,
+                'learning_outcome_description': learning_outcome.description,
+                'portfolio_items': "Hoi"
+            })
+    student_group = a_course.find_student_group(a_student.group_id)
+    portfolio_html_string = a_templates['portfolio'].substitute(
+        {'semester': a_course.name,
+         'student_name': a_student.name,
+         'student_email': a_student.email,
+         'student_number': a_student.number,
+         'student_group': student_group.name,
+         'teachers': "Berend Wilkens",
+         'coach': "Berend Wilkens",
+         'actual_date': get_date_time_loc(a_actual_date),
+         'learning_outcomes': learning_outcomes_html_string})
+    file_name = a_instances.get_plot_path() + a_student.name + " portfolio"
+    asci_file_name = file_name.translate(translation_table)
+    print("BB21 - Write portfolio for", a_student.name)
+    with open(asci_file_name + ".html", mode='w', encoding="utf-8") as file_portfolio:
+        file_portfolio.write(portfolio_html_string)
+    return
 
 def build_bootstrap_students_tabs(a_instances, a_start, a_course, a_results, a_templates, a_labels_colors, a_totals):
     tabs = ["Groepen"]

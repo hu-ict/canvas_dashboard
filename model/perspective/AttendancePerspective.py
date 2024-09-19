@@ -20,9 +20,9 @@ class AttendancePerspective:
         }
 
     def __str__(self):
-        lines = f' AttendancePerspective({self.name} progress {self.progress}, sum_score {self.sum_score}, last_score {self.last_score})\n'
+        lines = f'AttendancePerspective({self.name} progress {self.progress}, sum_score {self.sum_score}, last_score {self.last_score})'
         for attendance_submission in self.attendance_submissions:
-            lines += " s " + str(attendance_submission) + "\n"
+            lines += "\n s " + str(attendance_submission)
         return lines
 
     # def put_submission(self, a_submission):

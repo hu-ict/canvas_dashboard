@@ -112,25 +112,25 @@
   "bin2": {
     "-2": {
       "label": "Leeg",
-      "color": "cornflowerblue"
+      "color": "#E97132"
     },
     "-1": {
       "label": "Leeg",
-      "color": "#aaaaaa"
+      "color": "#BFBFBF"
     },
     "0": {
       "label": "Niet zichtbaar",
-      "color": "#f25829",
+      "color": "#000000",
       "fraction": 0.0
     },
     "1": {
       "label": "Niet voldaan",
-      "color": "#f2a529",
+      "color": "#0070C0",
       "fraction": 0.99
     },
     "2": {
       "label": "Voldaan",
-      "color": "#2bad4e",
+      "color": "#3C7D22",
       "fraction": 1.0
     }
   },
