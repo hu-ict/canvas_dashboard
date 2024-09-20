@@ -15,6 +15,14 @@
 
     <!-- Custom styles for this template-->
     <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+    <style>
+        .status_complete {background-color: #3C7D22; color: white;}
+        .status_incomplete {background-color: #0070C0; color: white;}
+        .status_missed {background-color: black; color: white;}
+        .status_pending {background-color: #E97132; color: white;}
+        .status_comming {background-color: #BFBFBF; color: white;}
+        .status_no_lo {background-color: white; color: white;}
+    </style>
 
 </head>
 <body id="page-top">
@@ -34,20 +42,26 @@
                     Student email: $student_email<br>
                     Studentnummer: $student_number<br>
                     Klas: $student_group<br>
-                    Docenten: $teachers<br>
-                    SLBer: $coach<br>
+                    Docenten: $teachers
                 </p>
-                <h2>Leeruitkomsten</h2>
+                <h2>Portfolio-matrix</h2>
                 <p>
-                    <table class="table">
+                    <table class="table table-sm">
                         <thead>
                             <tr>
-                                <th scope="col">Leerdoel</th>
-                                <th scope="col">Beschrijving</th>
+                                <th scope="col">Datum</th>
+                                <th scope="col">Portfolio-item</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">LU1</th>
+                                <th scope="col">LU2</th>
+                                <th scope="col">LU3</th>
+                                <th scope="col">LU4</th>
+                                <th scope="col">LU5</th>
+                                <th scope="col">LU6</th>
                             </tr>
                         </thead>
                         <tbody>
-                            $learning_outcomes
+                            $portfolio_items
                         </tbody>
                     </table>
                 </p>

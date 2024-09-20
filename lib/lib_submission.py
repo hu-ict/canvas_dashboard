@@ -216,6 +216,8 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
             grader_name = a_canvas_submission.grader_id
         if a_canvas_submission.graded_at:
             grader_date = get_date_time_obj(a_canvas_submission.graded_at)
+        else:
+            grader_date = None
     else:
         grader_name = "Onbekend"
         grader_date = None

@@ -36,7 +36,7 @@ class Assignment:
             'points': int(self.points),
             'messages': self.messages,
             'rubrics': list(map(lambda r: r.to_json(), self.rubrics)),
-            'learning_outcomes': list(map(lambda l: l.to_json(), self.learning_outcomes)),
+            'learning_outcomes': self.learning_outcomes
         }
 
     def get_criterion(self, criterion_id):
@@ -61,7 +61,7 @@ class Assignment:
                               data_dict['assignment_day'])
         new.rubrics = list(map(lambda c: Criterion.from_dict(c), data_dict['rubrics']))
         if 'learning_outcomes' in data_dict:
-            new.learning_outcomes = list(map(lambda l: LearningOutcome.from_dict(l), data_dict['learning_outcomes']))
+            new.learning_outcomes = data_dict['learning_outcomes']
         if 'messages' in data_dict:
             new.messages = data_dict['messages']
         return new

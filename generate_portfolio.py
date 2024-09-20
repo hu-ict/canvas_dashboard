@@ -12,12 +12,6 @@ from lib.file import read_start, read_course, read_results, read_levels, read_co
 from lib.translation_table import translation_table
 from model.Submission import Submission
 
-
-def write_student_portfolio(a_instances, a_course, a_student, a_actual_date, a_templates, a_levels):
-    build_bootstrap_portfolio(a_instances, a_course, a_student, a_actual_date, a_templates, a_levels)
-
-
-
 def main(instance_name):
     g_actual_date = get_actual_date()
     instances = read_course_instance()
@@ -39,7 +33,7 @@ def main(instance_name):
     for student in results.students:
         # print(l_peil_construction)
         print("GP10 -", student.name)
-        write_student_portfolio(instances, course, student, results.actual_date, templates, levels)
+        build_bootstrap_portfolio(instances, course, student, results.actual_date, templates, levels)
         build_portfolio_items(instances, course, student, levels)
 
     print("GP99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")

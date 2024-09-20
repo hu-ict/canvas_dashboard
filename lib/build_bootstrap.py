@@ -147,29 +147,71 @@ def write_release_planning(a_start, a_templates, a_assignment_group, a_file_name
         file_list.write(file_html_string)
 
 
-def build_bootstrap_portfolio(a_instances, a_course, a_student, a_actual_date, a_templates, a_levels):
-    learning_outcomes_html_string = ""
-    for learning_outcome in a_course.learning_outcomes:
-        learning_outcomes_html_string += a_templates['learning_outcome'].substitute(
-            {
-                'learning_outcome_short': learning_outcome.short,
-                'learning_outcome_description': learning_outcome.description,
-                'portfolio_items': "Hoi"
-            })
-    student_group = a_course.find_student_group(a_student.group_id)
-    portfolio_html_string = a_templates['portfolio'].substitute(
-        {'semester': a_course.name,
-         'student_name': a_student.name,
-         'student_email': a_student.email,
-         'student_number': a_student.number,
+def build_bootstrap_portfolio(instances, course, student, actual_date, templates, a_levels):
+    portfolio_items_html_string = ""
+    portfolio_items = []
+    for perspective in course.perspectives.values():
+        for assignment_group_id in perspective.assignment_groups:
+            assignment_groep = course.find_assignment_group(assignment_group_id)
+            for assignment_sequence in assignment_groep.assignment_sequences:
+                portfolio_item = assignment_sequence.name + " (" + str(len(assignment_sequence.assignments)) + ")"
+                submission_sequence = student.get_submission_sequence_by_name(assignment_sequence.name)
+                student_group = course.find_student_group(student.group_id)
+                teacher_str = ""
+                for teacher in student_group.teachers:
+                    teacher = course.find_teacher(teacher)
+                    teacher_str += teacher.name + ", "
+                cell_status = "status_no_lo"
+                if submission_sequence is not None:
+                    if submission_sequence.is_graded():
+                        score = submission_sequence.get_score()
+                        if score == 0:
+                            status = "Niet zichtbaar"
+                            cell_status = "status_missed"
+                        elif score == submission_sequence.points:
+                            status = "Voldaan"
+                            cell_status = "status_complete"
+                        else:
+                            status = "Niet voldaan"
+                            cell_status = "status_incomplete"
+                    else:
+                        status = "Nog niet beoordeeld"
+                        cell_status = "status_pending"
+                else:
+                    status = "Toekomst"
+                    cell_status = "status_comming"
+                item_dict = {
+                    "portfolio_item": portfolio_item,
+                    "portfolio_date": get_date_time_loc(assignment_sequence.get_date()),
+                    "portfolio_day": assignment_sequence.get_day(),
+                    "portfolio_status": status,
+                    "cell_status": cell_status
+                }
+                lu_nr = 0
+                for learning_outcome in course.learning_outcomes:
+                    lu_nr += 1
+                    if learning_outcome.id in assignment_sequence.learning_outcomes:
+                        item_dict["portfolio_lu"+str(lu_nr)] = "x"
+                    else:
+                        item_dict["portfolio_lu" + str(lu_nr)] = ""
+                portfolio_items.append(item_dict)
+    portfolio_items = sorted(portfolio_items, key=lambda p: p['portfolio_day'])
+    for portfolio_item in portfolio_items:
+        portfolio_items_html_string += templates['learning_outcome'].substitute(portfolio_item)
+
+    student_group = course.find_student_group(student.group_id)
+    portfolio_html_string = templates['portfolio'].substitute(
+        {'semester': course.name,
+         'student_name': student.name,
+         'student_email': student.email,
+         'student_number': student.number,
          'student_group': student_group.name,
-         'teachers': "Berend Wilkens",
-         'coach': "Berend Wilkens",
-         'actual_date': get_date_time_loc(a_actual_date),
-         'learning_outcomes': learning_outcomes_html_string})
-    file_name = a_instances.get_plot_path() + a_student.name + " portfolio"
+         'teachers': teacher_str,
+         'actual_date': get_date_time_loc(actual_date),
+         'portfolio_items': portfolio_items_html_string})
+    file_name = instances.get_plot_path() + student.name + " portfolio"
     asci_file_name = file_name.translate(translation_table)
-    print("BB21 - Write portfolio for", a_student.name)
+    print("BB21 - Write portfolio for", student.name)
     with open(asci_file_name + ".html", mode='w', encoding="utf-8") as file_portfolio:
         file_portfolio.write(portfolio_html_string)
     return

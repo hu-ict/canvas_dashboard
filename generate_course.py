@@ -189,10 +189,10 @@ def main(instance_name):
                             tags_lu.append(t[1:])
                 for tag_lu in tags_lu:
                     print("GC61 - LU", tag_lu)
-                    lu = config.find_learning_outcome(tag_lu)
-                    print("GC62 - LU", lu)
-                    if lu is not None:
-                        assignment.learning_outcomes.append(lu)
+                    learning_outcome = config.find_learning_outcome(tag_lu)
+                    print("GC62 - LU", learning_outcome)
+                    if learning_outcome is not None:
+                        assignment.learning_outcomes.append(learning_outcome.id)
                 if assignment.grading_type == "pass_fail":
                     if hasattr(canvas_assignment, "rubric"):
                         assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
@@ -247,7 +247,12 @@ def main(instance_name):
             print("GC51 -", assignment_group.name, "punten:", assignment_group.total_points)
         else:
             print(f"GC41 - assignment_group {canvas_assignment_group.name} is not used")
-
+    # collect all LU from Assignment and copy them AssignmentSequence
+    for assignment_group in config.assignment_groups:
+        for assignment_sequence in assignment_group.assignment_sequences:
+            for assignment in assignment_sequence.assignments:
+                for learning_outcome in assignment.learning_outcomes:
+                    assignment_sequence.learning_outcomes.append(learning_outcome)
     for assignment_group in config.assignment_groups:
         assignment_group.bandwidth = None
         assignment_group.assignment_sequences = sorted(assignment_group.assignment_sequences, key=lambda a: a.get_day())

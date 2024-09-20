@@ -25,6 +25,7 @@ def main(instance_name, a_event):
                 events[trigger].attach(observer)
 
     # for event in course_instances.events.keys():
+    print("RU11 -", a_event)
     events[a_event].notify()
 
 if __name__ == "__main__":

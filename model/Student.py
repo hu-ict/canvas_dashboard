@@ -55,6 +55,12 @@ class Student:
                 return int(level_moment.score)
         return None
 
+    def get_submission_sequence_by_name(self, name):
+        for student_perspective in self.perspectives.values():
+            for submission_sequence in student_perspective.submission_sequences:
+                if submission_sequence.name == name:
+                    return submission_sequence
+        return None
 
     def to_json(self, scope):
         dict_result = {

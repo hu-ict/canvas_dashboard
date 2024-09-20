@@ -67,7 +67,7 @@ class ConcreteEvent(Event):
 
         # print("Subject: Notifying observers...")
         for observer in self.observers:
-            # print("Observer", observer.number, observer.name)
+            print("Observer", observer.name)
             observer.update(self)
 
 
