@@ -139,6 +139,13 @@ class CourseConfig:
                         return assignment
         return None
 
+    def find_assignment_sequence(self, assignment_sequence_tag):
+        for assignment_group in self.assignment_groups:
+            for assignment_sequence in assignment_group.assignment_sequences:
+                if assignment_sequence.tag == assignment_sequence_tag:
+                    return assignment_sequence
+        return None
+
     def find_student(self, student_id):
         for student in self.students:
             if student.id == student_id:

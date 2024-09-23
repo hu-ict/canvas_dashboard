@@ -67,7 +67,7 @@ class ConcreteEvent(Event):
 
         # print("Subject: Notifying observers...")
         for observer in self.observers:
-            print("Observer", observer.name)
+            # print("Observer", observer.name)
             observer.update(self)
 
 
@@ -79,7 +79,7 @@ class ConcreteObserver(Observer):
     def update(self, event: Event) -> None:
         # print("ConcreteObserverA", self.number, self.name, ": Reacted to the event")
         for python_script in self.listen.run:
-            print("Event", event.name, "Instance", self.name+":>", python_script)
+            print("OP05 - Event", event.name, "Instance", self.name+":>", python_script)
             result = subprocess.run(["python", python_script, self.name], capture_output=True, text=True)
             print(result.stdout)
 

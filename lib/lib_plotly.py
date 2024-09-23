@@ -18,7 +18,7 @@ def attendance_to_level(a_fraction):
 
 def get_marker_size(graded):
     if graded:
-        return 14
+        return 16
     else:
-        return 9
+        return 12
 

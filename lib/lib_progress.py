@@ -13,14 +13,26 @@ def flow_to_progress(flow):
 
 
 def get_overall_progress(a_progress):
+    if 0 in a_progress:
+        return 0
+    if 1 in a_progress:
+        return 1
     if -1 in a_progress:
         return -1
-    elif 0 in a_progress:
-        return 0
     boven = 8
     if len(a_progress) == 3: # 3 perspectieven
         if a_progress[0] >= 2 and a_progress[1] >= 2 and a_progress[2] >= 2:
             if sum(a_progress) >= boven:
+                # boven niveau
+                return 3
+            else:
+                # op niveau
+                return 2
+        else:
+            return 1
+    if len(a_progress) == 4: # 3 perspectieven
+        if a_progress[0] >= 2 and a_progress[1] >= 2 and a_progress[2] >= 2 and a_progress[3] >= 2:
+            if sum(a_progress) >= 10:
                 # boven niveau
                 return 3
             else:
@@ -52,9 +64,9 @@ def get_attendance_progress(attendance, results, attendance_perspective):
         # Niet te bepalen
         attendance_perspective.progress = -1
     elif attendance_perspective.last_score != 0:
-        # print(f"LP55 - Laatste dag {attendance_perspective.last_score}, laatste waarde {attendance_perspective.sum_score}")
+        # print(f"LP54 - Laatste dag {attendance_perspective.last_score}, laatste waarde {attendance_perspective.sum_score}")
         attendance_perspective.progress = attendance.bandwidth.get_progress(attendance_perspective.last_score,  attendance_perspective.sum_score*100)
-        print(f"LP55 - Laatste dag {attendance_perspective.last_score}, laatste waarde {attendance_perspective.sum_score*100}, voortgang {attendance_perspective.progress}")
+        # print(f"LP55 - Laatste dag {attendance_perspective.last_score}, laatste waarde {attendance_perspective.sum_score*100}, voortgang {attendance_perspective.progress}")
     else:
         # Niet te bepalen
         attendance_perspective.progress = -1

@@ -3,12 +3,14 @@ class LearningOutcome:
         self.id = id
         self.short = short
         self.description = description
+        self.assignment_sequences = []
 
     def to_json(self):
         return {
             'id': self.id,
             'short': self.short,
-            'description': self.description
+            'description': self.description,
+            'assignment_sequences': self.assignment_sequences
         }
 
     def __str__(self):
@@ -17,4 +19,6 @@ class LearningOutcome:
     @staticmethod
     def from_dict(data_dict):
         new = LearningOutcome(data_dict['id'], data_dict['short'], data_dict['description'])
+        if 'assignment_sequences' in data_dict:
+            new.assignment_sequences = data_dict['assignment_sequences']
         return new

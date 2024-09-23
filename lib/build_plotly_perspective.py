@@ -67,69 +67,44 @@ def plot_progress(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_level
 
 
 def plot_assignments(a_row, a_col, a_fig, a_start, a_course, a_show_points, a_assignment_sequences, a_levels):
-    series = {"color": [], "size": [], "size2": [], 'x': [], 'x2': [], 'y': [], 'y2': [], 'hover': []}
+    series = {"color": [], "size": [], "size2": [], 'x': [], 'y': [], 'hover': []}
     cum_points = 0
 
-    y2 = {}
-    for day in range(1, a_course.days_in_semester+2):
-        y2[(day//7)+1] = 0
     for assignment_sequence in a_assignment_sequences:
-        y2[assignment_sequence.get_day() // 7 + 1] += assignment_sequence.points
-    for punt in y2:
-        series['x2'].append(punt*7)
-        series['y2'].append(y2[punt])
-        series['size2'].append(get_marker_size(True))
-    y2_max = max(series['y2'])
-
-    for assignment_sequence in a_assignment_sequences:
-        series['size'].append(get_marker_size(False))
-        series['x'].append(assignment_sequence.get_day())
         cum_points += assignment_sequence.points
-        series['y'].append(cum_points)
-        series['color'].append(a_levels.level_series[a_start.grade_levels].levels["-1"].color)
-        series['hover'].append(get_hover_assignment(a_show_points, assignment_sequence))
+        series = {"color": [], "size": [], "size2": [], 'x': [], 'y': [], 'hover': []}
+        for assignment in assignment_sequence.assignments:
 
-    open_assignments = go.Scatter(
-        x=series['x'],
-        y=series['y'],
-        hoverinfo="text",
-        hovertext=series['hover'],
-        mode='markers',
-        marker_color=series['color'],
-        line_color="#444444",
-        hoverlabel=hover_style,
-        marker=dict(
-            size=series['size'],
-            opacity=1.0,
-            line=dict(
-                width=2
+            series['size'].append(get_marker_size(False))
+            series['x'].append(assignment.unlock_day)
+            series['y'].append(cum_points)
+            series['color'].append(a_levels.level_series[a_start.grade_levels].levels["-1"].color)
+            series['hover'].append(get_hover_assignment(a_show_points, assignment))
+
+            series['size'].append(get_marker_size(True))
+            series['x'].append(assignment.assignment_day)
+            series['y'].append(cum_points)
+            series['color'].append(a_levels.level_series[a_start.grade_levels].levels["-1"].color)
+            series['hover'].append(get_hover_assignment(a_show_points, assignment))
+
+        open_assignments = go.Scatter(
+            x=series['x'],
+            y=series['y'],
+            hoverinfo="text",
+            hovertext=series['hover'],
+            mode='lines+markers',
+            marker_color=series['color'],
+            line_color="#444444",
+            hoverlabel=hover_style,
+            marker=dict(
+                size=series['size'],
+                opacity=1.0,
+                line=dict(
+                    width=2
+                )
             )
         )
-    )
-
-    workload = go.Scatter(
-        x=series['x2'],
-        y=series['y2'],
-        mode='markers',
-        marker_color="#DDDDDD",
-        line_color="#333333",
-        hoverlabel=hover_style,
-        marker=dict(
-            size=series['size2'],
-            opacity=1.0,
-            line=dict(
-                width=2
-            )
-        )
-    )
-
-    if a_row == 0:
         a_fig.add_trace(open_assignments, secondary_y=False)
-        a_fig.add_trace(workload, secondary_y=True)
-        a_fig.update_yaxes(secondary_y=False)
-        a_fig.update_yaxes(title_text="Waarde per week", range=[0, y2_max+1], secondary_y=True)
-    else:
-        a_fig.add_trace(open_assignments, row=a_row, col=a_col)
     return
 
 def plot_future_assignments(a_row, a_col, a_fig, a_start, a_show_points, a_assignment_sequences, a_levels):

@@ -40,7 +40,7 @@ def build_bootstrap_group(a_course, a_templates, a_labels_colors):
             coaches = ""
             for coach in group.teachers:
                 teacher = a_course.find_teacher(coach)
-                coaches += " " + teacher.id
+                coaches += " " + str(teacher.id)
                 coaches_string += ", " + teacher.name
         else:
             coaches = None
@@ -248,5 +248,5 @@ def build_bootstrap_structure_index(a_instances, a_start, a_course, a_coaches, a
          'tabs_html_string': tabs_html_string})
 
     with open(a_instances.get_html_path() + 'index_structure.html', mode='w', encoding="utf-8") as file_index:
-        print("BB89 - Schrijf stucure HTML:", a_instances.get_html_path() + 'index_structure.html')
+        print("BS89 - Schrijf stucture HTML:", a_instances.get_html_path() + 'index_structure.html')
         file_index.write(index_html_string)

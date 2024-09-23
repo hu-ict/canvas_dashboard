@@ -38,6 +38,10 @@ class AssignmentSequence:
                 last_passed_assignment = assignment
         return last_passed_assignment
 
+    def add_learning_outcome(self, learning_outcome_id):
+        if learning_outcome_id not in self.learning_outcomes:
+            self.learning_outcomes.append(learning_outcome_id)
+
     def to_json(self):
         return {
             'name': self.name,

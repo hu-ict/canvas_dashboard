@@ -13,14 +13,14 @@ from model.perspective.StudentLevelMoments import StudentLevelMoments
 
 
 def link_teachers(config):
-    print('GS15 - Link teachers to student_groups')
+    print('GS21 - Link teachers to student_groups')
     for teacher in config.teachers:
         for studentGroupId in teacher.teams:
             studentGroup = config.find_student_group(studentGroupId)
             if studentGroup is not None:
                 studentGroup.teachers.append(teacher.id)
             else:
-                print("GS16 - studentGroupName", studentGroupId)
+                # print("GS22 - studentGroupName", studentGroupId)
                 studentGroup = config.find_student_group_by_name(studentGroupId)
                 if studentGroup is not None:
                     studentGroup.teachers.append(teacher.id)
@@ -53,6 +53,8 @@ def get_section_students(canvas_course, start, course):
                             else:
                                 print(f"GS25 - ERROR - section.name ({section.name}) not found in list student_group for student {student.name}.")
                         student.role = section.role
+                        if student.role is None:
+                            print("GS26 - Student.Role", student.name)
                     else:
                         print("GS27 -", "Student not found", section_student["id"])
             else:

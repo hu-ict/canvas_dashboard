@@ -34,6 +34,7 @@
                  <!-- Page Heading -->
                 <h1>Portfolio</h1>
                 <h2>Algemeen</h2>
+
                 <p>
                     Opleiding: HBO-ICT<br>
                     Semester: S1 $semester<br>
@@ -44,6 +45,24 @@
                     Klas: $student_group<br>
                     Docenten: $teachers
                 </p>
+                <h2>Samenvatting</h2>
+                <p>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col"></th>
+                                $learning_outcomes
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Behaalde punten</td>$behaalde_punten</tr>
+                            <tr><td>Complete items</td>$complete_items</tr>
+                            <tr><td>Incomplete items</td>$incomplete_items</tr>
+                            <tr><td>Niet gemaakt</td>$niet_gemaakt</tr>
+                            <tr><td>Openstaande items</td>$niet_beoordeeld</tr>
+                        </tbody>
+                    </table>
+                </p>
                 <h2>Portfolio-matrix</h2>
                 <p>
                     <table class="table table-sm">
@@ -52,12 +71,7 @@
                                 <th scope="col">Datum</th>
                                 <th scope="col">Portfolio-item</th>
                                 <th scope="col">Status</th>
-                                <th scope="col">LU1</th>
-                                <th scope="col">LU2</th>
-                                <th scope="col">LU3</th>
-                                <th scope="col">LU4</th>
-                                <th scope="col">LU5</th>
-                                <th scope="col">LU6</th>
+                                $learning_outcomes
                             </tr>
                         </thead>
                         <tbody>

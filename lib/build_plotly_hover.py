@@ -18,6 +18,12 @@ def get_hover_assignment(points, data_point):
             return "<b>" + assignment_sequence.name + "</b>, " + str(assignment_sequence.points) + get_punten_str(assignment_sequence.points) + ", deadline " + get_date_time_loc(assignment_sequence.assignments[0].assignment_date)
         else:
             return "<b>" + assignment_sequence.name + "</b>, deadline " + get_date_time_loc(assignment_sequence.assignments[0].assignment_date)
+    elif "Assignment" in str(type(data_point)):
+        assignment = data_point
+        if points:
+            return "<b>" + assignment.name + "</b>, " + str(assignment.points) + get_punten_str(assignment.points) + ", deadline " + get_date_time_loc(assignment.assignment_date)
+        else:
+            return "<b>" + assignment.name + "</b>, deadline " + get_date_time_loc(assignment.assignment_date)
     else:
         submission = data_point
         if points:

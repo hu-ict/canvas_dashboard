@@ -33,8 +33,8 @@ def main(instance_name):
     for student in course.students:
         print("GR05 -", student.name, student.number)
     results.students = course.students
-    for student in results.students:
-        print("GR07 -", student.name, student.number)
+    # for student in results.students:
+    #     print("GR07 -", student.name, student.number)
     read_submissions(canvas_course, start, course, results, True)
     for student in results.students:
         for perspective in student.perspectives.values():
@@ -79,6 +79,8 @@ def main(instance_name):
         perspectives = []
         for perspective in student.perspectives.values():
             perspectives.append(perspective.progress)
+        if start.attendance is not None:
+            perspectives.append(student.attendance_perspective.progress)
         progress = get_overall_progress(perspectives)
         # print(student.name, perspectives, progress )
         student.progress = progress

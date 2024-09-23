@@ -168,7 +168,7 @@ def main(instance_name):
                                         canvas_assignment.assignment_group_id, section_id,
                                         canvas_assignment.grading_type, canvas_assignment.grading_standard_id,
                                         points_possible, assignment_date,
-                                        unlock_date, date_to_day(start.start_date, assignment_date))
+                                        unlock_date, date_to_day(start.start_date, assignment_date), date_to_day(start.start_date, unlock_date))
                 if len(message) > 0:
                     assignment.messages.append(message)
                 # print(assignment)
@@ -177,7 +177,7 @@ def main(instance_name):
                 if "#" in assignment.name or "@" in assignment.name:
                     tags = get_tags(assignment.name)
                     for t in tags:
-                        print("GC60 -", t)
+                        # print("GC60 -", t)
                         if "#" in t[0]:
                             if "LU" in t:
                                 tags_lu.append(t[1:])
@@ -188,11 +188,12 @@ def main(instance_name):
                         if "@" in t[0]:
                             tags_lu.append(t[1:])
                 for tag_lu in tags_lu:
-                    print("GC61 - LU", tag_lu)
+                    # print("GC61 - LU", tag_lu)
                     learning_outcome = config.find_learning_outcome(tag_lu)
-                    print("GC62 - LU", learning_outcome)
+                    # print("GC62 - LU", learning_outcome)
                     if learning_outcome is not None:
                         assignment.learning_outcomes.append(learning_outcome.id)
+
                 if assignment.grading_type == "pass_fail":
                     if hasattr(canvas_assignment, "rubric"):
                         assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
@@ -251,8 +252,10 @@ def main(instance_name):
     for assignment_group in config.assignment_groups:
         for assignment_sequence in assignment_group.assignment_sequences:
             for assignment in assignment_sequence.assignments:
-                for learning_outcome in assignment.learning_outcomes:
-                    assignment_sequence.learning_outcomes.append(learning_outcome)
+                for learning_outcome_id in assignment.learning_outcomes:
+                    learning_outcome = config.find_learning_outcome(learning_outcome_id)
+                    assignment_sequence.add_learning_outcome(learning_outcome_id)
+                    learning_outcome.assignment_sequences.append(assignment_sequence.tag)
     for assignment_group in config.assignment_groups:
         assignment_group.bandwidth = None
         assignment_group.assignment_sequences = sorted(assignment_group.assignment_sequences, key=lambda a: a.get_day())

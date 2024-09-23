@@ -8,9 +8,11 @@ def build_student_button(course, student, templates, labels_colors):
     if not role:
         return ""
     color = role.btn_color
-    file_name = "./plotly/" + student.name.replace(" ", "%20") + ".html"
+    progress_file_name = "./plotly/" + student.name.replace(" ", "%20") + ".html"
+    portfolio_file_name = "./plotly/" + student.name.replace(" ", "%20") + "%20portfolio.html"
     #       file_name = plot_path + student.name + ".html"
-    asci_file_name = file_name.translate(translation_table)
+    progress_asci_file_name = progress_file_name.translate(translation_table)
+    portfolio_asci_file_name = portfolio_file_name.translate(translation_table)
     l_progress_color = labels_colors.level_series['progress'].levels[str(student.progress)].color
     return templates['student'].substitute(
         {'btn_color': color,
@@ -18,7 +20,10 @@ def build_student_button(course, student, templates, labels_colors):
          'student_name': student.name,
          'student_number': student.number,
          'student_role': role.name,
-         'student_file': asci_file_name})
+         'student_file': progress_asci_file_name,
+         'frame_a': progress_asci_file_name,
+         'frame_b': portfolio_asci_file_name
+        })
 
 
 def build_bootstrap_canvas_overzicht(a_templates, a_perspectives, a_student_totals):
@@ -54,7 +59,7 @@ def build_bootstrap_group(a_start, a_course, a_results, a_templates, a_labels_co
             if l_student is None:
                 print("BB05 - ERROR Student not found in results", student, "re-run generate_results")
             else:
-                print('BB07 -', l_student.name, "[", l_student.number, "]")
+                # print('BB07 -', l_student.name, "[", l_student.number, "]")
                 students_html_string += build_student_button(a_course, l_student, a_templates, a_labels_colors)
         if coaches:
             group_html_string = a_templates['group'].substitute(
@@ -150,6 +155,15 @@ def write_release_planning(a_start, a_templates, a_assignment_group, a_file_name
 def build_bootstrap_portfolio(instances, course, student, actual_date, templates, a_levels):
     portfolio_items_html_string = ""
     portfolio_items = []
+    learning_outcome_summary = {}
+    for learning_outcome in course.learning_outcomes:
+        learning_outcome_summary[learning_outcome.id] = {
+            'behaalde_punten': 0,
+            'complete_items': 0,
+            'incomplete_items': 0,
+            'niet_gemaakt': 0,
+            'niet_beoordeeld': 0
+        }
     for perspective in course.perspectives.values():
         for assignment_group_id in perspective.assignment_groups:
             assignment_groep = course.find_assignment_group(assignment_group_id)
@@ -161,22 +175,34 @@ def build_bootstrap_portfolio(instances, course, student, actual_date, templates
                 for teacher in student_group.teachers:
                     teacher = course.find_teacher(teacher)
                     teacher_str += teacher.name + ", "
-                cell_status = "status_no_lo"
+
                 if submission_sequence is not None:
                     if submission_sequence.is_graded():
                         score = submission_sequence.get_score()
+                        for learning_outcome_id in assignment_sequence.learning_outcomes:
+                            learning_outcome_summary[learning_outcome_id]['behaalde_punten'] += score
                         if score == 0:
                             status = "Niet zichtbaar"
                             cell_status = "status_missed"
+                            for learning_outcome_id in assignment_sequence.learning_outcomes:
+                                learning_outcome_summary[learning_outcome_id]['niet_gemaakt'] += 1
                         elif score == submission_sequence.points:
                             status = "Voldaan"
                             cell_status = "status_complete"
+                            for learning_outcome_id in assignment_sequence.learning_outcomes:
+                                learning_outcome_summary[learning_outcome_id]['complete_items'] += 1
                         else:
                             status = "Niet voldaan"
                             cell_status = "status_incomplete"
+                            for learning_outcome_id in assignment_sequence.learning_outcomes:
+                                learning_outcome_summary[learning_outcome_id]['incomplete_items'] += 1
                     else:
                         status = "Nog niet beoordeeld"
                         cell_status = "status_pending"
+                        for learning_outcome_id in assignment_sequence.learning_outcomes:
+                            if "Modderman" in student.name:
+                                print("BB71 -", learning_outcome_id, assignment_sequence.name)
+                            learning_outcome_summary[learning_outcome_id]['niet_beoordeeld'] += 1
                 else:
                     status = "Toekomst"
                     cell_status = "status_comming"
@@ -187,17 +213,34 @@ def build_bootstrap_portfolio(instances, course, student, actual_date, templates
                     "portfolio_status": status,
                     "cell_status": cell_status
                 }
-                lu_nr = 0
+                learning_outcomes_row_html_string = ""
                 for learning_outcome in course.learning_outcomes:
-                    lu_nr += 1
                     if learning_outcome.id in assignment_sequence.learning_outcomes:
-                        item_dict["portfolio_lu"+str(lu_nr)] = "x"
+                        learning_outcomes_row_html_string += '<td style="text-align:center;">V</td>'
                     else:
-                        item_dict["portfolio_lu" + str(lu_nr)] = ""
+                        learning_outcomes_row_html_string += '<td></td>'
+                item_dict["learning_outcomes"] = learning_outcomes_row_html_string
                 portfolio_items.append(item_dict)
     portfolio_items = sorted(portfolio_items, key=lambda p: p['portfolio_day'])
+    learning_outcomes_header_html_string = ""
+    behaalde_punten_html = ""
+    complete_items_html = ""
+    incomplete_items_html = ""
+    niet_gemaakt_html = ""
+    niet_beoordeeld_html = ""
+
+    for learning_outcome in course.learning_outcomes:
+        learning_outcomes_header_html_string += '<th scope = "col" >'+learning_outcome.id+'</th>'
+        behaalde_punten_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['behaalde_punten'])+"</td>"
+        complete_items_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['complete_items'])+"</td>"
+        incomplete_items_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['incomplete_items'])+"</td>"
+        niet_gemaakt_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['niet_gemaakt'])+"</td>"
+        niet_beoordeeld_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['niet_beoordeeld'])+"</td>"
+
     for portfolio_item in portfolio_items:
+        # print(portfolio_item)
         portfolio_items_html_string += templates['learning_outcome'].substitute(portfolio_item)
+
 
     student_group = course.find_student_group(student.group_id)
     portfolio_html_string = templates['portfolio'].substitute(
@@ -208,10 +251,16 @@ def build_bootstrap_portfolio(instances, course, student, actual_date, templates
          'student_group': student_group.name,
          'teachers': teacher_str,
          'actual_date': get_date_time_loc(actual_date),
+         'behaalde_punten': behaalde_punten_html,
+         'complete_items': complete_items_html,
+         'incomplete_items': incomplete_items_html,
+         'niet_gemaakt': niet_gemaakt_html,
+         'niet_beoordeeld': niet_beoordeeld_html,
+         'learning_outcomes': learning_outcomes_header_html_string,
          'portfolio_items': portfolio_items_html_string})
     file_name = instances.get_plot_path() + student.name + " portfolio"
     asci_file_name = file_name.translate(translation_table)
-    print("BB21 - Write portfolio for", student.name)
+    # print("BB21 - Write portfolio for", student.name)
     with open(asci_file_name + ".html", mode='w', encoding="utf-8") as file_portfolio:
         file_portfolio.write(portfolio_html_string)
     return
