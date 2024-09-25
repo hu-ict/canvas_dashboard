@@ -122,7 +122,7 @@ def main(instance_name):
                                                None, None, False, None, None, -1, 3, 0)
                     plot_overall_peilingen(fig, positions[peil]['row'], positions[peil]['col'], a_start, a_course, l_level_moment, levels)
 
-        file_name = a_instances.get_plot_path() + a_student.name
+        file_name = a_instances.get_student_path() + a_student.name + " progress"
         asci_file_name = file_name.translate(translation_table)
         fig.write_html(asci_file_name + ".html", include_plotlyjs="cdn")
         fig.write_image(asci_file_name + ".jpeg")

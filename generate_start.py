@@ -79,7 +79,7 @@ else:
 
 os.makedirs(os.path.dirname(project_path), exist_ok=True)
 os.makedirs(os.path.dirname(project_path +"dashboard_" + course_instance + "//"), exist_ok=True)
-os.makedirs(os.path.dirname(project_path +"dashboard_" + course_instance + "//plotly//"), exist_ok=True)
+os.makedirs(os.path.dirname(project_path +"dashboard_" + course_instance + "//students//"), exist_ok=True)
 
 dir_names = ["css", "js", "scss", "vendor"]
 for dir_name in dir_names:

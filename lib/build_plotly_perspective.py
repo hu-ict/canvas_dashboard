@@ -78,13 +78,13 @@ def plot_assignments(a_row, a_col, a_fig, a_start, a_course, a_show_points, a_as
             series['size'].append(get_marker_size(False))
             series['x'].append(assignment.unlock_day)
             series['y'].append(cum_points)
-            series['color'].append(a_levels.level_series[a_start.grade_levels].levels["-1"].color)
+            series['color'].append(a_levels.level_series[a_start.grade_levels].levels["3"].color)
             series['hover'].append(get_hover_assignment(a_show_points, assignment))
 
             series['size'].append(get_marker_size(True))
             series['x'].append(assignment.assignment_day)
             series['y'].append(cum_points)
-            series['color'].append(a_levels.level_series[a_start.grade_levels].levels["-1"].color)
+            series['color'].append(a_levels.level_series[a_start.grade_levels].levels["0"].color)
             series['hover'].append(get_hover_assignment(a_show_points, assignment))
 
         open_assignments = go.Scatter(

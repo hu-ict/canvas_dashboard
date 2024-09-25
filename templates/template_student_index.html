@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="description" content="">
+    <meta name="author" content="Hogeschool Utrecht">
+    <!-- Custom fonts for this template-->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <!-- Custom styles for this template-->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/startbootstrap-sb-admin-2/4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
+    <style>
+        .status_complete {background-color: #3C7D22; color: white;}
+        .status_incomplete {background-color: #0070C0; color: white;}
+        .status_missed {background-color: black; color: white;}
+        .status_pending {background-color: #E97132; color: white;}
+        .status_comming {background-color: #BFBFBF; color: white;}
+        .status_no_lo {background-color: white; color: white;}
+    </style>
+    <script>
+         function setStudentView(view) {
+            const views = document.getElementsByClassName("student_view");
+            for (i = views.length - 1; i >= 0; --i) {
+                if (views[i].className.includes(view)) {
+                    views[i].style.display = "block";
+                } else {
+                    views[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+
+</head>
+<body id="page-top">
+    <div id="content">
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12 mb-1">
+                    <div class="card border-primary mb-1">
+                        <div class="row card-body">
+                            <div class="col-lg-6">
+                                $student_name ($student_number)<br>
+                                Email: $student_email<br>
+                                Groep: $student_group
+                            </div>
+                            <div class="col-lg-6">
+                                HBO-ICT, $semester<br>
+                                Datum: $actual_date<br>
+                                Docent(en): $teachers
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+
+            <div class="col-lg-12">
+                <div class="student_view Progressie">
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a onclick="setStudentView('Progressie')" class="nav-link active" aria-current="page" href="#">Progressie</a>
+                        </li>
+                        <li class="nav-item">
+                            <a onclick="setStudentView('Portfolio')" class="nav-link" aria-current="false" href="#">Portfolio</a>
+                        </li>
+                        <li class="nav-item">
+                            <a onclick="setStudentView('Beoordeling')" class="nav-link" aria-current="false" href="#">Beoordeling</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="student_view Portfolio">
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a onclick="setStudentView('Progressie')" class="nav-link" aria-current="false" href="#">Progressie</a>
+                        </li>
+                        <li class="nav-item">
+                            <a onclick="setStudentView('Portfolio')" class="nav-link active" aria-current="page" href="#">Portfolio</a>
+                        </li>
+                        <li class="nav-item">
+                            <a onclick="setStudentView('Beoordeling')" class="nav-link " aria-current="false" href="#">Beoordeling</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="student_view Beoordeling">
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a onclick="setStudentView('Progressie')" class="nav-link" aria-current="false" href="#">Progressie</a>
+                        </li>
+                        <li class="nav-item">
+                            <a onclick="setStudentView('Portfolio')" class="nav-link" aria-current="false" href="#">Portfolio</a>
+                        </li>
+                        <li class="nav-item">
+                            <a onclick="setStudentView('Beoordeling')" class="nav-link active" aria-current="page" href="#">Beoordeling</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="student_view Progressie">
+                    <div class="embed-responsive embed-responsive-1by1">
+                        <div >
+                            <iframe class="embed-responsive-item" name="iframe_a" id="iframe_a" height="1000" src="$progress_file"></iframe>
+                        </div>
+                    </div>
+                </div>
+                <div class="student_view Portfolio">
+                    <div class="embed-responsive embed-responsive-1by1">
+                        <div>
+                            <iframe class="embed-responsive-item" name="iframe_b" id="iframe_b" height="1000" width="1300" src="$portfolio_file"></iframe>
+                        </div>
+                    </div>
+                </div>
+                <div class="student_view Beoordeling">
+                    <div class="embed-responsive embed-responsive-1by1">
+                        <div>
+                            <iframe class="embed-responsive-item" name="iframe_c" id="iframe_c" height="1000" width="1300" src=""></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+        <script>
+            setStudentView("Progressie");
+            setDetailName("Leeg", "", "")
+        </script>
+    </div>
+    <!-- Bootstrap core JavaScript-->
+    <script src="../vendor/jquery/jquery.min.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="../vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="../js/sb-admin-2.min.js"></script>
+
+    <!-- Page level plugins -->
+    <script src="../vendor/chart.js/Chart.min.js"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="../js/demo/chart-area-demo.js"></script>
+    <script src="../js/demo/chart-pie-demo.js"></script>
+
+</body>
+</html>

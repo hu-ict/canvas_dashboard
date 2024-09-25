@@ -32,7 +32,7 @@ if __name__ == "__main__":
     l_actual_date = get_actual_date()
     if len(sys.argv) > 2:
         main(sys.argv[1], sys.argv[2])
-    else:
+    else: #sep24_inno TICT-V1SE1-24_SEP2024
         main("TICT-V1SE1-24_SEP2024", "results_create_event")
         # main("")
 

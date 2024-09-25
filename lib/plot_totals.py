@@ -121,7 +121,7 @@ def plot_voortgang(a_instances, a_course, student_totals, a_progress_history, a_
             break
     # if a_instances.is_instance_of("inno_courses"):
     plot_peilingen(fig, 1, 2, student_totals, a_course, a_progress_levels)
-    file_name = a_instances.get_plot_path() + "totals_voortgang" + ".html"
+    file_name = a_instances.get_html_path() + "totals_voortgang" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")
 
 def plot_werkvoorraad(a_instances, a_start, a_course, student_totals, a_workload_history):
@@ -167,5 +167,5 @@ def plot_werkvoorraad(a_instances, a_start, a_course, student_totals, a_workload
     plot_workload_history(fig, 2, 1, a_workload_history)
     data = go.Histogram(x=np.array(student_totals['late']['count']))
     fig.add_trace(data, 2, 2)
-    file_name = a_instances.get_plot_path() + "totals_werkvoorraad" + ".html"
+    file_name = a_instances.get_html_path() + "totals_werkvoorraad" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")

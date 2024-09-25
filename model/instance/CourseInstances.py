@@ -52,8 +52,8 @@ class CourseInstances:
     def get_test_path(self):
         return CourseInstances.get_project_path(self.current_instance) + "test//"
 
-    def get_plot_path(self):
-        return CourseInstances.get_project_path(self.current_instance) + "dashboard_" + self.current_instance + "//plotly//"
+    def get_student_path(self):
+        return CourseInstances.get_project_path(self.current_instance) + "dashboard_" + self.current_instance + "//students//"
 
     def get_html_path(self):
         return CourseInstances.get_project_path(self.current_instance) + "dashboard_" + self.current_instance + "//"

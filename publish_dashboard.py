@@ -17,17 +17,9 @@ def main(instance_name):
     file_names.append("index.html")
     for file_name in file_names:
         shutil.copyfile(instances.get_html_path() + file_name, start.target_path + file_name)
-    shutil.copytree(instances.get_html_path() + "plotly", start.target_path + "plotly", copy_function=shutil.copy2,
+    shutil.copytree(instances.get_student_path(), start.target_path + "students", copy_function=shutil.copy2,
                     ignore_dangling_symlinks=False,
                     dirs_exist_ok=True)
-
-    if len(start.target_slb_path) > 0:
-        print("PB05 - Copy files to OneDrive slb")
-        for file_name in file_names:
-            shutil.copyfile(instances.get_html_path() + file_name, start.target_slb_path + file_name)
-        shutil.copytree(instances.get_html_path() + "plotly", start.target_slb_path + "plotly",
-                        copy_function=shutil.copy2, ignore_dangling_symlinks=False,
-                        dirs_exist_ok=True)
     print("PD99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
 

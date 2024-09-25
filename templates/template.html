@@ -22,7 +22,7 @@
     <script>
         function setDetailName(name, number, role, frame_a, frame_b) {
             document.getElementById("detail_name").innerHTML = name+' ('+number+') - '+role;
-            document.getElementById("iframe_b").setAttribute("src", frame_b);
+            <!-- document.getElementById("iframe_b").setAttribute("src", frame_b);-->
 
             window.scrollTo({
                 top: 0,
@@ -188,81 +188,12 @@
                         $tabs_html_string
                         <script>setView("Groepen")</script>
                         <div class="col-lg-8">
-                            <div class="card shadow mb-4">
-                                <div class="card-header py-3">
-                                    <div class="row">
-                                        <h6 class="m-0 font-weight-bold text-primary" id="detail_name"></h6>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div class="student_view Progressie">
-                                        <ul class="nav nav-tabs ">
-                                            <li class="nav-item">
-                                                <a onclick="setStudentView('Progressie')" class="nav-link active" aria-current="page" href="#">Progressie</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a onclick="setStudentView('Portfolio')" class="nav-link" aria-current="false" href="#">Portfolio</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a onclick="setStudentView('Beoordeling')" class="nav-link" aria-current="false" href="#">Beoordeling</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="student_view Portfolio">
-                                        <ul class="nav nav-tabs">
-                                            <li class="nav-item">
-                                                <a onclick="setStudentView('Progressie')" class="nav-link" aria-current="false" href="#">Progressie</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a onclick="setStudentView('Portfolio')" class="nav-link active" aria-current="page" href="#">Portfolio</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a onclick="setStudentView('Beoordeling')" class="nav-link " aria-current="false" href="#">Beoordeling</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="student_view Beoordeling">
-                                        <ul class="nav nav-tabs">
-                                            <li class="nav-item">
-                                                <a onclick="setStudentView('Progressie')" class="nav-link" aria-current="false" href="#">Progressie</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a onclick="setStudentView('Portfolio')" class="nav-link" aria-current="false" href="#">Portfolio</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a onclick="setStudentView('Beoordeling')" class="nav-link active" aria-current="page" href="#">Beoordeling</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="student_view Progressie">
-                                        <div class="embed-responsive embed-responsive-1by1">
-                                            <div >
-                                                <iframe class="embed-responsive-item" name="iframe_a" id="iframe_a" height="820" width="620" src=""></iframe>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="student_view Portfolio">
-                                        <div class="embed-responsive embed-responsive-1by1">
-                                            <div>
-                                                <iframe class="embed-responsive-item" name="iframe_b" id="iframe_b" height="820" width="620" src=""></iframe>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="student_view Beoordeling">
-                                        <div class="embed-responsive embed-responsive-1by1">
-                                            <div>
-                                                <iframe class="embed-responsive-item" name="iframe_c" id="iframe_c" height="820" width="620" src=""></iframe>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <div class="embed-responsive embed-responsive-1by1">
+                                <div>
+                                    <iframe class="embed-responsive-item" name="frame_right" id="frame_right" height="820" src=""></iframe>
                                 </div>
                             </div>
                         </div>
-                        <script>
-                            setStudentView("Progressie");
-                            setDetailName("Leeg", "", "")
-                        </script>
-
                     </div>
 
                 </div>

@@ -2,10 +2,10 @@ import sys
 
 from plotly.subplots import make_subplots
 
-from lib.build_bootstrap import build_bootstrap_portfolio
+from lib.build_bootstrap import build_bootstrap_portfolio, build_bootstrap_student_index
 from lib.build_plotly_attendance import plot_attendance
 from lib.build_plotly_perspective import plot_perspective, find_submissions, plot_overall_peilingen
-from lib.build_plotly_portfolio_items import build_portfolio_items
+
 from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_date_time_loc, get_actual_date
 from lib.file import read_start, read_course, read_results, read_levels, read_course_instance
@@ -20,8 +20,6 @@ def main(instance_name):
     print("GP02 - Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
     course = read_course(instances.get_course_file_name(instances.current_instance))
-    if len(course.learning_outcomes) == 0:
-        return
     results = read_results(instances.get_result_file_name(instances.current_instance))
     templates = load_templates(instances.get_template_path())
     levels = read_levels("levels.json")
@@ -33,8 +31,10 @@ def main(instance_name):
     for student in results.students:
         # print(l_peil_construction)
         print("GP10 -", student.name)
-        build_bootstrap_portfolio(instances, course, student, results.actual_date, templates, levels)
-        build_portfolio_items(instances, course, student, levels)
+        if len(course.learning_outcomes) > 0:
+            build_bootstrap_portfolio(instances, course, student, results.actual_date, templates, levels)
+        build_bootstrap_student_index(instances, course, student, results.actual_date, templates, levels)
+
 
     print("GP99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 

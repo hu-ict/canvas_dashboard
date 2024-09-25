@@ -8,11 +8,8 @@ def build_student_button(course, student, templates, labels_colors):
     if not role:
         return ""
     color = role.btn_color
-    progress_file_name = "./plotly/" + student.name.replace(" ", "%20") + ".html"
-    portfolio_file_name = "./plotly/" + student.name.replace(" ", "%20") + "%20portfolio.html"
-    #       file_name = plot_path + student.name + ".html"
-    progress_asci_file_name = progress_file_name.translate(translation_table)
-    portfolio_asci_file_name = portfolio_file_name.translate(translation_table)
+    index_file_name = "./students/" + student.name.replace(" ", "%20") + "%20index.html"
+    index_asci_file_name = index_file_name.translate(translation_table)
     l_progress_color = labels_colors.level_series['progress'].levels[str(student.progress)].color
     return templates['student'].substitute(
         {'btn_color': color,
@@ -20,9 +17,7 @@ def build_student_button(course, student, templates, labels_colors):
          'student_name': student.name,
          'student_number': student.number,
          'student_role': role.name,
-         'student_file': progress_asci_file_name,
-         'frame_a': progress_asci_file_name,
-         'frame_b': portfolio_asci_file_name
+         'frame_right': index_asci_file_name
         })
 
 
@@ -258,7 +253,40 @@ def build_bootstrap_portfolio(instances, course, student, actual_date, templates
          'niet_beoordeeld': niet_beoordeeld_html,
          'learning_outcomes': learning_outcomes_header_html_string,
          'portfolio_items': portfolio_items_html_string})
-    file_name = instances.get_plot_path() + student.name + " portfolio"
+    file_name = instances.get_student_path() + student.name + " portfolio"
+    asci_file_name = file_name.translate(translation_table)
+    # print("BB21 - Write portfolio for", student.name)
+    with open(asci_file_name + ".html", mode='w', encoding="utf-8") as file_portfolio:
+        file_portfolio.write(portfolio_html_string)
+    return
+
+def build_bootstrap_student_index(instances, course, student, actual_date, templates, a_levels):
+    student_group = course.find_student_group(student.group_id)
+    teacher_str = ""
+    for teacher in student_group.teachers:
+        teacher = course.find_teacher(teacher)
+        teacher_str += teacher.name + ", "
+
+    progress_file_name = ".//" + student.name.replace(" ", "%20") + "%20progress.html"
+    portfolio_file_name = ".//" + student.name.replace(" ", "%20") + "%20portfolio.html"
+    progress_asci_file_name = progress_file_name.translate(translation_table)
+    portfolio_asci_file_name = portfolio_file_name.translate(translation_table)
+    print("BB91 - Index", progress_file_name, portfolio_asci_file_name)
+    student_group = course.find_student_group(student.group_id)
+    portfolio_html_string = templates['student_index'].substitute(
+        {
+            'semester': course.name,
+            'student_name': student.name,
+            'student_email': student.email,
+            'student_number': student.number,
+            'student_group': student_group.name,
+            'teachers': teacher_str,
+            'actual_date': get_date_time_loc(actual_date),
+            'progress_file': progress_asci_file_name,
+            'portfolio_file': portfolio_asci_file_name
+        }
+    )
+    file_name = instances.get_student_path() + student.name + " index"
     asci_file_name = file_name.translate(translation_table)
     # print("BB21 - Write portfolio for", student.name)
     with open(asci_file_name + ".html", mode='w', encoding="utf-8") as file_portfolio:
