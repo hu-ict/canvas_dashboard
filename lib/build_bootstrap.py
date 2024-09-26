@@ -298,8 +298,8 @@ def build_bootstrap_students_tabs(a_instances, a_start, a_course, a_results, a_t
     if len(a_course.roles) > 1:
         tabs.append("Rollen")
     tabs.append("Voortgang")
-    if a_start.slb_groep_name:
-        tabs.append("SLB")
+    # if a_start.slb_groep_name:
+    #     tabs.append("SLB")
     tabs.append("Overzichten")
     tabs.append("Release Planning")
     html_tabs = ""
@@ -310,8 +310,8 @@ def build_bootstrap_students_tabs(a_instances, a_start, a_course, a_results, a_t
             students_html_string = build_bootstrap_role(a_course, a_results, a_templates, a_labels_colors)
         elif tab == "Voortgang":
             students_html_string = build_bootstrap_progress(a_start, a_course, a_results, a_templates, a_labels_colors)
-        elif tab == "SLB":
-            students_html_string = build_bootstrap_slb(a_start, a_course, a_results, a_templates, a_labels_colors)
+        # elif tab == "SLB":
+        #     students_html_string = build_bootstrap_slb(a_start, a_course, a_results, a_templates, a_labels_colors)
         elif tab == "Overzichten":
             students_html_string = a_templates['overzichten'].template
             perspectives = []

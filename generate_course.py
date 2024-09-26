@@ -4,8 +4,9 @@ import sys
 from canvasapi import Canvas
 from lib.lib_bandwidth import bandwidth_builder, bandwidth_builder_attendance
 from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
-from lib.file import read_start, read_config, read_course_instance
+from lib.file import read_start, read_config, read_course_instance, remove_html_tags
 from model.Assignment import Assignment
+from model.CourseConfig import CourseConfig
 from model.Criterion import Criterion
 from model.Rating import Rating
 from model.perspective.AttendanceMoment import AttendanceMoment
@@ -94,6 +95,13 @@ def get_attendance(attendance):
     return attendance
 
 
+def read_config_from_canvas(canvas_course):
+    page = canvas_course.get_page("config-dot-json")
+    config_file = remove_html_tags(page.body)
+    data = json.loads(config_file)
+    return CourseConfig.from_dict(data)
+
+
 def main(instance_name):
     g_actual_date = get_actual_date()
     instances = read_course_instance()
@@ -101,7 +109,13 @@ def main(instance_name):
         instances.current_instance = instance_name
     print("GC02 -", "Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
-    config = read_config(instances.get_config_file_name(instances.current_instance))
+    canvas = Canvas(API_URL, start.api_key)
+    canvas_course = canvas.get_course(start.canvas_course_id)
+    user = canvas.get_current_user()
+    print("GC03 -", user.name)
+
+    config = read_config_from_canvas(canvas_course)
+    # config = read_config(instances.get_config_file_name(instances.current_instance))
     if config.attendance is not None:
         attendance = get_attendance(config.attendance)
         if attendance is not None:
@@ -110,11 +124,9 @@ def main(instance_name):
     #     print("GC04 -", teacher)
     # print("GC02 -", "Config", config)
     # Initialize a new Canvas object
-    canvas = Canvas(API_URL, start.api_key)
-    user = canvas.get_current_user()
-    print("GC03 -", user.name)
+
     uses_assignment_groups = get_uses_assignment_groups(config)
-    canvas_course = canvas.get_course(start.canvas_course_id)
+
     # Ophalen Assignments bij de AssignmentsGroups
     canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignments', 'overrides', 'online_quiz'])
     for canvas_assignment_group in canvas_assignment_groups:

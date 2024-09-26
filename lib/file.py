@@ -109,3 +109,9 @@ def read_file_list(file_list_file_name):
     with open(file_list_file_name, mode='r', encoding="utf-8") as file_list_file:
         result = json.load(file_list_file)
         return result
+
+def remove_html_tags(text):
+    """Remove html tags from a string"""
+    import re
+    clean = re.compile('<.*?>')
+    return re.sub(clean, '', text)

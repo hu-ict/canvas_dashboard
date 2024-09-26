@@ -20,9 +20,18 @@
     <!-- Custom styles for this template-->
     <link href="./css/sb-admin-2.min.css" rel="stylesheet">
     <script>
-        function setDetailName(name, number, role, frame_a, frame_b) {
+        function setDetailName(name, number, role) {
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: 'smooth'
+            });
             document.getElementById("detail_name").innerHTML = name+' ('+number+') - '+role;
-            <!-- document.getElementById("iframe_b").setAttribute("src", frame_b);-->
+        }
+
+        function setStudent(name, number, role, frame_a) {
+            document.getElementById("detail_name").innerHTML = name+' ('+number+') - '+role;
+            document.getElementById("iframe_a").setAttribute("src", frame_a);
 
             window.scrollTo({
                 top: 0,
@@ -70,7 +79,12 @@
             }
         }
 
-         function setStudentView(view) {
+        function setStudentView(view) {
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: 'smooth'
+            });
             const views = document.getElementsByClassName("student_view");
             for (i = views.length - 1; i >= 0; --i) {
                 if (views[i].className.includes(view)) {
