@@ -112,6 +112,10 @@ def load_templates(template_path):
         string_html = file_template.read()
         templates["portfolio"] = Template(string_html)
 
+    with open(template_path + 'template_portfolio_leeg.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["portfolio_leeg"] = Template(string_html)
+
     with open(template_path + 'template_student_index.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["student_index"] = Template(string_html)

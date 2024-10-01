@@ -42,13 +42,14 @@ def process_progress(start, course, results, progress_history):
     for student in results.students:
         perspectives = []
         for perspective in student.perspectives.values():
-            print("GP08 -", perspective.name, perspective.progress)
+            # print("GP08 -", perspective.name, perspective.progress)
             perspectives.append(perspective.progress)
-        print("GP10 -", perspectives)
+        # print("GP10 -", perspectives)
         progress = get_overall_progress(perspectives)
-        print("GP20 - student.progress =", progress, student.name)
+        # print("GP20 - student.progress =", progress, student.name)
         student.progress = progress
         progress_day.progress[str(progress)] += 1
+        # print(f"{student.name}, {student.role}, {student.progress}, {student.perspectives['team'].progress}, {student.perspectives['gilde'].progress}, {student.perspectives['kennis'].progress}")
     progress_history.append_day(progress_day)
 
 

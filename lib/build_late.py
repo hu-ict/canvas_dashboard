@@ -40,8 +40,13 @@ def build_late_list(a_instances, a_templates, a_result, a_student_totals):
             late_list_html_total_string = ''
             for l_submission in late_list:
                 l_student_name = a_result.find_student(l_submission['student_id']).name
+                l_messages = l_submission['messages']
+                if len(l_messages) > 0:
+                    messages = l_messages[0]
+                else:
+                    messages = ""
                 url = "https://canvas.hu.nl/courses/"+str(a_result.id)+"/gradebook/speed_grader?assignment_id="+str(l_submission['assignment_id'])+"&student_id="+str(l_submission['student_id'])
-                submission_html_string = a_templates["submission"].substitute({'submission_id': l_submission['id'], 'student_name': l_student_name, 'assignment_name': l_submission['assignment_name'], 'submission_date': get_date_time_loc(get_date_time_obj(l_submission['submitted_date'])), 'url': url})
+                submission_html_string = a_templates["submission"].substitute({'submission_id': l_submission['id'], 'student_name': l_student_name, 'assignment_name': l_submission['assignment_name'], 'submission_date': get_date_time_loc(get_date_time_obj(l_submission['submitted_date'])), 'url': url, 'messages': messages})
                 late_list_html_total_string += submission_html_string
             late_list_html_string = a_templates["late_list"].substitute({'submissions': late_list_html_total_string})
             file_name = "late_"+perspective+"_"+selector+".html"

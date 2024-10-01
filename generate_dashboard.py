@@ -82,7 +82,7 @@ def init_coaches_dict(a_course):
                 teacher = a_course.find_teacher(teacher_id)
                 l_coaches[teacher.id] = {'count': {}, 'teacher': teacher}
     l_coaches = dict(sorted(l_coaches.items(), key=lambda item: get_initials(item)))
-    print("GD81 -", l_coaches)
+    # print("GD81 -", l_coaches)
     return l_coaches
 
 
@@ -99,8 +99,8 @@ def main(instance_name):
     level_series = read_levels("levels.json")
 
     team_coaches = init_coaches_dict(course)
-    for team_coach in team_coaches.values():
-        print("GD04 -", team_coach["teacher"])
+    # for team_coach in team_coaches.values():
+        # print("GD04 -", team_coach["teacher"])
     if instances.is_instance_of("inno_courses"):
         peilen = {}
         for peil in course.level_moments.moments:

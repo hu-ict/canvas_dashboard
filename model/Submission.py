@@ -22,6 +22,8 @@ class Submission:
         self.score = score
         self.points = points
         self.flow = flow
+        self.body = ""
+        self.messages = []
         self.comments = []
         self.rubrics = []
 
@@ -47,6 +49,8 @@ class Submission:
             'score': int(self.score*10)/10,
             'points': int(self.points),
             'flow': int(self.flow*100)/100,
+            'body': self.body,
+            'messages': self.messages,
             'comments': list(map(lambda c: c.to_json(), self.comments)),
             'rubrics': list(map(lambda r: r.to_json(), self.rubrics)),
         }
@@ -61,5 +65,10 @@ class Submission:
                                     data_dict['graded'], data_dict['grader_name'], get_date_time_obj(data_dict['graded_date']), data_dict['score'], data_dict['points'], data_dict['flow'])
         new_submission.comments = list(map(lambda c: Comment.from_dict(c), data_dict['comments']))
         new_submission.rubrics = list(map(lambda c: CriteriumScore.from_dict(c), data_dict['rubrics']))
+        # print("SU05 -", data_dict)
+        if ("body" in data_dict) and (data_dict['body'] is not None) and len(data_dict['body']) > 0:
+            new_submission.body = data_dict['body']
+        if ("messages" in data_dict) and (data_dict['messages'] is not None) and len(data_dict['messages']) > 0:
+            new_submission.messages = data_dict['messages']
         return new_submission
 

@@ -76,7 +76,7 @@ def bandwidth_builder(assignment_group, days_in_semester):
             band_upper.append(y * upper_b)
     elif assignment_group.strategy == "EXP_POINTS":
         print("LB61 -", assignment_group)
-        const = 7
+        const = 6
         lower_c = float(assignment_group.lower_c)
         lower_b = 1 / const
         lower_a = (assignment_group.lower_points - lower_c - assignment_group.total_points / const) / (assignment_group.total_points * assignment_group.total_points)

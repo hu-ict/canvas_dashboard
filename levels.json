@@ -111,11 +111,11 @@
   },
   "bin2": {
     "-2": {
-      "label": "Leeg",
+      "label": "Nog niet beoordeeld",
       "color": "#E97132"
     },
     "-1": {
-      "label": "Leeg",
+      "label": "Voor deadline",
       "color": "#BFBFBF"
     },
     "0": {

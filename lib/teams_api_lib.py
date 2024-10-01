@@ -4,7 +4,7 @@ from lib.translation_table import translation_table
 import subprocess
 import io
 
-teams = ["943b34c2-39cc-44d2-8251-88b75a835cfc", "d1f12dcf-875b-4d0c-bba6-262b3b57daea", "1b8c2e9b-8c84-4e1d-af12-1ea4d4aff274", "961f8415-0d43-4f85-94df-4c1e4ec48757"]
+teams = ["1c99e1b3-d604-4344-b160-70a6f0607ae1", "0f18c8bc-c414-4323-a79a-9653032d984a", "b48382c5-40aa-4301-a004-40f24be15201", "a8ddf781-d19f-437f-a8c5-24ab8227f291", "4a6a0e07-561a-4e82-85ed-457083db7ba5"]
 
 def get_access_token(a_tenant_id, a_client_id):
     print("get_access_token", a_tenant_id, a_client_id)
@@ -26,6 +26,7 @@ def get_access_token(a_tenant_id, a_client_id):
     captured_output.writelines(chars)
 
     resulting_object = captured_output.getvalue()
+    print(resulting_object)
     obj = json.loads(resulting_object)
 
     print("Accesstoken: ", obj["AccessToken"])
@@ -135,22 +136,23 @@ def get_sites(a_token, a_query):
     if response.status_code == 200:
         result = response.json()
         values = result['value']
-        print("TA41 - Aantal sites:",len(values))
+        print("TA41 - Aantal sites:", len(values))
         names = {}
         for value in values:
+            # print("TA44 -", value)
             # "INNO - Sep23 - Studenten - Kyrill Westdorp"
             l_display_name = value['displayName']
-            # print("DisplayName:", l_display_name)
+            print("TA45 - DisplayName:", l_display_name)
             l_display_name_split = l_display_name.split(' - ')
             if len(l_display_name_split) > 3:
                 l_student_name = l_display_name_split[3]
-                names[l_student_name] =  value['id']
-                # print("Student:", l_student_name)
+                names[l_student_name] = value['id']
+                print("TA46 - Student:", l_student_name)
             else:
-                print("TA43 - DisplayName doesn't contain a student name")
+                print("TA47 - DisplayName doesn't contain a student name")
         return names
     else:
-        print(f"TA44 - Error getting token: {response.json()}")
+        print(f"TA48 - Error getting token: {response.json()}")
         return None
 
 
@@ -179,35 +181,49 @@ def get_site_id(a_token, a_student):
     return None
 
 
-def upload_file_html(a_token, a_plot_path, a_name, a_channel):
+def upload_file_to_teams(a_token, a_channel, a_source_filename, a_remote_filename, a_name):
     l_headers = {
         "Authorization": "Bearer "+a_token,
         "Content-Type": "application/html"
     }
-    file_name_html = a_plot_path + a_name + ".html"
-    asci_file_name = file_name_html.translate(translation_table)
-    l_remote_file_name = a_name.translate(translation_table)
-    with open(asci_file_name, mode='r', encoding="utf-8") as file_plotly:
+
+    asci_source_file_name = a_source_filename.translate(translation_table)
+    # asci_source_file_name = asci_source_file_name.replace(" ", "%20")
+    asci_remote_file_name = a_remote_filename.translate(translation_table)
+    asci_remote_file_name = asci_remote_file_name.replace(" ", "%20")
+    a_channel = "19%3Af51e6d4cce424fc4a906b4cc78748bd3%40thread.tacv2"
+    a_name = a_name.replace(" ", " ")
+    # PUT /groups/{group-id}/drive/items/{parent-id}:/{filename}:/content
+    # PUT /sites/{site-id}/drives/{drive-id}/{parent-id}:/{filename}:/content
+    print("TA22 - Remote filename", asci_remote_file_name)
+    with open(asci_source_file_name, mode='r', encoding="utf-8") as file_plotly:
         data = file_plotly.read()
-    l_url = f"https://graph.microsoft.com/v1.0/sites/{a_channel}/drive/items/root:/{a_name}/{l_remote_file_name}.html:/content"
+    l_url = f"https://graph.microsoft.com/v1.0/sites/{a_channel}/drive/items/root:/{asci_remote_file_name}:/content"
+    print("TA23 -", l_url)
     response = requests.put(l_url, headers=l_headers, data=data)
     if response.status_code != 200:
         print(f"Error {response.status_code} response: {response.json()}")
 
-def upload_file_jpeg(a_token, a_plot_path, a_name, a_channel):
+def upload_file_to_onedrive(a_token, a_name, a_drive_id, a_file_path, a_file_name):
     l_headers = {
         "Authorization": "Bearer "+a_token,
         "Content-Type": "image/jpeg"
     }
-    file_name_html = a_plot_path + a_name + ".jpeg"
+    # print(l_headers)
+    file_name_html = a_file_path + a_file_name
     asci_file_name = file_name_html.translate(translation_table)
-    l_remote_file_name = a_name.translate(translation_table)
+    l_remote_file_name = a_file_name.translate(translation_table)
     with open(asci_file_name, mode='rb') as file_plotly:
         data = file_plotly.read()
-    l_url = f"https://graph.microsoft.com/v1.0/sites/{a_channel}/drive/items/root:/{a_name}/{l_remote_file_name}.jpeg:/content"
-    response = requests.put(l_url, headers=l_headers, data=data)
+
+    # drive_id = "b!JlWXSwZ06kqtE18zUw4nyLLiywuLAR9AiyKsmQ1pD5H1RQraPukJRoocfQ2Oj64W"
+    # l_url = f"https://graph.microsoft.com/v1.0/sites/{a_channel}/drive/items/root:/{a_name}/{l_remote_file_name}%20progress.jpeg:/content"
+    url = f"https://graph.microsoft.com/v1.0/drives/{a_drive_id}/items/root:/{a_name.replace(' ', '%20')}/{l_remote_file_name.replace(' ', '%20')}:/content"
+    print(url)
+    response = requests.put(url, headers=l_headers, data=data)
     if response.status_code != 200:
         print(f"Error {response.status_code} response: {response.json()}")
+
 
 
 def create_channel(a_token, a_team_id, a_diplay_name):
@@ -286,15 +302,18 @@ def get_channels(a_token, a_team_id):
         values = result['value']
         channels = []
         for value in values:
-            channels.append(value['displayName'])
+            print("TA27 -", value)
+            channel = {"display_name": value["displayName"], "id": value["id"]}
+            # print("TA22 -", channel)
+            channels.append(channel)
         return channels
     else:
         print(f"TA24 - Error getting token: {response.json()}")
-    return None
+    return []
 
 def get_team(a_token, a_team_id):
     url = f"https://graph.microsoft.com/v1.0/teams/{a_team_id}"
-    print("TA36 -", url)
+    # print("TA36 -", url)
     headers = {
         "Authorization": "Bearer " + a_token,
         "Content-Type": "application/json"
@@ -306,3 +325,18 @@ def get_team(a_token, a_team_id):
     else:
         print(f"TA38 - Error getting token: {response.json()}")
     return None
+
+def get_drive(token, team_id, channel_id):
+    url = f"https://graph.microsoft.com/v1.0/teams/{team_id}/channels/{channel_id}/filesFolder"
+    # print("TA36 -", url)
+    headers = {
+        "Authorization": "Bearer " + token,
+        "Content-Type": "application/json"
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        result = response.json()
+        return {"display_name": result['name'], "drive_id": result['parentReference']['driveId']}
+    else:
+        print(f"TA38 - Error getting token: {response.json()}")
+    return {"display_name": "", "drive_id": ""}

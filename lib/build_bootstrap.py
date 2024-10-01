@@ -147,17 +147,17 @@ def write_release_planning(a_start, a_templates, a_assignment_group, a_file_name
         file_list.write(file_html_string)
 
 
-def build_bootstrap_portfolio(instances, course, student, actual_date, templates, a_levels):
+def build_bootstrap_portfolio(instances, course, student, actual_date, templates, level_series):
     portfolio_items_html_string = ""
     portfolio_items = []
     learning_outcome_summary = {}
     for learning_outcome in course.learning_outcomes:
         learning_outcome_summary[learning_outcome.id] = {
-            'behaalde_punten': 0,
-            'complete_items': 0,
-            'incomplete_items': 0,
-            'niet_gemaakt': 0,
-            'niet_beoordeeld': 0
+            'total_points': 0,
+            'status_complete': 0,
+            'status_incomplete': 0,
+            'status_missed': 0,
+            'status_pending': 0
         }
     for perspective in course.perspectives.values():
         for assignment_group_id in perspective.assignment_groups:
@@ -175,31 +175,31 @@ def build_bootstrap_portfolio(instances, course, student, actual_date, templates
                     if submission_sequence.is_graded():
                         score = submission_sequence.get_score()
                         for learning_outcome_id in assignment_sequence.learning_outcomes:
-                            learning_outcome_summary[learning_outcome_id]['behaalde_punten'] += score
-                        if score == 0:
-                            status = "Niet zichtbaar"
+                            learning_outcome_summary[learning_outcome_id]['total_points'] += score
+                        if score == 0: #"Niet zichtbaar"
+                            status = level_series.level_series["bin2"].levels["0"].label
                             cell_status = "status_missed"
                             for learning_outcome_id in assignment_sequence.learning_outcomes:
-                                learning_outcome_summary[learning_outcome_id]['niet_gemaakt'] += 1
+                                learning_outcome_summary[learning_outcome_id][cell_status] += 1
                         elif score == submission_sequence.points:
-                            status = "Voldaan"
+                            status = level_series.level_series["bin2"].levels["2"].label
                             cell_status = "status_complete"
                             for learning_outcome_id in assignment_sequence.learning_outcomes:
-                                learning_outcome_summary[learning_outcome_id]['complete_items'] += 1
-                        else:
-                            status = "Niet voldaan"
+                                learning_outcome_summary[learning_outcome_id][cell_status] += 1
+                        else: #Niet voldaan
+                            status = level_series.level_series["bin2"].levels["1"].label
                             cell_status = "status_incomplete"
                             for learning_outcome_id in assignment_sequence.learning_outcomes:
-                                learning_outcome_summary[learning_outcome_id]['incomplete_items'] += 1
-                    else:
-                        status = "Nog niet beoordeeld"
+                                learning_outcome_summary[learning_outcome_id][cell_status] += 1
+                    else: #Nog niet beoordeeld
+                        status = level_series.level_series["bin2"].levels["-2"].label
                         cell_status = "status_pending"
                         for learning_outcome_id in assignment_sequence.learning_outcomes:
                             if "Modderman" in student.name:
                                 print("BB71 -", learning_outcome_id, assignment_sequence.name)
-                            learning_outcome_summary[learning_outcome_id]['niet_beoordeeld'] += 1
+                            learning_outcome_summary[learning_outcome_id][cell_status] += 1
                 else:
-                    status = "Toekomst"
+                    status = level_series.level_series["bin2"].levels["-1"].label
                     cell_status = "status_comming"
                 item_dict = {
                     "portfolio_item": portfolio_item,
@@ -226,11 +226,11 @@ def build_bootstrap_portfolio(instances, course, student, actual_date, templates
 
     for learning_outcome in course.learning_outcomes:
         learning_outcomes_header_html_string += '<th scope = "col" >'+learning_outcome.id+'</th>'
-        behaalde_punten_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['behaalde_punten'])+"</td>"
-        complete_items_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['complete_items'])+"</td>"
-        incomplete_items_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['incomplete_items'])+"</td>"
-        niet_gemaakt_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['niet_gemaakt'])+"</td>"
-        niet_beoordeeld_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['niet_beoordeeld'])+"</td>"
+        behaalde_punten_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['total_points'])+"</td>"
+        complete_items_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['status_complete'])+"</td>"
+        incomplete_items_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['status_incomplete'])+"</td>"
+        niet_gemaakt_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['status_missed'])+"</td>"
+        niet_beoordeeld_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['status_pending'])+"</td>"
 
     for portfolio_item in portfolio_items:
         # print(portfolio_item)
@@ -260,18 +260,31 @@ def build_bootstrap_portfolio(instances, course, student, actual_date, templates
         file_portfolio.write(portfolio_html_string)
     return
 
+def build_bootstrap_portfolio_empty(instances, course, student, actual_date, templates, levels):
+    portfolio_html_string = templates['portfolio_leeg'].substitute(
+        {'student_name': student.name,
+         'student_number': student.number,
+         })
+    file_name = instances.get_student_path() + student.name + " portfolio"
+    asci_file_name = file_name.translate(translation_table)
+    # print("BB21 - Write portfolio for", student.name)
+    with open(asci_file_name + ".html", mode='w', encoding="utf-8") as file_portfolio:
+        file_portfolio.write(portfolio_html_string)
+    return
+
+
 def build_bootstrap_student_index(instances, course, student, actual_date, templates, a_levels):
     student_group = course.find_student_group(student.group_id)
     teacher_str = ""
     for teacher in student_group.teachers:
         teacher = course.find_teacher(teacher)
         teacher_str += teacher.name + ", "
+    portfolio_file_name = ".//" + student.name.replace(" ", "%20") + "%20portfolio.html"
 
     progress_file_name = ".//" + student.name.replace(" ", "%20") + "%20progress.html"
-    portfolio_file_name = ".//" + student.name.replace(" ", "%20") + "%20portfolio.html"
     progress_asci_file_name = progress_file_name.translate(translation_table)
     portfolio_asci_file_name = portfolio_file_name.translate(translation_table)
-    print("BB91 - Index", progress_file_name, portfolio_asci_file_name)
+    # print("BB91 - Index", progress_file_name, portfolio_asci_file_name)
     student_group = course.find_student_group(student.group_id)
     portfolio_html_string = templates['student_index'].substitute(
         {

@@ -2,7 +2,8 @@ import sys
 
 from plotly.subplots import make_subplots
 
-from lib.build_bootstrap import build_bootstrap_portfolio, build_bootstrap_student_index
+from lib.build_bootstrap import build_bootstrap_portfolio, build_bootstrap_student_index, \
+    build_bootstrap_portfolio_empty
 from lib.build_plotly_attendance import plot_attendance
 from lib.build_plotly_perspective import plot_perspective, find_submissions, plot_overall_peilingen
 
@@ -18,21 +19,18 @@ def main(instance_name):
     if len(instance_name) > 0:
         instances.current_instance = instance_name
     print("GP02 - Instance:", instances.current_instance)
-    start = read_start(instances.get_start_file_name())
     course = read_course(instances.get_course_file_name(instances.current_instance))
     results = read_results(instances.get_result_file_name(instances.current_instance))
     templates = load_templates(instances.get_template_path())
     levels = read_levels("levels.json")
 
-    if results.actual_day > course.days_in_semester:
-        course.days_in_semester = results.actual_day + 1
-
-    count = 0
     for student in results.students:
         # print(l_peil_construction)
         print("GP10 -", student.name)
         if len(course.learning_outcomes) > 0:
             build_bootstrap_portfolio(instances, course, student, results.actual_date, templates, levels)
+        else:
+            build_bootstrap_portfolio_empty(instances, course, student, results.actual_date, templates, levels)
         build_bootstrap_student_index(instances, course, student, results.actual_date, templates, levels)
 
 
