@@ -14,9 +14,9 @@ class Attendance:
         self.total_points = total_points
         self.lower_points = lower_points
         self.upper_points = upper_points
-        self.attendance_moments = []
         self.bandwidth = bandwidth
         self.policy = policy
+        self.attendance_moments = []
 
     def to_json(self):
         check = lambda x: self.bandwidth.to_json() if x is not None else None
@@ -30,8 +30,8 @@ class Attendance:
             'total_points': self.total_points,
             'lower_points': self.lower_points,
             'upper_points': self.upper_points,
-            'attendance_moments': list(map(lambda m: m.to_json(), self.attendance_moments)),
-            'policy': self.policy.to_json()
+            'policy': self.policy.to_json(),
+            'attendance_moments': list(map(lambda m: m.to_json(), self.attendance_moments))
 
         }
         if self.bandwidth is not None:
@@ -42,6 +42,13 @@ class Attendance:
 
     def __str__(self):
         return f'Attendance({self.name}, {self.title}, {self.attendance_moments}, {self.levels}, , {self.policy})'
+
+    def get_moment(self, day):
+        for moment in self.attendance_moments:
+            if moment.attendance_day == day:
+                return moment
+        else:
+            None
 
     @staticmethod
     def from_dict(data_dict):

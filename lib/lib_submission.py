@@ -136,12 +136,8 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
         if hasattr(a_canvas_submission, "rubric_assessment"):
             canvas_submission_rubrics = a_canvas_submission.rubric_assessment.items()
             if len(canvas_submission_rubrics) == 0:
-                errors.append(f"WARNING rubrics defined in assignment [{a_assignment.name}] but not used in submission for student {a_student.name} group {a_student.group_id}. Teacher action required.")
-                print("LS51 -", errors[-1])
                 canvas_submission_rubrics = None
         else:
-            errors.append(f"WARNING rubrics defined in assignment [{a_assignment.name}] but not used in submission for student {a_student.name} group {a_student.group_id}. Teacher action required.")
-            print("LS52 -", errors[-1])
             canvas_submission_rubrics = None
     else:
         canvas_submission_rubrics = None
@@ -152,9 +148,14 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
         #Geen rubrics bij submission
         rubrics_scores = None
         # Geen rubriek dus voldaan niet voldaan wordt gebruikt bij bepalen score
+        if len(a_assignment.rubrics) > 0:
+            errors.append(f"WARNING rubrics defined in assignment [{a_assignment.name}] but not used in submission for student {a_student.name} group {a_student.group_id}. Teacher action required.")
+            print("LS52 -", errors[-1])
+
         if a_assignment.grading_type == "pass_fail":
             if a_canvas_submission.grade == 'complete':
                 submission_score = a_assignment.points
+                errors = []
             elif a_canvas_submission.grade == 'incomplete':
                 submission_score = round(a_assignment.points/2, 2)
             else:

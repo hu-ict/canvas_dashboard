@@ -2,9 +2,8 @@ import json
 import sys
 
 from canvasapi import Canvas
-from lib.lib_bandwidth import bandwidth_builder
 from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
-from lib.file import read_start, read_config, read_course_instance, read_course
+from lib.file import read_start, read_course_instance, read_course
 from model.Student import Student
 from model.StudentLink import StudentLink
 from model.perspective.AttendancePerspective import AttendancePerspective
@@ -69,7 +68,7 @@ def add_perspectives_to_student(course, student):
         student.student_level_moments = StudentLevelMoments(course.level_moments.name, course.level_moments.assignment_groups)
     if course.attendance is not None:
         # print("GS33 - Add attendance perspective to students")
-        student.attendance_perspective = AttendancePerspective(course.attendance.name, -1, 0, 0)
+        student.attendance_perspective = AttendancePerspective(course.attendance.name, -1, 0, 0, 0, 0, 0)
     # Perspectives toevoegen aan Students
     student.perspectives = {}
     for perspective in course.perspectives.values():

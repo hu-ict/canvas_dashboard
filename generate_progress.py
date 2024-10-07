@@ -1,5 +1,5 @@
 import sys
-from lib.lib_progress import get_overall_progress, get_attendance_progress
+from lib.lib_progress import get_overall_progress, get_attendance_progress, proces_progress
 import json
 from lib.file import read_start, read_course, read_progress, read_results, read_course_instance
 from lib.lib_date import get_actual_date
@@ -29,29 +29,6 @@ def generate_history(results):
     return progress_history
 
 
-def process_progress(start, course, results, progress_history):
-    progress_day = ProgressDay(results.actual_day, course.perspectives.keys())
-    for student in results.students:
-        if start.attendance is not None:
-            get_attendance_progress(course.attendance, results, student.attendance_perspective)
-            progress_day.attendance[str(student.attendance_perspective.progress)] += 1
-        for perspective in student.perspectives.values():
-            get_progress(course, perspective)
-            progress_day.perspective[perspective.name][str(perspective.progress)] += 1
-    # bepaal de totaal voortgang
-    for student in results.students:
-        perspectives = []
-        for perspective in student.perspectives.values():
-            # print("GP08 -", perspective.name, perspective.progress)
-            perspectives.append(perspective.progress)
-        # print("GP10 -", perspectives)
-        progress = get_overall_progress(perspectives)
-        # print("GP20 - student.progress =", progress, student.name)
-        student.progress = progress
-        progress_day.progress[str(progress)] += 1
-        # print(f"{student.name}, {student.role}, {student.progress}, {student.perspectives['team'].progress}, {student.perspectives['gilde'].progress}, {student.perspectives['kennis'].progress}")
-    progress_history.append_day(progress_day)
-
 
 def main(instance_name):
     g_actual_date = get_actual_date()
@@ -65,7 +42,7 @@ def main(instance_name):
     progress_history = read_progress(instances.get_progress_file_name(instances.current_instance))
 
     # progress_history = generate_history(results)
-    process_progress(start, course, results, progress_history)
+    proces_progress(start, course, results, progress_history)
 
     with open(instances.get_result_file_name(instances.current_instance), 'w') as f:
         dict_result = results.to_json(['perspectives'])

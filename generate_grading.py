@@ -1,8 +1,10 @@
 import sys
 
-from lib.file import read_course_instance, read_start, read_course, read_results, read_levels
+from canvasapi import Canvas
+
+from lib.file import read_course_instance, read_start, read_course, read_results, read_levels_from_canvas, read_levels
 from lib.lib_bootstrap import load_templates
-from lib.lib_date import get_actual_date, get_date_time_loc
+from lib.lib_date import get_actual_date, get_date_time_loc, API_URL
 from lib.translation_table import translation_table
 
 
@@ -74,6 +76,11 @@ def build_bootstrap_grading(a_instances, a_start, a_course, a_results, a_templat
         print("GG11 - Write grade for", student.name)
         with open(asci_file_name + ".html", mode='w', encoding="utf-8") as file_grade:
             file_grade.write(grading_html_string)
+
+
+def read_levels_fron_canvas(canvas_course_id):
+    pass
+
 
 def main(instance_name):
     g_actual_date = get_actual_date()

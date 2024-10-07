@@ -1,13 +1,16 @@
 import json
 import sys
 
+from canvasapi import Canvas
+
 from lib.build_totals import build_totals
 from lib.build_bootstrap import build_bootstrap_general
 from lib.build_late import build_late_list
 from lib.lib_bootstrap import load_templates
-from lib.lib_date import get_actual_date
+from lib.lib_date import get_actual_date, API_URL
 from lib.plot_totals import plot_werkvoorraad, plot_voortgang
-from lib.file import read_course, read_start, read_results, read_progress, read_levels, read_course_instance, read_workload
+from lib.file import read_course, read_start, read_results, read_progress, read_course_instance, read_workload, \
+    read_levels_from_canvas, read_levels
 from model.WorkloadDay import WorkloadDay
 
 

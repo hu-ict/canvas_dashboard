@@ -1,10 +1,11 @@
 import json
 import sys
 
-from lib.build_bootstrap import build_bootstrap_general
+from canvasapi import Canvas
+
 from lib.build_bootstrap_structure import build_bootstrap_structure_index
-from lib.lib_date import get_actual_date
-from lib.file import read_course, read_start, read_levels, read_course_instance
+from lib.lib_date import get_actual_date, API_URL
+from lib.file import read_course, read_start, read_course_instance, read_levels_from_canvas
 
 
 def init_sections_count(course):
@@ -90,7 +91,8 @@ def main(instance_name):
     start = read_start(instances.get_start_file_name())
 
     course = read_course(instances.get_course_file_name(instances.current_instance))
-    level_series = read_levels("levels.json")
+    canvas = Canvas(API_URL, start.api_key)
+    level_series = read_levels_from_canvas(canvas)
 
     team_coaches = init_coaches_dict(course)
     for team_coach in team_coaches.values():

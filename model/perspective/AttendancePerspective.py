@@ -3,10 +3,13 @@ from model.perspective.AttendanceSubmission import AttendanceSubmission
 
 
 class AttendancePerspective:
-    def __init__(self, name, progress, sum_score, last_score):
+    def __init__(self, name, progress, count, percentage, essential_count, essential_percentage, last_score):
         self.name = name
         self.progress = progress
-        self.sum_score = sum_score
+        self.count = count
+        self.percentage = percentage
+        self.essential_count = essential_count
+        self.essential_percentage = essential_percentage
         self.last_score = last_score
         self.attendance_submissions = []
 
@@ -14,13 +17,16 @@ class AttendancePerspective:
         return {
             'name': self.name,
             'progress': self.progress,
-            'sum_score': self.sum_score,
+            'count': self.count,
+            'percentage': self.percentage,
+            'essential_count': self.essential_count,
+            'essential_percentage': self.essential_percentage,
             'last_score': self.last_score,
             'attendance_submissions': list(map(lambda s: s.to_json(), self.attendance_submissions))
         }
 
     def __str__(self):
-        lines = f'AttendancePerspective({self.name} progress {self.progress}, sum_score {self.sum_score}, last_score {self.last_score})'
+        lines = f'AttendancePerspective({self.name} progress {self.progress}, count {self.count}, percentage {self.percentage}, essential_count {self.essential_count}, essential_percentage {self.essential_percentage}, last_score {self.last_score})'
         for attendance_submission in self.attendance_submissions:
             lines += "\n s " + str(attendance_submission)
         return lines
@@ -42,10 +48,10 @@ class AttendancePerspective:
     @staticmethod
     def from_dict(data_dict):
         # print("StudentPerspective.from_dict", data_dict)
-        if 'last_score' in data_dict.keys():
-            new = AttendancePerspective(data_dict['name'], data_dict['progress'], data_dict['sum_score'], data_dict['last_score'])
+        if 'count' in data_dict.keys():
+            new = AttendancePerspective(data_dict['name'], data_dict['progress'], data_dict['count'], data_dict['percentage'], data_dict['essential_count'], data_dict['essential_percentage'], data_dict['last_score'])
         else:
-            new = AttendancePerspective(data_dict['name'], 0, 0, 0)
+            new = AttendancePerspective(data_dict['name'], -1, 0, 0, 0, 0, 0)
         if 'attendance_submissions' in data_dict.keys():
             new.attendance_submissions = list(map(lambda s: AttendanceSubmission.from_dict(s), data_dict['attendance_submissions']))
         return new

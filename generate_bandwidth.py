@@ -1,6 +1,6 @@
 import json
 import sys
-from lib.file import read_start, read_course, read_progress, read_results, read_course_instance
+from lib.file import read_start, read_course, read_course_instance
 from lib.lib_bandwidth import bandwidth_builder, bandwidth_builder_attendance
 from lib.lib_date import get_actual_date
 

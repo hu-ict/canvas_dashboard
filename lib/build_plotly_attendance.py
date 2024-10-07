@@ -63,7 +63,7 @@ def plot_attendance(a_row, a_col, a_fig, a_instances, a_start, a_course, a_atten
 
     plot_bandbreedte_colored(a_row, a_col, a_fig, a_course.days_in_semester, a_attendance.bandwidth, a_attendance.show_flow, a_attendance.total_points)
 
-    plot_day_bar(a_row, a_col, a_fig, a_start, a_attendance.total_points, a_actual_day, a_actual_date, a_attendance_perspective.progress, a_levels, a_attendance.show_points, a_attendance.show_flow, a_attendance_perspective.sum_score )
+    plot_day_bar(a_row, a_col, a_fig, a_start, a_attendance.total_points, a_actual_day, a_actual_date, a_attendance_perspective.progress, a_levels, a_attendance.show_points, a_attendance.show_flow, a_attendance_perspective.essential_percentage )
     plot_attendance_submissions(a_row, a_col, a_fig, a_start, a_course, a_attendance, a_attendance_perspective.attendance_submissions, a_levels)
     # plot_open_assignments(a_row, a_col, a_fig, a_start, a_course, show_points, l_assignments, a_levels)
     a_fig.update_yaxes(title_text="Percentage aanwezig", range=[0, a_course.attendance.total_points], row=a_row, col=a_col)

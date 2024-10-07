@@ -115,3 +115,20 @@ def remove_html_tags(text):
     import re
     clean = re.compile('<.*?>')
     return re.sub(clean, '', text)
+
+
+def read_config_from_canvas(canvas_course):
+    print("F021 - read config_file from Canvas", "config-dot-json")
+    page = canvas_course.get_page("config-dot-json")
+    config_file = remove_html_tags(page.body)
+    data = json.loads(config_file)
+    return CourseConfig.from_dict(data)
+
+
+def read_levels_from_canvas(canvas_course):
+    print("F022 - read levels_file from Canvas", "levels-dot-json")
+    page = canvas_course.get_page("levels-dot-json")
+    config_file = remove_html_tags(page.body)
+    data = json.loads(config_file)
+    level_series = LevelSeries.from_dict(data)
+    return level_series

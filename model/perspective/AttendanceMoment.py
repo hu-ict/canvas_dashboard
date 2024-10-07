@@ -11,7 +11,7 @@ class AttendanceMoment:
         return dict_result
 
     def __str__(self):
-        return f'Policy({self.attendance_day}, {self.points})'
+        return f'AttendanceMoment({self.attendance_day}, {self.points})'
 
     @staticmethod
     def from_dict(data_dict):

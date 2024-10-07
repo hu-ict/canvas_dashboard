@@ -1,11 +1,12 @@
 import sys
 
+from canvasapi import Canvas
 from plotly.subplots import make_subplots
 
 from lib.build_plotly_attendance import plot_attendance
 from lib.build_plotly_perspective import plot_perspective, find_submissions, plot_overall_peilingen
 from lib.lib_date import get_date_time_loc, get_actual_date
-from lib.file import read_start, read_course, read_results, read_levels, read_course_instance
+from lib.file import read_start, read_course, read_results, read_course_instance, read_levels
 from lib.translation_table import translation_table
 from model.Submission import Submission
 
@@ -19,7 +20,7 @@ def main(instance_name):
     start = read_start(instances.get_start_file_name())
     course = read_course(instances.get_course_file_name(instances.current_instance))
     results = read_results(instances.get_result_file_name(instances.current_instance))
-    levels = read_levels("levels.json")
+    level_series = read_levels("levels.json")
 
     if results.actual_day > course.days_in_semester:
         course.days_in_semester = results.actual_day + 1
@@ -101,11 +102,11 @@ def main(instance_name):
             row = positions[perspective.name]['row']
             col = positions[perspective.name]['col']
             plot_perspective(row, col, fig, a_start, a_course, perspective, a_peil_construction,
-                              results.actual_day, get_date_time_loc(a_actual_date), levels)
+                              results.actual_day, get_date_time_loc(a_actual_date), level_series)
         if a_course.attendance is not None:
             row = positions["attendance"]['row']
             col = positions["attendance"]['col']
-            plot_attendance(row, col, fig, a_instances, a_start, a_course, a_course.attendance, a_student.attendance_perspective, results.actual_day, get_date_time_loc(a_actual_date), levels)
+            plot_attendance(row, col, fig, a_instances, a_start, a_course, a_course.attendance, a_student.attendance_perspective, results.actual_day, get_date_time_loc(a_actual_date), level_series)
 
         if a_instances.is_instance_of('inno_courses'):
             # Peil overall drie peilmomenten
@@ -114,13 +115,13 @@ def main(instance_name):
                 level_moment = a_student.get_peilmoment_submission_by_query([peil, "overall"])
                 if level_moment is not None:
                     # ingevuld
-                    plot_overall_peilingen(fig, positions[peil]['row'], positions[peil]['col'], a_start, a_course, level_moment, levels)
+                    plot_overall_peilingen(fig, positions[peil]['row'], positions[peil]['col'], a_start, a_course, level_moment, level_series)
                 else:
                     # nog niet ingevuld
                     l_assignment = a_course.get_level_moments_by_query([peil, "overall"])
                     l_level_moment = Submission(0, 0, 0, 0, l_assignment.name, l_assignment.get_date(), l_assignment.get_day(),
                                                None, None, False, None, None, -1, 3, 0)
-                    plot_overall_peilingen(fig, positions[peil]['row'], positions[peil]['col'], a_start, a_course, l_level_moment, levels)
+                    plot_overall_peilingen(fig, positions[peil]['row'], positions[peil]['col'], a_start, a_course, l_level_moment, level_series)
 
         file_name = a_instances.get_student_path() + a_student.name + " progress"
         asci_file_name = file_name.translate(translation_table)
