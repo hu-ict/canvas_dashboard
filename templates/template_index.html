@@ -17,8 +17,10 @@
     <!-- Custom styles for this template-->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/startbootstrap-sb-admin-2/4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
     <script>
-        function setDetailName(name, role) {
-            document.getElementById("detail_name").innerHTML = name+' - '+role;
+        function setStudent(name, number, role, frame_a) {
+            document.getElementById("detail_name").innerHTML = name+' ('+number+') - '+role;
+            document.getElementById("iframe_a").setAttribute("src", frame_a);
+
             window.scrollTo({
                 top: 0,
                 left: 0,
@@ -65,7 +67,18 @@
             }
         }
 
-        function setCoach(coach_initials) {
+         function setStudentView(view) {
+            const views = document.getElementsByClassName("student_view");
+            for (i = views.length - 1; i >= 0; --i) {
+                if (views[i].className.includes(view)) {
+                    views[i].style.display = "block";
+                } else {
+                    views[i].style.display = "none";
+                }
+            }
+        }
+
+       function setCoach(coach_initials) {
             console.info("Coach! "+coach_initials);
             const leer_team = document.getElementsByClassName("coach");
             console.info("Boxes: "+leer_team.length);
@@ -87,25 +100,18 @@
 
     <!-- Page Wrapper -->
     <div id="wrapper">
-
-
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
-
             <!-- Main Content -->
             <div id="content">
-
-
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4 .gap-2">
-                        <h2 class="mt-4">Semesterstructuur $course_name</h2>
+                        <h2 class="mt-4">Dashboard $course_name</h2>
                     </div>
-
                     <!-- Content Row -->
                     <div class="row">
-
                         <div class="col-xl-2 col-md-6 mb-4">
                             <div class="card border-left-primary shadow h-100 py-2">
                                 <div class="card-body">
@@ -129,8 +135,8 @@
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                            </div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800"></div>
+                                                Inzendingen (nog beoordelen)</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">$submission_count ($not_graded_count)</div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -139,28 +145,121 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="col-xl-2 col-md-6 mb-4">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Snapshot $actual_date [dag] </div>
+                                            <div class="row no-gutters align-items-center">
+                                                <div class="col-auto">
+                                                    <div id="semester_day" class="h5 mb-0 mr-3 font-weight-bold text-gray-800">$semester_day</div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="progress progress-sm mr-2">
+                                                        <div class="progress-bar bg-info" role="progressbar"
+                                                            style="width:$percentage" aria-valuenow="$semester_day" aria-valuemin="0"
+                                                            aria-valuemax="150"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        $roles_card
+
                         $coaches_card
+
                     </div>
 
                     <!-- Content Row -->
 
                     <div class="row">
                         $tabs_html_string
+                        <script>setView("Groepen")</script>
                         <div class="col-lg-8">
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3">
                                     <div class="row">
-                                    <div class="col-lg-10">
                                         <h6 class="m-0 font-weight-bold text-primary" id="detail_name"></h6>
                                     </div>
-                                    </div>
                                 </div>
-                                <div class="embed-responsive embed-responsive-1by1">
-                                    <iframe class="embed-responsive-item" name="iframe_a" height="820" width="620" src=""></iframe>
+                                <div class="card-body">
+                                    <div class="student_view Progressie">
+                                        <ul class="nav nav-tabs ">
+                                            <li class="nav-item">
+                                                <a onclick="setStudentView('Progressie')" class="nav-link active" aria-current="page" href="#">Progressie</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a onclick="setStudentView('Portfolio')" class="nav-link" aria-current="false" href="#">Portfolio</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a onclick="setStudentView('Beoordeling')" class="nav-link" aria-current="false" href="#">Beoordeling</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="student_view Portfolio">
+                                        <ul class="nav nav-tabs">
+                                            <li class="nav-item">
+                                                <a onclick="setStudentView('Progressie')" class="nav-link" aria-current="false" href="#">Progressie</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a onclick="setStudentView('Portfolio')" class="nav-link active" aria-current="page" href="#">Portfolio</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a onclick="setStudentView('Beoordeling')" class="nav-link " aria-current="false" href="#">Beoordeling</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="student_view Beoordeling">
+                                        <ul class="nav nav-tabs">
+                                            <li class="nav-item">
+                                                <a onclick="setStudentView('Progressie')" class="nav-link" aria-current="false" href="#">Progressie</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a onclick="setStudentView('Portfolio')" class="nav-link" aria-current="false" href="#">Portfolio</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a onclick="setStudentView('Beoordeling')" class="nav-link active" aria-current="page" href="#">Beoordeling</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="student_view Progressie">
+                                        <div class="embed-responsive embed-responsive-1by1">
+                                            <div >
+                                                <iframe class="embed-responsive-item" name="iframe_a" id="iframe_a" height="820" width="620" src=""></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="student_view Portfolio">
+                                        <div class="embed-responsive embed-responsive-1by1">
+                                            <div>
+                                                <iframe class="embed-responsive-item" name="iframe_b" id="iframe_b" height="820" width="620" src=""></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="student_view Beoordeling">
+                                        <div class="embed-responsive embed-responsive-1by1">
+                                            <div>
+                                                <iframe class="embed-responsive-item" name="iframe_c" id="iframe_c" height="820" width="620" src=""></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <script>setView("Groepen")</script>
+                        <script>
+                            setStudentView("Progressie");
+                            setDetailName("Leeg", "", "")
+                        </script>
+
                     </div>
 
                 </div>
