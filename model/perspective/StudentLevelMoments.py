@@ -26,6 +26,13 @@ class StudentLevelMoments:
                 return submission
         return None
 
+
+    def get_submission_by_assignment(self, assigment_id):
+        for submission in self.submissions:
+            if submission.assignment_id == assigment_id:
+                return submission
+        return None
+
     def put_submission(self, a_submission):
         index = -1
         for i in range(len(self.submissions)):

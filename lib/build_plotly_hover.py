@@ -78,7 +78,7 @@ def get_hover_peiling(a_peil_submissions, a_start, a_course, a_levels):
 def get_hover_comments(comments):
     l_hover = ""
     if len(comments) > 0:
-        l_hover += "<br><b>Commentaar:</b>"
+        l_hover += "<br><b>Commentaar/Feedback:</b>"
         for comment in comments:
             value = comment.author_name + " - <i>" + comment.comment + "</i>"
             wrapper = textwrap.TextWrapper(width=125)

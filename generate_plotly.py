@@ -133,8 +133,6 @@ def main(instance_name):
             asci_file_name = file_name.translate(translation_table)
             fig.write_image(asci_file_name)
 
-
-
     peil_construction = peil_construct(course)
     # print(peil_construction)
     # peil_construction = None

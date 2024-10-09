@@ -1,12 +1,10 @@
 import csv
 import json
 import os
-
 from model.ProgressHistory import ProgressHistory
 from model.Result import Result
 from model.CourseConfig import CourseConfig
 from model.Start import Start
-from model.Submission import Submission
 from model.TeamsApi import TeamsApi
 from model.WorkloadHistory import WorkloadHistory
 from model.instance.CourseInstances import CourseInstances
@@ -132,3 +130,13 @@ def read_levels_from_canvas(canvas_course):
     data = json.loads(config_file)
     level_series = LevelSeries.from_dict(data)
     return level_series
+
+
+def read_plotly(plotly_file_name):
+    with open(plotly_file_name, mode='r', encoding="utf-8") as file_result:
+        lines = file_result.readlines()
+        result_str = ""
+        for line in lines:
+            result_str += line.strip()
+        return result_str
+

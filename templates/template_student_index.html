@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <meta name="description" content="">
-    <meta name="author" content="Hogeschool Utrecht">
+    <meta name="author" content="Berend Wilkens, Hogeschool Utrecht">
     <!-- Custom fonts for this template-->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
@@ -59,74 +59,20 @@
             </div>
 
             <div class="row">
-
-            <div class="col-lg-12">
-                <div class="student_view Progressie">
-                    <ul class="nav nav-tabs">
-                        <li class="nav-item">
-                            <a onclick="setStudentView('Progressie')" class="nav-link active" aria-current="page" href="#">Progressie</a>
-                        </li>
-                        <li class="nav-item">
-                            <a onclick="setStudentView('Portfolio')" class="nav-link" aria-current="false" href="#">Portfolio</a>
-                        </li>
-                        <li class="nav-item">
-                            <a onclick="setStudentView('Beoordeling')" class="nav-link" aria-current="false" href="#">Beoordeling</a>
-                        </li>
-                    </ul>
+                <div class="col-lg-12">
+                    $student_tabs
                 </div>
-                <div class="student_view Portfolio">
-                    <ul class="nav nav-tabs">
-                        <li class="nav-item">
-                            <a onclick="setStudentView('Progressie')" class="nav-link" aria-current="false" href="#">Progressie</a>
-                        </li>
-                        <li class="nav-item">
-                            <a onclick="setStudentView('Portfolio')" class="nav-link active" aria-current="page" href="#">Portfolio</a>
-                        </li>
-                        <li class="nav-item">
-                            <a onclick="setStudentView('Beoordeling')" class="nav-link " aria-current="false" href="#">Beoordeling</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="student_view Beoordeling">
-                    <ul class="nav nav-tabs">
-                        <li class="nav-item">
-                            <a onclick="setStudentView('Progressie')" class="nav-link" aria-current="false" href="#">Progressie</a>
-                        </li>
-                        <li class="nav-item">
-                            <a onclick="setStudentView('Portfolio')" class="nav-link" aria-current="false" href="#">Portfolio</a>
-                        </li>
-                        <li class="nav-item">
-                            <a onclick="setStudentView('Beoordeling')" class="nav-link active" aria-current="page" href="#">Beoordeling</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="student_view Progressie">
-                    <div class="embed-responsive embed-responsive-1by1">
-                        <div >
-                            <iframe class="embed-responsive-item" name="iframe_a" id="iframe_a" height="1000" src="$progress_file"></iframe>
-                        </div>
-                    </div>
-                </div>
-                <div class="student_view Portfolio">
-                    <div class="embed-responsive embed-responsive-1by1">
-                        <div>
-                            <iframe class="embed-responsive-item" name="iframe_b" id="iframe_b" height="1000" width="1300" src="$portfolio_file"></iframe>
-                        </div>
-                    </div>
-                </div>
-                <div class="student_view Beoordeling">
-                    <div class="embed-responsive embed-responsive-1by1">
-                        <div>
-                            <iframe class="embed-responsive-item" name="iframe_c" id="iframe_c" height="1000" width="1300" src=""></iframe>
-                        </div>
-                    </div>
-                </div>
-            </div>
             </div>
         </div>
-        <script>
-            setStudentView("Progressie");
-        </script>
+<!--        <script>
+            setStudentView("portfolio");
+        </script> -->
     </div>
+    <!-- Bootstrap core JavaScript-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <!-- Core plugin JavaScript-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js" integrity="sha512-ahmSZKApTDNd3gVuqL5TQ3MBTj8tL5p2tYV05Xxzcfu6/ecvt1A0j6tfudSGBVuteSoTRMqMljbfdU0g2eDNUA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/startbootstrap-sb-admin-2/4.1.4/js/sb-admin-2.min.js" integrity="sha512-+QnjQxxaOpoJ+AAeNgvVatHiUWEDbvHja9l46BHhmzvP0blLTXC4LsvwDVeNhGgqqGQYBQLFhdKFyjzPX6HGmw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>

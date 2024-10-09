@@ -2,7 +2,8 @@ import sys
 
 from canvasapi import Canvas
 from plotly.subplots import make_subplots
-from lib.build_bootstrap import build_bootstrap_portfolio, build_bootstrap_student_index, build_bootstrap_portfolio_empty
+
+from lib.build_bootstrap_student import build_bootstrap_student_index
 from lib.build_plotly_attendance import plot_attendance
 from lib.build_plotly_perspective import plot_perspective, find_submissions, plot_overall_peilingen
 
@@ -26,13 +27,8 @@ def main(instance_name):
     for student in results.students:
         # print(l_peil_construction)
         print("GP10 -", student.name)
-        if len(course.learning_outcomes) > 0:
-            build_bootstrap_portfolio(instances, course, student, results.actual_date, templates, level_series)
-        else:
-            build_bootstrap_portfolio_empty(instances, course, student, results.actual_date, templates, level_series)
-        build_bootstrap_student_index(instances, course, student, results.actual_date, templates, level_series)
 
-
+        build_bootstrap_student_index(instances, results.id, course, student, results.actual_date, templates, level_series)
     print("GP99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
 
