@@ -8,7 +8,7 @@ from model.Start import Start
 from model.TeamsApi import TeamsApi
 from model.WorkloadHistory import WorkloadHistory
 from model.instance.CourseInstances import CourseInstances
-from model.perspective.LevelSeries import LevelSeries
+from model.perspective.LevelSerieCollection import LevelSerieCollection
 
 ENVIRONMENT_FILE_NAME = ".//courses//course_instances.json"
 
@@ -37,8 +37,8 @@ def read_levels(levels_file_name):
     print("F003 - read_levels", levels_file_name)
     with open(levels_file_name, mode='r', encoding="utf-8") as file_labels:
         data = json.load(file_labels)
-        level_series = LevelSeries.from_dict(data)
-        return level_series
+        level_serie_colection = LevelSerieCollection.from_dict(data)
+        return level_serie_colection
 
 
 def read_config(config_file_name):
@@ -128,7 +128,7 @@ def read_levels_from_canvas(canvas_course):
     page = canvas_course.get_page("levels-dot-json")
     config_file = remove_html_tags(page.body)
     data = json.loads(config_file)
-    level_series = LevelSeries.from_dict(data)
+    level_series = LevelSerieCollection.from_dict(data)
     return level_series
 
 

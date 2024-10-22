@@ -1,5 +1,6 @@
 from model.Assignment import Assignment
 from model.LearningOutcome import LearningOutcome
+from model.perspective.Status import MISSED_ITEM
 
 
 class AssignmentSequence:
@@ -15,14 +16,52 @@ class AssignmentSequence:
         return f'AssignmentSequence({self.name}, {self.tag}, {self.grading_type}, {self.points})'
 
     def get_day(self):
-        if len(self.assignments) > 0:
-            return self.assignments[0].assignment_day
-        return 0
+        return self.assignments[0].assignment_day
 
     def get_date(self):
+        return self.assignments[0].assignment_date
+
+    def get_date_day(self, submission_sequence, actual_day):
         if len(self.assignments) > 0:
-            return self.assignments[0].assignment_date
-        return 0
+            index = 0
+            for assignment in self.assignments:
+                if submission_sequence is None:
+                    if actual_day < assignment.assignment_day:
+                        # deadline nog niet verstreken
+                        return self.assignments[index].assignment_date, self.assignments[index].assignment_day
+                    else:
+                        # deadline verstreken
+                        index += 1
+                else:
+                    submission = submission_sequence.get_submission_by_assignment_id(assignment.id)
+                    if submission is None:
+                        # niets ingeleverd
+                        if actual_day < assignment.assignment_day:
+                            # deadline nog niet verstreken
+                            return self.assignments[index].assignment_date, self.assignments[index].assignment_day
+                        else:
+                            # deadline verstreken
+                            index += 1
+                    else:
+                        # wel ingeleverd
+                        if submission.graded:
+                            # beoordeeld
+                            if submission.score == submission.points:
+                                # voldaan
+                                return self.assignments[index].assignment_date, self.assignments[index].assignment_day
+                            else:
+                                # niet voldaan
+                                index += 1
+                        elif submission.status == MISSED_ITEM:
+                            # niets ingeleverd
+                            index += 1
+                        else:
+                            # nog niet beoordeeld
+                            return self.assignments[index].assignment_date, self.assignments[index].assignment_day
+            if index >= len(self.assignments):
+                index = len(self.assignments) - 1
+                return self.assignments[index].assignment_date, self.assignments[index].assignment_day
+        return 0, 0
 
     def get_passed_assignments(self, actual_day):
         passed_assignments = []
@@ -30,6 +69,31 @@ class AssignmentSequence:
             if assignment.assignment_day < actual_day:
                 passed_assignments.append(assignment)
         return passed_assignments
+
+    def get_missed_assignments(self, submission_sequence, actual_day):
+        missed_assignments = []
+        last_in_completed = False
+        for assignment in self.assignments:
+            if assignment.assignment_day < actual_day:
+                # deadline is verstreken
+                if submission_sequence is None:
+                    missed_assignments.append(assignment)
+                else:
+                    submission = submission_sequence.get_submission_by_assignment_id(assignment.id)
+                    if submission is None:
+                        missed_assignments.append(assignment)
+                    else:
+                        if submission.graded:
+                            if submission.score == submission.points:
+                                # voldaan
+                                return missed_assignments
+                            else:
+                                # niet voldaan
+                                pass
+                        else:
+                            # nog niet beoordeeld
+                            return missed_assignments
+        return missed_assignments
 
     def get_last_passed_assignment(self, actual_day):
         last_passed_assignment = None

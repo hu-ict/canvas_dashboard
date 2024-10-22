@@ -3,7 +3,7 @@ from model.perspective.StudentLevelMoments import StudentLevelMoments
 from model.perspective.StudentPerspective import StudentPerspective
 
 
-class Student:
+class StudentResults:
     def __init__(self, a_student_id, a_group_id, a_name, a_number, a_sortable_name, a_coach, a_role, a_email, a_site, a_progress):
         self.id = a_student_id
         self.group_id = a_group_id
@@ -20,7 +20,7 @@ class Student:
         self.perspectives = None
 
     def __str__(self):
-        line = f'Student({self.id}, {self.group_id}, {self.name}, {self.number}, {self.coach}, {self.role}, {self.email}, {self.progress})\n'
+        line = f'StudentResults({self.id}, {self.group_id}, {self.name}, {self.number}, {self.coach}, {self.role}, {self.email}, {self.progress})\n'
         if self.perspectives is not None:
             for perspective in self.perspectives:
                 line += " p "+str(self.perspectives[perspective])
@@ -100,10 +100,10 @@ class Student:
     def from_dict(data_dict):
         # print("Student.from_dict", data_dict)
         if 'number' in data_dict.keys():
-            new = Student(data_dict['id'], data_dict['group_id'], data_dict['name'], data_dict['number'], data_dict['sortable_name'], data_dict['coach'],
+            new = StudentResults(data_dict['id'], data_dict['group_id'], data_dict['name'], data_dict['number'], data_dict['sortable_name'], data_dict['coach'],
             data_dict['role'], data_dict['email'], data_dict[ 'site'], data_dict['progress'])
         else:
-            new = Student(data_dict['id'], data_dict['group_id'], data_dict['name'], "x", data_dict['sortable_name'], data_dict['coach'],
+            new = StudentResults(data_dict['id'], data_dict['group_id'], data_dict['name'], "x", data_dict['sortable_name'], data_dict['coach'],
             data_dict['role'], data_dict['email'], data_dict[ 'site'], data_dict['progress'])
 
         if 'student_level_moments' in data_dict.keys() and data_dict['student_level_moments'] is not None:

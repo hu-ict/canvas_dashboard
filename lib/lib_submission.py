@@ -2,11 +2,12 @@ from lib.lib_date import get_date_time_obj, date_to_day, get_actual_date, get_da
 from model.Comment import Comment
 from model.CriteriumScore import CriteriumScore
 from model.Submission import Submission
-from random import randrange
+from model.perspective.Status import MISSED_ITEM, NOT_CORRECT_GRADED, NOT_YET_GRADED, GRADED
 
-NOT_GRADED = "Nog niet beoordeeld."
 NO_SUBMISSION = "Niets ingeleverd voor de deadline"
+NO_SUBMISSION_GRADE = "Moet nog beoordeeld worden"
 NO_DATA = "Geen data"
+ROBOT = "Automatisch door systeem"
 
 
 def remove_html_tags(text):
@@ -16,13 +17,13 @@ def remove_html_tags(text):
     return re.sub(clean, '', text)
 
 
-def get_submission_date(a_canvas_submission, a_start, a_assignment):
-# bepaal de date/time van het datapunt
+def get_submission_date(a_course, a_canvas_submission, a_assignment):
+    # bepaal de date/time van het datapunt
     if a_canvas_submission.submitted_at:
         submitted_date = get_date_time_obj(a_canvas_submission.submitted_at)
     else:
         submitted_date = a_assignment.assignment_date
-    submitted_day = date_to_day(a_start.start_date, submitted_date)
+    submitted_day = date_to_day(a_course.start_date, submitted_date)
     return submitted_date, submitted_day
 
 
@@ -98,7 +99,7 @@ def get_rubric_score(rubrics_submission, student):
     return criterium_scores, round(rubric_score, 2), error
 
 
-def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_submission):
+def submission_builder(a_course, a_student, a_assignment, a_canvas_submission):
     errors = []
     if a_canvas_submission.grade:
         graded = True
@@ -114,14 +115,14 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
     if not graded:
         grader_name = None
         grader_date = None
-        submission_score = 0
         l_submission = Submission(a_canvas_submission.id, a_assignment.group_id, a_assignment.id, a_student.id,
                                   a_assignment.name,
                                   a_assignment.assignment_date,
                                   a_assignment.assignment_day,
                                   None,
                                   None,
-                                  graded, grader_name, grader_date, submission_score,
+                                  graded, NOT_YET_GRADED,
+                                  grader_name, grader_date, 0,
                                   a_assignment.points, 0)
         for canvas_comment in canvas_comments:
             l_submission.comments.append(
@@ -129,7 +130,8 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
                         canvas_comment['author_name'],
                         get_date_time_obj(canvas_comment['created_at']),
                         canvas_comment['comment']))
-        l_submission.submitted_date, l_submission.submitted_day = get_submission_date(a_canvas_submission, a_start, a_assignment)
+        l_submission.submitted_date, l_submission.submitted_day = get_submission_date(a_course, a_canvas_submission,
+                                                                                      a_assignment)
         return l_submission
 
     if len(a_assignment.rubrics) > 0:
@@ -145,24 +147,32 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
     # print("LS31 -", f"submission_builder [{graded}] [{a_canvas_submission.submitted_at}] grade {a_canvas_submission.grade} grader_id {a_canvas_submission.grader_id} comments {len(canvas_comments)} score {a_canvas_submission.score} grading_type {a_assignment.grading_type} and student {a_student.name}.")
     submission_score = 0.0
     if canvas_submission_rubrics is None:
-        #Geen rubrics bij submission
+        # Geen rubrics bij submission
         rubrics_scores = None
         # Geen rubriek dus voldaan niet voldaan wordt gebruikt bij bepalen score
         if len(a_assignment.rubrics) > 0:
-            errors.append(f"WARNING rubrics defined in assignment [{a_assignment.name}] but not used in submission for student {a_student.name} group {a_student.group_id}. Teacher action required.")
+            errors.append(
+                f"WARNING rubrics defined in assignment [{a_assignment.name}] but not used in submission for student {a_student.name} group {a_student.group_id}. Teacher action required.")
             print("LS52 -", errors[-1])
 
         if a_assignment.grading_type == "pass_fail":
-            if a_canvas_submission.grade == 'complete':
+            if len(a_assignment.rubrics) > 0 and a_assignment.group_id == a_course.level_moments.assignment_groups[0]:
+                # als er rubrics achter een peilmoment zit moet deze gebuikt worden, zo niet fout
+                errors.append(
+                    f"ERROR rubrics defined in assignment [{a_assignment.name}] but not used in LevelMoment for student {a_student.name} group {a_student.group_id}. Teacher action required.")
+                print("LS52 -", errors[-1])
+                submission_score = 0.00
+            elif a_canvas_submission.grade == 'complete':
                 submission_score = a_assignment.points
                 errors = []
             elif a_canvas_submission.grade == 'incomplete':
-                submission_score = round(a_assignment.points/2, 2)
+                submission_score = round(a_assignment.points / 2, 2)
             else:
                 submission_score = 0.00
         elif a_assignment.grading_type == "points":
             if a_canvas_submission.score is None:
-                errors.append(f"ERROR score is empty {a_canvas_submission.grade} {a_canvas_submission.grader_id} for assignment {a_assignment.name} and student {a_student.name} group {a_student.group_id}.")
+                errors.append(
+                    f"ERROR score is empty {a_canvas_submission.grade} {a_canvas_submission.grader_id} for assignment {a_assignment.name} and student {a_student.name} group {a_student.group_id}.")
                 print("LS75 -", errors[-1])
                 submission_score = 0.00
             else:
@@ -181,14 +191,21 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
         if len(error) > 0:
             errors.append(error)
         if a_assignment.grading_type == "pass_fail":
-            if a_canvas_submission.score is not None:
-                #INNO vd/nvd met rubrics voor de "echte" punten (verborgen voor studenten)
-                if a_canvas_submission.score == 0:
-                    submission_score = round(rubric_score, 2)
+            if a_canvas_submission.grade == 'complete':
+                if a_canvas_submission.score is not None:
+                    # INNO en PROP-peil vd/nvd met rubrics voor de "echte" punten (verborgen voor studenten)
+                    if a_canvas_submission.score == 0:
+                        submission_score = round(rubric_score, 2)
+                    else:
+                        submission_score = round(a_canvas_submission.score, 2)
                 else:
-                    submission_score = round(a_canvas_submission.score, 2)
-            else:
+                    submission_score = round(rubric_score, 2)
+                errors = []
+            elif a_canvas_submission.grade == 'incomplete':
+                # submission_score = round(a_assignment.points / 2, 2)
                 submission_score = round(rubric_score, 2)
+            else:
+                submission_score = 0.00
         elif a_assignment.grading_type == "letter_grade":
             submission_score = round(rubric_score, 2)
         elif a_assignment.grading_type == "points":
@@ -202,15 +219,20 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
                         submission_score = round(rubric_score, 2)
             else:
                 print(a_canvas_submission, a_canvas_submission.score)
-                errors.append(f"WARNING Submission score is empty {a_assignment.grading_type} for assignment {a_assignment.name}, student: {a_student.name} group {a_student.group_id}.")
+                errors.append(
+                    f"WARNING Submission score is empty {a_assignment.grading_type} for assignment {a_assignment.name}, student: {a_student.name} group {a_student.group_id}.")
                 print("LS02 -", errors)
                 submission_score = 0.00
         else:
-            errors.append(error = f"ERROR Unknown grading_type {a_assignment.grading_type} for assignment {a_assignment.name}")
+            errors.append(
+                error=f"ERROR Unknown grading_type {a_assignment.grading_type} for assignment {a_assignment.name}")
             print("LS04 -", errors[-1])
 
     if len(errors) > 0:
         graded = False
+        status = NOT_CORRECT_GRADED
+    else:
+        status = GRADED
     if a_canvas_submission.grader_id is not None and a_canvas_submission.grader_id > 0:
         teacher = a_course.find_teacher(a_canvas_submission.grader_id)
         if teacher:
@@ -231,61 +253,97 @@ def submission_builder(a_start, a_course, a_student, a_assignment, a_canvas_subm
                               a_assignment.assignment_day,
                               None,
                               None,
-                              graded, grader_name, grader_date, submission_score,
+                              graded, status, grader_name, grader_date, submission_score,
                               a_assignment.points, 0)
     for canvas_comment in canvas_comments:
         # print("LS51 -", a_student.name, canvas_comment['comment'])
-        l_submission.comments.append(Comment(canvas_comment['author_id'], canvas_comment['author_name'], get_date_time_obj(canvas_comment['created_at']), remove_html_tags(canvas_comment['comment'])))
+        l_submission.comments.append(Comment(canvas_comment['author_id'], canvas_comment['author_name'],
+                                             get_date_time_obj(canvas_comment['created_at']),
+                                             remove_html_tags(canvas_comment['comment'])))
     if rubrics_scores is not None:
         l_submission.rubrics = rubrics_scores
     if len(errors) > 0:
         # er is een fout opgetreden, waarschijnlijk in de rubrics
         for error in errors:
-            l_submission.comments.append(Comment(0, "Systeem", get_date_time_obj(get_date_time_str(get_actual_date())), error))
+            l_submission.comments.append(
+                Comment(0, "Systeem", get_date_time_obj(get_date_time_str(get_actual_date())), error))
 
     # bepaal de date/time van het datapunt
-    l_submission.submitted_date, l_submission.submitted_day = get_submission_date(a_canvas_submission, a_start, a_assignment)
+    l_submission.submitted_date, l_submission.submitted_day = get_submission_date(a_course, a_canvas_submission,
+                                                                                  a_assignment)
     l_submission.messages = errors
     return l_submission
 
 
-def add_missed_assignments(course, actual_day, perspective):
-    if len(perspective.assignment_groups) == 1:
-        assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
+def add_missed_assignments(course, actual_day, student_perspective):
+    if len(student_perspective.assignment_groups) == 1:
+        assignment_group = course.find_assignment_group(student_perspective.assignment_groups[0])
         if assignment_group is None:
-            print("LS06 - Assignment_group for perspective not found in course", perspective.assignment_groups[0])
+            print("ASA06 - Assignment_group for perspective not found in course",
+                  student_perspective.assignment_groups[0])
             return
-        # maak een deep-copy van de lijst
+
         for assignment_sequence in assignment_group.assignment_sequences:
-            # remove already submitted
-            # perspective.get_is_submitted(assignment_sequence)
-            if perspective.get_submitted(assignment_sequence, actual_day) is None:
-                assignment = assignment_sequence.get_last_passed_assignment(actual_day)
-                if assignment is not None:
-                    l_submission = Submission(0, assignment.group_id, assignment.id, 0, assignment.name,
-                                              assignment.assignment_date,
-                                              assignment.assignment_day,
-                                              assignment.assignment_date,
-                                              assignment.assignment_day,
-                                              True, "System", assignment.assignment_date, 0, assignment.points, 0)
-                    l_submission.comments.append(Comment(0, "System", assignment.assignment_date, NO_SUBMISSION))
-                    perspective.put_submission(assignment_sequence, l_submission)
-    elif len(perspective.assignment_groups) > 1:
-        print("LS07 - Perspective has more then one assignment_groups attached", perspective.name,
-              perspective.assignment_groups)
+            submission_sequence = student_perspective.get_submission_sequence_by_tag(assignment_sequence.tag)
+            missed_assignments = assignment_sequence.get_missed_assignments(submission_sequence, actual_day)
+            # print("ASA07 - Missed assignments", len(missed_assignments))
+            for assignment in missed_assignments:
+                l_submission = Submission(0, assignment.group_id, assignment.id, 0, assignment.name,
+                                          assignment.assignment_date,
+                                          assignment.assignment_day,
+                                          None,
+                                          None,
+                                          False,  MISSED_ITEM, 0, 0, 0, assignment.points, 0)
+                l_submission.comments.append(Comment(0, ROBOT, assignment.assignment_date, NO_SUBMISSION))
+                student_perspective.put_submission(assignment_sequence, l_submission)
+    elif len(student_perspective.assignment_groups) > 1:
+        print("LS07 - Perspective has more then one assignment_groups attached", student_perspective.name,
+              student_perspective.assignment_groups)
     else:
-        print("LS08 - Perspective has no assignment_groups attached", perspective.name, perspective.assignment_groups)
+        print("LS08 - Perspective has no assignment_groups attached", student_perspective.name,
+              student_perspective.assignment_groups)
 
 
-def read_submissions(a_canvas_course, a_start, a_course, a_results, a_total_refresh):
+def add_open_level_moments(course, actual_day, student_id, student_level_moments):
+    if len(student_level_moments.assignment_groups) == 1:
+        assignment_group = course.find_assignment_group(student_level_moments.assignment_groups[0])
+        if assignment_group is None:
+            print("AOL02 - Assignment_group for perspective not found in course",
+                  student_level_moments.assignment_groups[0])
+            return
+        for assignment_sequence in assignment_group.assignment_sequences:
+            for assignment in assignment_sequence.assignments:
+                print("AOL04 -", assignment.name)
+                if assignment.unlock_day <= actual_day:
+                    if (assignment.assignment_day - actual_day) <= 21:
+                        if student_level_moments.get_submission_by_assignment(assignment.id) is None:
+                            print("AOL08 -", assignment.name, assignment.unlock_day, actual_day, assignment.assignment_day+21)
+                            l_submission = Submission(0, assignment.group_id, assignment.id, student_id, assignment.name,
+                                                      assignment.assignment_date,
+                                                      assignment.assignment_day,
+                                                      None,
+                                                      None,
+                                                      False,  NOT_YET_GRADED, 0, 0, 0, assignment.points, 0)
+                            l_submission.comments.append(Comment(0, ROBOT, assignment.assignment_date, NO_SUBMISSION_GRADE))
+                            student_level_moments.submissions.append(l_submission)
+    elif len(student_level_moments.assignment_groups) > 1:
+        print("AOL98 - Perspective has more then one assignment_groups attached", student_level_moments.name,
+              student_level_moments.assignment_groups)
+    else:
+        print("AOL99 - Perspective has no assignment_groups attached", student_level_moments.name,
+              student_level_moments.assignment_groups)
+
+
+def read_submissions(a_canvas_course, a_course, a_results, a_total_refresh):
     for assignment_group in a_course.assignment_groups:
         for assignment_sequence in assignment_group.assignment_sequences:
             for assignment in assignment_sequence.assignments:
-                print("LS10 - Processing Assignment {0:6} - {1} - {2}".format(assignment.id, assignment_group.name, assignment.name))
+                print("LS10 - Processing Assignment {0:6} - {1} - {2}".format(assignment.id, assignment_group.name,
+                                                                              assignment.name))
                 if not a_total_refresh and ((a_results.actual_date - assignment.assignment_date).days > 10):
                     # deadline langer dan twee weken geleden. Alle feedback is gegeven.
                     continue
-                if assignment.unlock_date:
+                if assignment.unlock_date is not None:
                     if assignment.unlock_date > a_results.actual_date:
                         # volgende assignment
                         continue
@@ -293,25 +351,26 @@ def read_submissions(a_canvas_course, a_start, a_course, a_results, a_total_refr
                     # deadline ligt nog 10 dagen voor actual_date
                     continue
                 canvas_assignment = a_canvas_course.get_assignment(assignment.id, include=['submissions'])
+                # print("LS12 -", canvas_assignment)
                 if canvas_assignment is not None:
                     canvas_submissions = canvas_assignment.get_submissions(include=['submission_comments', 'rubric_assessment'])
+                    # print("LS13 -", canvas_submissions)
                     for canvas_submission in canvas_submissions:
+                        # print("LS14 - canvas_submission", canvas_submission.id, canvas_submission.user_id)
                         student = a_results.find_student(canvas_submission.user_id)
                         if student is not None:
                             # voeg een submission toe aan een van de perspectieven
                             # print(f"R31 Submission for {student.name}")
-                            l_submission = submission_builder(a_start, a_course, student, assignment, canvas_submission)
-
+                            l_submission = submission_builder(a_course, student, assignment, canvas_submission)
                             if l_submission is not None:
                                 l_perspective = a_course.find_perspective_by_assignment_group(l_submission.assignment_group_id)
-                                if l_perspective:
+                                if l_perspective is not None:
                                     if l_perspective.name == "level_moments":
                                         l_submission.body = canvas_submission.body
                                         if a_total_refresh:
                                             student.student_level_moments.submissions.append(l_submission)
                                         else:
                                             student.student_level_moments.put_submission(l_submission)
-
                                         # print("LS18 - PERSPECTIVE level_moments")
                                     else:
                                         # print("LS19 -", student.perspectives.keys())
@@ -320,12 +379,11 @@ def read_submissions(a_canvas_course, a_start, a_course, a_results, a_total_refr
                                             this_perspective.put_submission(assignment_sequence, l_submission)
 
                                 else:
-                                    print(f"LS21 - Warning, could not find perspective for assignment_group {assignment_group.name}")
+                                    print(
+                                        f"LS21 - Warning, could not find perspective for assignment_group {assignment_group.name}")
                             # else:
                             #     print(f"R22 - Error creating submission {assignment.name} for student {student.name}")
                         # else:
                         #     print("R23 Could not find student", canvas_submission.user_id)
                 else:
                     print("LS25 - Could not find assignment", canvas_assignment.id, "within group", assignment_group.id)
-
-

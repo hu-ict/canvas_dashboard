@@ -1,30 +1,40 @@
 from model.perspective.Level import Level
+from model.perspective.Status import Status
 
 
 class LevelSerie:
     def __init__(self, a_name):
-        self.levels = {}
         self.name = a_name
+        self.status = {}
+        self.grades = {}
 
     def to_json(self):
-        dict_result = {}
-        for key in self.levels:
-            dict_result[key] = self.levels[key].to_json()
+        dict_result = {"status": {},
+                       "grades": {}}
+        for key in self.status:
+            dict_result["status"][key] = self.status[key].to_json()
+        for key in self.grades:
+            dict_result["grades"][key] = self.grades[key].to_json()
         return dict_result
+
+    def get_status(self, status):
+        return self.status[status]
 
     def get_level_by_fraction(self, fraction):
         last_fraction = 0.0
-        for level in self.levels.keys():
-            if self.levels[level].fraction:
-                if last_fraction < fraction <= self.levels[level].fraction:
+        for level in self.grades.keys():
+            if self.grades[level].fraction:
+                if last_fraction < fraction <= self.grades[level].fraction:
                     # print(last_fraction, "<", fraction, "<", self.levels[level].fraction, level)
                     return level
-                last_fraction = self.levels[level].fraction
+                last_fraction = self.grades[level].fraction
         return 0
 
     @staticmethod
     def from_dict(data_dict, a_name):
         new = LevelSerie(a_name)
-        for key in data_dict.keys():
-            new.levels[key] = Level.from_dict(data_dict[key])
+        for key in data_dict["grades"].keys():
+            new.grades[key] = Level.from_dict(data_dict["grades"][key])
+        for key in data_dict["status"].keys():
+            new.status[key] = Status.from_dict(data_dict["status"][key])
         return new

@@ -4,12 +4,11 @@ from model.CriteriumScore import CriteriumScore
 
 
 class AttendanceSubmission:
-    def __init__(self, name, student_id, date, day, graded, teacher, score, points, flow):
+    def __init__(self, name, student_id, date, day, teacher, score, points, flow):
         self.name = name
         self.student_id = student_id
         self.date = date
         self.day = day
-        self.graded = graded
         self.teacher = teacher
         self.score = score
         self.points = points
@@ -23,7 +22,6 @@ class AttendanceSubmission:
             'name': self.name,
             'date': get_date_time_str(self.date),
             'day': self.day,
-            'graded': self.graded,
             'teacher': self.teacher,
             'score': round(self.score, 2),
             'points': int(self.points),
@@ -37,7 +35,7 @@ class AttendanceSubmission:
     def from_dict(data_dict):
         new = AttendanceSubmission(data_dict['name'], data_dict['student_id'],
                                     get_date_time_obj(data_dict['date']), data_dict['day'],
-                                    data_dict['graded'], data_dict['teacher'], data_dict['score'], data_dict['points'], data_dict['flow'])
+                                    data_dict['teacher'], data_dict['score'], data_dict['points'], data_dict['flow'])
 
         return new
 

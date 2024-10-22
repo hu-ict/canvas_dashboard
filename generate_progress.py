@@ -36,13 +36,12 @@ def main(instance_name):
     if len(instance_name) > 0:
         instances.current_instance = instance_name
     print("GP02 - Instance:", instances.current_instance)
-    start = read_start(instances.get_start_file_name())
     course = read_course(instances.get_course_file_name(instances.current_instance))
     results = read_results(instances.get_result_file_name(instances.current_instance))
     progress_history = read_progress(instances.get_progress_file_name(instances.current_instance))
 
     # progress_history = generate_history(results)
-    proces_progress(start, course, results, progress_history)
+    proces_progress(course, results, progress_history)
 
     with open(instances.get_result_file_name(instances.current_instance), 'w') as f:
         dict_result = results.to_json(['perspectives'])

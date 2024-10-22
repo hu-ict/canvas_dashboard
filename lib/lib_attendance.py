@@ -25,8 +25,8 @@ def read_attendance(start, course):
             l_date = get_date_time_obj_alt(item["Class Date"])
             l_teacher_id = item["Teacher ID"]
             l_teacher_name = item["Teacher Name"]
-            l_day = date_to_day(start.start_date, l_date)
-            attendance_submission = AttendanceSubmission("Attendance", int(item["Student ID"]), l_date, l_day, True, l_teacher_name, score, 2, 0)
+            l_day = date_to_day(course.start_date, l_date)
+            attendance_submission = AttendanceSubmission("Attendance", int(item["Student ID"]), l_date, l_day, l_teacher_name, score, 2, 0)
             if attendance_submission.student_id == 994:
                 print("LA05 -", attendance_submission)
             appendances.append(attendance_submission)

@@ -1,5 +1,5 @@
-from lib.lib_date import date_to_day
 from model.ProgressDay import ProgressDay
+from model.perspective.Status import MISSED_ITEM
 
 
 def flow_to_progress(flow):
@@ -55,24 +55,21 @@ def get_attendance_progress(attendance, attendance_perspective):
     points = 0
     last_flow = 1.0
     for submission in attendance_perspective.attendance_submissions:
-        if submission.graded:
-            moment = attendance.get_moment(submission.day)
-            attendance_perspective.count += 1
-            points += submission.score
-            attendance_perspective.percentage = points / attendance_perspective.count / 2
-            if moment is not None:
-                # print("LP61 -", moment)
-                # alleen op vastgestelde dagen wordt aanwezigheid beloond
-                essential_points += submission.score
-                attendance_perspective.essential_count += 1
-                attendance_perspective.essential_percentage = essential_points / attendance_perspective.essential_count / moment.points
-                submission.flow = attendance_perspective.essential_percentage
-                last_flow = submission.flow
-            else:
-                submission.flow = last_flow
-            attendance_perspective.last_score = submission.day
+        moment = attendance.get_moment(submission.day)
+        attendance_perspective.count += 1
+        points += submission.score
+        attendance_perspective.percentage = points / attendance_perspective.count / 2
+        if moment is not None:
+            # print("LP61 -", moment)
+            # alleen op vastgestelde dagen wordt aanwezigheid beloond
+            essential_points += submission.score
+            attendance_perspective.essential_count += 1
+            attendance_perspective.essential_percentage = essential_points / attendance_perspective.essential_count / moment.points
+            submission.flow = attendance_perspective.essential_percentage
+            last_flow = submission.flow
         else:
             submission.flow = last_flow
+        attendance_perspective.last_score = submission.day
     if attendance_perspective.essential_count == 0:
         # Niet te bepalen
         attendance_perspective.progress = -1
@@ -96,7 +93,7 @@ def get_progress(course, perspective):
                     total_count = 0
                     last_flow = 0.5
                     for submission_sequence in perspective.submission_sequences:
-                        if submission_sequence.is_graded():
+                        if submission_sequence.is_graded() or submission_sequence.get_status() == MISSED_ITEM:
                             perspective.last_score = submission_sequence.get_day()
                             total_score += round(submission_sequence.get_score(), 2)
                             total_count += 1
@@ -108,22 +105,22 @@ def get_progress(course, perspective):
                             # print("Graded")
                         else:
                             submission_sequence.flow = last_flow
-                                # print("Not graded")
+                            # print("Not graded")
                     if total_count == 0:
                         # Niet te bepalen
-                        perspective.progress = -1
+                        perspective.progress = 0
                     elif perspective.last_score != 0:
                         perspective.progress = assignment_group.bandwidth.get_progress(perspective.last_score,
                                                                                        perspective.sum_score)
                     else:
                         # Niet te bepalen
-                        perspective.progress = -1
+                        perspective.progress = 0
                 else:
                     # Niet te bepalen
-                    perspective.progress = -1
+                    perspective.progress = 0
             else:
                 # Niet te bepalen
-                perspective.progress = -1
+                perspective.progress = 0
         else:
             print("LP63 - Perspective assignment_group is not set [None]")
     elif len(perspective.assignment_groups) > 1:
@@ -133,10 +130,10 @@ def get_progress(course, perspective):
         print("LP65 - Perspective has no assignment_groups attached", perspective.name, perspective.assignment_groups)
 
 
-def proces_progress(start, course, results, progress_history):
+def proces_progress(course, results, progress_history):
     progress_day = ProgressDay(results.actual_day, course.perspectives.keys())
     for student in results.students:
-        if start.attendance is not None:
+        if course.attendance is not None:
             get_attendance_progress(course.attendance, student.attendance_perspective)
             progress_day.attendance[str(student.attendance_perspective.progress)] += 1
         for perspective in student.perspectives.values():

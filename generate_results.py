@@ -5,9 +5,7 @@ import json
 from generate_progress import proces_progress
 from lib.file import read_start, read_course, read_course_instance, read_progress
 from lib.lib_attendance import process_attendance
-from lib.lib_progress import get_progress, get_overall_progress, get_attendance_progress
-from lib.lib_submission import count_graded, add_missed_assignments, read_submissions
-from model.ProgressDay import ProgressDay
+from lib.lib_submission import count_graded, add_missed_assignments, read_submissions, add_open_level_moments
 from model.Result import *
 from lib.lib_date import get_actual_date, API_URL, date_to_day
 
@@ -24,24 +22,25 @@ def main(instance_name):
     canvas = Canvas(API_URL, start.api_key)
     user = canvas.get_current_user()
     print("GR03 - Username", user.name)
-    canvas_course = canvas.get_course(start.canvas_course_id)
-    if g_actual_date > start.end_date:
-        results = Result(start.canvas_course_id, course.name, start.end_date, date_to_day(start.start_date, start.end_date), 0, 0)
-    elif g_actual_date < start.start_date:
-        results = Result(start.canvas_course_id, course.name, start.start_date, 1, 0, 0)
+    canvas_course = canvas.get_course(course.canvas_id)
+    if g_actual_date > course.end_date:
+        results = Result(course.canvas_id, course.name, course.end_date, date_to_day(course.start_date, course.end_date), 0, 0)
+    elif g_actual_date < course.start_date:
+        results = Result(course.canvas_id, course.name, course.start_date, 1, 0, 0)
     else:
-        results = Result(start.canvas_course_id, course.name, g_actual_date, date_to_day(start.start_date, g_actual_date), 0, 0)
-    for student in course.students:
-        print("GR05 -", student.name, student.number)
+        results = Result(course.canvas_id, course.name, g_actual_date, date_to_day(course.start_date, g_actual_date), 0, 0)
+    # for student in course.students:
+    #     print("GR05 -", student.name, student.number)
     results.students = course.students
     # for student in results.students:
     #     print("GR07 -", student.name, student.number)
-    read_submissions(canvas_course, start, course, results, True)
+    read_submissions(canvas_course, course, results, True)
     for student in results.students:
-        for perspective in student.perspectives.values():
-            # Perspective aanvullen met missed Assignments (niets ingeleverd)
-            add_missed_assignments(course, results.actual_day, perspective)
-    if start.attendance is not None:
+        for student_perspective in student.perspectives.values():
+            # Perspective aanvullen met missed Assignments waar nodig (niets ingeleverd)
+            add_missed_assignments(course, results.actual_day, student_perspective)
+        add_open_level_moments(course, results.actual_day, student.id, student.student_level_moments)
+    if course.attendance is not None:
         process_attendance(start, course, results)
     else:
         print("GR10 - No attendance")
@@ -50,7 +49,7 @@ def main(instance_name):
     #     print("GR75", student.name)
     # sorteer de attendance en submissions
     for student in results.students:
-        if start.attendance is not None:
+        if course.attendance is not None:
             student.attendance_perspective.attendance_submissions = sorted(student.attendance_perspective.attendance_submissions, key=lambda s: s.day)
         for perspective in student.perspectives.values():
             for submission_sequence in perspective.submission_sequences:
@@ -63,7 +62,7 @@ def main(instance_name):
     #     dict_result = results.to_json(["perspectives"])
     #     json.dump(dict_result, f, indent=2)
     progress_history = read_progress(instances.get_progress_file_name(instances.current_instance))
-    proces_progress(start, course, results, progress_history)
+    proces_progress(course, results, progress_history)
     # progress_history = generate_history(results)
 
     with open(instances.get_progress_file_name(instances.current_instance), 'w') as f:

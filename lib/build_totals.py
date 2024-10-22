@@ -1,5 +1,153 @@
 from lib.lib_date import date_to_day
+from model.perspective.Status import NOT_YET_GRADED, NOT_CORRECT_GRADED
 
+def init_sections_count(course):
+    count = {}
+    for section in course.sections:
+        count[section.name] = 0
+    return count
+
+
+def init_sections_list(course):
+    l_list = {}
+    for section in course.sections:
+        l_list[section.name] = []
+    return l_list
+
+
+def init_sections_dict(course):
+    l_list = {}
+    for section in course.sections:
+        l_list[section.name] = {}
+    return l_list
+
+
+def init_roles_count(course):
+    role_count = {}
+    for role in course.roles:
+        role_count[role.short] = 0
+    return role_count
+
+
+def init_roles_list(course):
+    l_list = {}
+    for role in course.roles:
+        l_list[role.short] = []
+    return l_list
+
+
+def init_roles_dict(course):
+    l_list = {}
+    for role in course.roles:
+        l_list[role.short] = {}
+    return l_list
+
+
+def init_coaches_count(coaches):
+    team_count = {}
+    for coach in coaches.values():
+        team_count[coach["teacher"].initials] = 0
+    return team_count
+
+
+def init_coaches_list(coaches):
+    team_list = {}
+    for coach in coaches.values():
+        team_list[coach["teacher"].initials] = []
+    return team_list
+
+
+def init_coaches_dict(a_course):
+    def get_initials(item):
+        return item[1]['teacher'].initials
+
+    l_coaches = {}
+    # for teacher in a_course.teachers:
+    #     if len(teacher.projects) > 0:
+    #         l_coaches[teacher.initials] = {}
+
+    for group in a_course.student_groups:
+        if len(group.teachers) > 0:
+            for teacher_id in group.teachers:
+                teacher = a_course.find_teacher(teacher_id)
+                l_coaches[teacher.id] = {'count': {}, 'teacher': teacher}
+    l_coaches = dict(sorted(l_coaches.items(), key=lambda item: get_initials(item)))
+    # print("GD81 -", l_coaches)
+    return l_coaches
+
+
+def create_student_totals(instances, course, team_coaches):
+    # for team_coach in team_coaches.values():
+        # print("GD04 -", team_coach["teacher"])
+    if instances.is_instance_of("inno_courses"):
+        peilen = {}
+        for peil in course.level_moments.moments:
+            peilen[peil] = {
+                'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+                'team': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+                'gilde': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+                'kennis': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+            }
+        student_totals = {
+            'student_count': 0,
+            'perspectives': {
+                'team': {'count': [], 'pending': init_coaches_count(team_coaches), 'late': init_coaches_count(team_coaches), 'to_late': init_coaches_count(team_coaches), 'list': init_coaches_list(team_coaches)},
+                'gilde': {'count': [], 'pending': init_roles_count(course), 'late': init_roles_count(course), 'to_late': init_roles_count(course), 'list': init_roles_list(course)},
+                'kennis': {'count': [], 'pending': init_roles_count(course), 'late': init_roles_count(course), 'to_late': init_roles_count(course), 'list': init_roles_list(course)},
+                'level_moments': {'count': [], 'pending': init_roles_count(course), 'late': init_roles_count(course), 'to_late': init_roles_count(course), 'list': init_roles_list(course)},
+            },
+            'level_moments': peilen,
+            'actual_progress': {
+                'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+                'team': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+                'gilde': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
+                'kennis': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+            },
+            'late': {'count': []}
+        }
+    elif instances.is_instance_of("prop_courses"):
+        peilen = {}
+        peilen["overall"] = {
+            'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+        }
+        student_totals = {
+            'student_count': 0,
+            'perspectives': {},
+            'level_moments': peilen,
+            'late': {'count': []}
+        }
+        for perspective in course.perspectives.keys():
+            student_totals["perspectives"][perspective] = {'count': [], 'pending': init_sections_count(course), 'late': init_sections_count(course), 'to_late': init_sections_count(course), 'list': init_sections_list(course)}
+        student_totals["perspectives"]["level_moments"] = {'count': [], 'pending': init_sections_count(course),
+                                                       'late': init_sections_count(course),
+                                                       'to_late': init_sections_count(course),
+                                                       'list': init_sections_list(course)}
+        if course.level_moments is not None:
+            student_totals["level_moments"] = {}
+            for moment in course.level_moments.moments:
+                student_totals["level_moments"][moment] = {'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}}
+                for perspective in course.perspectives.keys():
+                    student_totals["level_moments"][moment][perspective] = {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+        student_totals["actual_progress"] = {'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}}
+        for perspective in course.perspectives.keys():
+            student_totals["actual_progress"][perspective] = {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+
+    else:
+        student_totals = {
+            'student_count': 0,
+            'perspectives': {},
+            'level_moments': {},
+            'late': {'count': []}
+        }
+        for perspective in course.perspectives:
+            student_totals['perspectives'][perspective] = {'count': [], 'pending': init_sections_count(course), 'late': init_sections_count(course), 'to_late': init_sections_count(course), 'list': init_sections_list(course)}
+        if course.level_moments is not None:
+            student_totals['perspectives'][course.level_moments.name] = {'count': [],
+                                                           'pending': init_sections_count(course),
+                                                           'late': init_sections_count(course),
+                                                           'to_late': init_sections_count(course),
+                                                           'list': init_sections_list(course)}
+    return student_totals
 
 def student_total(a_perspective):
     cum_score = 0
@@ -35,8 +183,8 @@ def count_student(a_instances, a_course, a_student_totals, a_student):
 
 
 def check_for_late(a_instances, a_course, a_student_totals, a_student, a_submission, a_perspective, a_actual_day):
-    if not a_submission.graded:
-        # print("BT81", a_student.name, a_student.coach)
+    if a_submission.status == NOT_YET_GRADED or a_submission.status == NOT_CORRECT_GRADED:
+        print("BT81", a_student.name, a_perspective, a_submission.assignment_name)
         if a_student.coach > 0:
             # print("BT82", a_student.name, a_student.coach)
             if a_perspective == 'team':
@@ -53,7 +201,10 @@ def check_for_late(a_instances, a_course, a_student_totals, a_student, a_submiss
                 # print("BT83 Group id", a_student.group_id)
                 group = a_course.find_student_group(a_student.group_id)
                 l_selector = group.name
-        late_days = a_actual_day - a_submission.submitted_day
+        if a_submission.submitted_day is None:
+            late_days = a_actual_day - a_submission.assignment_day
+        else:
+            late_days = a_actual_day - a_submission.submitted_day
         # print("BT85", a_perspective, l_selector)
         a_student_totals['perspectives'][a_perspective]['list'][l_selector].append(a_submission.to_json())
         if late_days <= 7:
@@ -65,11 +216,13 @@ def check_for_late(a_instances, a_course, a_student_totals, a_student, a_submiss
         add_total(a_student_totals['late']['count'], late_days)
 
 
-def build_totals(a_instances, a_start, a_course, a_results, a_student_totals):
+def build_totals(a_instances, a_course, a_results, a_student_totals):
     for l_student in a_results.students:
         count_student(a_instances, a_course, a_student_totals, l_student)
         for l_perspective in l_student.perspectives.values():
             for submission_sequence in l_perspective.submission_sequences:
                 for submission in submission_sequence.submissions:
                     check_for_late(a_instances, a_course, a_student_totals, l_student, submission, l_perspective.name, a_results.actual_day)
+        for submission in l_student.student_level_moments.submissions:
+            check_for_late(a_instances, a_course, a_student_totals, l_student, submission, l_student.student_level_moments.name, a_results.actual_day)
 

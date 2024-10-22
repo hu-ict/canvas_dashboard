@@ -9,11 +9,11 @@ def plot_progress_history(a_fig, a_row, a_col, a_progress_history, a_perspective
     for day in a_progress_history.days:
         x.append(day.day)
 
-    for level in a_progress_levels.levels.keys():
+    for level in a_progress_levels.grades.keys():
         y = []
         y_hover = []
-        l_label = a_progress_levels.levels[str(level)].label
-        l_color = a_progress_levels.levels[str(level)].color
+        l_label = a_progress_levels.grades[str(level)].label
+        l_color = a_progress_levels.grades[str(level)].color
         for day in a_progress_history.days:
             if a_perspective_name == "overall":
                 y.append(day.progress[str(level)])
@@ -65,14 +65,14 @@ def plot_workload_history(a_fig, a_row, a_col, a_workload_history):
 
 
 def plot_peilingen(a_fig, a_row, a_col, student_totals, a_course, a_progress_levels):
-    for level in a_progress_levels.levels.keys():
+    for level in a_progress_levels.grades.keys():
         y_counts = []
         x_labels = []
         y_hover = []
 
         x_labels.append('Actueel')
         y_counts.append(student_totals['actual_progress']["overall"][int(level)])
-        y_hover.append("Actueel " + a_progress_levels.levels[str(level)].label + " " + str(
+        y_hover.append("Actueel " + a_progress_levels.grades[str(level)].label + " " + str(
             student_totals['actual_progress']["overall"][int(level)]))
 
         if a_course.level_moments is not None:
@@ -80,15 +80,15 @@ def plot_peilingen(a_fig, a_row, a_col, student_totals, a_course, a_progress_lev
                 # print("PT10 moment", label, level, student_totals[a_start.level_moments.name][label])
                 x_labels.append(label)
                 y_counts.append(student_totals["level_moments"][label]["overall"][int(level)])
-                y_hover.append(label+" "+a_progress_levels.levels[str(level)].label+" "+str(student_totals["level_moments"][label]["overall"][int(level)]))
+                y_hover.append(label+" "+a_progress_levels.grades[str(level)].label+" "+str(student_totals["level_moments"][label]["overall"][int(level)]))
 
         a_fig.add_trace(go.Bar(x=x_labels, y=y_counts,
-                               name=a_progress_levels.levels[level].label,
+                               name=a_progress_levels.grades[level].label,
                                hoverinfo="text",
                                hovertext=y_hover,
                                hoverlabel=hover_style,
                                text=y_counts,
-                               marker=dict(color=a_progress_levels.levels[str(level)].color)), row=a_row, col=a_col)
+                               marker=dict(color=a_progress_levels.grades[str(level)].color)), row=a_row, col=a_col)
     y_axis = len(a_course.students)
     a_fig.update_yaxes(title_text="Aantal", range=[0, y_axis], row=a_row, col=a_col)
 
@@ -124,7 +124,7 @@ def plot_voortgang(a_instances, a_course, student_totals, a_progress_history, a_
     file_name = a_instances.get_html_path() + "totals_voortgang" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")
 
-def plot_werkvoorraad(a_instances, a_start, a_course, student_totals, a_workload_history):
+def plot_werkvoorraad(a_instances, a_course, student_totals, a_workload_history):
     specs = [
         [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
         [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}]
@@ -132,6 +132,7 @@ def plot_werkvoorraad(a_instances, a_start, a_course, student_totals, a_workload
     titles = []
     for perspective in a_course.perspectives.values():
         titles.append(perspective.title)
+    titles.append("Peilmomenten")
     titles.append('Dagelijkse werkvoorraad <b>docenten</b>')
     titles.append("Vertraging")
     fig = make_subplots(rows=2, cols=3, specs=specs, subplot_titles=titles)
@@ -144,7 +145,8 @@ def plot_werkvoorraad(a_instances, a_start, a_course, student_totals, a_workload
         xaxis3_title_text='Pending',  # xaxis perspective
         yaxis_title_text='Aantal',  # yaxis perspective
         yaxis4_title_text='Aantal',  # yaxis perspective
-        xaxis4_title_text='dag in semester',  # xaxis perspective
+        xaxis4_title_text='Pending',  # xaxis perspective
+        xaxis5_title_text='dag in semester',  # xaxis perspective
 
         # yaxis9_title_text='Aantal',  # yaxis perspective
         bargap=0.2,  # gap between bars of adjacent location coordinates
@@ -152,20 +154,25 @@ def plot_werkvoorraad(a_instances, a_start, a_course, student_totals, a_workload
         barmode='stack'
     )
 
-    col = 0
-    for l_perspective in a_course.perspectives:
+    col = 1
+    row = 1
+    for l_perspective in student_totals['perspectives'].values():
+        if col > 3:
+            col = 1
+            row += 1
+        x_selector = list(l_perspective['pending'].keys())
+        y_counts = list(l_perspective['pending'].values())
+        fig.add_trace(go.Bar(x=x_selector, y=y_counts, name="Pending", marker=dict(color="#4e73df")), row, col)
+        x_selector = list(l_perspective['late'].keys())
+        y_counts = list(l_perspective['late'].values())
+        fig.add_trace(go.Bar(x=x_selector, y=y_counts, name="Late", marker=dict(color="#e74a3b")), row, col)
+        x_selector = list(l_perspective['to_late'].keys())
+        y_counts = list(l_perspective['to_late'].values())
+        fig.add_trace(go.Bar(x=x_selector, y=y_counts, name="To Late", marker=dict(color="#555555")), row, col)
         col += 1
-        x_team = list(student_totals['perspectives'][l_perspective]['pending'].keys())
-        y_counts = list(student_totals['perspectives'][l_perspective]['pending'].values())
-        fig.add_trace(go.Bar(x=x_team, y=y_counts, name="Pending", marker=dict(color="#4e73df")), 1, col)
-        x_team = list(student_totals['perspectives'][l_perspective]['late'].keys())
-        y_counts = list(student_totals['perspectives'][l_perspective]['late'].values())
-        fig.add_trace(go.Bar(x=x_team, y=y_counts, name="Late", marker=dict(color="#e74a3b")), 1, col)
-        x_team = list(student_totals['perspectives'][l_perspective]['to_late'].keys())
-        y_counts = list(student_totals['perspectives'][l_perspective]['to_late'].values())
-        fig.add_trace(go.Bar(x=x_team, y=y_counts, name="To Late", marker=dict(color="#555555")), 1, col)
-    plot_workload_history(fig, 2, 1, a_workload_history)
+
+    plot_workload_history(fig, 2, 2, a_workload_history)
     data = go.Histogram(x=np.array(student_totals['late']['count']))
-    fig.add_trace(data, 2, 2)
+    fig.add_trace(data, 2, 3)
     file_name = a_instances.get_html_path() + "totals_werkvoorraad" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")

@@ -2,7 +2,7 @@ import json
 import sys
 
 from canvasapi import Canvas
-from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
+from lib.lib_date import API_URL, get_actual_date
 from lib.file import read_start, read_course_instance, read_course
 from model.Student import Student
 from model.StudentLink import StudentLink
@@ -106,11 +106,7 @@ def main(instance_name):
     for student_group in course.student_groups:
         student_group.students = []
         student_group.teachers = []
-    for slb_group in course.slb_groups:
-        slb_group.students = []
-
-
-    canvas_course = canvas.get_course(start.canvas_course_id)
+    canvas_course = canvas.get_course(course.canvas_id)
     # Ophalen Students
     print("GS13 - Retrieve students")
     course.students = []
@@ -141,7 +137,7 @@ def main(instance_name):
     for student in course.students:
         student = add_perspectives_to_student(course, student)
     # Students en StudentGroups koppelen
-    if start.slb_groep_name is None and start.projects_groep_name == "SECTIONS":
+    if start.projects_groep_name == "SECTIONS":
         print("GS36 - Werken met Canvas secties als groepen.")
     else:
         canvas_group_categories = canvas_course.get_group_categories()
@@ -167,23 +163,7 @@ def main(instance_name):
                                 student_group.students.append(student_link)
                             else:
                                 print("GS42 - Student in Canvas project group not found", canvas_user.id, canvas_user.name)
-            # Link students to slb_groups
-            if start.slb_groep_name is not None and canvas_group_category.name == start.slb_groep_name:
-                print("GS45 - Link students to slb_groups")
-                canvas_groups = canvas_group_category.get_groups()
-                for canvas_group in canvas_groups:
-                    print("GS47 - canvas_group", canvas_group)
-                    slb_group = course.find_slb_group(canvas_group.id)
-                    if slb_group:
-                        canvas_users = canvas_group.get_users()
-                        for canvas_user in canvas_users:
-                            student = course.find_student(canvas_user.id)
-                            if student:
-                                student_link = StudentLink.from_student(student)
-                                # print("GS48 -", student_link)
-                                slb_group.students.append(student_link)
-                            else:
-                                print("GS49 - Student in Canvas slb group not found", canvas_user.id)
+
     # Link students to roles
     print("GS50 - Link students to roles")
     for role in course.roles:

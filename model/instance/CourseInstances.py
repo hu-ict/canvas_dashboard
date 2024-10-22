@@ -56,6 +56,9 @@ class CourseInstances:
         return CourseInstances.get_project_path(self.current_instance) + "dashboard_" + self.current_instance + "//students//"
 
     def get_html_path(self):
+        return CourseInstances.get_project_path(self.current_instance) + "dashboard_" + self.current_instance + "//general//"
+
+    def get_html_root_path(self):
         return CourseInstances.get_project_path(self.current_instance) + "dashboard_" + self.current_instance + "//"
 
     def get_start_file_name(self):

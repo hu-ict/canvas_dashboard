@@ -39,7 +39,9 @@ def build_late_list(a_instances, a_templates, a_result, a_student_totals):
             late_list = sorted(late_list_temp, key=itemgetter('submitted_date'))
             late_list_html_total_string = ''
             for l_submission in late_list:
-                l_student_name = a_result.find_student(l_submission['student_id']).name
+                student_id = l_submission['student_id']
+                # print("BL22 -", l_submission, student_id)
+                l_student_name = a_result.find_student(student_id).name
                 l_messages = l_submission['messages']
                 if len(l_messages) > 0:
                     messages = l_messages[0]

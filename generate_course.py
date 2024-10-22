@@ -20,18 +20,18 @@ def get_tags(name):
     return tags
 
 
-def get_dates(start, input):
+def get_dates(config, input):
     if input.due_at:
         assignment_date = get_date_time_obj(input.due_at)
     else:
         if input.lock_at:
             assignment_date = get_date_time_obj(input.lock_at)
         else:
-            assignment_date = start.end_date
+            assignment_date = config.end_date
     if input.unlock_at:
         unlock_date = get_date_time_obj(input.unlock_at)
     else:
-        unlock_date = start.start_date
+        unlock_date = config.start_date
     return unlock_date, assignment_date
 
 
@@ -103,9 +103,9 @@ def main(instance_name):
     start = read_start(instances.get_start_file_name())
     canvas = Canvas(API_URL, start.api_key)
     canvas_course = canvas.get_course(start.canvas_course_id)
+    config = read_config_from_canvas(canvas_course)
     user = canvas.get_current_user()
     print("GC03 -", user.name)
-    config = read_config_from_canvas(canvas_course)
     if config.attendance is not None:
         attendance = get_attendance(config.attendance)
         if attendance is not None:
@@ -152,9 +152,9 @@ def main(instance_name):
                     print(message)
                     continue
                 if canvas_assignment.overrides:
-                    new_assignment_date = start.start_date
+                    new_assignment_date = config.start_date
                     for overrides in canvas_assignment.overrides:
-                        unlock_date, assignment_date = get_dates(start, overrides)
+                        unlock_date, assignment_date = get_dates(config, overrides)
                         if assignment_date > new_assignment_date:
                             new_assignment_date = assignment_date
                         if hasattr(overrides, "course_section_id"):
@@ -162,14 +162,14 @@ def main(instance_name):
                         else:
                             section_id = 0
                 else:
-                    unlock_date, new_assignment_date = get_dates(start, canvas_assignment)
+                    unlock_date, new_assignment_date = get_dates(config, canvas_assignment)
                     section_id = 0
 
                 assignment = Assignment(canvas_assignment.id, canvas_assignment.name,
                                         canvas_assignment.assignment_group_id, section_id,
                                         canvas_assignment.grading_type, canvas_assignment.grading_standard_id,
                                         points_possible, new_assignment_date,
-                                        unlock_date, date_to_day(start.start_date, new_assignment_date), date_to_day(start.start_date, unlock_date))
+                                        unlock_date, date_to_day(config.start_date, new_assignment_date), date_to_day(config.start_date, unlock_date))
                 if len(message) > 0:
                     assignment.messages.append(message)
                 # print(assignment)
@@ -254,9 +254,10 @@ def main(instance_name):
         for assignment_sequence in assignment_group.assignment_sequences:
             for assignment in assignment_sequence.assignments:
                 for learning_outcome_id in assignment.learning_outcomes:
+                    #establish many-2-many relation
                     learning_outcome = config.find_learning_outcome(learning_outcome_id)
                     assignment_sequence.add_learning_outcome(learning_outcome_id)
-                    learning_outcome.assignment_sequences.append(assignment_sequence.tag)
+                    learning_outcome.add_assigment_sequence(assignment_sequence.tag)
     for assignment_group in config.assignment_groups:
         assignment_group.bandwidth = None
         assignment_group.assignment_sequences = sorted(assignment_group.assignment_sequences, key=lambda a: a.get_day())

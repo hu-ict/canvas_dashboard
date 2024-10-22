@@ -20,16 +20,9 @@ class StudentLevelMoments:
             line += " s " + str(submission) + "\n"
         return line
 
-    def get_submission_by_assignment(self, assigment_id):
+    def get_submission_by_assignment(self, assignment_id):
         for submission in self.submissions:
-            if submission.assignment_id == assigment_id:
-                return submission
-        return None
-
-
-    def get_submission_by_assignment(self, assigment_id):
-        for submission in self.submissions:
-            if submission.assignment_id == assigment_id:
+            if submission.assignment_id == assignment_id:
                 return submission
         return None
 

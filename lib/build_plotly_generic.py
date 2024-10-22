@@ -1,11 +1,5 @@
-import copy
 import plotly.graph_objs as go
-
-from lib.build_plotly_hover import get_hover_peiling, get_hover_assignment, get_hover_day_bar, get_hover_grade, \
-    get_hover_comments, get_hover_rubrics_comments
 from lib.lib_bandwidth import calc_dev
-from lib.lib_date import date_to_day, get_date_time_loc
-from lib.lib_plotly import get_marker_size, hover_style
 
 
 def plot_bandbreedte_colored(a_row, a_col, a_fig, a_days, a_bandwidth, a_flow, a_total_points):

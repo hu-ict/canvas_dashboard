@@ -91,32 +91,14 @@ def build_bootstrap_progress(a_start, a_course, a_results, a_templates, a_labels
     return progress_html_string
 
 
-def build_bootstrap_slb(a_course, a_templates, a_labels_colors):
-    l_groups_html_string = ''
-    for group in a_course.slb_groups:
-        # print("-", group.name)
-        students_html_string = ''
-        for student in group.students:
-            l_student = a_course.find_student(student.id)
-            students_html_string += build_student_button(a_course, l_student, a_templates, a_labels_colors)
-
-        group_html_string = a_templates['group'].substitute(
-            {'selector_type': 'coach', 'selector': 'Leeg', 'student_group_name': group.name,
-             'students': students_html_string})
-
-        l_groups_html_string += group_html_string
-
-    return l_groups_html_string
-
-
-def write_release_planning(a_start, a_templates, a_assignment_group, a_file_name):
+def write_release_planning(a_course, a_templates, a_assignment_group, a_file_name):
     list_html_string = ""
     for assignment_sequence in a_assignment_group.assignment_sequences:
         messages_html_string = ""
         assignment_sequence_html_string = ""
         # print(assignment_sequence.name)
         for assignment in assignment_sequence.assignments:
-            url = "https://canvas.hu.nl/courses/" + str(a_start.canvas_course_id) + "/assignments/" + str(assignment.id)
+            url = "https://canvas.hu.nl/courses/" + str(a_course.canvas_id) + "/assignments/" + str(assignment.id)
             rubric_points = 0
             rubric_count = 0
             rubrics_html_string = "<ul>"
@@ -160,25 +142,23 @@ def write_release_planning(a_start, a_templates, a_assignment_group, a_file_name
         file_list.write(file_html_string)
 
 
-def build_bootstrap_release_planning(a_instances, a_start, a_course, a_templates, a_labels_colors):
+def build_bootstrap_release_planning(a_instances, a_course, a_templates, a_labels_colors):
     html_string = ""
     buttons_planning_html_string = ""
     for assignment_group in a_course.assignment_groups:
-        file_name = "release_planning_" + str(assignment_group.id) + ".html"
+        file_name = "general//release_planning_" + str(assignment_group.id) + ".html"
         buttons_planning_html_string += a_templates["selector"].substitute(
             {'selector_file': file_name,
              'selector': assignment_group.name}) + "<br>"
-        write_release_planning(a_start, a_templates, assignment_group, a_instances.get_html_path() + file_name)
+        write_release_planning(a_course, a_templates, assignment_group, a_instances.get_html_root_path() + file_name)
 
     buttons_flow_html_string = ""
     for assignment_group in a_course.assignment_groups:
-        file_name = "bandwidth_" + str(assignment_group.id) + ".html"
+        file_name = "general//bandwidth_" + str(assignment_group.id) + ".html"
         buttons_flow_html_string += a_templates["selector"].substitute(
             {'selector_file': file_name,
              'selector': assignment_group.name}) + "<br>"
-        process_bandwidth(a_instances, a_start, a_course, assignment_group, a_labels_colors)
-
-
+        process_bandwidth(a_instances, a_course, assignment_group, a_labels_colors)
     html_string += a_templates["release_planning"].substitute({'buttons_planning': buttons_planning_html_string, 'buttons_flow': buttons_flow_html_string})
     return html_string
 
@@ -187,8 +167,6 @@ def build_bootstrap_tabs(a_instances, a_start, a_course, a_templates, a_labels_c
     tabs = ["Groepen"]
     if len(a_course.roles) > 1:
         tabs.append("Rollen")
-    if a_start.slb_groep_name:
-        tabs.append("SLB")
     tabs.append("Release Planning")
     html_tabs = ""
     for tab in tabs:
@@ -196,8 +174,6 @@ def build_bootstrap_tabs(a_instances, a_start, a_course, a_templates, a_labels_c
             students_html_string = build_bootstrap_group(a_course, a_templates, a_labels_colors)
         elif tab == "Rollen":
             students_html_string = build_bootstrap_role(a_course, a_templates, a_labels_colors)
-        elif tab == "SLB":
-            students_html_string = build_bootstrap_slb(a_course, a_templates, a_labels_colors)
         elif tab == "Release Planning":
             students_html_string = build_bootstrap_release_planning(a_instances, a_start, a_course, a_templates, a_labels_colors)
         else:

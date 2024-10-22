@@ -14,15 +14,18 @@ from model.perspective.Perspective import Perspective
 from model.perspective.Perspectives import Perspectives
 
 
-
 class CourseConfig:
-    def __init__(self, name, days_in_semester, student_count):
+    def __init__(self, canvas_id, name, start_date, end_date, days_in_semester, grade_levels, student_count):
+        self.canvas_id = canvas_id
         self.name = name
         self.student_count = student_count
         self.days_in_semester = days_in_semester
+        self.start_date = start_date
+        self.end_date = end_date
         self.sections = []
         self.level_moments = None
         self.attendance = None
+        self.grade_levels = grade_levels
         self.perspectives = {}
         self.roles = []
         self.learning_outcomes = []
@@ -30,11 +33,10 @@ class CourseConfig:
         self.assignment_groups = []
         self.student_groups = []
         self.role_groups = []
-        self.slb_groups = []
         self.students = []
 
     def __str__(self):
-        line = f'CourseConfig({self.name})\n'
+        line = f'CourseConfig({self.canvas_id}, {self.name})\n'
         for section in self.sections:
             line += str(section)
         for teacher in self.teachers:
@@ -46,17 +48,19 @@ class CourseConfig:
             line += str(assignment_group)
         for student_group in self.student_groups:
             line += str(student_group)
-        for slb_group in self.slb_groups:
-            line += str(slb_group)
         for student in self.students:
             line += str(student)
         return line
 
     def to_json(self, scope):
         dict_result = {
+            'canvas_id': self.canvas_id,
             'name': self.name,
             'student_count': self.student_count,
+            'start_date': get_date_time_str(self.start_date),
+            'end_date': get_date_time_str(self.end_date),
             'days_in_semester': self.days_in_semester,
+            'grade_levels': self.grade_levels,
             'sections': list(map(lambda s: s.to_json(), self.sections))
         }
         # print("CC10 -", self.attendance)
@@ -76,7 +80,6 @@ class CourseConfig:
         dict_result['teachers'] = list(map(lambda t: t.to_json(), self.teachers))
         dict_result['assignment_groups'] = list(map(lambda ag: ag.to_json(scope), self.assignment_groups))
         dict_result['student_groups'] = list(map(lambda sg: sg.to_json([]), self.student_groups))
-        dict_result['slb_groups'] = list(map(lambda sg: sg.to_json([]), self.slb_groups))
         dict_result['students'] = list(map(lambda s: s.to_json(['perspectives']), self.students))
 
         return dict_result
@@ -112,12 +115,6 @@ class CourseConfig:
             if student.role == role_short:
                 students.append(student)
         return students
-
-    def find_slb_group(self, slb_group_id):
-        for group in self.slb_groups:
-            if group.id == slb_group_id:
-                return group
-        return None
 
     def find_assignment_group(self, group_id):
         for group in self.assignment_groups:
@@ -155,6 +152,12 @@ class CourseConfig:
     def find_student_by_name(self, student_name):
         for student in self.students:
             if student.name == student_name:
+                return student
+        return None
+
+    def find_student_by_email(self, student_email):
+        for student in self.students:
+            if student.email == student_email:
                 return student
         return None
 
@@ -226,7 +229,7 @@ class CourseConfig:
                 return self.find_assignment_group(role.assignment_group_id)
         return None
 
-    def get_level_moments_by_query(self, a_query):
+    def get_first_level_moment_by_query(self, a_query):
         for assignment_group_id in self.level_moments.assignment_groups:
             assignment_group = self.find_assignment_group(assignment_group_id)
             for assignment in assignment_group.assignment_sequences:
@@ -237,6 +240,19 @@ class CourseConfig:
                 if condition == len(a_query):
                     return assignment
         return None
+
+    def get_level_moments_by_query(self, a_query):
+        assignments = []
+        for assignment_group_id in self.level_moments.assignment_groups:
+            assignment_group = self.find_assignment_group(assignment_group_id)
+            for assignment in assignment_group.assignment_sequences:
+                condition = 0
+                for selector in a_query:
+                    if selector.lower() in assignment.name.lower():
+                        condition += 1
+                if condition == len(a_query):
+                    assignments.append(assignment)
+        return assignments
 
     def get_role(self, role_short):
         for role in self.roles:
@@ -259,8 +275,12 @@ class CourseConfig:
     @staticmethod
     def from_dict(data_dict):
         new = CourseConfig(
+            data_dict['canvas_id'],
             data_dict['name'],
+            get_date_time_obj(data_dict['start_date']),
+            get_date_time_obj(data_dict['end_date']),
             data_dict['days_in_semester'],
+            data_dict['grade_levels'],
             data_dict['student_count'])
         new.perspectives = {}
         if 'level_moments' in data_dict.keys() and data_dict['level_moments'] is not None:
@@ -280,6 +300,5 @@ class CourseConfig:
         new.assignment_groups = list(
             map(lambda g: AssignmentGroup.from_dict(g), data_dict['assignment_groups']))
         new.student_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['student_groups']))
-        new.slb_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['slb_groups']))
         new.students = list(map(lambda s: Student.from_dict(s), data_dict['students']))
         return new

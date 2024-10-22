@@ -13,6 +13,10 @@ class LearningOutcome:
             'assignment_sequences': self.assignment_sequences
         }
 
+    def add_assigment_sequence(self, tag):
+        if tag not in self.assignment_sequences:
+            self.assignment_sequences.append(tag)
+
     def __str__(self):
         return f'LearningOutcome(Id: {self.id}, {self.short}, {self.description})'
 

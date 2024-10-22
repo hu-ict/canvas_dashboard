@@ -3,10 +3,10 @@ import plotly.graph_objs as go
 
 from lib.build_plotly_generic import plot_bandbreedte_colored
 from lib.build_plotly_hover import get_hover_peiling, get_hover_assignment, get_hover_day_bar, get_hover_grade, \
-    get_hover_comments, get_hover_rubrics_comments
-from lib.lib_bandwidth import calc_dev
+    get_hover_comments, get_hover_rubrics_comments, get_hover_status
 from lib.lib_date import date_to_day, get_date_time_loc
 from lib.lib_plotly import get_marker_size, hover_style
+from model.perspective.Status import BEFORE_DEADLINE
 
 
 def find_submissions(a_student, a_peil_construction):
@@ -21,28 +21,28 @@ def find_submissions(a_student, a_peil_construction):
     return l_peil_construction
 
 
-def plot_progress(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_levels):
+def plot_progress(a_row, a_col, a_fig, a_course, a_perspective, a_level_serie_collection):
     series = {"color": [], "size": [], 'x': [], 'y': [], 'hover': []}
     for pleiling in a_perspective:
         series['y'].append(0)
-        if pleiling['submission']:
-            #Heeft beoordeling
+        if pleiling['submission'] is not None and pleiling['submission'].graded:
+            #Heeft submission en beoordeling
             series['size'].append(get_marker_size(True)+2)
-            series['hover'].append(get_hover_peiling(pleiling['submission'], a_start, a_course, a_levels))
-            series['x'].append(date_to_day(a_start.start_date, pleiling['submission'].submitted_date))
+            series['hover'].append(get_hover_peiling(pleiling['submission'], a_course, a_level_serie_collection))
+            series['x'].append(date_to_day(a_course.start_date, pleiling['submission'].submitted_date))
             if "beoordeling" in pleiling['assignment'].name.lower():
-                series['color'].append(a_levels.level_series[a_start.grade_levels].levels[str(int(pleiling['submission'].score))].color)
+                series['color'].append(a_level_serie_collection.level_series["grade"].grades[str(int(pleiling['submission'].score))].color)
             else:
-                series['color'].append(a_levels.level_series[a_start.level_moments.levels].levels[str(int(pleiling['submission'].score))].color)
+                series['color'].append(a_level_serie_collection.level_series["progress"].grades[str(int(pleiling['submission'].score))].color)
         else:
             #Heeft nog geen beoordeling
             series['size'].append(get_marker_size(False)+2)
             series['hover'].append("<b>"+pleiling['assignment'].name + "</b> " + get_date_time_loc(pleiling['assignment'].assignment_date))
-            series['x'].append(date_to_day(a_start.start_date, pleiling['assignment'].assignment_date))
+            series['x'].append(date_to_day(a_course.start_date, pleiling['assignment'].assignment_date))
             if "beoordeling" in pleiling['assignment'].name.lower():
-                series['color'].append(a_levels.level_series[a_start.grade_levels].levels["-1"].color)
+                series['color'].append(a_level_serie_collection.level_series["grade"].get_status(BEFORE_DEADLINE).color)
             else:
-                series['color'].append(a_levels.level_series[a_start.level_moments.levels].levels["-1"].color)
+                series['color'].append(a_level_serie_collection.level_series["progress"].get_status(BEFORE_DEADLINE).color)
     a_fig.add_trace(
         go.Scatter(
             x=series['x'],
@@ -66,7 +66,7 @@ def plot_progress(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_level
     )
 
 
-def plot_assignments(a_row, a_col, a_fig, a_start, a_course, a_show_points, a_assignment_sequences, a_levels):
+def plot_assignments(a_row, a_col, a_fig, a_course, a_show_points, a_assignment_sequences, a_levels):
     series = {"color": [], "size": [], "size2": [], 'x': [], 'y': [], 'hover': []}
     cum_points = 0
 
@@ -78,13 +78,15 @@ def plot_assignments(a_row, a_col, a_fig, a_start, a_course, a_show_points, a_as
             series['size'].append(get_marker_size(False))
             series['x'].append(assignment.unlock_day)
             series['y'].append(cum_points)
-            series['color'].append(a_levels.level_series[a_start.grade_levels].levels["3"].color)
+            # print("PA05 -", a_course.grade_levels)
+            # print("PA07 -",a_levels.level_series[a_course.grade_levels].levels["3"].color)
+            series['color'].append(a_levels.level_series[a_course.grade_levels].grades["3"].color)
             series['hover'].append(get_hover_assignment(a_show_points, assignment))
 
             series['size'].append(get_marker_size(True))
             series['x'].append(assignment.assignment_day)
             series['y'].append(cum_points)
-            series['color'].append(a_levels.level_series[a_start.grade_levels].levels["0"].color)
+            series['color'].append(a_levels.level_series[a_course.grade_levels].grades["0"].color)
             series['hover'].append(get_hover_assignment(a_show_points, assignment))
 
         open_assignments = go.Scatter(
@@ -107,13 +109,20 @@ def plot_assignments(a_row, a_col, a_fig, a_start, a_course, a_show_points, a_as
         a_fig.add_trace(open_assignments, secondary_y=False)
     return
 
-def plot_future_assignments(a_row, a_col, a_fig, a_start, a_show_points, a_assignment_sequences, a_levels):
+
+def plot_future_assignments(a_row, a_col, a_fig,
+                            a_course, a_show_points,
+                            a_assignment_sequences, a_student_perspective, a_actual_day, a_levels):
     series = {"color": [], "size": [], 'x': [], 'y': [], 'hover': []}
     for assignment_sequence in a_assignment_sequences:
+        submission_sequences = a_student_perspective.get_sequence_by_tag(assignment_sequence.tag)
+        date, day = assignment_sequence.get_date_day(submission_sequences, a_actual_day)
+        if day <= a_actual_day:
+            continue
         series['size'].append(get_marker_size(False))
-        series['x'].append(assignment_sequence.get_day())
+        series['x'].append(day)
         series['y'].append(0)
-        series['color'].append(a_levels.level_series[a_start.grade_levels].levels["-1"].color)
+        series['color'].append(a_levels.level_series[a_course.grade_levels].get_status(BEFORE_DEADLINE).color)
         series['hover'].append(get_hover_assignment(a_show_points, assignment_sequence))
     future_assignments = go.Scatter(
         x=series['x'],
@@ -136,13 +145,14 @@ def plot_future_assignments(a_row, a_col, a_fig, a_start, a_show_points, a_assig
     return
 
 
-def plot_day_bar(a_row, a_col, a_fig, a_start, a_total_points, a_actual_day, a_actual_date, a_progress, a_levels, a_show_points, a_show_flow, a_actual_points):
+def plot_day_bar(a_row, a_col, a_fig,
+                 a_course, a_total_points, a_actual_day, a_actual_date, a_progress, a_grades, a_show_points, a_show_flow, a_actual_points):
     if a_total_points <= 0:
         return
     if a_show_flow:
         a_total_points = 1
-    l_label = a_levels.level_series[a_start.progress_levels].levels[str(a_progress)].label
-    l_color = a_levels.level_series[a_start.progress_levels].levels[str(a_progress)].color
+    l_label = a_grades[str(a_progress)].label
+    l_color = a_grades[str(a_progress)].color
     l_hover = get_hover_day_bar(l_label, a_actual_day, a_actual_date, a_show_points, a_actual_points)
 
     a_fig.add_trace(
@@ -168,24 +178,20 @@ def plot_day_bar(a_row, a_col, a_fig, a_start, a_total_points, a_actual_day, a_a
     )
 
 
-
-def plot_submissions(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_levels):
+def plot_submissions(a_row, a_col, a_fig, a_course, a_perspective, a_level_serie_collection):
     l_assignment_group = a_course.find_assignment_group(a_perspective.assignment_groups[0])
-    # for assignment_sequence in l_assignment_group.assignment_sequences:
-    #     submission_sequence = a_perspective.get_sequence_by_tag(assignment_sequence.tag)
-    #     if submission_sequence is None:
-
     l_perspective = a_course.find_perspective_by_name(a_perspective.name)
     x_submission = [0]
     if l_perspective.show_flow:
         y_submission = [0.5]
     else:
         y_submission = [0]
-    y_hover = ['<b>Start</b> '+get_date_time_loc(a_start.start_date)]
-    y_colors = [a_levels.level_series[a_start.progress_levels].levels["-1"].color]
+    y_hover = ['<b>Start</b> '+get_date_time_loc(a_course.start_date)]
+    y_colors = [a_level_serie_collection.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).color]
     y_size = [get_marker_size(False)]
     cum_score = 0
     for submission_sequence in a_perspective.submission_sequences:
+
         y_size.append(get_marker_size(submission_sequence.is_graded()))
         x_submission.append(submission_sequence.get_day())
         if submission_sequence.is_graded():
@@ -193,28 +199,33 @@ def plot_submissions(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_le
             if submission_sequence.points == 0:
                 # lelijke hack
                 submission_sequence.points = 1
-            level = a_levels.level_series[a_course.perspectives[a_perspective.name].levels].get_level_by_fraction(submission_sequence.get_score() / submission_sequence.points)
-            y_colors.append(a_levels.level_series[a_course.perspectives[a_perspective.name].levels].levels[str(level)].color)
+            level = a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels].get_level_by_fraction(submission_sequence.get_score() / submission_sequence.points)
+            y_colors.append(a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels].grades[str(level)].color)
         else:
-            y_colors.append(a_levels.level_series[a_course.perspectives[a_perspective.name].levels].levels["-2"].color)
+            y_colors.append(a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels].get_status(submission_sequence.get_status()).color)
 
+        submission_nr = 0
         l_hover = ""
         for submission in submission_sequence.submissions:
-            level = a_levels.level_series[a_course.perspectives[a_perspective.name].levels].get_level_by_fraction(submission.score / submission_sequence.points)
+            level_series = a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels]
+            level = a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels].get_level_by_fraction(submission.score / submission_sequence.points)
             l_hover += get_hover_assignment(l_perspective.show_points, submission)
-            if submission_sequence.is_graded():
-                l_hover += get_hover_grade(a_levels, a_course, a_perspective, level, submission)
+            if submission.graded:
+                l_hover += get_hover_grade(a_course, submission, level_series.grades, level)
             else:
-                l_hover += get_hover_grade(a_levels, a_course, a_perspective, "", submission)
+                l_hover += get_hover_status(submission, level_series)
             l_hover += get_hover_comments(submission.comments)
-            l_hover += get_hover_rubrics_comments(a_course, submission, a_levels)
-            l_hover += "<br>"
+            l_hover += get_hover_rubrics_comments(a_course, submission, level_series.grades)
+            if submission_nr < len(submission_sequence.submissions) - 1:
+                l_hover += "<br><br>"
+        if len(l_hover) > 4000:
+            l_hover = l_hover[:4000] + "<br>Te veel commentaar/feedback voor pop-up. Ga naar Canvas voor alle gegevens."
+
         y_hover.append(l_hover)
         if l_perspective.show_flow:
             y_submission.append(submission_sequence.flow)
         else:
             y_submission.append(cum_score)
-
     a_fig.add_trace(
         go.Scatter(
             x=x_submission,
@@ -255,20 +266,29 @@ def remove_assignment_sequence(a_assignment_sequences, a_submission_sequence):
     return a_assignment_sequences
 
 
-def plot_overall_peilingen(a_fig, a_row, a_col, a_start, a_course, a_peiling, a_levels):
+def plot_overall_peilingen(a_row, a_col, a_fig, a_course, a_peiling, a_levels):
     if "beoordeling" in a_peiling.assignment_name.lower():
         # print(a_labels_colors.level_series[a_start.grade_levels].levels["-1"].color)
-        label = a_levels.level_series[a_start.grade_levels].levels[str(int(a_peiling.score))].label
-        color = a_levels.level_series[a_start.grade_levels].levels[str(int(a_peiling.score))].color
+        if a_peiling.graded:
+            label = a_levels.level_series[a_course.grade_levels].levels[str(int(a_peiling.score))].label
+            color = a_levels.level_series[a_course.grade_levels].levels[str(int(a_peiling.score))].color
+        else:
+            label = a_levels.level_series[a_course.grade_levels].get_status(BEFORE_DEADLINE).label
+            color = a_levels.level_series[a_course.grade_levels].get_status(BEFORE_DEADLINE).color
     else:
-        label = a_levels.level_series[a_start.level_moments.levels].levels[str(int(a_peiling.score))].label
-        color = a_levels.level_series[a_start.level_moments.levels].levels[str(int(a_peiling.score))].color
+        if a_peiling.graded:
+            label = a_levels.level_series[a_course.level_moments.levels].grades[str(int(a_peiling.score))].label
+            color = a_levels.level_series[a_course.level_moments.levels].grades[str(int(a_peiling.score))].color
+        else:
+            label = a_levels.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).label
+            color = a_levels.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).color
+
     if a_peiling.score <= 0:
         y_niveau = [0.2]
     else:
         y_niveau = [a_peiling.score]
     x_labels = [a_peiling.assignment_name]
-    y_hover = get_hover_peiling(a_peiling, a_start, a_course, a_levels)
+    y_hover = get_hover_peiling(a_peiling, a_course, a_levels)
     a_fig.add_trace(go.Bar(x=x_labels, y=y_niveau,
                            name="Hoi",
                            hoverinfo="text",
@@ -279,23 +299,29 @@ def plot_overall_peilingen(a_fig, a_row, a_col, a_start, a_course, a_peiling, a_
     a_fig.update_yaxes(title_text="Niveau", range=[0, 3.5], dtick=1, row=a_row, col=a_col)
 
 
-def plot_perspective(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_peil_construction,
-                     a_actual_day, a_actual_date, a_levels):
+def plot_perspective(a_row, a_col, a_fig, a_course, a_student_perspective, a_peil_construction,
+                     a_actual_day, a_actual_date, a_level_serie_collection):
     # slechts één assignment_group
-    assignment_group = a_course.find_assignment_group(a_perspective.assignment_groups[0])
+    assignment_group = a_course.find_assignment_group(a_student_perspective.assignment_groups[0])
     if assignment_group is None:
-        print("BPP01 - could not find assignment_group", a_perspective.assignment_groups[0], a_perspective)
+        print("BPP01 - could not find assignment_group", a_student_perspective.assignment_groups[0], a_student_perspective)
         return
     show_points = a_course.find_perspective_by_assignment_group(assignment_group.id).show_points
     show_flow = a_course.find_perspective_by_assignment_group(assignment_group.id).show_flow
     plot_bandbreedte_colored(a_row, a_col, a_fig, a_course.days_in_semester, assignment_group.bandwidth, show_flow, assignment_group.total_points)
-    if a_start.level_moments is not None and len(a_peil_construction) > 0:
+    if a_course.level_moments is not None and len(a_peil_construction) > 0:
         # print("BPP02 ", a_perspective.name, a_peil_construction)
-        plot_progress(a_row, a_col, a_fig, a_start, a_course, a_peil_construction[a_perspective.name], a_levels)
-    plot_day_bar(a_row, a_col, a_fig, a_start, assignment_group.total_points, a_actual_day, a_actual_date, a_perspective.progress, a_levels, show_points, show_flow, a_perspective.sum_score )
-    plot_submissions(a_row, a_col, a_fig, a_start, a_course, a_perspective, a_levels)
-    assignment_sequences = assignment_group.assignment_sequences[:]
-    for submission_sequence in a_perspective.submission_sequences:
-       assignment_sequences = remove_assignment_sequence(assignment_sequences, submission_sequence)
-    # print("BPP09 -", a_perspective.name, "assignment_group.assignment_sequences",  len(assignment_sequences))
-    plot_future_assignments(a_row, a_col, a_fig, a_start, show_points, assignment_sequences, a_levels)
+        plot_progress(a_row, a_col, a_fig, a_course, a_peil_construction[a_student_perspective.name], a_level_serie_collection)
+
+    plot_day_bar(a_row, a_col, a_fig,
+                 a_course, assignment_group.total_points, a_actual_day, a_actual_date,
+                 a_student_perspective.progress, a_level_serie_collection.level_series["progress"].grades, show_points, show_flow, a_student_perspective.sum_score)
+
+    plot_submissions(a_row, a_col, a_fig, a_course, a_student_perspective, a_level_serie_collection)
+    # assignment_sequences = assignment_group.assignment_sequences[:]
+    # for submission_sequence in a_student_perspective.submission_sequences:
+    #    assignment_sequences = remove_assignment_sequence(assignment_sequences, submission_sequence)
+    # # print("BPP09 -", a_perspective.name, "assignment_group.assignment_sequences",  len(assignment_sequences))
+    plot_future_assignments(a_row, a_col, a_fig,
+                            a_course, show_points,
+                            assignment_group.assignment_sequences, a_student_perspective, a_actual_day, a_level_serie_collection)

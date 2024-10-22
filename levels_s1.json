@@ -1,0 +1,162 @@
+{
+  "bin2": {
+    "status": {
+      "1": {
+        "label": "Voor deadline",
+        "color": "#BFBFBF"
+      },
+      "2": {
+        "label": "Nog niet beoordeeld",
+        "color": "#E97132"
+      },
+      "3": {
+        "label": "Niet correct beoordeeld",
+        "color": "#E97132"
+      },
+      "4": {
+        "label": "Niet gemaakt",
+        "color": "#000000"
+      }
+    },
+    "grades": {
+      "0": {
+        "label": "Niet zichtbaar",
+        "color": "#0070C0",
+        "fraction": 0.0,
+        "value": 0
+      },
+      "1": {
+        "label": "Niet voldaan",
+        "color": "#0070C0",
+        "fraction": 0.99,
+        "value": 0
+      },
+      "2": {
+        "label": "Voldaan",
+        "color": "#3C7D22",
+        "fraction": 1.0,
+        "value": 1
+      }
+    }
+  },
+  "attendance": {
+    "status": {
+      "1": {
+        "label": "Voor deadline",
+        "color": "#BFBFBF"
+      },
+      "2": {
+        "label": "Nog niet beoordeeld",
+        "color": "#E97132"
+      },
+      "3": {
+        "label": "Niet correct beoordeeld",
+        "color": "#E97132"
+      },
+      "4": {
+        "label": "Niets ingeleverd",
+        "color": "#E97132"
+      }
+    },
+    "grades": {
+      "0": {
+        "label": "Niet aanwezig",
+        "color": "#B8E3C4",
+        "fraction": 0.01,
+        "value": 0
+      },
+      "1": {
+        "label": "Te laat/vroeg weg",
+        "color": "#85e043",
+        "fraction": 0.5,
+        "value": 0.5
+      },
+      "2": {
+        "label": "Aanwezig",
+        "color": "#2bad4e",
+        "fraction": 1.0,
+        "value": 1
+      }
+    }
+  },
+  "progress": {
+    "status": {
+      "1": {
+        "label": "Voortgang niet bepaald",
+        "color": "#BFBFBF"
+      },
+      "2": {
+        "label": "Voortgang nog niet bepaald",
+        "color": "#E97132"
+      },
+      "3": {
+        "label": "Voortgang niet correct bepaald",
+        "color": "#E97132"
+      },
+      "4": {
+        "label": "Voortgang niet bepaald",
+        "color": "#E97132"
+      }
+    },
+    "grades": {
+      "0": {
+        "label": "Voortgang niet zichtbaar",
+        "color": "#f25829"
+      },
+      "1": {
+        "label": "Onvoldoende voortgang",
+        "color": "#f2a529"
+      },
+      "2": {
+        "label": "Voldoende voortgang",
+        "color": "#85e043"
+      },
+      "3": {
+        "label": "Goede voortgang",
+        "color": "#2bad4e"
+      }
+    }
+  },
+  "grade": {
+    "status": {
+      "1": {
+        "label": "Nog geen beslissing",
+        "color": "#BFBFBF"
+      },
+      "2": {
+        "label": "Beslissing nog niet bepaald",
+        "color": "#E97132"
+      },
+      "3": {
+        "label": "Beslissing niet correct bepaald",
+        "color": "#E97132"
+      },
+      "4": {
+        "label": "Beslissing niet bepaald",
+        "color": "#000000"
+      }
+    },
+    "grades": {
+      "0": {
+        "label": "Niet zichtbaar",
+        "color": "#f25829"
+      },
+      "1": {
+        "label": "Onvoldoende",
+        "color": "#f2a529"
+      },
+      "2": {
+        "label": "Voldoende",
+        "color": "#85e043"
+      },
+      "3": {
+        "label": "Goed",
+        "color": "#2bad4e"
+      },
+      "4": {
+        "label": "Uitmuntend",
+        "color": "#2bad4e"
+      }
+    }
+  }
+}
