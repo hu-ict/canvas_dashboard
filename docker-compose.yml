@@ -1,0 +1,13 @@
+services:
+  dashboard:
+    container_name: canvas_dashboard
+    image: python:3.12-alpine
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "5101:5101"
+    volumes:
+      - ./courses:/app/courses
+
+volumes:
+  courses:

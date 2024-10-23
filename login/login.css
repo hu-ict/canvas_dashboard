@@ -1,0 +1,92 @@
+* {
+    box-sizing: border-box;
+    font-family: "Avenir LT W01_85 Heavy1475544", Avenir, Arial, sans-serif;
+}
+
+body {
+    color: black;
+    display: grid;
+    margin: 0;
+    height: 100vh;
+    grid-template: repeat(10, 1fr) / repeat(10, 1fr);
+}
+
+header {
+    grid-area: 1 / 1 / 2 / 11;
+    border: 1px solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+header img {
+    width: 210px; /* Adjust the width as needed */
+    height: auto; /* Maintain aspect ratio */
+}
+
+main {
+    grid-area: 2 / 1 / 10 / 11;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+footer {
+    grid-area: 10 / 1 / 11 / 11;
+    border: 1px solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#inlog-blok {
+    background-color: #fff;
+    border: 1px solid lightgray;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 400px;
+    height: 400px;
+}
+
+.login-container {
+    width: 300px;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 0 auto;
+}
+
+.login-container h2 {
+    text-align: center;
+}
+
+.login-form {
+    margin-top: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.form-group input[type="button"] {
+    background-color: royalblue;
+    color: white;
+    cursor: pointer;
+}
+
+.message {
+    color: red;
+}
