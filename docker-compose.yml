@@ -7,7 +7,7 @@ services:
     ports:
       - "5101:5101"
     volumes:
-      - ./courses:/app/courses
+      - ./courses:/src/courses
 
 volumes:
   courses:
