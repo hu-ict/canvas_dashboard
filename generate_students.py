@@ -6,9 +6,6 @@ from lib.lib_date import API_URL, get_actual_date
 from lib.file import read_start, read_course_instance, read_course
 from model.Student import Student
 from model.StudentLink import StudentLink
-from model.perspective.AttendancePerspective import AttendancePerspective
-from model.perspective.StudentPerspective import StudentPerspective
-from model.perspective.StudentLevelMoments import StudentLevelMoments
 
 
 def link_teachers(config):
@@ -62,30 +59,6 @@ def get_section_students(canvas_course, start, course):
             print("GS29 -", "Section not found", course_section.name)
 
 
-def add_perspectives_to_student(course, student):
-    # StudentProgress toevoegen aan Students
-    if course.level_moments is not None:
-        student.student_level_moments = StudentLevelMoments(course.level_moments.name, course.level_moments.assignment_groups)
-    if course.attendance is not None:
-        # print("GS33 - Add attendance perspective to students")
-        student.attendance_perspective = AttendancePerspective(course.attendance.name, -1, 0, 0, 0, 0, 0)
-    # Perspectives toevoegen aan Students
-    student.perspectives = {}
-    for perspective in course.perspectives.values():
-        if len(perspective.assignment_groups) > 1:
-            # meerdere assignment_group: kennis
-            student.perspectives[perspective.name] = StudentPerspective(perspective.name, -1, 0, 0)
-            assignment_group_id = course.find_assignment_group_by_role(student.role)
-            student.perspectives[perspective.name].assignment_groups.append(assignment_group_id)
-        elif len(perspective.assignment_groups) == 1:
-            # één assignment_group: team, gilde en peil
-            student.perspectives[perspective.name] = StudentPerspective(perspective.name, -1, 0, 0)
-            assignment_group_id = course.perspectives[perspective.name].assignment_groups[0]
-            student.perspectives[perspective.name].assignment_groups.append(assignment_group_id)
-        else:
-            print("GS31 - ERROR: geen assignment_group for perspective")
-    return student
-
 def main(instance_name):
     g_actual_date = get_actual_date()
     instances = read_course_instance()
@@ -100,7 +73,7 @@ def main(instance_name):
     canvas = Canvas(API_URL, start.api_key)
     user = canvas.get_current_user()
     print("GS03 -", user.name)
-    # cleanup students in list roles, slb and project_groups
+    # cleanup students in list roles and project_groups
     for role in course.roles:
         role.students = []
     for student_group in course.student_groups:
@@ -115,10 +88,10 @@ def main(instance_name):
     for user in users:
         if hasattr(user, 'login_id'):
             print("GS15 - Create student", user.name, user.login_id, user.sis_user_id)
-            student = Student(user.id, 0, user.name, user.sis_user_id, user.sortable_name, 0, "", user.login_id, "", 0)
+            student = Student(user.id, 0, user.name, user.sis_user_id, user.sortable_name, 0, "", user.login_id, "")
         else:
             print("GS16 - Create student without login_id", user.name, user.sis_user_id)
-            student = Student(user.id, 0, user.name, user.sis_user_id, user.sortable_name, 0, "", "", "", 0)
+            student = Student(user.id, 0, user.name, user.sis_user_id, user.sortable_name, 0, "", "", "")
         # print("GS17 ", student)
         course.students.append(student)
         student_count += 1
@@ -134,9 +107,6 @@ def main(instance_name):
         if len(student.role) == 0:
             print("GS95 - Verwijder student uit lijst, heeft geen role", student.name)
             course.students.remove(student)
-    for student in course.students:
-        student = add_perspectives_to_student(course, student)
-    # Students en StudentGroups koppelen
     if start.projects_groep_name == "SECTIONS":
         print("GS36 - Werken met Canvas secties als groepen.")
     else:

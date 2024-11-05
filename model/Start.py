@@ -1,5 +1,6 @@
 from lib.lib_date import get_date_time_obj, get_date_time_str
 
+
 class Start:
     def __init__(self, canvas_course_id, projects_groep_name,
                  start_date, end_date, target_path, attendance_report, api_key):
@@ -25,7 +26,6 @@ class Start:
             'attendance_report': self.attendance_report,
         }
         return dict_result
-
 
     @staticmethod
     def from_dict(data_dict):

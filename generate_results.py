@@ -4,10 +4,11 @@ import json
 
 from generate_progress import proces_progress
 from lib.file import read_start, read_course, read_course_instance, read_progress
-from lib.lib_attendance import process_attendance
+from lib.lib_attendance import read_attendance
 from lib.lib_submission import count_graded, add_missed_assignments, read_submissions, add_open_level_moments
 from model.Result import *
 from lib.lib_date import get_actual_date, API_URL, date_to_day
+from model.StudentResults import StudentResults
 
 
 def main(instance_name):
@@ -31,26 +32,33 @@ def main(instance_name):
         results = Result(course.canvas_id, course.name, g_actual_date, date_to_day(course.start_date, g_actual_date), 0, 0)
     # for student in course.students:
     #     print("GR05 -", student.name, student.number)
-    results.students = course.students
+    for student in course.students:
+        student_results = StudentResults.copy_from(student, course)
+        results.students.append(student_results)
+        # with open(".//output//"+student_results.name+".json", 'w') as f:
+        #     dict_results = student_results.to_json()
+        #     print(student_results.name)
+        #     json.dump(dict_results, f, indent=2)
+
     # for student in results.students:
     #     print("GR07 -", student.name, student.number)
-    read_submissions(canvas_course, course, results, True)
+    if course.attendance is not None:
+        read_attendance(start, course, results)
+    else:
+        print("GR10 - No attendance")
+    read_submissions(instances, canvas_course, course, results, True)
     for student in results.students:
         for student_perspective in student.perspectives.values():
             # Perspective aanvullen met missed Assignments waar nodig (niets ingeleverd)
             add_missed_assignments(course, results.actual_day, student_perspective)
         add_open_level_moments(course, results.actual_day, student.id, student.student_level_moments)
-    if course.attendance is not None:
-        process_attendance(start, course, results)
-    else:
-        print("GR10 - No attendance")
 
     # for student in results.students:
     #     print("GR75", student.name)
     # sorteer de attendance en submissions
     for student in results.students:
         if course.attendance is not None:
-            student.attendance_perspective.attendance_submissions = sorted(student.attendance_perspective.attendance_submissions, key=lambda s: s.day)
+            student.student_attendance.attendance_submissions = sorted(student.student_attendance.attendance_submissions, key=lambda s: s.day)
         for perspective in student.perspectives.values():
             for submission_sequence in perspective.submission_sequences:
                 submission_sequence.submissions = sorted(submission_sequence.submissions, key=lambda s: s.assignment_day)
@@ -69,8 +77,14 @@ def main(instance_name):
         dict_result = progress_history.to_json()
         json.dump(dict_result, f, indent=2)
 
+    # for student_results in results.students:
+    #     with open(".//output//"+student_results.name+".json", 'w') as f:
+    #         dict_results = student_results.to_json()
+    #         print(student_results.name)
+    #         json.dump(dict_results, f, indent=2)
+
     with open(instances.get_result_file_name(instances.current_instance), 'w') as f:
-        dict_result = results.to_json(["perspectives"])
+        dict_result = results.to_json()
         json.dump(dict_result, f, indent=2)
 
     print("GR99 Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")

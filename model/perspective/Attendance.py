@@ -4,7 +4,8 @@ from model.perspective.Policy import Policy
 
 
 class Attendance:
-    def __init__(self, name, title, levels, show_points, show_flow, strategy, total_points, lower_points, upper_points, bandwidth, policy):
+    def __init__(self, name, title, levels, show_points, show_flow, strategy, total_points, lower_points, upper_points,
+                 bandwidth, policy):
         self.name = name
         self.title = title
         self.levels = levels
@@ -19,7 +20,6 @@ class Attendance:
         self.attendance_moments = []
 
     def to_json(self):
-        check = lambda x: self.bandwidth.to_json() if x is not None else None
         dict_result = {
             'name': self.name,
             'title': self.title,
@@ -62,8 +62,10 @@ class Attendance:
         else:
             bandwidth = None
 
-        new = Attendance(data_dict['name'], data_dict['title'], data_dict['levels'], data_dict['show_points'], data_dict['show_flow'],
-                         data_dict['strategy'], data_dict['total_points'], data_dict['lower_points'], data_dict['upper_points'], bandwidth, policy)
+        new = Attendance(data_dict['name'], data_dict['title'], data_dict['levels'], data_dict['show_points'],
+                         data_dict['show_flow'],
+                         data_dict['strategy'], data_dict['total_points'], data_dict['lower_points'],
+                         data_dict['upper_points'], bandwidth, policy)
         if 'attendance_moments' in data_dict.keys():
             new.attendance_moments = list(map(lambda s: AttendanceMoment.from_dict(s), data_dict['attendance_moments']))
         return new

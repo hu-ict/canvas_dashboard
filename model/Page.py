@@ -1,6 +1,6 @@
 class Page:
-    def __init__(self, id, name, url):
-        self.id = id
+    def __init__(self, page_id, name, url):
+        self.id = page_id
         self.name = name
         self.url = url
         self.is_in_module = False

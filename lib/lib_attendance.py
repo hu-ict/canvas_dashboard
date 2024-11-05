@@ -5,7 +5,7 @@ from model.Submission import Submission
 from model.perspective.AttendanceSubmission import AttendanceSubmission
 
 
-def read_attendance(start, course):
+def read_attendance_from_file(start, course):
     print("read_attendance", start.attendance_report)
     appendances = []
     with open(start.attendance_report, mode='r', encoding="utf-8") as attendance_file:
@@ -33,15 +33,15 @@ def read_attendance(start, course):
     return appendances
 
 
-def process_attendance(start, course, results):
-    attendances = read_attendance(start, course)
+def read_attendance(start, course, results):
+    attendances = read_attendance_from_file(start, course)
     not_found = set()
     for student in results.students:
-        student.attendance_perspective.attendance_submissions = []
+        student.student_attendance.attendance_submissions = []
     for attendance in attendances:
         student = results.find_student(attendance.student_id)
         if student:
-            student.attendance_perspective.attendance_submissions.append(attendance)
+            student.student_attendance.attendance_submissions.append(attendance)
         else:
             not_found.add(attendance.student_id)
             # print("Student niet gevonden", attendance.student_id)

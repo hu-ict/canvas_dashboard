@@ -22,3 +22,12 @@ class StudentPerspectives:
         for key in data_dict.keys():
             new.perspectives[key] = StudentPerspective.from_dict(data_dict[key])
         return new
+
+    @staticmethod
+    def copy_from(perspectives):
+        # print(data_dict)
+        new = StudentPerspectives()
+        for perspective in perspectives.values():
+            new.perspectives[perspective.name] = StudentPerspective(perspective.name, perspective.title, 0, 0, 0)
+            new.perspectives[perspective.name].assignment_groups = perspective.assignment_groups
+        return new

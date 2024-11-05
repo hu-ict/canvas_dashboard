@@ -1,7 +1,7 @@
 from model.Submission import Submission
 
 
-class StudentLevelMoments:
+class StudentGradeMoments:
     def __init__(self, name, assignment_groups):
         self.name = name
         self.assignment_groups = assignment_groups
@@ -15,7 +15,7 @@ class StudentLevelMoments:
         }
 
     def __str__(self):
-        line = f' StudentLevelMoments({self.name}, {self.assignment_groups})\n'
+        line = f' StudentGradeMoments({self.name}, {self.assignment_groups})\n'
         for submission in self.submissions:
             line += " s " + str(submission) + "\n"
         return line
@@ -43,11 +43,12 @@ class StudentLevelMoments:
     @staticmethod
     def from_dict(data_dict):
         # print("StudentPerspective.from_dict", data_dict)
-        new = StudentLevelMoments(data_dict['name'], data_dict['assignment_groups'])
+        new = StudentGradeMoments(data_dict['name'], data_dict['assignment_groups'])
         if 'submissions' in data_dict.keys():
             new.submissions = list(map(lambda s: Submission.from_dict(s), data_dict['submissions']))
         return new
 
     @staticmethod
-    def copy_from(level_moments):
-        return StudentLevelMoments(level_moments.name, level_moments.assignment_groups)
+    def copy_from(grade_moments):
+        return StudentGradeMoments(grade_moments.name, grade_moments.assignment_groups)
+

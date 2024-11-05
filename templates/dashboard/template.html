@@ -12,6 +12,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/startbootstrap-sb-admin-2/4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
     <script>
         flag = true
+        last_tab = 0
         function setDetailName(name, number, role) {
             window.scrollTo({
                 top: 0,
@@ -76,7 +77,12 @@
         function setView(view) {
             const views = document.getElementsByClassName("dashboard_view");
             if (view == "Groepen"){
-                toggleFlags()
+                if (last_tab == 1) {
+                    toggleFlags()
+                }
+                last_tab = 1
+            } else {
+                last_tab = 0
             }
             for (i = views.length - 1; i >= 0; --i) {
                 if (views[i].className.includes(view)) {

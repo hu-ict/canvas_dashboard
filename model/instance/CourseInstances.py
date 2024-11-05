@@ -1,6 +1,6 @@
 from model.instance.Event import Event
 from model.instance.Instance import Instance
-from model.instance.CourseCategory import CourseCatergory
+from model.instance.CourseCategory import CourseCategory
 
 
 class CourseInstances:
@@ -11,9 +11,9 @@ class CourseInstances:
         self.events = {}
 
     def new_environment(self):
-        self.course_categories['inno_courses'] = CourseCatergory('inno_courses', [])
-        self.course_categories['prop_courses'] = CourseCatergory('prop_courses', [])
-        self.course_categories['other_courses'] = CourseCatergory('other_courses', [])
+        self.course_categories['inno_courses'] = CourseCategory('inno_courses', [])
+        self.course_categories['prop_courses'] = CourseCategory('prop_courses', [])
+        self.course_categories['other_courses'] = CourseCategory('other_courses', [])
         self.events['course_create_event'] = Event('course_create_event', 'TIME')
         self.events['course_update_event'] = Event('course_update_event', 'TIME')
         self.events['results_create_event'] = Event('results_create_event', 'TIME')
@@ -114,7 +114,7 @@ class CourseInstances:
         new = CourseInstances(data_dict["current_instance"])
         for key in data_dict["course_categories"].keys():
             # print(key, data_dict["course_categories"][key])
-            new.course_categories[key] = CourseCatergory.from_dict(key, data_dict["course_categories"][key])
+            new.course_categories[key] = CourseCategory.from_dict(key, data_dict["course_categories"][key])
         for key in data_dict["instances"].keys():
             new.instances[key] = Instance.from_dict(key, data_dict["instances"][key])
         for key in data_dict["events"].keys():

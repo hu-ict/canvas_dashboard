@@ -21,7 +21,7 @@ def main(instance_name):
     shutil.copytree(instances.get_student_path(), start.target_path + "students", copy_function=shutil.copy2,
                     ignore_dangling_symlinks=False,
                     dirs_exist_ok=True)
-    shutil.copytree(instances.get_student_path(), start.target_path + "dashboard", copy_function=shutil.copy2,
+    shutil.copytree(instances.get_html_path(), start.target_path + "general", copy_function=shutil.copy2,
                     ignore_dangling_symlinks=False,
                     dirs_exist_ok=True)
     print("PD99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")

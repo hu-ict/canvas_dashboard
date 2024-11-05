@@ -1,8 +1,5 @@
-from datetime import datetime
-
 from lib.lib_date import get_date_time_str, get_date_time_obj
-from model.Student import Student
-from model.StudentGroup import StudentGroup
+from model.StudentResults import StudentResults
 
 
 class Result:
@@ -22,7 +19,7 @@ class Result:
             line += " s "+str(s)
         return line
 
-    def to_json(self, scope):
+    def to_json(self):
         return {
             'id': self.id,
             'name': self.name,
@@ -30,7 +27,7 @@ class Result:
             'actual_day': self.actual_day,
             'submission_count': self.submission_count,
             'not_graded_count': self.not_graded_count,
-            'students': list(map(lambda g: g.to_json(scope), self.students)),
+            'students': list(map(lambda g: g.to_json(), self.students)),
         }
 
     def find_student(self, student_id):
@@ -42,5 +39,5 @@ class Result:
     @staticmethod
     def from_dict(data_dict):
         new_course = Result(data_dict['id'], data_dict['name'], get_date_time_obj(data_dict['actual_date']), data_dict['actual_day'], data_dict['submission_count'], data_dict['not_graded_count'])
-        new_course.students = list(map(lambda g: Student.from_dict(g), data_dict['students']))
+        new_course.students = list(map(lambda g: StudentResults.from_dict(g), data_dict['students']))
         return new_course

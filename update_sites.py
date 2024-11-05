@@ -1,11 +1,9 @@
 import json
 import sys
 
-from lib.file import read_start, read_course, read_msteams_api, read_course_instance
+from lib.file import read_course, read_msteams_api, read_course_instance
 from lib.lib_date import get_actual_date
-from lib.teams_api_lib import get_sites, get_me_for_check, get_access_token, teams, get_channels, get_team, get_drive
-
-
+from lib.teams_api_lib import teams, get_channels, get_drive
 
 
 def main(instance_name):
@@ -47,7 +45,6 @@ def main(instance_name):
                 student.site = drive["drive_id"]
     print("US10 - Channels:", channel_count, "Sites:", site_count)
 
-
     for student in course.students:
         if student.site == "":
             print("US12 - No channel in teams, display_name:", student.name)
@@ -58,7 +55,7 @@ def main(instance_name):
         dict_result = course.to_json(["assignment"])
         json.dump(dict_result, f, indent=2)
 
-    print("US99 - Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
+    print("US99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":

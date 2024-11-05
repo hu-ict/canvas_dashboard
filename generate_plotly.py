@@ -4,7 +4,8 @@ from canvasapi import Canvas
 from plotly.subplots import make_subplots
 
 from lib.build_plotly_attendance import plot_attendance_perspective
-from lib.build_plotly_perspective import plot_perspective, find_submissions, plot_overall_peilingen
+from lib.build_plotly_perspective import plot_perspective, find_submissions, plot_overall_level_moment, \
+    plot_overall_grade_moment
 from lib.lib_date import get_date_time_loc, get_actual_date, API_URL
 from lib.file import read_course, read_results, read_course_instance, read_levels, read_levels_from_canvas, read_start
 from lib.translation_table import translation_table
@@ -47,27 +48,35 @@ def plot_student(instances, course, student, actual_date, actual_day, a_peil_con
     if course.attendance is not None:
         row = positions["attendance"]['row']
         col = positions["attendance"]['col']
-        plot_attendance_perspective(row, col, fig, course, student.attendance_perspective, actual_day, get_date_time_loc(actual_date), level_serie_collection)
+        plot_attendance_perspective(row, col, fig, course, student.student_attendance, actual_day, get_date_time_loc(actual_date), level_serie_collection)
 
     if instances.is_instance_of('inno_courses'):
         # Peil overall drie peilmomenten
         for peil in course.level_moments.moments:
             # print("GP21 - Peilmoment", peil, "overall")
-            level_moment = student.get_peilmoment_submission_by_query([peil, "overall"])
-            if level_moment is None:
+            l_level_moment = student.get_level_moment_submission_by_query([peil, "overall"])
+            row = positions[peil]['row']
+            col = positions[peil]['col']
+            if l_level_moment is None:
                 # nog niet ingevuld
                 l_assignment = course.get_first_level_moment_by_query([peil, "overall"])
                 l_level_moment = Submission(0, 0, 0, 0, l_assignment.name, l_assignment.get_date(),
                                             l_assignment.get_day(),
                                             None, None, False, "1", None, None, -1, 3, 0)
-                row = positions[peil]['row']
-                col = positions[peil]['col']
-                plot_overall_peilingen(row, col, fig, course, l_level_moment, level_serie_collection)
-            else:
-                # ingevuld
-                row = positions[peil]['row']
-                col = positions[peil]['col']
-                plot_overall_peilingen(row, col, fig, course, level_moment, level_serie_collection)
+            plot_overall_level_moment(row, col, fig, course, l_level_moment, level_serie_collection)
+
+        for grade_moment in course.grade_moments.moments:
+            # print("GP21 - Beordelingsmoment", grade_moment, "overall")
+            l_grade_moment = student.get_grade_moment_submission_by_query([grade_moment, "overall"])
+            row = positions[grade_moment]['row']
+            col = positions[grade_moment]['col']
+            if l_grade_moment is None:
+                # nog niet ingevuld
+                l_assignment = course.get_first_level_moment_by_query([grade_moment, "overall"])
+                l_grade_moment = Submission(0, 0, 0, 0, l_assignment.name, l_assignment.get_date(),
+                                            l_assignment.get_day(),
+                                            None, None, False, "1", None, None, -1, 3, 0)
+            plot_overall_grade_moment(row, col, fig, course, l_grade_moment, level_serie_collection)
 
 
     file_name = instances.get_student_path() + student.name + " progress"

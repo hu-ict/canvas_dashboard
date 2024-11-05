@@ -137,9 +137,6 @@ def main(instance_name):
                         message = f"GC64 - WARNING [{canvas_assignment.grading_type}] points_possible is not set for", canvas_assignment.name
                         print(message)
                 elif canvas_assignment.grading_type == "pass_fail":
-                    if canvas_assignment.points_possible == 0:
-                        points_possible = 2
-                    else:
                         points_possible = canvas_assignment.points_possible
                 elif canvas_assignment.grading_type == 'letter_grade':
                     if canvas_assignment.points_possible:
@@ -198,23 +195,30 @@ def main(instance_name):
                 if assignment.grading_type == "pass_fail":
                     if hasattr(canvas_assignment, "rubric"):
                         assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
-                        assignment.points = rubrics_points
                         # print("GC31 - ",len(assignment.rubrics))
                         if assignment.points > 0 and assignment.points != rubrics_points:
-                            message = f"GC33 - WARNING inconsistency in assignment {assignment.name} assignment points {assignment.points} rubrics points {rubrics_points}"
+                            message = f"GC33 - ERROR inconsistency in assignment {assignment.name} assignment points {assignment.points} rubrics points {rubrics_points}"
                             assignment.messages.append(message)
                             print(message)
+                        else:
+                            if rubrics_points > 0:
+                                assignment.points = rubrics_points
                     else:
                         print("GC34 - INFO No rubric", assignment.name, "grading_type", assignment.grading_type)
+                        if assignment.points == 0:
+                            assignment.points = 2
                 elif assignment.grading_type == "letter_grade":
                     if hasattr(canvas_assignment, "rubric"):
                         assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
-                        assignment.points = rubrics_points
+
                         # print("GC31 - ",len(assignment.rubrics))
                         if assignment.points > 0 and assignment.points != rubrics_points:
                             message = f"GC33 - WARNING inconsistency in assignment {assignment.name} assignment points {assignment.points} rubrics points {rubrics_points}"
                             assignment.messages.append(message)
                             print(message)
+                        else:
+                            if rubrics_points > 0:
+                                assignment.points = rubrics_points
                     else:
                         message = f"GC34 - WARNING No rubric in assignment {assignment.name} grading_type {assignment.grading_type}"
                         assignment.messages.append(message)
@@ -226,6 +230,9 @@ def main(instance_name):
                             message = f"GC36 - WARNING inconsistency in assignment {assignment.name} assignment points {assignment.points} rubrics points {rubrics_points}"
                             assignment.messages.append(message)
                             print(message)
+                        else:
+                            if rubrics_points > 0:
+                                assignment.points = rubrics_points
                     else:
                         if "external_tool" in canvas_assignment.submission_types:
                             pass
@@ -245,7 +252,7 @@ def main(instance_name):
                 if "Aanvullende" not in assignment_sequence.name:
                     total_group_points += assignment_sequence.points
             assignment_group.total_points = total_group_points
-            print("GC47 -", tags_lu)
+            # print("GC47 -", tags_lu)
             print("GC51 -", assignment_group.name, "punten:", assignment_group.total_points)
         else:
             print(f"GC41 - assignment_group {canvas_assignment_group.name} is not used")

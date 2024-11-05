@@ -1,6 +1,6 @@
 class Rating:
-    def __init__(self, id, points, description):
-        self.id = id
+    def __init__(self, rating_id, points, description):
+        self.id = rating_id
         self.points = points
         self.description = description
 

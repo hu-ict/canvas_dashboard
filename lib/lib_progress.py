@@ -134,8 +134,8 @@ def proces_progress(course, results, progress_history):
     progress_day = ProgressDay(results.actual_day, course.perspectives.keys())
     for student in results.students:
         if course.attendance is not None:
-            get_attendance_progress(course.attendance, student.attendance_perspective)
-            progress_day.attendance[str(student.attendance_perspective.progress)] += 1
+            get_attendance_progress(course.attendance, student.student_attendance)
+            progress_day.attendance[str(student.student_attendance.progress)] += 1
         for perspective in student.perspectives.values():
             get_progress(course, perspective)
             progress_day.perspective[perspective.name][str(perspective.progress)] += 1

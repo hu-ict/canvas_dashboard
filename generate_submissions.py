@@ -3,7 +3,7 @@ from canvasapi import Canvas
 import json
 
 from lib.file import read_start, read_course, read_results, read_course_instance, read_progress
-from lib.lib_attendance import process_attendance
+from lib.lib_attendance import process_attendance, read_attendance
 from lib.lib_progress import get_progress, get_overall_progress, get_attendance_progress
 from lib.lib_submission import submission_builder, count_graded, add_missed_assignments, read_submissions
 from lib.lib_date import API_URL, get_actual_date
@@ -40,7 +40,7 @@ def main(instance_name):
             add_missed_assignments(course, results.actual_day, perspective)
 
     if start.attendance is not None:
-        process_attendance(start, course)
+        read_attendance(start, course)
     else:
         print("GS06 - No attendance")
 
@@ -55,8 +55,8 @@ def main(instance_name):
 
     for student in results.students:
         if start.attendance is not None:
-            get_attendance_progress(course.attendance, results, student.attendance_perspective)
-            progress_day.perspective[start.attendance.name][str(student.attendance_perspective.progress)] += 1
+            get_attendance_progress(course.attendance, results, student.student_attendance)
+            progress_day.perspective[start.attendance.name][str(student.student_attendance.progress)] += 1
         for perspective in student.perspectives.values():
             get_progress(course, perspective)
             progress_day.perspective[perspective.name][str(perspective.progress)] += 1

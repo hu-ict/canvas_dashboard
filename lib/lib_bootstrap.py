@@ -104,6 +104,10 @@ def load_templates(template_path):
         string_html = file_template.read()
         templates["explanation"] = Template(string_html)
 
+    with open(template_path + 'student//template_reflection.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["reflection"] = Template(string_html)
+
     with open(template_path + 'student//template_portfolio.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["portfolio"] = Template(string_html)

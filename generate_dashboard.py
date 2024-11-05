@@ -10,11 +10,8 @@ from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_actual_date, API_URL
 from lib.plot_totals import plot_werkvoorraad, plot_voortgang
 from lib.file import read_course, read_results, read_progress, read_course_instance, read_workload, \
-    read_levels_from_canvas, read_levels, read_start
+    read_levels_from_canvas, read_start
 from model.WorkloadDay import WorkloadDay
-
-
-
 
 
 def main(instance_name):
@@ -24,8 +21,8 @@ def main(instance_name):
         instances.current_instance = instance_name
     print("GD02 - Instance:", instances.current_instance, instances.get_category(instances.current_instance))
     course = read_course(instances.get_course_file_name(instances.current_instance))
-    for teacher in course.teachers:
-        print(teacher)
+    # for teacher in course.teachers:
+    #     print(teacher)
     results = read_results(instances.get_result_file_name(instances.current_instance))
     templates = load_templates(instances.get_template_path())
     # level_serie_collection = read_levels("levels.json")
@@ -37,8 +34,8 @@ def main(instance_name):
     level_serie_collection = read_levels_from_canvas(canvas_course)
 
     team_coaches = init_coaches_dict(course)
-    for team_coach in team_coaches.values():
-        print(team_coach['teacher'])
+    # for team_coach in team_coaches.values():
+    #     print(team_coach['teacher'])
 
     student_totals = create_student_totals(instances, course, team_coaches)
     with open("student_totals.json", 'w') as f:

@@ -62,9 +62,13 @@ class Submission:
 
     @staticmethod
     def from_dict(data_dict):
-        new_submission = Submission(data_dict['id'], data_dict['assignment_group_id'], data_dict['assignment_id'], data_dict['student_id'], data_dict['assignment_name'],
-                                    get_date_time_obj(data_dict['assignment_date']), data_dict['assignment_day'], get_date_time_obj(data_dict['submitted_date']), data_dict['submitted_day'],
-                                    data_dict['graded'], data_dict['status'], data_dict['grader_name'], get_date_time_obj(data_dict['graded_date']), data_dict['score'], data_dict['points'], data_dict['flow'])
+        new_submission = Submission(data_dict['id'], data_dict['assignment_group_id'], data_dict['assignment_id'],
+                                    data_dict['student_id'], data_dict['assignment_name'],
+                                    get_date_time_obj(data_dict['assignment_date']), data_dict['assignment_day'],
+                                    get_date_time_obj(data_dict['submitted_date']), data_dict['submitted_day'],
+                                    data_dict['graded'], data_dict['status'], data_dict['grader_name'],
+                                    get_date_time_obj(data_dict['graded_date']), data_dict['score'],
+                                    data_dict['points'], data_dict['flow'])
         new_submission.comments = list(map(lambda c: Comment.from_dict(c), data_dict['comments']))
         new_submission.rubrics = list(map(lambda c: CriteriumScore.from_dict(c), data_dict['rubrics']))
         # print("SU05 -", data_dict)

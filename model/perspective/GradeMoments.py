@@ -1,10 +1,9 @@
-class Perspective:
-    def __init__(self, name, title, levels, show_points, show_flow):
+class GradeMoments:
+    def __init__(self, name, title, levels, moments):
         self.name = name
         self.title = title
         self.levels = levels
-        self.show_points = show_points
-        self.show_flow = show_flow
+        self.moments = moments
         self.assignment_groups = []
 
     def to_json(self):
@@ -12,20 +11,18 @@ class Perspective:
             'name': self.name,
             'title': self.title,
             'levels': self.levels,
-            'show_points': self.show_points,
-            'show_flow': self.show_flow,
+            'moments': self.moments,
             'assignment_groups': self.assignment_groups
         }
         return dict_result
 
     def __str__(self):
-        return f'Perspective({self.name}, {self.title}, {self.assignment_groups}, {self.levels})'
+        return f'GradeMoments({self.name}, {self.title}, {self.levels}, {self.moments}, {self.assignment_groups})'
 
     @staticmethod
     def from_dict(data_dict):
         # print("Perspective.from_dict", data_dict)
-        new = Perspective(data_dict['name'], data_dict['title'], data_dict['levels'], data_dict['show_points'],
-                          data_dict['show_flow'])
+        new = GradeMoments(data_dict['name'], data_dict['title'], data_dict['levels'], data_dict['moments'])
         if 'assignment_groups' in data_dict.keys():
             new.assignment_groups = data_dict['assignment_groups']
         return new

@@ -1,6 +1,6 @@
 class Teacher:
-    def __init__(self, id, name):
-        self.id = id
+    def __init__(self, teacher_id, name):
+        self.id = teacher_id
         self.name = name
         self.initials = ''.join([x[0].upper() for x in name.split(' ')])
         self.login_id = ""

@@ -1,5 +1,6 @@
 workload_aspects = {"count": 0, "week": 0, "over_week": 0, "over_14": 0}
 
+
 class WorkloadDay:
     def __init__(self, day):
         self.day = day

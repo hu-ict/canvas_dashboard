@@ -2,7 +2,7 @@ import csv
 import sys
 import json
 from lib.file import read_start, read_results, read_course_instance, read_course
-from lib.lib_attendance import process_attendance
+from lib.lib_attendance import read_attendance
 from lib.lib_date import get_actual_date
 
 
@@ -16,7 +16,7 @@ def main(instance_name):
     course = read_course(instances.get_course_file_name(instances.current_instance))
     results = read_results(instances.get_result_file_name(instances.current_instance))
     if start.attendance is not None:
-        process_attendance(start, course, results)
+        read_attendance(start, course, results)
     else:
         print("GA04 - No attendance")
 

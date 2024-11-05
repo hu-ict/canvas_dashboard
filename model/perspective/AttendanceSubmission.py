@@ -29,7 +29,8 @@ class AttendanceSubmission:
         }
 
     def __str__(self):
-        return f'AttendanceSubmission({self.name}, {self.student_id}, {self.day} {get_date_time_str(self.date)}, {self.teacher}, {self.score})'
+        return f'AttendanceSubmission({self.name}, {self.student_id}, {self.day} {get_date_time_str(self.date)},' \
+               f'{self.teacher}, {self.score})'
 
     @staticmethod
     def from_dict(data_dict):

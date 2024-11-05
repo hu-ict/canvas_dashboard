@@ -8,10 +8,20 @@ class Instance:
         self.listen = {}
 
     def new_instance(self):
-        self.listen['course_create_event'] = Action('course_create_event', ["generate_course.py", "generate_students.py", "generate_results.py", "generate_dashboard.py", "generate_plotly.py", "publish_dashboard.py"])
-        self.listen['course_update_event'] = Action('course_update_event', ["generate_course.py", "generate_students.py", "generate_results.py", "generate_dashboard.py", "generate_plotly.py", "publish_dashboard.py"])
-        self.listen['results_create_event'] = Action('results_create_event', ["generate_results.py", "generate_dashboard.py", "generate_plotly.py", "publish_dashboard.py"])
-        self.listen['results_update_event'] = Action('results_update_event', ["generate_submissions.py", "generate_dashboard.py", "generate_plotly.py", "publish_dashboard.py"])
+        self.listen['course_create_event'] = Action('course_create_event',
+                                                    ["generate_course.py", "generate_students.py",
+                                                     "generate_results.py", "generate_dashboard.py",
+                                                     "generate_plotly.py", "publish_dashboard.py"])
+        self.listen['course_update_event'] = Action('course_update_event',
+                                                    ["generate_course.py", "generate_students.py",
+                                                     "generate_results.py", "generate_dashboard.py",
+                                                     "generate_plotly.py", "publish_dashboard.py"])
+        self.listen['results_create_event'] = Action('results_create_event',
+                                                     ["generate_results.py", "generate_dashboard.py",
+                                                      "generate_plotly.py", "publish_dashboard.py"])
+        self.listen['results_update_event'] = Action('results_update_event',
+                                                     ["generate_submissions.py", "generate_dashboard.py",
+                                                      "generate_plotly.py", "publish_dashboard.py"])
 
     def to_json(self):
         dict_result = {
