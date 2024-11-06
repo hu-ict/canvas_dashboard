@@ -8,6 +8,23 @@ services:
       - "5101:5101"
     volumes:
       - ./courses:/src/courses
-
+    networks:
+      - dashboard-network
+  database:
+    image: "postgres:14.7-alpine"
+    environment:
+        - POSTGRES_USER=innovation
+        - POSTGRES_PASSWORD=admin
+        - POSTGRES_DB=canvas_dashboard
+        - POSTGRES_PORT=5432
+    ports:
+      - "25432:5432"
+    volumes:
+      - dashboard-database-data:/var/lib/postgresql/data/ # persist data even if container shuts down
+    networks:
+      - dashboard-network
 volumes:
   courses:
+  dashboard-database-data:
+networks:
+    dashboard-network:
