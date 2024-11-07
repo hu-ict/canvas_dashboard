@@ -2,27 +2,31 @@ import os
 import json
 import sys
 from random import Random
+from src.db.course_data import get_course_instance_name, get_students
 
 import psycopg2
 from model.Student import Student
 
-# paths to the JSON files
-base_dir = os.path.dirname(os.path.abspath(__file__))
-json_file_path_student = os.path.join(base_dir, '..', '..', 'courses', "inno", f"result_inno.json")
+# course name
+course_name = get_course_instance_name()
+
+
+# Path to students
+path_to_students = get_students(course_name)
 
 # read the JSON files
-with open(json_file_path_student) as file:
-    data = json.load(file)
+with open(path_to_students) as file:
+    student_data = json.load(file)
 
 # Maak studenten objecten aan
 students = []
-for student_data in data["students"]:
-    first_name, surname = student_data["name"].split(' ', 1)
+for data in student_data["students"]:
+    first_name, surname = data["name"].split(' ', 1)
     student = Student(
-        id=student_data["number"],
+        id=data["number"],
         first_name=first_name,
         surname=surname,
-        email=student_data["email"],
+        email=data["email"],
     )
     students.append(student)
 

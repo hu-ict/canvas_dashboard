@@ -2,14 +2,10 @@ import os
 import glob
 import json
 import psycopg2
+from src.db.course_data import get_course_instance_name
 
-base_dir = os.path.dirname(os.path.abspath(__file__))
-json_courses = os.path.join(base_dir, '..', '..' ,'courses', 'course_instances.json')
-# read the JSON files
-with open(json_courses) as file:
-    data = json.load(file)
 
-course_name = data["current_instance"]
+course_name = get_course_instance_name()
 
 try:
     connection = psycopg2.connect(
@@ -33,7 +29,7 @@ try:
             if student[4] == email:
                 student_name = student[2] + " " + student[3]
                 # Zoek naar HTML-bestanden in de opgegeven map
-                matches = glob.glob(f'./courses/{course_name}/dashboard_INNO/students/*.html')
+                matches = glob.glob(f'./courses/{course_name}/dashboard_{course_name}/students/*.html')
                 print(f"Matches found: {matches}")  # Print matches for debugging
 
                 # Filter de matches op basis van de studentnaam

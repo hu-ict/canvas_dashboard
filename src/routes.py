@@ -3,7 +3,7 @@ import os
 from flask import Blueprint, jsonify, redirect, session, send_from_directory, request, render_template_string
 from src.auth import login_required, role_required
 import jwt
-from db import utils
+from src.db.dashboards import find_dashboard_by_student_name
 
 main_bp = Blueprint('main', __name__)
 
@@ -61,7 +61,7 @@ def teacher_dashboard():
 @role_required('students')
 def student_dashboard():
     email = jwt.decode(session['token']['access_token'], options={"verify_signature": False}).get("email", "Student")
-    stud_dashboard = utils.find_dashboard_by_student_name(email)
+    stud_dashboard = find_dashboard_by_student_name(email)
     if stud_dashboard:
         return render_template_string(open(stud_dashboard).read())
     else:
@@ -81,7 +81,7 @@ def serve_js(filename):
 @login_required
 def dashboard_jeroen():
     student_email = "jeroen.cabri@student.hu.nl"
-    stud_dashboard = utils.find_dashboard_by_student_name(student_email)
+    stud_dashboard = find_dashboard_by_student_name(student_email)
 
     if stud_dashboard:
         return render_template_string(open(stud_dashboard).read())
