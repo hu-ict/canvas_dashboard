@@ -10,7 +10,6 @@ from model.Student import Student
 # course name
 course_name = get_course_instance_name()
 
-
 # Path to students
 path_to_students = get_students(course_name)
 
@@ -44,8 +43,7 @@ try:
     # Tabel aanmaken voor de studenten als hij nog niet bestaat
     cursor.execute("""
             CREATE TABLE IF NOT EXISTS students (
-                id SERIAL PRIMARY KEY,
-                student_id INTEGER,
+                id INTEGER PRIMARY KEY,
                 first_name VARCHAR(100),
                 surname VARCHAR(100),
                 email VARCHAR(100)
@@ -53,15 +51,24 @@ try:
         """)
     connection.commit()
 
-    # Studenten toevoegen aan de database
+    # haal alle student ids op uit de database
+    cursor.execute("SELECT id FROM students")
+    db_student_ids = {row[0] for row in cursor.fetchall()}
+    print(db_student_ids)
+    for student in students:
+        print(student.get_id())
+
+    # Studenten toevoegen aan de database als ze nog niet bestaan
     for student in students:
         cursor.execute("""
-                INSERT INTO students (student_id, first_name, surname, email)
-                VALUES (%s, %s, %s, %s)
-            """, (student.id, student.first_name, student.surname, student.email))
+            INSERT INTO students (id, first_name, surname, email)
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (id) DO NOTHING
+        """, (student.id, student.first_name, student.surname, student.email))
 
     connection.commit()
-    print("Data succesfully inserted")
+
+    print("Data successfully inserted")
 except Exception as e:
     print("Error: ", e)
 
