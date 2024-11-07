@@ -4,7 +4,6 @@ import json
 import psycopg2
 from src.db.course_data import get_course_instance_name
 
-
 course_name = get_course_instance_name()
 
 try:
@@ -18,7 +17,7 @@ try:
 
     cursor = connection.cursor()
 
-    # Haal alle studenten op uit de database
+    # Haalt alle studenten op uit de database
     cursor.execute("SELECT * FROM students")
     students = cursor.fetchall()
 
@@ -28,15 +27,16 @@ try:
         for student in students:
             if student[3] == email:
                 student_name = student[1] + " " + student[2]
-                # Zoek naar HTML-bestanden in de opgegeven map
+                # Zoekt naar HTML-bestanden in de opgegeven map
                 matches = glob.glob(f'./courses/{course_name}/dashboard_{course_name}/students/*.html')
                 print(f"Matches found: {matches}")  # Print matches for debugging
 
-                # Filter de matches op basis van de studentnaam
-                student_dashboard = [match for match in matches if student_name in os.path.basename(match)]
+                # Zoekt naar de html die overeenkomt met de studentnaam
+                student_dashboard = [match for match in matches if
+                                     student_name in os.path.basename(match) and match.endswith('index.html')]
 
                 if student_dashboard:
-                    return student_dashboard[1]  # Return the eerste match
+                    return student_dashboard[0]
                 else:
                     return print("No dashboard found for this student")
 

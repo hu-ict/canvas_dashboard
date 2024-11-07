@@ -12,11 +12,11 @@ course_name = get_course_instance_name()
 # Path to students
 path_to_students = get_students(course_name)
 
-# read the JSON files
+# read the students data
 with open(path_to_students) as file:
     student_data = json.load(file)
 
-# Maak studenten objecten aan
+# Make students objects
 students = []
 for data in student_data["students"]:
     first_name, surname = data["name"].split(' ', 1)
@@ -28,7 +28,7 @@ for data in student_data["students"]:
     )
     students.append(student)
 
-# Verbinding maken met PostgreSQL
+# connect to the database
 try:
     connection = psycopg2.connect(
         dbname="canvas_dashboard",
@@ -39,7 +39,7 @@ try:
     )
     cursor = connection.cursor()
 
-    # Tabel aanmaken voor de studenten als hij nog niet bestaat
+    # make table if not exists
     cursor.execute("""
             CREATE TABLE IF NOT EXISTS students (
                 id INTEGER PRIMARY KEY,
@@ -50,11 +50,11 @@ try:
         """)
     connection.commit()
 
-    # haal alle student ids op uit de database
+    # get all student ids from the database
     cursor.execute("SELECT id FROM students")
     db_student_ids = {row[0] for row in cursor.fetchall()}
 
-    # Studenten toevoegen aan de database als ze nog niet bestaan
+    # add students to the database if they are not already in the database
     for student in students:
         cursor.execute("""
             INSERT INTO students (id, first_name, surname, email)
