@@ -1,7 +1,6 @@
-import os
+
 import json
-import sys
-from random import Random
+
 from src.db.course_data import get_course_instance_name, get_students
 
 import psycopg2
@@ -54,9 +53,6 @@ try:
     # haal alle student ids op uit de database
     cursor.execute("SELECT id FROM students")
     db_student_ids = {row[0] for row in cursor.fetchall()}
-    print(db_student_ids)
-    for student in students:
-        print(student.get_id())
 
     # Studenten toevoegen aan de database als ze nog niet bestaan
     for student in students:
@@ -72,7 +68,3 @@ try:
 except Exception as e:
     print("Error: ", e)
 
-finally:
-    if connection:
-        cursor.close()
-        connection.close()

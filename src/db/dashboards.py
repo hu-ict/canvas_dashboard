@@ -26,8 +26,8 @@ try:
     def find_dashboard_by_student_name(email):
         print(students)
         for student in students:
-            if student[4] == email:
-                student_name = student[2] + " " + student[3]
+            if student[3] == email:
+                student_name = student[1] + " " + student[2]
                 # Zoek naar HTML-bestanden in de opgegeven map
                 matches = glob.glob(f'./courses/{course_name}/dashboard_{course_name}/students/*.html')
                 print(f"Matches found: {matches}")  # Print matches for debugging
