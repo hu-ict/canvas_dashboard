@@ -1,28 +1,23 @@
-import os
 import glob
-import json
-import psycopg2
+import os
+
 from src.db.course_data import get_course_instance_name
-
-course_name = get_course_instance_name()
-
-try:
-    connection = psycopg2.connect(
-        dbname="canvas_dashboard",
-        user="innovation",
-        password="admin",
-        host="database",
-        port="5432"
-    )
-
-    cursor = connection.cursor()
-
-    # Haalt alle studenten op uit de database
-    cursor.execute("SELECT * FROM students")
-    students = cursor.fetchall()
+from src.db.db_context import context, close_connection
 
 
-    def find_dashboard_by_student_name(email):
+def find_dashboard_by_student_name(email):
+    global cursor, connection
+    course_name = get_course_instance_name()
+
+    try:
+
+        cursor, connection = context()
+
+        # Haalt alle studenten op uit de database
+
+        cursor.execute("SELECT * FROM students")
+        students = cursor.fetchall()
+
         print(students)
         for student in students:
             if student[3] == email:
@@ -41,7 +36,7 @@ try:
                     return print("No dashboard found for this student")
 
         return print("Student not found in database")
-
-
-except Exception as e:
-    print(f"An error occurred: {e}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        close_connection(cursor, connection)
