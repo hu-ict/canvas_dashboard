@@ -3,11 +3,24 @@ import os
 from flask import Blueprint, jsonify, redirect, session, send_from_directory, request
 from src.auth import login_required, role_required
 import jwt
-
+from generate_start import main_generate
+from runner import main as runner
 main_bp = Blueprint('main', __name__)
 
+@main_bp.route("/generate/start", methods=['POST'])
+def generate_start():
+    data = request.get_json()
+
+    print(data)
+    main_generate(data['new_instance'], data['category'], data['canvas_course_id'], data['canvas_api_key'])
+
+    print("Event emitted")
+    runner(data['new_instance'], "course_create_event")
+
+    return data
+
 @main_bp.route("/")
-def main():
+def auth():
     token = session.get('token', {}).get('access_token')
     if not token:
         return redirect('/auth/login')
