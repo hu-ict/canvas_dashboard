@@ -1,15 +1,12 @@
 from flask import Flask
 
 from src.auth import auth_bp
-from src.db.generate_data import initialize_db
 from src.routes import main_bp
 
 
 def create_app():
     app = Flask(__name__)
     app.secret_key = 'your_random_generated_secret_key'  # Change This
-    initialize_db()
-
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     return app

@@ -5,6 +5,7 @@ from src.auth import login_required, role_required
 import jwt
 from generate_start import main_generate
 from runner import main as runner
+from src.db.generate_data import initialize_db
 
 from src.db.dashboards import find_dashboard_by_student_name
 
@@ -13,6 +14,8 @@ main_bp = Blueprint('main', __name__)
 
 @main_bp.route("/generate/start", methods=['POST'])
 def generate_start():
+
+
     data = request.get_json()
 
     print(data)
@@ -20,6 +23,8 @@ def generate_start():
 
     print("Event emitted")
     runner(data['new_instance'], "course_create_event")
+
+    initialize_db()
 
     return data
 
