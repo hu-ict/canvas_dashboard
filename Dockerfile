@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-WORKDIR /app
+WORKDIR /src
 
 
 COPY requirements.txt .
@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install libexpat1
 
 COPY . .
 
+ENV PYTHONPATH=/src
+
 EXPOSE 5101
 
-CMD ["python", "app.py"]
+CMD ["python", "/src/src/app.py"]

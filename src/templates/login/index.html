@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="stylesheet" href="/login/login.css"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}"/>
     <title>INNO Dashboard Login</title>
 </head>
 <body>
-<header><img src="/login/images/hu-logo.svg" alt="hu-logo"></header>
+<header>
+    <img src="{{ url_for('static', filename='images/hu-logo.svg') }}" alt="hu-logo">
+</header>
 <main>
     <!-- Inlogveld -->
     <div id="inlog-blok">
@@ -32,6 +34,6 @@
 </main>
 
 <footer><h3>© 2024 Hogeschool Utrecht</h3></footer>
-<script src="/login/js/login.js"></script>
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
 </body>
 </html>
