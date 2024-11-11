@@ -60,9 +60,12 @@ def plot_student(instances, course, student, actual_date, actual_day, a_peil_con
             if l_level_moment is None:
                 # nog niet ingevuld
                 l_assignment = course.get_first_level_moment_by_query([peil, "overall"])
-                l_level_moment = Submission(0, 0, 0, 0, l_assignment.name, l_assignment.get_date(),
-                                            l_assignment.get_day(),
-                                            None, None, False, "1", None, None, -1, 3, 0)
+
+                l_level_moment = Submission(0, 0, 0, 0,
+                                            l_assignment.name, l_assignment.get_date(), l_assignment.get_day(),
+                                            None, None,
+                                            "1", False, None, None, None,
+                                            -1, 3, 0)
             plot_overall_level_moment(row, col, fig, course, l_level_moment, level_serie_collection)
 
         for grade_moment in course.grade_moments.moments:
@@ -73,11 +76,13 @@ def plot_student(instances, course, student, actual_date, actual_day, a_peil_con
             if l_grade_moment is None:
                 # nog niet ingevuld
                 l_assignment = course.get_first_level_moment_by_query([grade_moment, "overall"])
-                l_grade_moment = Submission(0, 0, 0, 0, l_assignment.name, l_assignment.get_date(),
-                                            l_assignment.get_day(),
-                                            None, None, False, "1", None, None, -1, 3, 0)
-            plot_overall_grade_moment(row, col, fig, course, l_grade_moment, level_serie_collection)
+                l_grade_moment = Submission(0, 0, 0, 0,
+                                            l_assignment.name, l_assignment.get_date(), l_assignment.get_day(),
+                                            None, None,
+                                            "1", False, None, None, None,
+                                            -1, 3, 0)
 
+            plot_overall_grade_moment(row, col, fig, course, l_grade_moment, level_serie_collection)
 
     file_name = instances.get_student_path() + student.name + " progress"
     asci_file_name = file_name.translate(translation_table)

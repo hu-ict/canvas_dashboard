@@ -165,7 +165,7 @@ def main(instance_name):
                 assignment = Assignment(canvas_assignment.id, canvas_assignment.name,
                                         canvas_assignment.assignment_group_id, section_id,
                                         canvas_assignment.grading_type, canvas_assignment.grading_standard_id,
-                                        points_possible, new_assignment_date,
+                                        points_possible, canvas_assignment.submission_types, new_assignment_date,
                                         unlock_date, date_to_day(config.start_date, new_assignment_date), date_to_day(config.start_date, unlock_date))
                 if len(message) > 0:
                     assignment.messages.append(message)

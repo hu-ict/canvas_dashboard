@@ -219,7 +219,7 @@ def plot_submissions(a_row, a_col, a_fig, a_course, a_perspective, a_level_serie
             if submission_nr < len(submission_sequence.submissions) - 1:
                 l_hover += "<br><br>"
         if len(l_hover) > 4000:
-            l_hover = l_hover[:4000] + "<br>Te veel commentaar/feedback voor pop-up. Ga naar Canvas voor alle gegevens."
+            l_hover = l_hover[:4000] + "<br>Te veel commentaar/feedback voor pop-up. Ga naar Canvas voor de complete tekst."
 
         y_hover.append(l_hover)
         if l_perspective.show_flow:

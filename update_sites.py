@@ -37,7 +37,7 @@ def main(instance_name):
 
             student = course.find_student_by_name(channel["display_name"])
             if student is None:
-                print("US06 - Student not found in course", channel["display_name"])
+                print(f"US06 - Student not found in course: [{channel['display_name']}]")
             else:
                 drive = get_drive(msteams_api.my_token, team_id, channel["id"])
                 print("US81 - Drive", drive)

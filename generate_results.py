@@ -3,7 +3,7 @@ from canvasapi import Canvas
 import json
 
 from generate_progress import proces_progress
-from lib.file import read_start, read_course, read_course_instance, read_progress
+from lib.file import read_start, read_course, read_course_instance, read_progress, read_levels_from_canvas
 from lib.lib_attendance import read_attendance
 from lib.lib_submission import count_graded, add_missed_assignments, read_submissions, add_open_level_moments
 from model.Result import *
@@ -19,11 +19,13 @@ def main(instance_name):
     print("GR02 - Instance:", instances.current_instance)
     start = read_start(instances.get_start_file_name())
     course = read_course(instances.get_course_file_name(instances.current_instance))
+
     # Initialize a new Canvas object
     canvas = Canvas(API_URL, start.api_key)
     user = canvas.get_current_user()
     print("GR03 - Username", user.name)
     canvas_course = canvas.get_course(course.canvas_id)
+    level_serie_collection = read_levels_from_canvas(canvas_course)
     if g_actual_date > course.end_date:
         results = Result(course.canvas_id, course.name, course.end_date, date_to_day(course.start_date, course.end_date), 0, 0)
     elif g_actual_date < course.start_date:
@@ -46,7 +48,7 @@ def main(instance_name):
         read_attendance(start, course, results)
     else:
         print("GR10 - No attendance")
-    read_submissions(instances, canvas_course, course, results, True)
+    read_submissions(instances, canvas_course, course, results, True, level_serie_collection)
     for student in results.students:
         for student_perspective in student.perspectives.values():
             # Perspective aanvullen met missed Assignments waar nodig (niets ingeleverd)

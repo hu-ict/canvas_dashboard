@@ -193,8 +193,8 @@ class CourseConfig:
                 return perspective
         if self.level_moments is not None and assignment_group_id in self.level_moments.assignment_groups:
             return self.level_moments
-        if self.attendance is not None and assignment_group_id in self.attendance.assignment_groups:
-            return self.attendance
+        # if self.attendance is not None and assignment_group_id in self.attendance.assignment_groups:
+        #     return self.attendance
         return None
 
     def find_assignment_group_by_name(self, group_name):

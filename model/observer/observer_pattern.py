@@ -80,6 +80,6 @@ class ConcreteObserver(Observer):
         # print("ConcreteObserverA", self.number, self.name, ": Reacted to the event")
         for python_script in self.listen.run:
             print("OP05 - Event", event.name, "Instance", self.name+":>", python_script)
-            result = subprocess.run(["python", python_script, self.name], capture_output=True, text=True)
+            result = subprocess.run(["python", python_script], capture_output=True, text=True)
             print(result.stdout)
 

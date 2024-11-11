@@ -140,4 +140,12 @@ def load_templates(template_path):
         string_html = file_template.read()
         templates["students_tab"] = Template(string_html)
 
+    with open(template_path + 'analyse//template_analyse_card.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["analyse_card"] = Template(string_html)
+
+    with open(template_path + 'analyse//template_analyse_assignment.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["analyse_assignment"] = Template(string_html)
+
     return templates

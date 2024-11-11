@@ -1,3 +1,4 @@
+import subprocess
 import sys
 from lib.file import read_course_instance
 from lib.lib_date import get_actual_date
@@ -32,11 +33,9 @@ if __name__ == "__main__":
     l_actual_date = get_actual_date()
     if len(sys.argv) > 2:
         main(sys.argv[1], sys.argv[2])
-    else: #sep24_inno TICT-V1SE1-24_SEP2024
+    else:
         # main("TICT-V1SE1-24_SEP2024", "results_create_event")
-        main("sep24_inno", "results_create_event")
-        # main("")
-
+        main("sep24_inno", "course_create_event")
     total_seconds = (get_actual_date() - l_actual_date).seconds
     seconds = total_seconds % 60
     minutes = total_seconds // 60

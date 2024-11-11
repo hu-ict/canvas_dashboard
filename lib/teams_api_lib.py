@@ -302,7 +302,7 @@ def get_channels(a_token, a_team_id):
         values = result['value']
         channels = []
         for value in values:
-            print("TA27 -", value)
+            # print("TA27 -", value)
             channel = {"display_name": value["displayName"], "id": value["id"]}
             # print("TA22 -", channel)
             channels.append(channel)

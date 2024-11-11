@@ -75,7 +75,7 @@ def build_level_moments(course_id, course, moment, moment_submissions, templates
              'grader_name': "leeg",
              'graded_date': "Leeg",
              'comments': comments,
-             'reflection': "<p>Geen reflectie van student</p>"
+             'reflection': ""
              }
         )
     else:
@@ -92,13 +92,17 @@ def build_level_moments(course_id, course, moment, moment_submissions, templates
                 # Niet bepaald
                 progress_label = levels.level_series[course.level_moments.levels].get_status(NOT_YET_GRADED).label
                 progress_color = levels.level_series[course.level_moments.levels].get_status(NOT_YET_GRADED).color
-            if moment_submission.body == "":
-                moment_submission.body = "Geen reflectie ingeleverd."
-            reflection_html_string = templates['reflection'].substitute(
-                {'submitted_date': get_date_time_loc(moment_submission.submitted_date),
-                 'body': moment_submission.body
-                 }
-            )
+            assignment = course.find_assignment(moment_submission.assignment_id)
+            if "online_text_entry" in assignment.submission_types:
+                if moment_submission.body is None or moment_submission.body == "":
+                    moment_submission.body = "Geen reflectie ingeleverd."
+                reflection_html_string = templates['reflection'].substitute(
+                    {'submitted_date': get_date_time_loc(moment_submission.submitted_date),
+                     'body': moment_submission.body
+                     }
+                )
+            else:
+                reflection_html_string = ""
             level_moment_html_string += templates['level_moment'].substitute(
                 {'level_moment_title': moment_submission.assignment_name,
                  'url': url,
@@ -292,12 +296,8 @@ def build_bootstrap_portfolio(instances, course_id, course, student, actual_date
          'portfolio_items_modal': "" #portfolio_items_modal_html_string
          }
     )
-    # file_name = instances.get_student_path() + student.name + " portfolio"
-    # asci_file_name = file_name.translate(translation_table)
-    # # print("BB21 - Write portfolio for", student.name)
-    # with open(asci_file_name + ".html", mode='w', encoding="utf-8") as file_portfolio:
-    #     file_portfolio.write(portfolio_html_string)
     return portfolio_html_string
+
 
 def build_bootstrap_portfolio_empty(instances, course, student, actual_date, templates, level_series):
     portfolio_html_string = templates['portfolio_leeg'].substitute(

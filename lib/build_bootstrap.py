@@ -1,4 +1,5 @@
-from lib.build_bootstrap_structure import build_bootstrap_release_planning
+from lib.build_bootstrap_structure import build_bootstrap_release_planning, build_bootstrap_analyse, \
+    build_learning_analytics
 from lib.build_plotly_hover import get_hover_comments
 from lib.lib_date import get_date_time_loc
 from lib.translation_table import translation_table
@@ -133,7 +134,7 @@ def write_release_planning(a_start, a_templates, a_assignment_group, a_file_name
 
 
 
-def build_bootstrap_students_tabs(a_instances, a_course, a_results, a_templates, level_series, a_totals):
+def build_bootstrap_students_tabs(a_instances, a_course, a_results, a_templates, a_level_serie_collection, a_totals):
     tabs = ["Groepen"]
     if len(a_course.roles) > 1:
         tabs.append("Rollen")
@@ -141,6 +142,7 @@ def build_bootstrap_students_tabs(a_instances, a_course, a_results, a_templates,
     # tabs.append("Overzichten")
     tabs.append("Werkvoorraad")
     tabs.append("Release Planning")
+    tabs.append("Analyse")
     start_pages = {}
     start_pages["Groepen"] = "./general/standard.html"
     start_pages["Rollen"] = "./general/standard.html"
@@ -148,29 +150,29 @@ def build_bootstrap_students_tabs(a_instances, a_course, a_results, a_templates,
     # start_pages["Overzichten"] = "./general/totals_voortgang.html"
     start_pages["Werkvoorraad"] = "./general/totals_werkvoorraad.html"
     start_pages["Release Planning"] = "./general/standard.html"
-
+    start_pages["Analyse"] = "./general/standard.html"
     html_tabs = ""
     for tab in tabs:
         if tab == "Groepen":
-            students_html_string = build_bootstrap_group(a_course, a_results, a_templates, level_series)
+            students_html_string = build_bootstrap_group(a_course, a_results, a_templates, a_level_serie_collection)
         elif tab == "Rollen":
-            students_html_string = build_bootstrap_role(a_course, a_results, a_templates, level_series)
+            students_html_string = build_bootstrap_role(a_course, a_results, a_templates, a_level_serie_collection)
         elif tab == "Voortgang":
-            students_html_string = build_bootstrap_progress(a_course, a_results, a_templates, level_series)
-        # elif tab == "SLB":
-        #     students_html_string = build_bootstrap_slb(a_start, a_course, a_results, a_templates, a_labels_colors)
+            students_html_string = build_bootstrap_progress(a_course, a_results, a_templates, a_level_serie_collection)
         elif tab == "Werkvoorraad":
-            students_html_string = ""
             perspectives = []
             for perspective in a_course.perspectives.values():
                 perspectives.append(perspective)
             if a_course.level_moments is not None:
                 perspectives.append(a_course.level_moments)
-            students_html_string += build_bootstrap_canvas_werkvoorraad(a_templates, a_course, perspectives, a_totals)
+            students_html_string = build_bootstrap_canvas_werkvoorraad(a_templates, a_course, perspectives, a_totals)
         elif tab == "Release Planning":
-            students_html_string = build_bootstrap_release_planning(a_instances, a_course, a_templates, level_series)
+            students_html_string = build_bootstrap_release_planning(a_instances, a_course, a_templates,
+                                                                    a_level_serie_collection)
         else:
-            pass
+            learning_analytics = build_learning_analytics(a_course, a_results, a_level_serie_collection)
+            students_html_string = build_bootstrap_analyse(a_instances, a_course, learning_analytics, a_templates,
+                                                           a_level_serie_collection, a_results.actual_day)
         html_tab = ""
         for tab1 in tabs:
             file_name = start_pages[tab1]
