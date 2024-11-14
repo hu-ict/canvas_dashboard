@@ -100,7 +100,7 @@ def get_rubric_score(rubrics_submission, student):
     return criterium_scores, round(total_rubric_score, 2), error
 
 
-def submission_builder(a_instances, a_course, a_student, a_assignment, a_canvas_submission, a_level_serie_collection):
+def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_submission, a_level_serie_collection):
     if a_canvas_submission.grade:
         graded = True
     else:
@@ -188,7 +188,7 @@ def submission_builder(a_instances, a_course, a_student, a_assignment, a_canvas_
                 f"FOUT Er is een rubric gedefinieerd bij het peilmonent (Canvas-opdracht), maar deze wordt niet gebruikt of is niet compleet ingevuld. Opdracht is nu niet zichtbaar in portfolio of voortgang. Actie vereist!")
             print("SB51 -", errors[-1])
         elif a_canvas_submission.grade == 'complete':
-            if a_instances.is_instance_of('inno_courses'):
+            if a_instance.is_instance_of('inno_courses'):
                 errors.append(
                     f"FOUT Er is een rubric gedefinieerd bij de opdracht (Canvas-opdracht resultaat COMPLETE), maar deze wordt niet gebruikt of is niet compleet ingevuld. Opdracht is nu niet zichtbaar in portfolio of voortgang. Actie vereist!")
                 print("SB52 -", errors[-1])
@@ -337,7 +337,7 @@ def add_open_level_moments(course, actual_day, student_id, student_level_moments
               student_level_moments.assignment_groups)
 
 
-def read_submissions(a_instances, a_canvas_course, a_course, a_results, a_total_refresh, level_serie_collection):
+def read_submissions(a_instance, a_canvas_course, a_course, a_results, a_total_refresh, level_serie_collection):
     for assignment_group in a_course.assignment_groups:
         for assignment_sequence in assignment_group.assignment_sequences:
             for assignment in assignment_sequence.assignments:
@@ -366,7 +366,7 @@ def read_submissions(a_instances, a_canvas_course, a_course, a_results, a_total_
                     if student is None:
                         print("RS20 Could not find student", canvas_submission.user_id)
                         continue
-                    l_submission = submission_builder(a_instances, a_course, student, assignment, canvas_submission, level_serie_collection)
+                    l_submission = submission_builder(a_instance, a_course, student, assignment, canvas_submission, level_serie_collection)
                     # voeg een submission toe aan een van de perspectieven
                     # print(f"R31 Submission for {student.name}")
                     if l_submission is None:

@@ -4,7 +4,7 @@ from string import Template
 from lib.lib_date import get_date_time_loc, get_date_time_obj
 
 
-def build_late_list(a_instances, a_templates, a_result, a_student_totals):
+def build_late_list(a_instance, a_templates, a_result, a_student_totals):
     for perspective in a_student_totals['perspectives'].keys():
         for selector in a_student_totals['perspectives'][perspective]['list'].keys():
             # print(l_selector)
@@ -24,11 +24,11 @@ def build_late_list(a_instances, a_templates, a_result, a_student_totals):
         all_late_substitute += a_templates["late_perspective"].substitute({"perspective": perspective, "buttons": late_substitute})
     late_html_string = a_templates["late"].substitute({"perspectives": all_late_substitute})
 
-    with open(a_instances.get_project_path(a_instances.current_instance)+'file_list.json', 'w') as f:
+    with open(a_instance.get_project_path()+'file_list.json', 'w') as f:
         dict_result = file_list
         json.dump(dict_result, f, indent=2)
 
-    with open(a_instances.get_html_path()+'late.html', mode='w', encoding="utf-8") as file_late:
+    with open(a_instance.get_html_path()+'late.html', mode='w', encoding="utf-8") as file_late:
         file_late.write(late_html_string)
 
     for perspective in a_student_totals['perspectives'].keys():
@@ -52,5 +52,5 @@ def build_late_list(a_instances, a_templates, a_result, a_student_totals):
                 late_list_html_total_string += submission_html_string
             late_list_html_string = a_templates["late_list"].substitute({'submissions': late_list_html_total_string})
             file_name = "late_"+perspective+"_"+selector+".html"
-            with open(a_instances.get_html_path()+file_name, mode='w', encoding="utf-8") as file_late_list:
+            with open(a_instance.get_html_path()+file_name, mode='w', encoding="utf-8") as file_late_list:
                 file_late_list.write(late_list_html_string)

@@ -7,15 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="Berend Wilkens, Hogeschool Utrecht">
-    <title>Dashboard $student_name</title>
+    <title>Overzicht niveaus $level_serie_name</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/startbootstrap-sb-admin-2/4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
 <!--    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">-->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/startbootstrap-sb-admin-2/4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
     <style>
         .status_complete {background-color: #3C7D22; color: white;}
         .status_incomplete {background-color: #0070C0; color: white;}
@@ -23,13 +22,9 @@
         .status_pending {background-color: #E97132; color: white;}
         .status_comming {background-color: #BFBFBF; color: white;}
         .status_no_lo {background-color: white; color: #aaaaaa;}
-        .badge_link {background-color: darkorange; color: white;}
-        /*.modal {color: green; float: left; left: 50%; top: 50%; transform: translate(-50%, -50%);*/
-}
     </style>
     <script>
-        function setStudentView(view) {
-            scrollToTop()
+         function setStudentView(view) {
             const views = document.getElementsByClassName("student_view");
             for (i = views.length - 1; i >= 0; --i) {
                 if (views[i].className.includes(view)) {
@@ -38,14 +33,6 @@
                     views[i].style.display = "none";
                 }
             }
-        }
-
-        function scrollToTop() {
-            window.scrollTo({
-                top: 0,
-                left: 0,
-                behavior: 'smooth'
-            });
         }
     </script>
 
@@ -56,26 +43,47 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12 mt-1 mb-1">
-                    <div class="card border-primary">
-                        <div class="row card-body">
-                            <div class="col-lg-6">
-                                $student_name ($student_number)<br>
-                                Email: $student_email<br>
-                                Groep: $student_group
-                            </div>
-                            <div class="col-lg-6">
-                                HBO-ICT, $semester<br>
-                                Datum: $actual_date<br>
-                                Docent(en): $teachers
-                            </div>
+                    <div class="card shadow mt-1 mb-1">
+                        <div class="card-header py-3">
+                            <h5 class="m-0 font-weight-bold text-primary">Status opdracht $level_serie_name</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Label</th>
+                                        <th scope="col">Kleur</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    $status_list
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-lg-12">
-                    $student_tabs
+                    <div class="card shadow mt-1 mb-1">
+                        <div class="card-header py-3">
+                            <h5 class="m-0 font-weight-bold text-primary">Niveau opdracht $level_serie_name</h5>
+                        </div>
+                        <div class="row card-body">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Niveau</th>
+                                        <th scope="col">Label</th>
+                                        <th scope="col">Kleur</th>
+                                        <th scope="col">Fractie</th>
+                                        <th scope="col">Waarde</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    $value_list
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+<!--                </div>-->
                 </div>
             </div>
         </div>

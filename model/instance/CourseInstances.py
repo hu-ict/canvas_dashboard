@@ -46,47 +46,6 @@ class CourseInstances:
         return line
 
     @staticmethod
-    def get_project_path(instance):
-        return ".//courses//" + instance + "//"
-
-    def get_test_path(self):
-        return CourseInstances.get_project_path(self.current_instance) + "test//"
-
-    def get_student_path(self):
-        return CourseInstances.get_project_path(self.current_instance) + "dashboard_" + self.current_instance + "//students//"
-
-    def get_html_path(self):
-        return CourseInstances.get_project_path(self.current_instance) + "dashboard_" + self.current_instance + "//general//"
-
-    def get_html_root_path(self):
-        return CourseInstances.get_project_path(self.current_instance) + "dashboard_" + self.current_instance + "//"
-
-    def get_start_file_name(self):
-        return CourseInstances.get_project_path(self.current_instance) + "start_" + self.current_instance + ".json"
-
-    @staticmethod
-    def get_template_path():
-        return ".//templates//"
-
-    @staticmethod
-    def get_config_file_name(instance_name):
-        return CourseInstances.get_project_path(instance_name) + "config_"+instance_name+".json"
-
-    @staticmethod
-    def get_course_file_name(instance_name):
-        return CourseInstances.get_project_path(instance_name) + "course_"+instance_name+".json"
-
-    @staticmethod
-    def get_result_file_name(instance_name):
-        return CourseInstances.get_project_path(instance_name) + "result_"+instance_name+".json"
-
-    @staticmethod
-    def get_progress_file_name(instance_name):
-        return CourseInstances.get_project_path(instance_name) + "progress_"+instance_name+".json"
-
-    @staticmethod
-    def get_workload_file_name(instance_name):
-        return CourseInstances.get_project_path(instance_name) + "workload_"+instance_name+".json"
 
     def get_category(self, instance_name):
         for category in self.course_categories.values():
@@ -95,12 +54,11 @@ class CourseInstances:
                     return category.category
         return None
 
-    def is_instance_of(self, category):
-        for key in self.instances.keys():
-            if self.current_instance == key:
-                if self.instances[key].category == category:
-                    return True
-        return False
+    def get_instance_by_name(self, instance_name):
+        for instance in self.instances.values():
+            if instance.name == instance_name:
+                return instance
+        return None
 
     def is_instance(self, instance_name):
         for key in self.course_categories.keys():

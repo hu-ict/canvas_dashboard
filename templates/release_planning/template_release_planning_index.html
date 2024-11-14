@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="Berend Wilkens, Hogeschool Utrecht">
-    <title>Dashboard $student_name</title>
+    <title>Release planning $assignment_group_name</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/startbootstrap-sb-admin-2/4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
@@ -23,14 +23,10 @@
         .status_pending {background-color: #E97132; color: white;}
         .status_comming {background-color: #BFBFBF; color: white;}
         .status_no_lo {background-color: white; color: #aaaaaa;}
-        .badge_link {background-color: darkorange; color: white;}
-        /*.modal {color: green; float: left; left: 50%; top: 50%; transform: translate(-50%, -50%);*/
-}
     </style>
     <script>
-        function setStudentView(view) {
-            scrollToTop()
-            const views = document.getElementsByClassName("student_view");
+         function setView(view) {
+            const views = document.getElementsByClassName("release_view");
             for (i = views.length - 1; i >= 0; --i) {
                 if (views[i].className.includes(view)) {
                     views[i].style.display = "block";
@@ -38,14 +34,6 @@
                     views[i].style.display = "none";
                 }
             }
-        }
-
-        function scrollToTop() {
-            window.scrollTo({
-                top: 0,
-                left: 0,
-                behavior: 'smooth'
-            });
         }
     </script>
 
@@ -56,18 +44,13 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12 mt-1 mb-1">
-                    <div class="card border-primary">
-                        <div class="row card-body">
-                            <div class="col-lg-6">
-                                $student_name ($student_number)<br>
-                                Email: $student_email<br>
-                                Groep: $student_group
-                            </div>
-                            <div class="col-lg-6">
-                                HBO-ICT, $semester<br>
-                                Datum: $actual_date<br>
-                                Docent(en): $teachers
-                            </div>
+                    <div class="card shadow mt-1 mb-1">
+                        <div class="card-header py-3">
+                            <h5 class="m-0 font-weight-bold text-primary">$assignment_group_name ($assignment_group_id)</h5>
+                        </div>
+                        <div class="card-body">
+                            Strategie: $strategie<br>
+                            Onder niveau: $lower_points, Boven niveau: $upper_points, Totaal: $total_points
                         </div>
                     </div>
                 </div>
@@ -75,13 +58,30 @@
 
             <div class="row">
                 <div class="col-lg-12">
-                    $student_tabs
+                    <div class="release_view planning">
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item"><a onclick="setView('planning')" class="nav-link active" aria-current="page" href="#">Release planning</a></li>
+                            <li class="nav-item"><a onclick="setView('opbouw')" class="nav-link " aria-current="false" href="#">Opbouw</a></li>
+                        </ul>
+                    </div>
+                    <div style="display: None" class="release_view opbouw">
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item"><a onclick="setView('planning')" class="nav-link " aria-current="false" href="#">Release planning</a></li>
+                            <li class="nav-item"><a onclick="setView('opbouw')" class="nav-link active" aria-current="page" href="#">Opbouw</a></li>
+                        </ul>
+                    </div>
+                    <div class="release_view planning">
+                        $planning
+                    </div>
+                    <div class="release_view opbouw">
+                        $flow
+                    </div>
                 </div>
             </div>
         </div>
-<!--        <script>
-            setStudentView("portfolio");
-        </script> -->
+        <script>
+            setView("planning");
+        </script>
     </div>
     <!-- Bootstrap core JavaScript-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>

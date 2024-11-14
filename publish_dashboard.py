@@ -1,13 +1,14 @@
 import shutil
 import sys
 
-from lib.file import read_start, read_course_instance, read_file_list
+from lib.file import read_start, read_course_instances
 from lib.lib_date import get_actual_date
 
 
-def main(instance_name):
+def publish_dashboard(instance_name):
+    print("PB01 publish_dashboard.py")
     g_actual_date = get_actual_date()
-    instances = read_course_instance()
+    instances = read_course_instances()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
     print("PB02 - Instance:", instances.current_instance)
@@ -28,8 +29,7 @@ def main(instance_name):
 
 
 if __name__ == "__main__":
-    print("PB01 publish_dashboard.py")
     if len(sys.argv) > 1:
-        main(sys.argv[1])
+        publish_dashboard(sys.argv[1])
     else:
-        main("")
+        publish_dashboard("")

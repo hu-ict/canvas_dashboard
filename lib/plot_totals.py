@@ -116,7 +116,7 @@ def plot_grades(a_fig, a_row, a_col, student_totals, a_course, a_grade_levels):
     a_fig.update_yaxes(title_text="Aantal", range=[0, y_axis], row=a_row, col=a_col)
 
 
-def plot_voortgang(a_instances, a_course, student_totals, a_progress_history, a_progress_levels):
+def plot_voortgang(a_instance, a_course, student_totals, a_progress_history, a_progress_levels):
     titles = ['Dagelijkse voortgang <b>studenten</b>', 'Peilingen', ""]
     for perspective in a_course.perspectives.values():
         titles.append(perspective.title)
@@ -145,11 +145,11 @@ def plot_voortgang(a_instances, a_course, student_totals, a_progress_history, a_
     # if a_instances.is_instance_of("inno_courses"):
     plot_peilingen(fig, 1, 2, student_totals, a_course, a_progress_levels)
     plot_grades(fig, 1, 2, student_totals, a_course, a_progress_levels)
-    file_name = a_instances.get_html_path() + "totals_voortgang" + ".html"
+    file_name = a_instance.get_html_path() + "totals_voortgang" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")
 
 
-def plot_werkvoorraad(a_instances, a_course, student_totals, a_workload_history):
+def plot_werkvoorraad(a_instance, a_course, student_totals, a_workload_history):
     specs = [
         [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
         [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}]
@@ -199,5 +199,5 @@ def plot_werkvoorraad(a_instances, a_course, student_totals, a_workload_history)
     plot_workload_history(fig, 2, 2, a_workload_history)
     data = go.Histogram(x=np.array(student_totals['late']['count']))
     fig.add_trace(data, 2, 3)
-    file_name = a_instances.get_html_path() + "totals_werkvoorraad" + ".html"
+    file_name = a_instance.get_html_path() + "totals_werkvoorraad" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")

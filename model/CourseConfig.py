@@ -197,14 +197,6 @@ class CourseConfig:
         #     return self.attendance
         return None
 
-    def find_assignment_group_by_name(self, group_name):
-        print(group_name)
-        for group in self.assignment_groups:
-            print("find_assignment_group_by_name", group_name, group)
-            if group.name == group_name:
-                return group
-        return None
-
     def find_assignment_group_by_role(self, a_role):
         # print("find_assignment_group_by_role", a_role)
         for role in self.roles:
@@ -262,6 +254,12 @@ class CourseConfig:
         for section in self.sections:
             if section.id == section_id:
                 return section.role
+        return None
+
+    def get_role_by_assignment_groep(self, assignment_group_id):
+        for role in self.roles:
+            if assignment_group_id in role.assignment_groups:
+                return role
         return None
 
     def find_teacher_by_group(self, group_id):

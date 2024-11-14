@@ -14,8 +14,8 @@ def get_comments(comments):
     return comments_html_string
 
 
-def build_student_tabs(instances, course, student_tabs):
-    if instances.is_instance_of("inno_courses"):
+def build_student_tabs(instance, course, student_tabs):
+    if instance.is_instance_of("inno_courses"):
         tabs = {"voortgang": "Voortgang",
                 }
     else:
@@ -201,11 +201,11 @@ def build_bootstrap_portfolio(instances, course_id, course, student, actual_date
                         modal_content_html_string += get_comments(submission.comments)
                         modal_content_html_string += get_hover_rubrics_comments(course, submission, level_serie.grades)
                         modal_content_html_string += "</p>"
-                    portfolio_items_modal_html_string = '<a class="badge mr-1" data-toggle="modal" data-target="#' + assignment_sequence.tag + '">Open</a>'
                     portfolio_items_modal_html_string += templates['portfolio_item_modal'].substitute(
                         {"portfolio_item_id": assignment_sequence.tag,
                          "portfolio_item": portfolio_item,
                          "content": modal_content_html_string})
+                    portfolio_items_modal_html_string += '<a class="badge btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#target' + assignment_sequence.tag + '"' + " onclick='scrollToTop()'>Detail</a>"
                     for submission in submission_sequence.submissions:
                         if submission.status == GRADED:
                             if submission.score == submission.points:
@@ -312,7 +312,7 @@ def build_bootstrap_portfolio_empty(instances, course, student, actual_date, tem
     return portfolio_html_string
 
 
-def build_bootstrap_student_index(instances, course_id, course, student, actual_date, actual_day, templates, levels):
+def build_bootstrap_student_index(instance, course_id, course, student, actual_date, actual_day, templates, levels):
     student_group = course.find_student_group(student.group_id)
     teacher_str = ""
     for teacher in student_group.teachers:
@@ -330,14 +330,15 @@ def build_bootstrap_student_index(instances, course_id, course, student, actual_
         grade_moment_submissions = student.get_grade_moment_submissions_by_query(moment)
         student_tabs[moment.replace(" ", "_").lower()] = build_level_moments(course_id, course, moment, grade_moment_submissions, templates, levels)
 
-    if instances.is_instance_of("prop_courses"):
-        student_tabs['portfolio'] = build_bootstrap_portfolio(instances, course_id, course, student, actual_date, actual_day, templates, levels)
+    if instance.is_instance_of("prop_courses"):
+        student_tabs['portfolio'] = build_bootstrap_portfolio(instance, course_id, course, student, actual_date, actual_day, templates, levels)
 
-    file_name = instances.get_student_path() + student.name + " progress.html"
-    asci_file_name = file_name.translate(translation_table)
-    student_tabs['voortgang'] = '<h2 class="mt-2">Voortgang</h2>'+read_plotly(asci_file_name)
+    #Importeren plotly plaatje in html file
+    student_name = student.email.split("@")[0].lower()
+    file_name_html = instance.get_temp_path() + student_name + "_progress.html"
+    student_tabs['voortgang'] = '<h2 class="mt-2">Voortgang</h2>'+read_plotly(file_name_html)
     # print("BSI10 - ", student_tabs.keys())
-    student_tabs_html_string = build_student_tabs(instances, course, student_tabs)
+    student_tabs_html_string = build_student_tabs(instance, course, student_tabs)
     student_index_html_string = templates['student_index'].substitute(
         {
             'semester': course.name,
@@ -350,9 +351,9 @@ def build_bootstrap_student_index(instances, course_id, course, student, actual_
             'student_tabs': student_tabs_html_string
         }
     )
-    file_name = instances.get_student_path() + student.name + " index"
-    asci_file_name = file_name.translate(translation_table)
+    student_name = student.email.split("@")[0].lower()
+    file_name_html = instance.get_student_path() + student_name + "_index.html"
     # print("BB21 - Write portfolio for", student.name)
-    with open(asci_file_name + ".html", mode='w', encoding="utf-8") as file_portfolio:
+    with open(file_name_html, mode='w', encoding="utf-8") as file_portfolio:
         file_portfolio.write(student_index_html_string)
     return

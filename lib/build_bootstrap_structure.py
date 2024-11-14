@@ -1,8 +1,10 @@
 from string import Template
 
 from lib.build_plotly_analyse import process_analyse
+from lib.file import read_plotly
 from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_date_time_loc
+from lib.translation_table import translation_table
 from test_bandwidth import process_bandwidth
 
 
@@ -120,7 +122,54 @@ def build_bootstrap_progress(a_start, a_course, a_results, a_templates, a_labels
     return progress_html_string
 
 
-def write_release_planning(a_course, a_templates, a_assignment_group, a_file_name):
+def write_level_serie(a_course, a_templates, level_serie, a_file_name):
+    status_list_html_string = ""
+    for status_id in level_serie.status:
+        level = level_serie.status[status_id]
+        status_list_html_string += a_templates["level_status"].substitute(
+            {'id': status_id,
+             'label': level.label,
+             'color': level.color})
+    value_list_html_string = ""
+    for grade_id in level_serie.grades:
+        grades = level_serie.grades[grade_id]
+        value_list_html_string += a_templates["level_level"].substitute(
+            {'id': grade_id,
+             'label': grades.label,
+             'color': grades.color,
+             'fraction': grades.fraction,
+             'value': grades.value})
+    file_html_string = a_templates["level_serie_index"].substitute(
+
+        {'level_serie_name': level_serie.name,
+         'status_list': status_list_html_string,
+         'value_list': value_list_html_string})
+    with open(a_file_name, mode='w', encoding="utf-8") as file_list:
+        file_list.write(file_html_string)
+
+
+def write_release_planning_index(course, templates, assignment_group, file_name, file_name_bandwidth):
+    bandwith_html_string = '<h2 class="mt-2">Opbouw</h2>'+read_plotly(file_name_bandwidth)
+    release_planning_html_string = write_release_planning(course, templates, assignment_group)
+    release_planning_index_html_string = templates['release_planning_index'].substitute(
+        {
+            'assignment_group_name': assignment_group.name,
+            'assignment_group_id': str(assignment_group.id),
+            'total_points': int(assignment_group.total_points),
+            'lower_points': assignment_group.lower_points,
+            'upper_points': assignment_group.upper_points,
+            'strategie': assignment_group.strategy,
+            'planning': release_planning_html_string,
+            'flow': bandwith_html_string
+        }
+    )
+
+    with open(file_name, mode='w', encoding="utf-8") as file_release_planning_index:
+        file_release_planning_index.write(release_planning_index_html_string)
+    return
+
+
+def write_release_planning(a_course, a_templates, a_assignment_group):
     list_html_string = ""
     for assignment_sequence in a_assignment_group.assignment_sequences:
         messages_html_string = ""
@@ -167,41 +216,50 @@ def write_release_planning(a_course, a_templates, a_assignment_group, a_file_nam
                                                                            'assignment_points': assignment_sequence.points,
                                                                            'messages': messages_html_string,
                                                                            'assignments': assignment_sequence_html_string})
-    file_html_string = a_templates["release_planning_list"].substitute(
+    release_planning_html_string = a_templates["release_planning_list"].substitute(
         {'assignment_group': a_assignment_group.name + " " + str(a_assignment_group.id),
          'total_points': int(a_assignment_group.total_points), 'lower_points': a_assignment_group.lower_points,
          'upper_points': a_assignment_group.upper_points, 'strategie': a_assignment_group.strategy,
          'assignments': list_html_string})
-
-    with open(a_file_name, mode='w', encoding="utf-8") as file_list:
-        file_list.write(file_html_string)
+    return release_planning_html_string
 
 
-def build_bootstrap_release_planning(a_instances, a_course, a_templates, a_labels_colors):
+def build_bootstrap_release_planning_tab(a_instance, a_course, a_templates, level_serie_collection):
     html_string = ""
-    buttons_planning_html_string = ""
+    for level_serie in level_serie_collection.level_series.values():
+        file_name = a_instance.get_html_path() + "level_serie_" + str(level_serie.name) + ".html"
+        write_level_serie(a_course, a_templates, level_serie, file_name)
     for assignment_group in a_course.assignment_groups:
-        file_name = "general//release_planning_" + str(assignment_group.id) + ".html"
-        buttons_planning_html_string += a_templates["selector"].substitute(
-            {'selector_file': file_name,
-             'selector': assignment_group.name}) + "<br>"
-        write_release_planning(a_course, a_templates, assignment_group, a_instances.get_html_root_path() + file_name)
+        file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group.id) + ".html"
+        process_bandwidth(a_course, assignment_group, level_serie_collection, file_name_bandwidth)
+    for assignment_group in a_course.assignment_groups:
+        file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group.id) + ".html"
+        file_name_release_planning = a_instance.get_html_path() + "release_planning_" + str(assignment_group.id) + ".html"
+        write_release_planning_index(a_course, a_templates, assignment_group, file_name_release_planning, file_name_bandwidth)
 
-    buttons_flow_html_string = ""
-    for assignment_group in a_course.assignment_groups:
-        file_name = "general//bandwidth_" + str(assignment_group.id) + ".html"
-        buttons_flow_html_string += a_templates["selector"].substitute(
-            {'selector_file': file_name,
-             'selector': assignment_group.name}) + "<br>"
-        process_bandwidth(a_instances, a_course, assignment_group, a_labels_colors)
+    perspectives_html_string = ""
+    for perspective in a_course.perspectives.values():
+        for assignment_group_id in perspective.assignment_groups:
+            assignment_group = a_course.find_assignment_group(assignment_group_id)
+            file_name_levels = ".//general//level_serie_" + str(perspective.levels) + ".html"
+            file_name_group = ".//general//release_planning_" + str(assignment_group.id) + ".html"
+            print("BBS31 -", file_name_group)
+
+            perspectives_html_string += a_templates["release_planning_perspective"].substitute(
+                {'url_levels': file_name_levels,
+                 'url_group': file_name_group,
+                 'perspective_name': perspective.title,
+                 'levels': perspective.levels,
+                 'assignment_group_name': assignment_group.name,
+                 'role': assignment_group.role})
+
     html_string += a_templates["release_planning"].substitute(
-        {'buttons_planning': buttons_planning_html_string, 'buttons_flow': buttons_flow_html_string})
+        {'perspectives': perspectives_html_string})
     return html_string
 
 
 def build_bootstrap_analyse(instances, a_course, learning_analytics, a_templates, a_level_serie_collection, actual_day):
     html_string = ""
-
     for assignment_group in a_course.assignment_groups:
         assignment_html_string = ""
         for assignment_sequence in assignment_group.assignment_sequences:
@@ -226,7 +284,7 @@ def build_bootstrap_analyse(instances, a_course, learning_analytics, a_templates
     return html_string
 
 
-def build_bootstrap_tabs(a_instances, a_start, a_course, a_templates, a_labels_colors):
+def build_bootstrap_tabs(a_instance, a_start, a_course, a_templates, a_labels_colors):
     tabs = ["Groepen"]
     if len(a_course.roles) > 1:
         tabs.append("Rollen")
@@ -238,7 +296,7 @@ def build_bootstrap_tabs(a_instances, a_start, a_course, a_templates, a_labels_c
         elif tab == "Rollen":
             students_html_string = build_bootstrap_role(a_course, a_templates, a_labels_colors)
         elif tab == "Release Planning":
-            students_html_string = build_bootstrap_release_planning(a_instances, a_start, a_course, a_templates,
+            students_html_string = build_bootstrap_release_planning_tab(a_instance, a_start, a_course, a_templates,
                                                                     a_labels_colors)
         else:
             pass

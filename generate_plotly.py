@@ -7,8 +7,7 @@ from lib.build_plotly_attendance import plot_attendance_perspective
 from lib.build_plotly_perspective import plot_perspective, find_submissions, plot_overall_level_moment, \
     plot_overall_grade_moment
 from lib.lib_date import get_date_time_loc, get_actual_date, API_URL
-from lib.file import read_course, read_results, read_course_instance, read_levels, read_levels_from_canvas, read_start
-from lib.translation_table import translation_table
+from lib.file import read_course, read_results, read_course_instances, read_levels_from_canvas, read_start
 from model.Submission import Submission
 
 
@@ -83,31 +82,28 @@ def plot_student(instances, course, student, actual_date, actual_day, a_peil_con
                                             -1, 3, 0)
 
             plot_overall_grade_moment(row, col, fig, course, l_grade_moment, level_serie_collection)
-
-    file_name = instances.get_student_path() + student.name + " progress"
-    asci_file_name = file_name.translate(translation_table)
-    fig.write_html(asci_file_name + ".html", include_plotlyjs="cdn")
-    fig.write_image(asci_file_name + ".jpeg")
-    # if a_instances.current_instance == "sep24_inno":
-    #     volg_nr = str(results.actual_day).zfill(3)
-    #     file_name = "./time_lap/" + a_student.name + "_" + volg_nr + ".jpeg"
-    #     asci_file_name = file_name.translate(translation_table)
-    #     fig.write_image(asci_file_name)
+    student_name = student.email.split("@")[0].lower()
+    file_name_html = instances.get_temp_path() + student_name + "_progress.html"
+    file_name_jpg = instances.get_student_path() + student_name + "_progress.jpg"
+    fig.write_html(file_name_html, include_plotlyjs="cdn")
+    fig.write_image(file_name_jpg)
 
 
-def main(instance_name):
+def generate_plotly(instance_name):
+    print("GPL01 - generate_plotly.py")
     g_actual_date = get_actual_date()
-    instances = read_course_instance()
+    instances = read_course_instances()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    print("GP02 - Instance:", instances.current_instance)
-    course = read_course(instances.get_course_file_name(instances.current_instance))
-    results = read_results(instances.get_result_file_name(instances.current_instance))
+    instance = instances.get_instance_by_name(instances.current_instance)
+    print("GPL02 - Instance:", instance.name)
+    course = read_course(instance.get_course_file_name())
+    results = read_results(instance.get_result_file_name())
     # level_serie_collection = read_levels("levels.json")
-    start = read_start(instances.get_start_file_name())
+    start = read_start(instance.get_start_file_name())
     canvas = Canvas(API_URL, start.api_key)
     user = canvas.get_current_user()
-    print("GR03 - Username", user.name)
+    print("GRL03 - Username", user.name)
     canvas_course = canvas.get_course(course.canvas_id)
     level_serie_collection = read_levels_from_canvas(canvas_course)
 
@@ -119,7 +115,7 @@ def main(instance_name):
     subplot_titles = []
     for perspective in course.perspectives.values():
         subplot_titles.append(perspective.title)
-    if instances.is_instance_of('prop_courses'):
+    if instance.is_instance_of('prop_courses'):
         positions = {'kennis': {'row': 1, 'col': 1},
                      'verbreding': {'row': 1, 'col': 4},
                      'skills': {'row': 2, 'col': 1},
@@ -133,7 +129,7 @@ def main(instance_name):
                 {'type': 'scatter', "colspan": 3}, None, None, {'type': 'scatter', "colspan": 3}, None, None
             ]
         ]
-    elif instances.is_instance_of('inno_courses'):
+    elif instance.is_instance_of('inno_courses'):
         subplot_titles.append("Halfweg")
         subplot_titles.append("Sprint 7")
         subplot_titles.append("Eindbeoordeling")
@@ -165,17 +161,16 @@ def main(instance_name):
     for student in results.students:
         l_peil_construction = find_submissions(student, peil_construction)
         # print(l_peil_construction)
-        print("GP90 -", student.name)
+        print("GPL90 -", student.name)
 
-        plot_student(instances, course, student, results.actual_date, results.actual_day, l_peil_construction, positions,
+        plot_student(instance, course, student, results.actual_date, results.actual_day, l_peil_construction, positions,
                          subplot_titles, specs, level_serie_collection)
 
-    print("GP99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
+    print("GPL99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":
-    print("GP01 - generate_plotly.py")
     if len(sys.argv) > 1:
-        main(sys.argv[1])
+        generate_plotly(sys.argv[1])
     else:
-        main("")
+        generate_plotly("")

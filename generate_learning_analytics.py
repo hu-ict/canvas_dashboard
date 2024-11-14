@@ -1,17 +1,17 @@
 import sys
 from canvasapi import Canvas
-from lib.build_bootstrap_student import build_bootstrap_student_index
 from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_actual_date, API_URL
 from lib.file import read_course, read_results, read_course_instance, read_levels, read_levels_from_canvas, read_start
 
 
-def main(instance_name):
+def generate_learning_analytics(instance_name):
+    print("GLA01 - generate_learning_analytics.py")
     g_actual_date = get_actual_date()
     instances = read_course_instance()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    print("GL02 - Instance:", instances.current_instance)
+    print("GLA02 - Instance:", instances.current_instance)
     course = read_course(instances.get_course_file_name(instances.current_instance))
     results = read_results(instances.get_result_file_name(instances.current_instance))
     templates = load_templates(instances.get_template_path())
@@ -19,7 +19,7 @@ def main(instance_name):
     start = read_start(instances.get_start_file_name())
     canvas = Canvas(API_URL, start.api_key)
     user = canvas.get_current_user()
-    print("GL03 - Username", user.name)
+    print("GLA03 - Username", user.name)
     canvas_course = canvas.get_course(course.canvas_id)
     level_serie_collection = read_levels_from_canvas(canvas_course)
     learning_analytics = {}
@@ -39,7 +39,7 @@ def main(instance_name):
 
     for student in results.students:
         # print(l_peil_construction)
-        print("GL10 -", student.name)
+        print("GLA10 -", student.name)
         for perspective in student.perspectives.values():
             for submission_sequence in perspective.submission_sequences:
                 for submission in submission_sequence.submissions:
@@ -48,12 +48,11 @@ def main(instance_name):
                         learning_analytics[str(submission.assignment_id)]["grades"][str(submission.grade)] += 1
     for assignment in learning_analytics.values():
         print(assignment)
-    print("GL99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
+    print("GLA99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":
-    print("GP01 - generate_learning_analytics.py")
     if len(sys.argv) > 1:
-        main(sys.argv[1])
+        generate_learning_analytics(sys.argv[1])
     else:
-        main("")
+        generate_learning_analytics("")

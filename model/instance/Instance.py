@@ -39,7 +39,48 @@ class Instance:
             line += f'{self.listen[key]}\n'
         return line
 
-    @staticmethod
+    def is_instance_of(self, category):
+        return self.category == category
+
+    def get_project_path(self):
+        return ".//courses//" + self.name + "//"
+
+    def get_test_path(self):
+        return self.get_project_path() + "test//"
+
+    def get_temp_path(self):
+        return self.get_project_path() + "temp//"
+
+    def get_template_path(self):
+        return ".//templates//"
+
+    def get_student_path(self):
+        return self.get_project_path() + "dashboard_" + self.name + "//students//"
+
+    def get_html_path(self):
+        return self.get_project_path() + "dashboard_" + self.name + "//general//"
+
+    def get_html_root_path(self):
+        return self.get_project_path() + "dashboard_" + self.name + "//"
+
+    def get_start_file_name(self):
+        return self.get_project_path() + "start_" + self.name + ".json"
+
+    def get_config_file_name(self):
+        return self.get_project_path() + "config_"+self.name+".json"
+
+    def get_course_file_name(self):
+        return self.get_project_path() + "course_"+self.name+".json"
+
+    def get_result_file_name(self):
+        return self.get_project_path() + "result_"+self.name+".json"
+
+    def get_progress_file_name(self):
+        return self.get_project_path() + "progress_"+self.name+".json"
+
+    def get_workload_file_name(self):
+        return self.get_project_path() + "workload_"+self.name+".json"
+
     def from_dict(key, data_dict):
         # print(data_dict)
         new = Instance(data_dict["name"], data_dict["category"])

@@ -3,7 +3,7 @@ import sys
 from canvasapi import Canvas
 import json
 from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
-from lib.file import read_start, read_course_instance
+from lib.file import read_start, read_course_instances
 from model.Assignment import Assignment
 from model.AssignmentGroup import AssignmentGroup
 from model.Bandwidth import Bandwidth
@@ -19,23 +19,25 @@ from model.perspective.Perspective import Perspective
 from model.perspective.Policy import Policy
 
 
-def main(instance_name):
+def generate_config(instance_name):
+    print("GCF01 - generate_config.py")
     g_actual_date = get_actual_date()
-    instances = read_course_instance()
+    instances = read_course_instances()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    print("Instance:", instances.current_instance)
-    start1 = read_start(instances.get_start_file_name())
+    instance = instances.get_instance_by_name(instances.current_instance)
+    print("Instance:", instance.name)
+    start1 = read_start(instance.get_start_file_name())
     # Initialize a new Canvas object
     canvas = Canvas(API_URL, start1.api_key)
     user = canvas.get_current_user()
     print(user.name)
     canvas_course = canvas.get_course(start1.canvas_course_id)
+
     config = CourseConfig(start1.canvas_course_id, canvas_course.name,
                           start1.start_date,
                           start1.end_date,
                           date_to_day(start1.start_date, start1.end_date),
-                          "grade",
                           0)
 
     if instances.is_instance_of("inno_courses"):
@@ -101,15 +103,13 @@ def main(instance_name):
     teacher_count = 0
     for canvas_user in canvas_users:
         teacher_count += 1
-        # werkt helaas niet om de secties op te halen, wordt vervolgd ...
-        # print("GCONF14 -", canvas_user)
-        # user = canvas.get_user(canvas_user.id)
-        # print("GCONF15 -", user)
-        teacher = Teacher(canvas_user.id, canvas_user.name)
-        if hasattr(user, 'login_id'):
-            teacher.login_id = canvas_user.login_id
+
+        if hasattr(canvas_user, 'email'):
+            teacher = Teacher(canvas_user.id, canvas_user.name, canvas_user.email)
+            # print("GCONF15 - Create teacher with email", canvas_user.email)
         else:
-            print("GCONF16 - Create teacher without login_id", canvas_user.name)
+            teacher = Teacher(canvas_user.id, canvas_user.name, "")
+            print("GCONF16 - Create teacher without email", canvas_user.name)
         config.teachers.append(teacher)
         print("GCONF18", teacher)
 
@@ -125,8 +125,8 @@ def main(instance_name):
                 print(canvas_group)
 
     config.learning_outcomes = []
-    print("GC98 - ConfigFileName:", CourseInstances.get_config_file_name(instances.current_instance))
-    with open(CourseInstances.get_config_file_name(instances.current_instance), 'w') as f:
+    print("GC98 - ConfigFileName:", instance.get_config_file_name())
+    with open(instance.get_config_file_name(), 'w') as f:
         dict_result = config.to_json([])
         json.dump(dict_result, f, indent=2)
 
@@ -135,6 +135,6 @@ def main(instance_name):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        main(sys.argv[1])
+        generate_config(sys.argv[1])
     else:
-        main("")
+        generate_config("")

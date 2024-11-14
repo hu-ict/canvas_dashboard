@@ -3,6 +3,7 @@ class Level:
         self.label = label
         self.color = color
         self.fraction = 0
+        self.value = 0
 
     def to_json(self):
         return {
