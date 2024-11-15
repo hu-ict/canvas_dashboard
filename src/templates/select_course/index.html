@@ -1,0 +1,30 @@
+<!-- select_course.html -->
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/select_course.css') }}"/>
+    <title>Selecteer een Cursus</title>
+</head>
+<body>
+<header>
+    <img src="{{ url_for('static', filename='images/hu-logo.svg') }}" alt="hu-logo">
+    <button id="logout-button">Uitloggen</button>
+</header>
+
+<main>
+    <div id="course-container">
+        <h2>Selecteer een cursus</h2>
+        <ul id="course-list">
+            {% for course in courses %}
+                <li><a href="{{ url_for('main.set_course', course_id=course[0]) }}">{{ course[1] }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</main>
+
+<footer><h3>© 2024 Hogeschool Utrecht</h3></footer>
+<script src="{{ url_for('static', filename='js/select_course.js') }}"></script>
+</body>
+</html>

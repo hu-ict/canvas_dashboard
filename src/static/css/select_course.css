@@ -1,0 +1,85 @@
+/* static/css/select_course.css */
+
+* {
+    box-sizing: border-box;
+    font-family: "Avenir LT W01_85 Heavy1475544", Avenir, Arial, sans-serif;
+}
+
+body {
+    color: black;
+    display: grid;
+    margin: 0;
+    height: 100vh;
+    grid-template: repeat(10, 1fr) / repeat(10, 1fr);
+}
+
+header {
+    grid-area: 1 / 1 / 2 / 11;
+    border-bottom: 1px solid lightgray;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+header img {
+    width: 210px; /* Adjust the width as needed */
+    height: auto; /* Maintain aspect ratio */
+}
+
+#logout-button {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#logout-button:hover {
+    background-color: #c9302c;
+}
+
+main {
+    grid-area: 2 / 2 / 10 / 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#course-container {
+    background-color: #fff;
+    border: 1px solid lightgray;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    width: 400px;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+#course-list {
+    list-style: none;
+    padding: 0;
+}
+
+#course-list li {
+    margin: 15px 0;
+}
+
+#course-list li a {
+    text-decoration: none;
+    color: royalblue;
+    font-weight: bold;
+}
+
+footer {
+    grid-area: 10 / 1 / 11 / 11;
+    border-top: 1px solid lightgray;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

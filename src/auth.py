@@ -1,12 +1,12 @@
 # src/auth.py
 from functools import wraps
-from flask import Blueprint, jsonify, request, session, render_template
+from flask import Blueprint, jsonify, request, session, render_template, redirect, url_for
 from keycloak.exceptions import KeycloakAuthenticationError
 from keycloak_config import keycloak_openid
 import jwt
+from src.db.course_data import get_student_courses
 
 auth_bp = Blueprint('auth', __name__)
-
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.json
@@ -16,6 +16,10 @@ def login():
     try:
         token = keycloak_openid.token(username, password)
         session['token'] = token
+        # Get courses for the student and store them in session
+        student_courses = get_student_courses(username)
+        session['student_courses'] = student_courses
+
         return jsonify({
             'message': 'Login successful',
             'access_token': token['access_token'],
@@ -24,6 +28,7 @@ def login():
         }), 200
     except KeycloakAuthenticationError:
         return jsonify({'message': 'Invalid username or password'}), 401
+
 
 @auth_bp.route('/login')
 def login_page():
@@ -61,3 +66,13 @@ def role_required(role):
             return f(*args, **kwargs)
         return decorated_function
     return wrapper
+
+@auth_bp.route('/logout')
+def logout():
+    # Clear session data
+    session.pop('token', None)
+    session.pop('student_courses', None)
+    session.pop('selected_course_id', None)
+
+    # Redirect to login
+    return redirect(url_for('auth.login_page'))
