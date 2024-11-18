@@ -2,13 +2,13 @@ import sys
 from canvasapi import Canvas
 from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_actual_date, API_URL
-from lib.file import read_course, read_results, read_course_instance, read_levels, read_levels_from_canvas, read_start
+from lib.file import read_course, read_results, read_course_instances, read_levels, read_levels_from_canvas, read_start
 
 
 def generate_learning_analytics(instance_name):
     print("GLA01 - generate_learning_analytics.py")
     g_actual_date = get_actual_date()
-    instances = read_course_instance()
+    instances = read_course_instances()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
     print("GLA02 - Instance:", instances.current_instance)

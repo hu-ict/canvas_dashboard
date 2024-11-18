@@ -193,6 +193,8 @@ class CourseConfig:
                 return perspective
         if self.level_moments is not None and assignment_group_id in self.level_moments.assignment_groups:
             return self.level_moments
+        if self.grade_moments is not None and assignment_group_id in self.grade_moments.assignment_groups:
+            return self.grade_moments
         # if self.attendance is not None and assignment_group_id in self.attendance.assignment_groups:
         #     return self.attendance
         return None

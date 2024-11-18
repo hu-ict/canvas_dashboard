@@ -247,8 +247,15 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
     if graded:
         perspective = a_course.find_perspective_by_assignment_group(a_assignment.group_id)
         # print("LS44 - Graded", graded, perspective.name)
-        if perspective.name in a_course.perspectives:
-            grade = a_level_serie_collection.level_series[a_course.perspectives[perspective.name].levels].get_level_by_fraction(submission_score / a_assignment.points)
+        if perspective.name == "level_moments":
+            grade = a_level_serie_collection.level_series[perspective.levels].get_level_by_fraction(submission_score / a_assignment.points)
+        if perspective.name == "grade_moments":
+            grade = a_level_serie_collection.level_series[perspective.levels].get_level_by_fraction(submission_score / a_assignment.points)
+        elif perspective.name in a_course.perspectives:
+            grade = a_level_serie_collection.level_series[perspective.levels].get_level_by_fraction(submission_score / a_assignment.points)
+        else:
+            pass
+
             # print("LS45 - Grade", grade)
     l_submission = Submission(a_canvas_submission.id, a_assignment.group_id, a_assignment.id, a_student.id,
                               a_assignment.name,

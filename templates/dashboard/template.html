@@ -99,11 +99,7 @@
         }
 
         function setStudentView(view) {
-            window.scrollTo({
-                top: 0,
-                left: 0,
-                behavior: 'smooth'
-            });
+            scrollToTop()
             const views = document.getElementsByClassName("student_view");
             for (i = views.length - 1; i >= 0; --i) {
                 if (views[i].className.includes(view)) {
@@ -114,6 +110,13 @@
             }
         }
 
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: 'smooth'
+            });
+        }
         function setCoach(coach_id) {
             console.info("Coach! "+coach_id);
             const leer_team = document.getElementsByClassName("coach");

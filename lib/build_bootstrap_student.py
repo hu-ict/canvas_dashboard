@@ -1,4 +1,4 @@
-from lib.build_plotly_hover import get_hover_rubrics_comments, get_hover_comments, get_hover_assignment, \
+from lib.build_plotly_hover import get_hover_rubrics_comments, get_hover_assignment, \
     get_hover_grade, get_hover_status
 from lib.file import read_plotly
 from lib.lib_date import get_date_time_loc

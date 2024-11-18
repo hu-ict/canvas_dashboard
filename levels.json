@@ -1,4 +1,166 @@
 {
+  "samen": {
+    "status": {
+      "1": {
+        "label": "Voor deadline",
+        "color": "#aaaaaa"
+      },
+      "2": {
+        "label": "Nog niet gewaardeerd",
+        "color": "CornflowerBlue"
+      },
+      "3": {
+        "label": "Niet correct gewaardeerd",
+        "color": "CornflowerBlue"
+      },
+      "4": {
+        "label": "Niets ingeleverd",
+        "color": "#f25829"
+      },
+      "5": {
+        "label": "Gewaardeerd",
+        "color": "#3C7D22"
+      }
+    },
+    "grades": {
+      "0": {
+        "label": "Niet zichtbaar",
+        "color": "#EDF8F0",
+        "fraction": 0.1,
+        "value": 0
+      },
+      "1": {
+        "label": "Startend",
+        "color": "#B8E3C4",
+        "fraction": 0.55,
+        "value": 1
+      },
+      "2": {
+        "label": "Samenwerkend",
+        "color": "#85e043",
+        "fraction": 0.8,
+        "value": 1
+      },
+      "3": {
+        "label": "Excellerend",
+        "color": "#2bad4e",
+        "fraction": 1.0,
+        "value": 1
+      }
+    }
+  },
+  "samen5": {
+    "status": {
+      "1": {
+        "label": "Voor deadline",
+        "color": "#aaaaaa"
+      },
+      "2": {
+        "label": "Nog niet gewaardeerd",
+        "color": "CornflowerBlue"
+      },
+      "3": {
+        "label": "Niet correct gewaardeerd",
+        "color": "CornflowerBlue"
+      },
+      "4": {
+        "label": "Niets ingeleverd",
+        "color": "#f25829"
+      },
+      "5": {
+        "label": "Gewaardeerd",
+        "color": "#3C7D22"
+      }
+    },
+    "grades": {
+      "0": {
+        "label": "Niet zichtbaar",
+        "color": "#EDF8F0",
+        "fraction": 0.1,
+        "value": 1
+      },
+      "1": {
+        "label": "Startend",
+        "color": "#c8ead1",
+        "fraction": 0.3,
+        "value": 1
+      },
+      "2": {
+        "label": "Bijna Samenwerkend",
+        "color": "#a4dbb1",
+        "fraction": 0.5,
+        "value": 1
+      },
+      "3": {
+        "label": "Samenwerkend",
+        "color": "#80cb90",
+        "fraction": 0.6,
+        "value": 1
+      },
+      "4": {
+        "label": "Bijna Excellerend",
+        "color": "#5abb6f",
+        "fraction": 0.7,
+        "value": 1
+      },
+      "5": {
+        "label": "Excellerend",
+        "color": "#2bad4e",
+        "fraction": 1.0,
+        "value": 1
+      }
+    }
+  },
+  "niveau": {
+    "status": {
+      "1": {
+        "label": "Voor deadline",
+        "color": "#aaaaaa"
+      },
+      "2": {
+        "label": "Nog niet gewaardeerd",
+        "color": "CornflowerBlue"
+      },
+      "3": {
+        "label": "Niet correct gewaardeerd",
+        "color": "CornflowerBlue"
+      },
+      "4": {
+        "label": "Niets ingeleverd",
+        "color": "#f25829"
+      },
+      "5": {
+        "label": "Gewaardeerd",
+        "color": "#3C7D22"
+      }
+    },
+    "grades": {
+      "0": {
+        "label": "Niet zichtbaar",
+        "color": "#f25829",
+        "fraction": 0.01,
+        "value": 1
+      },
+      "1": {
+        "label": "Onder niveau",
+        "color": "#f2a529",
+        "fraction": 0.55,
+        "value": 1
+      },
+      "2": {
+        "label": "Op niveau",
+        "color": "#85e043",
+        "fraction": 0.8,
+        "value": 1
+      },
+      "3": {
+        "label": "Boven niveau",
+        "color": "#2bad4e",
+        "fraction": 1.0,
+        "value": 1
+    }
+    }
+  },
   "bin2": {
     "status": {
       "1": {
@@ -7,18 +169,18 @@
       },
       "2": {
         "label": "Nog niet beoordeeld",
-        "color": "#E97132"
+        "color": "CornflowerBlue"
       },
       "3": {
         "label": "Niet correct beoordeeld",
-        "color": "#E97132"
+        "color": "CornflowerBlue"
       },
       "4": {
         "label": "Niet gemaakt",
-        "color": "#000000"
+        "color": "#0070C0"
       },
       "5": {
-        "label": "Beoordeeld",
+        "label": "Gewaardeerd",
         "color": "#3C7D22"
       }
     },
@@ -51,18 +213,18 @@
       },
       "2": {
         "label": "Nog niet beoordeeld",
-        "color": "#E97132"
+        "color": "CornflowerBlue"
       },
       "3": {
         "label": "Niet correct beoordeeld",
-        "color": "#E97132"
+        "color": "CornflowerBlue"
       },
       "4": {
         "label": "Niets ingeleverd",
         "color": "#E97132"
       },
       "5": {
-        "label": "Beoordeeld",
+        "label": "Bepaald",
         "color": "#3C7D22"
       }
     },
@@ -95,11 +257,11 @@
       },
       "2": {
         "label": "Voortgang nog niet bepaald",
-        "color": "#E97132"
+        "color": "CornflowerBlue"
       },
       "3": {
         "label": "Voortgang niet correct bepaald",
-        "color": "#E97132"
+        "color": "CornflowerBlue"
       },
       "4": {
         "label": "Voortgang niet bepaald",
@@ -113,19 +275,27 @@
     "grades": {
       "0": {
         "label": "Voortgang niet zichtbaar",
-        "color": "#f25829"
+        "color": "#f25829",
+        "fraction": 0.01,
+        "value": 0
       },
       "1": {
         "label": "Onvoldoende voortgang",
-        "color": "#f2a529"
+        "color": "#f2a529",
+        "fraction": 0.4,
+        "value": 0
       },
       "2": {
         "label": "Voldoende voortgang",
-        "color": "#85e043"
+        "color": "#85e043",
+        "fraction": 0.7,
+        "value": 0
       },
       "3": {
         "label": "Goede voortgang",
-        "color": "#2bad4e"
+        "color": "#2bad4e",
+        "fraction": 1.1,
+        "value": 0
       }
     }
   },
@@ -137,15 +307,15 @@
       },
       "2": {
         "label": "Beslissing nog niet bepaald",
-        "color": "#E97132"
+        "color": "CornflowerBlue"
       },
       "3": {
         "label": "Beslissing niet correct bepaald",
-        "color": "#E97132"
+        "color": "CornflowerBlue"
       },
       "4": {
         "label": "Beslissing niet bepaald",
-        "color": "#000000"
+        "color": "#E97132"
       },
       "5": {
         "label": "Beslissing bepaald",
@@ -158,19 +328,15 @@
         "color": "#f25829"
       },
       "1": {
-        "label": "Onvoldoende",
+        "label": "Onder niveau",
         "color": "#f2a529"
       },
       "2": {
-        "label": "Voldoende",
+        "label": "Op niveau",
         "color": "#85e043"
       },
       "3": {
-        "label": "Goed",
-        "color": "#2bad4e"
-      },
-      "4": {
-        "label": "Uitmuntend",
+        "label": "Boven niveau",
         "color": "#2bad4e"
       }
     }
