@@ -18,11 +18,7 @@ def generate_start():
     data = request.get_json()
 
     print(data)
-    try:
-        main_generate(data['new_instance'], data['category'], data['canvas_course_id'], data['canvas_api_key'])
-    except Exception as e:
-        print(f"An error occurred while generating the start file: {e}")
-        return jsonify({'message': 'An error occurred while generating the start file'}), 500
+    main_generate(data['new_instance'], data['category'], data['canvas_course_id'], os.getenv("CANVAS_API_KEY"))
 
     print("Event emitted")
     runner(data['new_instance'], "course_create_event")
