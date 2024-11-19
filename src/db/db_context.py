@@ -5,12 +5,12 @@ import psycopg2
 
 def context():
     try:
-        db_host = os.getenv('DB_HOST', 'ict-inno.postgres.database.azure.com')  # Default to 'localhost' if not set
-        db_user = os.getenv('DB_USER', 'admincanvas')  # Default to 'root'
+        db_host = os.getenv('DB_HOST')  # Default to 'localhost' if not set
+        db_user = os.getenv('DB_USER')  # Default to 'root'
 
-        db_password = os.getenv('DB_PASSWORD', '/SEwbONsRm/9B0f3+EDpmit1iTHL5iaoUNAjOy3vTG+ACRAa7DKg')  # Default to an empty string
-        db_name = os.getenv('DB_NAME', 'dev')
-        db_port = os.getenv('DB_PORT', '5432')
+        db_password = os.getenv('DB_PASSWORD')  # Default to an empty string
+        db_name = os.getenv('DB_NAME')
+        db_port = os.getenv('DB_PORT')
         connection = psycopg2.connect(
             dbname=db_name,
             user=db_user,
