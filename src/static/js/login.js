@@ -29,7 +29,7 @@ document.getElementById('inloggen').addEventListener('click', function() {
     })
     .then(dashboardData => {
         if (dashboardData.role === 'student') {
-            window.location.href = '/student_dashboard';
+            window.location.href = '/select_course';
         } else if (dashboardData.role === 'teacher') {
             window.location.href = '/teacher_dashboard';
         } else {

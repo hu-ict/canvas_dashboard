@@ -1,42 +1,41 @@
-import glob
 import os
-
+import glob
 from src.db.course_data import get_course_instance_name
 from src.db.db_context import context, close_connection
 
 
-def find_dashboard_by_student_name(email):
-    global cursor, connection
-    course_name = get_course_instance_name()
+def find_dashboard_by_student_name(email, course_id):
+    # get the course name based on the course_id
+    course_name = get_course_instance_name(course_id)
+
+    if not course_name:
+        print(f"Geen directory naam gevonden voor course ID {course_id}")
+        return None
 
     try:
-
         cursor, connection = context()
+        cursor.execute("SELECT first_name, surname FROM students WHERE email = %s", (email,))
+        student = cursor.fetchone()
+        if not student:
+            print(f"Geen student gevonden met email {email}")
+            return None
 
-        # Haalt alle studenten op uit de database
+        # Name of the student
+        student_name = f"{student[0]} {student[1]}"
 
-        cursor.execute("SELECT * FROM students")
-        students = cursor.fetchall()
+        # Path to the students directory
+        students_path = f'./courses/{course_name}/dashboard_{course_name}/students/'
 
-        print(students)
-        for student in students:
-            if student[3] == email:
-                student_name = student[1] + " " + student[2]
-                # Zoekt naar HTML-bestanden in de opgegeven map
-                matches = glob.glob(f'./courses/{course_name}/dashboard_{course_name}/students/*.html')
-                print(f"Matches found: {matches}")  # Print matches for debugging
+        # Search for the student dashboard in the students directory
+        student_dashboard = glob.glob(f"{students_path}/{student_name} index.html")
 
-                # Zoekt naar de html die overeenkomt met de studentnaam
-                student_dashboard = [match for match in matches if
-                                     student_name in os.path.basename(match) and match.endswith('index.html')]
-
-                if student_dashboard:
-                    return student_dashboard[0]
-                else:
-                    return print("No dashboard found for this student")
-
-        return print("Student not found in database")
+        if student_dashboard:
+            return student_dashboard[0]
+        else:
+            print(f"Geen dashboard gevonden voor student: {student_name}")
+            return None
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Fout bij het zoeken naar het dashboard van de student {email}: {e}")
+        return None
     finally:
         close_connection(cursor, connection)

@@ -1,6 +1,7 @@
 import glob
 import os
-from flask import Blueprint, jsonify, redirect, session, send_from_directory, request, render_template_string
+from flask import Blueprint, jsonify, redirect, session, send_from_directory, request, render_template_string, \
+    render_template, url_for
 from src.auth import login_required, role_required
 import jwt
 from generate_start import main_generate
@@ -11,10 +12,8 @@ from src.db.dashboards import find_dashboard_by_student_name
 
 main_bp = Blueprint('main', __name__)
 
-
 @main_bp.route("/generate/start", methods=['POST'])
 def generate_start():
-
 
     data = request.get_json()
 
@@ -35,11 +34,14 @@ def auth():
         return redirect('/auth/login')
     try:
         roles = jwt.decode(token, options={"verify_signature": False}).get("realm_access", {}).get("roles", [])
-        return redirect('/teacher_dashboard' if "teachers" in roles else '/student_dashboard') if roles else jsonify(
-            {'message': 'Unauthorized'}), 403
+        if "students" in roles:
+            return redirect(url_for('main.select_course'))
+        elif "teachers" in roles:
+            return redirect(url_for('main.teacher_dashboard'))
+        else:
+            return jsonify({'message': 'Unauthorized'}), 403
     except jwt.InvalidTokenError:
         return redirect('/auth/login')
-
 
 @main_bp.route('/dashboard', methods=['GET'])
 def dashboard():
@@ -64,6 +66,26 @@ def dashboard():
     except jwt.InvalidTokenError:
         return jsonify({'message': 'Invalid token'}), 401
 
+@main_bp.route('/select_course')
+@login_required
+@role_required('students')
+def select_course():
+    # Get the student courses from the session
+    student_courses = session.get('student_courses', [])
+
+    # Render the select course page with the student courses
+    return render_template('select_course/index.html', courses=student_courses)
+
+
+@main_bp.route('/set_course/<int:course_id>')
+@login_required
+@role_required('students')
+def set_course(course_id):
+    session['selected_course_id'] = course_id
+    return redirect(url_for('main.student_dashboard', course_id=course_id))
+
+
+
 @main_bp.route('/teacher_dashboard')
 @login_required
 @role_required('teachers')
@@ -75,16 +97,18 @@ def teacher_dashboard():
     return send_from_directory(directory, 'index.html')
 
 
-@main_bp.route('/student_dashboard')
+@main_bp.route('/student_dashboard/<int:course_id>')
 @login_required
 @role_required('students')
-def student_dashboard():
+def student_dashboard(course_id):
     email = jwt.decode(session['token']['access_token'], options={"verify_signature": False}).get("email", "Student")
-    stud_dashboard = find_dashboard_by_student_name(email)
+    stud_dashboard = find_dashboard_by_student_name(email, course_id)
     if stud_dashboard:
         return render_template_string(open(stud_dashboard).read())
     else:
-        return jsonify({'message': 'No dashboard found for the student'}), 404
+        return jsonify({'message': 'No dashboard found for the selected course'}), 404
+
+
 
 @main_bp.route('/css/<path:filename>')
 def serve_css(filename):
