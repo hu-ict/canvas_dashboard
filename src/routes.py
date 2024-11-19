@@ -19,7 +19,7 @@ def generate_start():
     data = request.get_json()
 
     print(data)
-    main_generate(data['new_instance'], data['category'], data['canvas_course_id'], os.getenv("CANVAS_API_KEY").to)
+    main_generate(data['new_instance'], data['category'], data['canvas_course_id'], os.getenv("CANVAS_API_KEY"))
 
     print("Event emitted")
     runner(data['new_instance'], "course_create_event")
