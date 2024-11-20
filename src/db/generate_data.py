@@ -1,8 +1,9 @@
-import os
 import json
-from src.db.course_data import get_course_instance_name, get_students
+import os
+
 from src.db.db_context import context, close_connection
 from src.db.model.Student import Student
+from src.db.model.Teacher import Teacher
 
 COURSES_PATH = os.path.join('../..', 'courses')
 
@@ -33,6 +34,24 @@ def initialize_db():
             );
         """)
 
+        # Create the 'teachers' table with 'email' as unique
+        cursor.execute("""
+                  CREATE TABLE IF NOT EXISTS teachers (
+                      id INTEGER PRIMARY KEY,
+                      first_name VARCHAR(100),
+                      surname VARCHAR(100),
+                      email VARCHAR(100) UNIQUE
+                  );
+              """)
+        # Create the 'teacher_courses' table with a composite primary key
+        cursor.execute("""
+                   CREATE TABLE IF NOT EXISTS teacher_courses (
+                       teacher_id INTEGER REFERENCES teachers(id),
+                       course_id INTEGER REFERENCES courses(id),
+                       PRIMARY KEY (teacher_id, course_id)
+                   );
+               """)
+
         # Create the 'student_courses' table with a composite primary key
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS student_courses (
@@ -47,6 +66,7 @@ def initialize_db():
         print(f"Fout bij initialisatie van de database: {e}")
     finally:
         close_connection(cursor, connection)
+
 
 def insert_student(cursor, student):
     # Checks if student already exists in the database
@@ -66,12 +86,32 @@ def insert_student(cursor, student):
         print(f"Student {student.first_name} {student.surname} toegevoegd aan de database.")
         return student.id
 
+
+def insert_teacher(cursor, teacher):
+    # Checks if teacher already exists in the database
+    cursor.execute("SELECT id FROM teachers WHERE email = %s", (teacher.email,))
+    result = cursor.fetchone()
+    if result:
+        # Teacher already exists, return existing ID
+        print(f"Teacher with email {teacher.email} already exists in the database.")
+        return result[0]
+    else:
+        # Teacher does not exist, insert teacher and return new ID
+        cursor.execute("""
+            INSERT INTO teachers (id, first_name, surname, email)
+            VALUES (%s, %s, %s, %s)
+        """, (teacher.id, teacher.first_name, teacher.surname, teacher.email))
+        print(f"Teacher {teacher.first_name} {teacher.surname} added to the database.")
+        return teacher.id
+
+
 def insert_course(cursor, course_id, course_name, directory_name):
     cursor.execute("""
         INSERT INTO courses (id, name, directory_name)
         VALUES (%s, %s, %s)
         ON CONFLICT (id) DO NOTHING
     """, (course_id, course_name, directory_name))
+
 
 def insert_student_course_relation(cursor, student_id, course_id):
     # Insert student-course relation if it does not exist yet
@@ -80,6 +120,16 @@ def insert_student_course_relation(cursor, student_id, course_id):
         VALUES (%s, %s)
         ON CONFLICT DO NOTHING
     """, (student_id, course_id))
+
+
+def insert_teacher_course_relation(cursor, teacher_id, course_id):
+    # Insert student-course relation if it does not exist yet
+    cursor.execute("""
+        INSERT INTO teacher_courses (teacher_id, course_id)
+        VALUES (%s, %s)
+        ON CONFLICT DO NOTHING
+    """, (teacher_id, course_id))
+
 
 def read_and_import_courses():
     try:
@@ -96,6 +146,7 @@ def read_and_import_courses():
         # Loop through all directories in the 'courses' directory
         for course_dir in os.listdir(COURSES_PATH):
             course_path = os.path.join(COURSES_PATH, course_dir, f'result_{course_dir}.json')
+            config_path = os.path.join(COURSES_PATH, course_dir, f'config_{course_dir}.json')
 
             # Check if the course file exists
             if os.path.isfile(course_path):
@@ -126,6 +177,23 @@ def read_and_import_courses():
 
                         # Map the student to the course
                         insert_student_course_relation(cursor, student_id, course_id)
+                if os.path.isfile(config_path):
+                    with open(config_path, 'r') as file:
+                        config_data = json.load(file)
+                        # Add teachers from the course to the database
+                        teachers = config_data.get("teachers", [])
+                        for data in teachers:
+                            first_name, surname = data["name"].split(' ', 1)
+                            teacher = Teacher(
+                                id=data["id"],  # Number = student ID
+                                first_name=first_name,
+                                surname=surname,
+                                email=data["email"]
+                            )
+                            # Add the student to the database or get the existing teacher ID
+                            teacher_id = insert_teacher(cursor, teacher)
+                            # Map the teacher to the course
+                            insert_teacher_course_relation(cursor, teacher_id, course_id)
 
         # Save changes to the database and close the connection
         connection.commit()
