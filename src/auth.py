@@ -6,7 +6,7 @@ from flask import Blueprint, jsonify, request, session, render_template, redirec
 from keycloak.exceptions import KeycloakAuthenticationError
 
 from keycloak_config import keycloak_openid
-from src.db.course_data import get_student_courses
+from src.db.course_data import get_student_courses, get_teacher_courses
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -16,35 +16,28 @@ def login():
     data = request.json
     username = data.get('username')
     password = data.get('password')
-    if username.endswith("@student.hu.nl"):
 
-        try:
-            token = keycloak_openid.token(username, password)
-            session['token'] = token
+    try:
+        token = keycloak_openid.token(username, password)
+        session['token'] = token
+
+        if username.endswith("@student.hu.nl"):
             # Get courses for the student and store them in session
             student_courses = get_student_courses(username)
             session['student_courses'] = student_courses
+        if username.endswith("@hu.nl"):
+            # Get courses for the teacher and store them in session
+            teacher_courses = get_teacher_courses(username)
+            session['teacher_courses'] = teacher_courses
 
-            return jsonify({
-                'message': 'Login successful',
-                'access_token': token['access_token'],
-                'refresh_token': token.get('refresh_token'),
-                'id_token': token.get('id_token')
-            }), 200
-        except KeycloakAuthenticationError:
-            return jsonify({'message': 'Invalid username or password'}), 401
-    else:
-        try:
-            token = keycloak_openid.token(username, password)
-            session['token'] = token
-            return jsonify({
-                'message': 'Login successful',
-                'access_token': token['access_token'],
-                'refresh_token': token.get('refresh_token'),
-                'id_token': token.get('id_token')
-            }), 200
-        except KeycloakAuthenticationError:
-            return jsonify({'message': 'Invalid username or password'}), 401
+        return jsonify({
+            'message': 'Login successful',
+            'access_token': token['access_token'],
+            'refresh_token': token.get('refresh_token'),
+            'id_token': token.get('id_token')
+        }), 200
+    except KeycloakAuthenticationError:
+        return jsonify({'message': 'Invalid username or password'}), 401
 
 
 @auth_bp.route('/login')
