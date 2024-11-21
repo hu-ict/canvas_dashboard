@@ -181,6 +181,7 @@ def plot_day_bar(a_row, a_col, a_fig,
 def plot_submissions(a_row, a_col, a_fig, a_course, a_perspective, a_level_serie_collection):
     l_assignment_group = a_course.find_assignment_group(a_perspective.assignment_groups[0])
     l_perspective = a_course.find_perspective_by_name(a_perspective.name)
+    l_level_serie = a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels]
     x_submission = [0]
     if l_perspective.show_flow:
         y_submission = [0.5]
@@ -191,31 +192,34 @@ def plot_submissions(a_row, a_col, a_fig, a_course, a_perspective, a_level_serie
     y_size = [get_marker_size(False)]
     cum_score = 0
     for submission_sequence in a_perspective.submission_sequences:
-
         y_size.append(get_marker_size(submission_sequence.is_graded()))
         x_submission.append(submission_sequence.get_day())
+
         if submission_sequence.is_graded():
             cum_score += submission_sequence.get_score()
             if submission_sequence.points == 0:
                 # lelijke hack
                 submission_sequence.points = 1
-            level = a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels].get_level_by_fraction(submission_sequence.get_score() / submission_sequence.points)
-            y_colors.append(a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels].grades[str(level)].color)
+            grade = l_level_serie.grades[submission_sequence.get_grade()]
+            y_colors.append(grade.color)
         else:
-            y_colors.append(a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels].get_status(submission_sequence.get_status()).color)
+            status = l_level_serie.status[submission_sequence.get_status()]
+            y_colors.append(status.color)
 
         submission_nr = 0
         l_hover = ""
         for submission in submission_sequence.submissions:
-            level_series = a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels]
-            level = a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels].get_level_by_fraction(submission.score / submission_sequence.points)
             l_hover += get_hover_assignment(l_perspective.show_points, submission)
             if submission.graded:
-                l_hover += get_hover_grade(a_course, submission, level_series.grades, level)
+                grade = l_level_serie.grades[submission.grade]
+                l_hover += get_hover_grade(a_course, submission, grade)
             else:
-                l_hover += get_hover_status(submission, level_series)
+                status = l_level_serie.status[submission.status]
+                l_hover += get_hover_status(submission, status)
             l_hover += get_hover_comments(submission.comments)
-            l_hover += get_hover_rubrics_comments(a_course, submission, level_series.grades)
+            if submission.graded:
+                grade = l_level_serie.grades[submission.grade]
+                l_hover += get_hover_rubrics_comments(a_course, submission, grade)
             if submission_nr < len(submission_sequence.submissions) - 1:
                 l_hover += "<br><br>"
         if len(l_hover) > 4000:

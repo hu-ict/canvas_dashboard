@@ -56,7 +56,7 @@ def generate_submissions(instance_name):
 
     for student in results.students:
         if start.attendance is not None:
-            get_attendance_progress(course.attendance, results, student.student_attendance)
+            get_attendance_progress(course.attendance, student)
             progress_day.perspective[start.attendance.name][str(student.student_attendance.progress)] += 1
         for perspective in student.perspectives.values():
             get_progress(course, perspective)

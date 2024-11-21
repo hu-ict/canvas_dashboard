@@ -6,7 +6,10 @@ from model.CriteriumScore import CriteriumScore
 class Submission:
     def __init__(self, submission_id, assignment_group_id, assignment_id, student_id,
                  assignment_name, assignment_date, assignment_day,
-                 submitted_date, submitted_day, status, graded, grade, grader_name, graded_date, score, points, flow):
+                 submitted_date, submitted_day,
+                 status, graded,
+                 grade, grader_name, graded_date,
+                 score, value, points, flow):
         self.id = submission_id
         self.assignment_group_id = assignment_group_id
         self.assignment_name = assignment_name
@@ -22,6 +25,7 @@ class Submission:
         self.grader_name = grader_name
         self.graded_date = graded_date
         self.score = score
+        self.value = value
         self.points = points
         self.flow = flow
         self.body = None
@@ -33,8 +37,18 @@ class Submission:
         return self.to_json()
 
     def to_json(self):
+        if self.flow is None:
+            l_flow = None
+        else:
+            l_flow = int(self.flow*10)/10
         if self.score is None:
-            self.score = 0.0
+            l_score = None
+        else:
+            l_score = int(self.score*10)/10
+        if self.value is None:
+            l_value = None
+        else:
+            l_value = int(self.value * 10) / 10
         return {
             'id': self.id,
             'assignment_group_id': self.assignment_group_id,
@@ -50,9 +64,10 @@ class Submission:
             'grade': self.grade,
             'grader_name': self.grader_name,
             "graded_date": get_date_time_str(self.graded_date),
-            'score': int(self.score*10)/10,
+            'score': l_score,
+            'value': l_value,
             'points': int(self.points),
-            'flow': int(self.flow*100)/100,
+            'flow': l_flow,
             'body': self.body,
             'messages': self.messages,
             'comments': list(map(lambda c: c.to_json(), self.comments)),
@@ -63,7 +78,7 @@ class Submission:
         return f'Submission({self.id}, {self.assignment_group_id}, {self.assignment_id}, {self.student_id}, ' \
                f'{self.assignment_name}, {get_date_time_str(self.assignment_date)}, ' \
                f'{get_date_time_str(self.submitted_date)}, {self.graded}, {self.status}, ' \
-               f'{self.score}, {self.points}, Comments: {len(self.comments)})'
+               f'{self.score}, {self.value}, {self.points}, Comments: {len(self.comments)})'
 
     @staticmethod
     def from_dict(data_dict):
@@ -74,7 +89,7 @@ class Submission:
                                     data_dict['status'],
                                     data_dict['graded'], data_dict['grade'], data_dict['grader_name'],
                                     get_date_time_obj(data_dict['graded_date']), data_dict['score'],
-                                    data_dict['points'], data_dict['flow'])
+                                    data_dict['value'], data_dict['points'], data_dict['flow'])
         new_submission.comments = list(map(lambda c: Comment.from_dict(c), data_dict['comments']))
         new_submission.rubrics = list(map(lambda c: CriteriumScore.from_dict(c), data_dict['rubrics']))
         # print("SU05 -", data_dict)

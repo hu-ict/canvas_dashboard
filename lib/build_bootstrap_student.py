@@ -192,14 +192,15 @@ def build_bootstrap_portfolio(instances, course_id, course, student, actual_date
                     for submission in submission_sequence.submissions:
                         # bouw de teksten voor het modal scherm
                         modal_content_html_string += "<p>"
-                        level = level_serie_collection.level_series["bin2"].get_level_by_fraction(submission.score / submission_sequence.points)
                         modal_content_html_string += get_hover_assignment(True, submission)
                         if submission.graded:
-                            modal_content_html_string += get_hover_grade(course, submission, level_serie.grades, level)
+                            grade = level_serie.grades[submission.grade]
+                            modal_content_html_string += get_hover_grade(course, submission, grade)
+                            modal_content_html_string += get_hover_rubrics_comments(course, submission, grade)
                         else:
-                            modal_content_html_string += get_hover_status(submission, level_serie)
+                            status = level_serie.status[submission.status]
+                            modal_content_html_string += get_hover_status(submission, status)
                         modal_content_html_string += get_comments(submission.comments)
-                        modal_content_html_string += get_hover_rubrics_comments(course, submission, level_serie.grades)
                         modal_content_html_string += "</p>"
                     portfolio_items_modal_html_string += templates['portfolio_item_modal'].substitute(
                         {"portfolio_item_id": assignment_sequence.tag,
@@ -224,9 +225,9 @@ def build_bootstrap_portfolio(instances, course_id, course, student, actual_date
                         badges += '<a class="badge mr-1 '+badge_status+'" target="_blank" href="'+url+'">'+str(teller)+'</a>'
                 date, day = assignment_sequence.get_date_day(submission_sequence, actual_day)
                 if day < actual_day:
-                    highlight = "danger"
+                    background_color = "#ffb3b3"
                 else:
-                    highlight = "success"
+                    background_color = "#c6ecd9"
                 item_dict = {
                     "portfolio_item": portfolio_item,
                     "portfolio_item_id": assignment_sequence.tag,
@@ -234,7 +235,7 @@ def build_bootstrap_portfolio(instances, course_id, course, student, actual_date
                     "item_url": badges,
                     "portfolio_date": get_date_time_loc(date),
                     "portfolio_day": day,
-                    "highlight": highlight,
+                    "background_color": background_color,
                     "portfolio_status": status_label,
                     "cell_status": cell_status
                 }

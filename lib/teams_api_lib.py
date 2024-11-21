@@ -221,7 +221,7 @@ def upload_file_to_onedrive(a_token, a_name, a_drive_id, a_file_path, a_file_nam
     url = f"https://graph.microsoft.com/v1.0/drives/{a_drive_id}/items/root:/{a_name.replace(' ', '%20')}/{l_remote_file_name.replace(' ', '%20')}:/content"
     print(url)
     response = requests.put(url, headers=l_headers, data=data)
-    if response.status_code != 200:
+    if response.status_code not in [200, 201]:
         print(f"Error {response.status_code} response: {response.json()}")
 
 

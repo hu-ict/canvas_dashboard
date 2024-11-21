@@ -63,8 +63,9 @@ def plot_student(instances, course, student, actual_date, actual_day, a_peil_con
                 l_level_moment = Submission(0, 0, 0, 0,
                                             l_assignment.name, l_assignment.get_date(), l_assignment.get_day(),
                                             None, None,
-                                            "1", False, None, None, None,
-                                            -1, 3, 0)
+                                            "1", False,
+                                            None, None, None,
+                                            -1, None, 3, 0)
             plot_overall_level_moment(row, col, fig, course, l_level_moment, level_serie_collection)
 
         for grade_moment in course.grade_moments.moments:
@@ -79,7 +80,7 @@ def plot_student(instances, course, student, actual_date, actual_day, a_peil_con
                                             l_assignment.name, l_assignment.get_date(), l_assignment.get_day(),
                                             None, None,
                                             "1", False, None, None, None,
-                                            -1, 3, 0)
+                                            -1, None, 3, 0)
 
             plot_overall_grade_moment(row, col, fig, course, l_grade_moment, level_serie_collection)
     student_name = student.email.split("@")[0].lower()

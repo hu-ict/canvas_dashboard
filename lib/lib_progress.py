@@ -1,3 +1,4 @@
+from lib.lib_attendance import get_attendance_progress
 from model.ProgressDay import ProgressDay
 from model.perspective.Status import MISSED_ITEM
 
@@ -42,45 +43,6 @@ def get_overall_progress(a_progress):
         else:
             return 1
     return -1
-
-
-def get_attendance_progress(attendance, attendance_perspective):
-    # bepaal de voortgang
-    attendance_perspective.attendance_submissions = sorted(attendance_perspective.attendance_submissions, key=lambda s: s.day)
-    attendance_perspective.count = 0
-    attendance_perspective.percentage = 0
-    attendance_perspective.essential_count = 0
-    attendance_perspective.essential_percentage = 0
-    essential_points = 0
-    points = 0
-    last_flow = 1.0
-    for submission in attendance_perspective.attendance_submissions:
-        moment = attendance.get_moment(submission.day)
-        attendance_perspective.count += 1
-        points += submission.score
-        attendance_perspective.percentage = points / attendance_perspective.count / 2
-        if moment is not None:
-            # print("LP61 -", moment)
-            # alleen op vastgestelde dagen wordt aanwezigheid beloond
-            essential_points += submission.score
-            attendance_perspective.essential_count += 1
-            attendance_perspective.essential_percentage = essential_points / attendance_perspective.essential_count / moment.points
-            submission.flow = attendance_perspective.essential_percentage
-            last_flow = submission.flow
-        else:
-            submission.flow = last_flow
-        attendance_perspective.last_score = submission.day
-    if attendance_perspective.essential_count == 0:
-        # Niet te bepalen
-        attendance_perspective.progress = -1
-    elif attendance_perspective.last_score != 0:
-        # print(f"LP54 - Laatste dag {attendance_perspective.last_score}, laatste waarde {attendance_perspective.sum_score}")
-        attendance_perspective.progress = attendance.bandwidth.get_progress(attendance_perspective.last_score,  attendance_perspective.essential_percentage*100)
-        # print(f"LP55 - Laatste dag {attendance_perspective.last_score}, laatste waarde {attendance_perspective.sum_score*100}, voortgang {attendance_perspective.progress}")
-    else:
-        # Niet te bepalen
-        attendance_perspective.progress = -1
-
 
 def get_progress(course, perspective):
     # bepaal de voortgang
@@ -134,7 +96,7 @@ def proces_progress(course, results, progress_history):
     progress_day = ProgressDay(results.actual_day, course.perspectives.keys())
     for student in results.students:
         if course.attendance is not None:
-            get_attendance_progress(course.attendance, student.student_attendance)
+            get_attendance_progress(course.attendance, student)
             progress_day.attendance[str(student.student_attendance.progress)] += 1
         for perspective in student.perspectives.values():
             get_progress(course, perspective)

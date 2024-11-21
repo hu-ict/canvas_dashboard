@@ -13,13 +13,21 @@ class StudentAttendance:
         self.attendance_submissions = []
 
     def to_json(self):
+        if self.percentage is None:
+            l_percentage = None
+        else:
+            l_percentage = round(self.percentage, 3)
+        if self.essential_percentage is None:
+            l_essential_percentage = None
+        else:
+            l_essential_percentage = round(self.essential_percentage, 3)
         return {
             'name': self.name,
             'progress': self.progress,
             'count': self.count,
-            'percentage': self.percentage,
+            'percentage': l_percentage,
             'essential_count': self.essential_count,
-            'essential_percentage': self.essential_percentage,
+            'essential_percentage': l_essential_percentage,
             'last_score': self.last_score,
             'attendance_submissions': list(map(lambda s: s.to_json(), self.attendance_submissions))
         }

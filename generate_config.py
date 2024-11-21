@@ -14,6 +14,7 @@ from model.StudentGroup import StudentGroup
 from model.Teacher import Teacher
 from model.instance.CourseInstances import CourseInstances
 from model.perspective.Attendance import Attendance
+from model.perspective.GradeMoments import GradeMoments
 from model.perspective.LevelMoments import LevelMoments
 from model.perspective.Perspective import Perspective
 from model.perspective.Policy import Policy
@@ -40,7 +41,7 @@ def generate_config(instance_name):
                           date_to_day(start1.start_date, start1.end_date),
                           0)
 
-    if instances.is_instance_of("inno_courses"):
+    if instance.is_instance_of("inno_courses"):
         role = Role("AI", "AI - Engineer", "Artificial Intelligence", "border-warning")
         config.roles.append(role)
         role = Role("BIM", "Business Analist", "Business and IT Management", "border-success")
@@ -63,6 +64,7 @@ def generate_config(instance_name):
         config.perspectives[perspective.name] = perspective
         config.attendance = None
         config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", [])
+        config.grade_moments = GradeMoments("grade_moments", "Beoordelingsmomenten", "grade", [])
     else:
         role = Role("role", "Student", "HBO-ICT", "border-dark")
         config.roles.append(role)

@@ -29,6 +29,16 @@ class SubmissionSequence:
                 score = submission.score
         return score
 
+    def get_grade(self):
+        '''
+        Look for the highest score
+        '''
+        grade = 0
+        for submission in self.submissions:
+            if submission.graded and (int(submission.grade) > grade):
+                grade = int(submission.grade)
+        return str(grade)
+
     def get_status(self):
         for submission in self.submissions:
             if submission.status == NOT_CORRECT_GRADED:

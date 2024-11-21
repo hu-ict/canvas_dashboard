@@ -1,11 +1,11 @@
 import json
 import os
-from lib.file import read_course_instance, ENVIRONMENT_FILE_NAME
+from lib.file import ENVIRONMENT_FILE_NAME, read_course_instances
 from lib.lib_date import get_date_time_obj
 from model.Start import Start
 from model.instance.Instance import Instance
 
-instances = read_course_instance()
+instances = read_course_instances()
 new_instance = input("Create new instance by giving name: ")
 if instances.is_instance(new_instance):
     print("Instance already exists", new_instance)
@@ -32,12 +32,16 @@ start_file_name = instance.get_start_file_name()
 
 canvas_course_id = input("Canvas course_id: ")
 canvas_api_key = input("Canvas API-key: ")
+if instance.is_instance_of("prop_courses"):
+    attendance_path = instance.get_project_path() + "attendance_report.csv"
+else:
+    attendance_path = None
 start = Start(canvas_course_id,
               "Project Groups",
               get_date_time_obj("2024-09-02T00:00:00Z"),
               get_date_time_obj("2025-01-31T23:59:59Z"),
               "onedrive",
-              instance.get_project_path() + "attendance_report.csv",
+              attendance_path,
               canvas_api_key)
 
 os.makedirs(os.path.dirname(instance.get_project_path()), exist_ok=True)

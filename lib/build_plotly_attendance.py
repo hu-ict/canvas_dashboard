@@ -17,23 +17,22 @@ def plot_attendance_submissions(a_row, a_col, a_fig, a_course, a_attendance_subm
     y_hover = ['<b>Start</b> ' + get_date_time_loc(a_course.start_date)]
     y_colors = [a_level_serie.get_status(BEFORE_DEADLINE).color]
     y_size = [get_marker_size(False)]
-    cum_score = 0
+    # cum_score = 0
     for attendance_submission in a_attendance_submissions:
 
         y_size.append(get_marker_size(True))
         x_submission.append(attendance_submission.day)
 
-        cum_score += attendance_submission.flow
-        level = a_level_serie.get_level_by_fraction(
-            attendance_submission.score / attendance_submission.points)
-        y_colors.append(a_level_serie.grades[str(level)].color)
-        l_hover = get_hover_attendance(a_course.attendance, attendance_submission, a_level_serie.grades, level)
+        # cum_score += attendance_submission.flow
+        grade = a_level_serie.grades[attendance_submission.grade]
+        y_colors.append(grade.color)
+        l_hover = get_hover_attendance(a_course.attendance, attendance_submission, grade)
 
         y_hover.append(l_hover)
         if a_course.attendance.show_flow:
-            y_submission.append(attendance_submission.flow * 100)
+            y_submission.append(round(attendance_submission.flow * 100, 0))
         else:
-            y_submission.append(attendance_submission.flow * 100)
+            y_submission.append(round(attendance_submission.flow * 100, 0))
 
     a_fig.add_trace(
         go.Scatter(

@@ -9,6 +9,7 @@ from lib.lib_date import get_date_time_loc
 
 def build_learning_analytics(course, results, level_serie_collection):
     learning_analytics = {}
+    assignment_list = {}
     for assignment_group in course.assignment_groups:
         perspective = course.find_perspective_by_assignment_group(assignment_group.id)
         if perspective is not None:
@@ -23,6 +24,7 @@ def build_learning_analytics(course, results, level_serie_collection):
                                                               "level_serie": perspective.levels,
                                                               "status": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0},
                                                               "grades": grades_dict}
+
     for student in results.students:
         # print(l_peil_construction)
         print("GL10 -", student.name)
@@ -286,21 +288,25 @@ def build_bootstrap_analyse(instances, a_course, learning_analytics, a_templates
     html_string = ""
     for assignment_group in a_course.assignment_groups:
         assignment_html_string = ""
+        assignment_list = []
         for assignment_sequence in assignment_group.assignment_sequences:
             for assignment in assignment_sequence.assignments:
-                file_name = "general/analyse_" + str(assignment.id) + ".html"
-                if assignment.assignment_day < actual_day:
-                    highlight = "danger"
-                else:
-                    highlight = "success"
-                assignment_html_string += a_templates["analyse_assignment"].substitute(
-                    {'url': file_name,
-                     'assignment_name': assignment.name,
-                     'highlight': highlight,
-                     'assignment_lock_date': get_date_time_loc(
-                         assignment.assignment_date)})
-                process_analyse(learning_analytics, assignment, a_level_serie_collection,
-                                instances.get_html_root_path() + file_name)
+                assignment_list.append(assignment)
+        assignment_list = sorted(assignment_list, key=lambda a: a.assignment_day)
+        for assignment in assignment_list:
+            file_name = "general/analyse_" + str(assignment.id) + ".html"
+            if assignment.assignment_day < actual_day:
+                background_color = "#ffb3b3"
+            else:
+                background_color = "#c6ecd9"
+            assignment_html_string += a_templates["analyse_assignment"].substitute(
+                {'url': file_name,
+                 'assignment_name': assignment.name,
+                 'background_color': background_color,
+                 'assignment_lock_date': get_date_time_loc(
+                     assignment.assignment_date)})
+            process_analyse(learning_analytics, assignment, a_level_serie_collection,
+                            instances.get_html_root_path() + file_name)
 
         html_string += a_templates["analyse_card"].substitute({'assignment_group_id': str(assignment_group.id),
                                                                'assignment_group_name': assignment_group.name,

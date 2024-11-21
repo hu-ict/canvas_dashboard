@@ -1,21 +1,23 @@
 import json
 import sys
 
-from lib.file import read_course, read_msteams_api, read_course_instance
+from lib.file import read_course, read_msteams_api, read_course_instances
 from lib.lib_date import get_actual_date
 from lib.teams_api_lib import teams, get_channels, get_drive
 
 
 def main(instance_name):
     g_actual_date = get_actual_date()
-    instances = read_course_instance()
+    instances = read_course_instances()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    print("US02 - Instance:", instances.current_instance)
+    instance = instances.get_instance_by_name(instances.current_instance)
+    print("PB02 - Instance:", instance.name)
+
     if instances.current_instance != "sep24_inno":
         print("US04 - No student channels defined for this course")
         return
-    course = read_course(instances.get_course_file_name(instances.current_instance))
+    course = read_course(instance.get_course_file_name())
     msteams_api = read_msteams_api("msteams_api.json")
     # if get_me_for_check(msteams_api.gen_token) is None:
     #     print("Obtain new token")
@@ -51,7 +53,7 @@ def main(instance_name):
         # else:
         #     print("US13 - displayName:", student.name)
 
-    with open(instances.get_course_file_name(instances.current_instance), 'w') as f:
+    with open(instance.get_course_file_name(), 'w') as f:
         dict_result = course.to_json(["assignment"])
         json.dump(dict_result, f, indent=2)
 

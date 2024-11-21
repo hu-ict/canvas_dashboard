@@ -117,7 +117,7 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
         return
     # print("SB05 -", graded, a_canvas_submission.grader_id)
     if not graded:
-        grade = None
+        grade_level = None
         grader_name = None
         grader_date = None
         l_submission = Submission(a_canvas_submission.id, a_assignment.group_id, a_assignment.id, a_student.id,
@@ -126,9 +126,9 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
                                   a_assignment.assignment_day,
                                   None,
                                   None,
-                                  NOT_YET_GRADED, graded, grade,
+                                  NOT_YET_GRADED, graded, grade_level,
                                   grader_name, grader_date, 0,
-                                  a_assignment.points, 0)
+                                  0, a_assignment.points, 0)
         for canvas_comment in canvas_comments:
             l_submission.comments.append(
                 Comment(canvas_comment['author_id'],
@@ -141,7 +141,6 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
     errors = []
     rubrics_scores = []
     rubric_score = 0
-    canvas_submission_rubrics = None
     if len(a_assignment.rubrics) > 0:
         has_assignment_rubric = True
         if hasattr(a_canvas_submission, "rubric_assessment") and len(a_canvas_submission.rubric_assessment.items()) > 0:
@@ -160,26 +159,39 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
     # print("LS31 -", f"submission_builder [{graded}] [{a_canvas_submission.submitted_at}] grade {a_canvas_submission.grade} grader_id {a_canvas_submission.grader_id} comments {len(canvas_comments)} score {a_canvas_submission.score} grading_type {a_assignment.grading_type} and student {a_student.name}.")
 
     submission_score = 0.0
+    grade_value = None
     if has_assignment_rubric and has_submission_rubrics and a_assignment.grading_type == "pass_fail":
         if a_canvas_submission.grade == 'complete':
             if a_canvas_submission.score is not None:
                 # INNO en PROP-peil vd/nvd met rubrics voor de "echte" punten (verborgen voor studenten)
                 if a_canvas_submission.score == 0:
-                    submission_score = round(rubric_score, 2)
+                    submission_score = round(rubric_score, 1)
                 else:
-                    submission_score = round(a_canvas_submission.score, 2)
+                    submission_score = round(a_canvas_submission.score, 1)
             else:
-                submission_score = round(rubric_score, 2)
+                submission_score = round(rubric_score, 1)
+            grade_value = submission_score
         elif a_canvas_submission.grade == 'incomplete':
-            # gebruik canvas_submission_rubrics
-            submission_score = round(a_assignment.points / 2, 2)
+            l_perspective = a_course.find_perspective_by_assignment_group(a_assignment.group_id)
+            submission_score = rubric_score
+            if l_perspective in a_course.perspectives:
+                l_level_series = a_level_serie_collection.level_series[a_course.perspectives[l_perspective.name].levels]
+                # gebruik canvas_submission_rubrics
+                grade = l_level_series.get_grade_by_fraction(submission_score / a_assignment.points)
+                if grade is None:
+                    print("LS45 -", l_level_series.name, submission_score, a_assignment.points)
+                grade_value = round(grade.value*a_assignment.points, 1)
+            else:
+                # level_moments or grade_moments
+                grade_value = submission_score
 
     if not has_assignment_rubric and a_assignment.grading_type == "pass_fail":
         if a_canvas_submission.grade == 'complete':
-            submission_score = round(a_assignment.points, 2)
+            submission_score = round(a_assignment.points, 1)
         elif a_canvas_submission.grade == 'incomplete':
-            # de helft
-            submission_score = round(a_assignment.points / 2, 2)
+            # geen waarde wanneer incomplete
+            submission_score = round(0, 1)
+        grade_value = submission_score
 
     if has_assignment_rubric and not has_submission_rubrics and a_assignment.grading_type == "pass_fail":
         if a_assignment.group_id == a_course.level_moments.assignment_groups[0]:
@@ -195,6 +207,7 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
             else:
                 # PROP als rubrics niet ingevuld dan toch goed keuren bij "complete"
                 submission_score = a_assignment.points
+                grade_value = submission_score
         elif a_canvas_submission.grade == 'incomplete':
             errors.append(
                 f"FOUT Er is een rubric gedefinieerd bij de opdracht (Canvas-opdracht resultaat INCOMPLETE), maar deze wordt niet gebruikt of is niet compleet ingevuld. Opdracht is nu niet zichtbaar in portfolio of voortgang. Actie vereist!")
@@ -203,30 +216,34 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
     if not has_assignment_rubric and a_assignment.grading_type == "points":
         if a_canvas_submission.score is None:
             errors.append(
-                f"ERROR score is empty {a_canvas_submission.grade} {a_canvas_submission.grader_id} for assignment {a_assignment.name} and student {a_student.name} group {a_student.group_id}.")
+                f"FOUT Score is leeg {a_canvas_submission.grade} {a_canvas_submission.grader_id} voor opdracht {a_assignment.name} en student {a_student.name} groep_id {a_student.group_id}.")
             print("SB55 -", errors[-1])
         else:
             submission_score = round(a_canvas_submission.score, 2)
+            grade_value = submission_score
 
     if has_assignment_rubric and not has_submission_rubrics and a_assignment.grading_type == "points":
         errors.append(
-            f"FOUT Er is een rubric gedefinieerd bij de opdracht (Canvas-opdracht resultaat INCOMPLETE), maar deze wordt niet gebruikt of is niet compleet ingevuld. Opdracht is nu niet zichtbaar in portfolio of voortgang. Actie vereist!")
+            f"FOUT Er is een rubric gedefinieerd bij de opdracht, maar deze wordt niet gebruikt of is niet compleet ingevuld. Opdracht is nu niet zichtbaar in portfolio of voortgang. Actie vereist!")
         print("SB53 -", errors[-1])
 
     if has_assignment_rubric and has_submission_rubrics and a_assignment.grading_type == "points":
         submission_score = round(rubric_score, 2)
+        grade_value = submission_score
 
     if not has_assignment_rubric and a_assignment.grading_type == "letter_grade":
         submission_score = round(a_canvas_submission.score, 2)
+        grade_value = submission_score
 
     if has_assignment_rubric and has_submission_rubrics and a_assignment.grading_type == "letter_grade":
-        submission_score = round(rubric_score.score, 2)
+        submission_score = round(rubric_score.score, 1)
+        grade_value = submission_score
 
-    if has_submission_rubrics and a_canvas_submission.score != round(rubric_score, 2):
+    if has_submission_rubrics and a_canvas_submission.score != round(rubric_score, 1):
         if a_assignment.id == 295123:
             # uitzondering voor opdracht CSC - MITRE ATTACK
-            submission_score = submission_score
-    grade = None
+            grade_value = submission_score
+
     grader_date = None
     if len(errors) > 0:
         graded = False
@@ -244,18 +261,19 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
     else:
         grader_name = "onbekend"
 
+    grade_level = None
     if graded:
         perspective = a_course.find_perspective_by_assignment_group(a_assignment.group_id)
         # print("LS44 - Graded", graded, perspective.name)
         if perspective.name == "level_moments":
-            grade = a_level_serie_collection.level_series[perspective.levels].get_level_by_fraction(submission_score / a_assignment.points)
+            grade_level = str(int(submission_score))
         if perspective.name == "grade_moments":
-            grade = a_level_serie_collection.level_series[perspective.levels].get_level_by_fraction(submission_score / a_assignment.points)
+            grade_level = str(int(submission_score))
         elif perspective.name in a_course.perspectives:
-            grade = a_level_serie_collection.level_series[perspective.levels].get_level_by_fraction(submission_score / a_assignment.points)
+            grade_obj = a_level_serie_collection.level_series[perspective.levels].get_grade_by_fraction(submission_score / a_assignment.points)
+            grade_level = grade_obj.level
         else:
             pass
-
             # print("LS45 - Grade", grade)
     l_submission = Submission(a_canvas_submission.id, a_assignment.group_id, a_assignment.id, a_student.id,
                               a_assignment.name,
@@ -263,8 +281,8 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
                               a_assignment.assignment_day,
                               None,
                               None,
-                              status, graded, grade, grader_name, grader_date, submission_score,
-                              a_assignment.points, 0)
+                              status, graded, grade_level, grader_name, grader_date, submission_score,
+                              grade_value, a_assignment.points, 0)
     for canvas_comment in canvas_comments:
         # print("LS51 -", a_student.name, canvas_comment['comment'])
         l_submission.comments.append(Comment(canvas_comment['author_id'], canvas_comment['author_name'],
@@ -303,7 +321,7 @@ def add_missed_assignments(course, actual_day, student_perspective):
                                           assignment.assignment_day,
                                           None,
                                           None,
-                                          MISSED_ITEM, False, None, 0, 0, 0, assignment.points, 0)
+                                          MISSED_ITEM, False, None, 0, 0, 0, 0, assignment.points, 0)
                 l_submission.comments.append(Comment(0, ROBOT, assignment.assignment_date, NO_SUBMISSION))
                 student_perspective.put_submission(assignment_sequence, l_submission)
     elif len(student_perspective.assignment_groups) > 1:
@@ -333,7 +351,7 @@ def add_open_level_moments(course, actual_day, student_id, student_level_moments
                                                       assignment.assignment_day,
                                                       None,
                                                       None,
-                                                      NOT_YET_GRADED, False, None, 0, 0, 0, assignment.points, 0)
+                                                      NOT_YET_GRADED, False, None, 0, 0, 0, 0, assignment.points, 0)
                             l_submission.comments.append(Comment(0, ROBOT, assignment.assignment_date, NO_SUBMISSION_GRADE))
                             student_level_moments.submissions.append(l_submission)
     elif len(student_level_moments.assignment_groups) > 1:
@@ -371,7 +389,7 @@ def read_submissions(a_instance, a_canvas_course, a_course, a_results, a_total_r
                     # print("LS14 - canvas_submission", canvas_submission.id, canvas_submission.user_id)
                     student = a_results.find_student(canvas_submission.user_id)
                     if student is None:
-                        print("RS20 Could not find student", canvas_submission.user_id)
+                        # print("RS20 Could not find student", canvas_submission.user_id)
                         continue
                     l_submission = submission_builder(a_instance, a_course, student, assignment, canvas_submission, level_serie_collection)
                     # voeg een submission toe aan een van de perspectieven

@@ -20,7 +20,7 @@ class LevelSerie:
     def get_status(self, status):
         return self.status[status]
 
-    def get_level_by_fraction(self, fraction):
+    def get_level_by_fraction_del(self, fraction):
         last_fraction = 0.0
         for level in self.grades.keys():
             if self.grades[level].fraction:
@@ -29,6 +29,15 @@ class LevelSerie:
                     return level
                 last_fraction = self.grades[level].fraction
         return 0
+
+    def get_grade_by_fraction(self, fraction):
+        last_fraction = -0.05
+        for grade in self.grades.values():
+            if last_fraction < fraction <= grade.fraction:
+                # print(last_fraction, "<", fraction, "<", self.levels[level].fraction, level)
+                return grade
+            last_fraction = grade.fraction
+        return None
 
     @staticmethod
     def from_dict(data_dict, a_name):
