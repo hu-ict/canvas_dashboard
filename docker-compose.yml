@@ -5,8 +5,7 @@ services:
     build:
       dockerfile: Dockerfile
     ports:
-      - "5101:5101"  # Application port
-      - "2222:2222"  # SSH port
+      - "5101:5101"
     env_file:
       - .env
     volumes:
