@@ -340,3 +340,38 @@ def get_drive(token, team_id, channel_id):
     else:
         print(f"TA38 - Error getting token: {response.json()}")
     return {"display_name": "", "drive_id": ""}
+
+
+def send_mail(token, recipient, body):
+    l_headers = {
+        "Authorization": "Bearer "+token,
+        "Content-Type": "application/json"
+    }
+    l_data = {"message": {
+                "subject": "Meet for lunch?",
+                "body": {
+                    "contentType": "Text",
+                    "content": "The new cafeteria is open."
+                },
+                "toRecipients": [
+                    {
+                        "emailAddress": {
+                            "address": "anita.grit@hu.nl"
+                        }
+                    }
+                ]
+            }
+        }
+    l_json_object = json.dumps(l_data)
+    print(l_json_object)
+    l_url = f"https://graph.microsoft.com/v1.0/me/sendMail"
+    print(l_url)
+    response = requests.post(l_url, headers=l_headers, data=l_json_object)
+    if response.status_code == 201:
+        l_result = response.json()
+        with open('teams-api/dump.json', 'w') as f:
+            json.dump(l_result, f, indent=2)
+        return l_result
+    print(f"TA04 - Response: {response.json()}")
+    return None
+

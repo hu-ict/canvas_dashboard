@@ -19,7 +19,6 @@ class CourseInstances:
         self.events['results_create_event'] = Event('results_create_event', 'TIME')
         self.events['results_update_event'] = Event('results_update_event', 'TIME')
 
-
     def to_json(self):
         dict_result = {
             'current_instance': self.current_instance,

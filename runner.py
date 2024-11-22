@@ -1,5 +1,6 @@
+import json
 import sys
-from lib.file import read_course_instances
+from lib.file import read_course_instances, ENVIRONMENT_FILE_NAME
 from lib.lib_date import get_actual_date
 from model.observer.observer_pattern import ConcreteEvent, ConcreteObserver
 
@@ -7,6 +8,11 @@ from model.observer.observer_pattern import ConcreteEvent, ConcreteObserver
 def main(instance_name, a_event):
     print("Only instance:", instance_name)
     course_instances = read_course_instances()
+    if len(instance_name) > 0:
+        course_instances.current_instance = instance_name
+    with open(ENVIRONMENT_FILE_NAME, 'w') as f:
+        dict_result = course_instances.to_json()
+        json.dump(dict_result, f, indent=2)
     # print(course_instances.current_instance)
     observers = []
     events = {}
@@ -34,8 +40,8 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         main(sys.argv[1], sys.argv[2])
     else:
-        # main("TICT-V1SE1-24_SEP2024", "results_create_event")
-        main("sep24_inno", "results_create_event")
+        main("TICT-V1SE1-24_SEP2024", "course_create_event")
+        # main("sep24_inno", "results_create_event")
     total_seconds = (get_actual_date() - l_actual_date).seconds
     seconds = total_seconds % 60
     minutes = total_seconds // 60

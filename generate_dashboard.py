@@ -4,9 +4,9 @@ import sys
 
 from canvasapi import Canvas
 
+from lib.build_late import build_bootstrap_late_list
 from lib.build_totals import build_totals, create_student_totals, init_coaches_dict
 from lib.build_bootstrap import build_bootstrap_general
-from lib.build_late import build_late_list
 from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_actual_date, API_URL
 from lib.plot_totals import plot_werkvoorraad, plot_voortgang
@@ -59,7 +59,7 @@ def generate_dashboard(instance_name):
     print("GD06 - build_bootstrap_general(start, course, results, team_coaches, labels_colors)")
     build_bootstrap_general(instance, course, results, templates, team_coaches, level_serie_collection, student_totals)
     print("GD07 - build_late(instances, templates, results, student_totals)")
-    build_late_list(instance, templates, results, student_totals)
+    build_bootstrap_late_list(instance, templates, results, student_totals)
     with open("student_totals.json", 'w') as f:
         dict_result = student_totals
         json.dump(dict_result, f, indent=2)

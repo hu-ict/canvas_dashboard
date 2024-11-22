@@ -4,7 +4,7 @@ from string import Template
 from lib.lib_date import get_date_time_loc, get_date_time_obj
 
 
-def build_late_list(a_instance, a_templates, a_result, a_student_totals):
+def build_bootstrap_late_list(a_instance, a_templates, a_result, a_student_totals):
     for perspective in a_student_totals['perspectives'].keys():
         for selector in a_student_totals['perspectives'][perspective]['list'].keys():
             # print(l_selector)
@@ -13,20 +13,14 @@ def build_late_list(a_instance, a_templates, a_result, a_student_totals):
             #     json.dump(late_list, f, indent=2)
 
     all_late_substitute = ""
-    file_list = ["late.html"]
     for perspective in a_student_totals['perspectives'].keys():
         late_substitute = ""
         for selector in a_student_totals['perspectives'][perspective]['list'].keys():
             # print("BL11 -", perspective, selector)
             file_name = "late_"+perspective+"_"+selector+".html"
-            file_list.append(file_name)
             late_substitute += a_templates["selector"].substitute({'selector_file': file_name, 'selector': selector})
         all_late_substitute += a_templates["late_perspective"].substitute({"perspective": perspective, "buttons": late_substitute})
     late_html_string = a_templates["late"].substitute({"perspectives": all_late_substitute})
-
-    with open(a_instance.get_project_path()+'file_list.json', 'w') as f:
-        dict_result = file_list
-        json.dump(dict_result, f, indent=2)
 
     with open(a_instance.get_html_path()+'late.html', mode='w', encoding="utf-8") as file_late:
         file_late.write(late_html_string)

@@ -272,6 +272,9 @@ def generate_course(instance_name):
                     learning_outcome = config.find_learning_outcome(learning_outcome_id)
                     assignment_sequence.add_learning_outcome(learning_outcome_id)
                     learning_outcome.add_assigment_sequence(assignment_sequence.tag)
+                assignment.name = assignment.name.split("(")[0].strip()
+            assignment_sequence.name = assignment_sequence.name.split("(")[0].strip()
+
     for assignment_group in config.assignment_groups:
         assignment_group.bandwidth = None
         assignment_group.assignment_sequences = sorted(assignment_group.assignment_sequences, key=lambda a: a.get_day())
