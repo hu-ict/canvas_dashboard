@@ -5,7 +5,8 @@ services:
     build:
       dockerfile: Dockerfile
     ports:
-      - "5101:5101"
+      - "5101:5101"  # Application port
+      - "2222:2222"  # SSH port
     env_file:
       - .env
     volumes:
@@ -22,11 +23,13 @@ services:
     ports:
       - "25432:5432"
     volumes:
-      - dashboard-database-data:/var/lib/postgresql/data/ # persist data even if container shuts down
+      - dashboard-database-data:/var/lib/postgresql/data/
     networks:
       - dashboard-network
+
 volumes:
   courses:
   dashboard-database-data:
+
 networks:
-    dashboard-network:
+  dashboard-network:
