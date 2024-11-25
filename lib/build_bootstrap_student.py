@@ -242,7 +242,7 @@ def build_bootstrap_portfolio(instances, course_id, course, student, actual_date
                 learning_outcomes_row_html_string = ""
                 for learning_outcome in course.learning_outcomes:
                     if learning_outcome.id in assignment_sequence.learning_outcomes:
-                        learning_outcomes_row_html_string += '<td style="text-align:center;">V</td>'
+                        learning_outcomes_row_html_string += '<td style="text-align:center;"><span class="badge badge-primary">'+str(assignment_sequence.points)+'</span></td>'
                     else:
                         learning_outcomes_row_html_string += '<td></td>'
                 item_dict["learning_outcomes"] = learning_outcomes_row_html_string
@@ -256,13 +256,17 @@ def build_bootstrap_portfolio(instances, course_id, course, student, actual_date
     niet_beoordeeld_html = ""
 
     for learning_outcome in course.learning_outcomes:
-        learning_outcomes_header_html_string += '<th scope = "col" >'+learning_outcome.id+'</th>'
+        items = learning_outcome_summary[learning_outcome.id]['status_complete']
+        score = learning_outcome_summary[learning_outcome.id]['total_points']
+        grade = learning_outcome.get_grade(items, score)
+        background_color = level_serie_collection.level_series["grade"].grades[grade].color
+        learning_outcomes_header_html_string += '<th scope = "col" style="text-align: center; color:white; background-color:'''+background_color+'''">'''+learning_outcome.id+'</th>'
         # behaalde_punten_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['total_points'])+"</td>"
+        # print("BBP51 -", items, score, grade, background_color)
         complete_items_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['status_complete'])+" ("+str(learning_outcome_summary[learning_outcome.id]['total_points'])+")</td>"
         incomplete_items_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['status_incomplete'])+"</td>"
         niet_gemaakt_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['status_missed'])+"</td>"
         niet_beoordeeld_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['status_pending'])+"</td>"
-
 
     for portfolio_item in portfolio_items:
         # print(portfolio_item)
@@ -300,19 +304,6 @@ def build_bootstrap_portfolio(instances, course_id, course, student, actual_date
     return portfolio_html_string
 
 
-def build_bootstrap_portfolio_empty(instances, course, student, actual_date, templates, level_series):
-    portfolio_html_string = templates['portfolio_leeg'].substitute(
-        {'student_name': student.name,
-         'student_number': student.number,
-         })
-    file_name = instances.get_student_path() + student.name + " portfolio"
-    asci_file_name = file_name.translate(translation_table)
-    # print("BB21 - Write portfolio for", student.name)
-    with open(asci_file_name + ".html", mode='w', encoding="utf-8") as file_portfolio:
-        file_portfolio.write(portfolio_html_string)
-    return portfolio_html_string
-
-
 def build_bootstrap_student_index(instance, course_id, course, student, actual_date, actual_day, templates, levels):
     student_group = course.find_student_group(student.group_id)
     teacher_str = ""
@@ -326,6 +317,7 @@ def build_bootstrap_student_index(instance, course_id, course, student, actual_d
     student_tabs = {}
     for moment in course.level_moments.moments:
         level_moment_submissions = student.get_level_moment_submissions_by_query(moment)
+        # print("BBS31 -", moment, len(level_moment_submissions))
         student_tabs[moment.replace(" ", "_").lower()] = build_level_moments(course_id, course, moment, level_moment_submissions, templates, levels)
     for moment in course.grade_moments.moments:
         grade_moment_submissions = student.get_grade_moment_submissions_by_query(moment)
@@ -334,7 +326,7 @@ def build_bootstrap_student_index(instance, course_id, course, student, actual_d
     if instance.is_instance_of("prop_courses"):
         student_tabs['portfolio'] = build_bootstrap_portfolio(instance, course_id, course, student, actual_date, actual_day, templates, levels)
 
-    #Importeren plotly plaatje in html file
+    #Importeren plotly html in index html file
     student_name = student.email.split("@")[0].lower()
     file_name_html = instance.get_temp_path() + student_name + "_progress.html"
     student_tabs['voortgang'] = '<h2 class="mt-2">Voortgang</h2>'+read_plotly(file_name_html)

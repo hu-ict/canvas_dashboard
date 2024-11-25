@@ -84,6 +84,22 @@ def load_templates(template_path):
         string_html = file_template.read()
         templates["message"] = Template(string_html)
 
+    with open(template_path + 'learning_outcome//template_learning_outcome_index.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["learning_outcome_index"] = Template(string_html)
+
+    with open(template_path + 'learning_outcome//template_learning_outcome_portfolio_item.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["learning_outcome_portfolio_item"] = Template(string_html)
+
+    with open(template_path + 'learning_outcome//template_learning_outcome_card.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["learning_outcome_card"] = Template(string_html)
+
+    with open(template_path + 'learning_outcome//template_learning_outcome.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["learning_outcome"] = Template(string_html)
+
     with open(template_path + 'overview//template_late.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["late"] = Template(string_html)

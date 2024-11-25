@@ -5,7 +5,7 @@ from lib.translation_table import translation_table
 
 
 def process_analyse(learning_analytics, assignment, level_serie_collection, filename):
-    print("BPA10 - Processing", assignment.name)
+    # print("BPA10 - Processing", assignment.name)
     positions = {'status': {'row': 1, 'col': 1},
                  'grades': {'row': 1, 'col': 2}
                  }

@@ -59,7 +59,7 @@ def generate_dashboard(instance_name):
     print("GD06 - build_bootstrap_general(start, course, results, team_coaches, labels_colors)")
     build_bootstrap_general(instance, course, results, templates, team_coaches, level_serie_collection, student_totals)
     print("GD07 - build_late(instances, templates, results, student_totals)")
-    build_bootstrap_late_list(instance, templates, results, student_totals)
+    build_bootstrap_late_list(instance, templates, course, results, student_totals)
     with open("student_totals.json", 'w') as f:
         dict_result = student_totals
         json.dump(dict_result, f, indent=2)

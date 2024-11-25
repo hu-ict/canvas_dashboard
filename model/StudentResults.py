@@ -36,60 +36,6 @@ class StudentResults:
                 return perspective
         return None
 
-    def get_level_moment(self, assigment_id):
-        for peilmoment in self.student_level_moments.submissions:
-            if peilmoment.assignment_id == assigment_id:
-                return peilmoment
-        return None
-
-    def get_level_moment_submission_by_query(self, a_query):
-        for submission in self.student_level_moments.submissions:
-            condition = 0
-            for selector in a_query:
-                if selector.lower() in submission.assignment_name.lower():
-                    condition += 1
-            if condition == len(a_query):
-                return submission
-        return None
-
-    def get_level_moment_submissions_by_query(self, a_query):
-        submissions = []
-        for submission in self.student_level_moments.submissions:
-            condition = 0
-            for selector in a_query:
-                if selector.lower() in submission.assignment_name.lower():
-                    condition += 1
-            if condition == len(a_query):
-                submissions.append(submission)
-        return submissions
-
-    def get_grade_moment(self, assigment_id):
-        for grade_moment in self.student_grade_moments.submissions:
-            if grade_moment.assignment_id == assigment_id:
-                return grade_moment
-        return None
-
-    def get_grade_moment_submission_by_query(self, a_query):
-        for submission in self.student_grade_moments.submissions:
-            condition = 0
-            for selector in a_query:
-                if selector.lower() in submission.assignment_name.lower():
-                    condition += 1
-            if condition == len(a_query):
-                return submission
-        return None
-
-    def get_grade_moment_submissions_by_query(self, a_query):
-        submissions = []
-        for submission in self.student_grade_moments.submissions:
-            condition = 0
-            for selector in a_query:
-                if selector.lower() in submission.assignment_name.lower():
-                    condition += 1
-            if condition == len(a_query):
-                submissions.append(submission)
-        return submissions
-
     def get_submission_sequence_by_name(self, name):
         for student_perspective in self.perspectives.values():
             for submission_sequence in student_perspective.submission_sequences:
@@ -209,6 +155,7 @@ class StudentResults:
 
         if 'student_level_moments' in data_dict.keys() and data_dict['student_level_moments'] is not None:
             new.student_level_moments = StudentLevelMoments.from_dict(data_dict['student_level_moments'])
+            # print("SR41 -", new.student_level_moments)
         if 'student_grade_moments' in data_dict.keys() and data_dict['student_grade_moments'] is not None:
             new.student_grade_moments = StudentGradeMoments.from_dict(data_dict['student_grade_moments'])
         if 'student_attendance' in data_dict.keys() and data_dict['student_attendance'] is not None:

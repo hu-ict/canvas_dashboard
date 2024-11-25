@@ -27,7 +27,7 @@ def build_learning_analytics(course, results, level_serie_collection):
 
     for student in results.students:
         # print(l_peil_construction)
-        print("GL10 -", student.name)
+        # print("GL10 -", student.name)
         for perspective in student.perspectives.values():
             for submission_sequence in perspective.submission_sequences:
                 for submission in submission_sequence.submissions:
@@ -178,6 +178,39 @@ def write_release_planning_index(course, templates, assignment_group, file_name,
     return
 
 
+def write_learning_outcome_index(course, templates, learning_outcome, file_name):
+    write_learning_outcome_assignments_html_string = get_learning_outcome_assignments(course, templates, learning_outcome)
+    write_learning_outcome_index_html_string = templates['learning_outcome_index'].substitute(
+        {
+            'learning_outcome_short': learning_outcome.short,
+            'learning_outcome_description': learning_outcome.description,
+            'assignment_sequences': write_learning_outcome_assignments_html_string
+        }
+    )
+
+    with open(file_name, mode='w', encoding="utf-8") as file_learning_outcome_index:
+        file_learning_outcome_index.write(write_learning_outcome_index_html_string)
+    return
+
+
+def get_learning_outcome_assignments(a_course, a_templates, a_learning_outcome):
+    html_string = ""
+    portfolio_items = []
+    for assignment_sequence_tag in a_learning_outcome.assignment_sequences:
+        assignment_sequence = a_course.find_assignment_sequence(assignment_sequence_tag)
+        portfolio_items.append({
+                'portfolio_item': assignment_sequence.name,
+                'tag': assignment_sequence.tag,
+                'assignment_date': get_date_time_loc(assignment_sequence.get_date()),
+                'assignment_day': assignment_sequence.get_day(),
+                'points': assignment_sequence.points,
+                'count': len(assignment_sequence.assignments)
+            })
+    portfolio_items = sorted(portfolio_items, key=lambda a: a['assignment_day'])
+    for portfolio_item in portfolio_items:
+        html_string += a_templates['learning_outcome_portfolio_item'].substitute(portfolio_item)
+    return html_string
+
 def write_release_planning(a_course, a_templates, a_assignment_group):
     list_html_string = ""
     for assignment_sequence in a_assignment_group.assignment_sequences:
@@ -284,7 +317,29 @@ def build_bootstrap_release_planning_tab(a_instance, a_course, a_templates, leve
     return html_string
 
 
-def build_bootstrap_analyse(instances, a_course, learning_analytics, a_templates, a_level_serie_collection, actual_day):
+def build_bootstrap_leeruitkomsten_tab(instance, course, templates, a_level_serie_collection):
+    html_string = ""
+    learning_outcomes_html_string = ""
+    for learning_outcome in course.learning_outcomes:
+        # assignment_html_string = ""
+        # assignment_list = []
+        # for assignment_sequence in assignment_group.assignment_sequences:
+        #     for assignment in assignment_sequence.assignments:
+        #         assignment_list.append(assignment)
+        # assignment_list = sorted(assignment_list, key=lambda a: a.assignment_day)
+        # for assignment in assignment_list:
+        file_name = "general/learning_outcome_" + str(learning_outcome.id).lower() + ".html"
+        print("BBL41 -", file_name)
+        learning_outcomes_html_string += templates["learning_outcome"].substitute(
+                {'url': file_name,
+                 'learning_outcome_short': learning_outcome.short})
+        write_learning_outcome_index(course, templates, learning_outcome, instance.get_html_root_path()+file_name)
+
+    html_string += templates["learning_outcome_card"].substitute({'learning_outcomes': learning_outcomes_html_string})
+    return html_string
+
+
+def build_bootstrap_analyse_tab(instance, a_course, learning_analytics, a_templates, a_level_serie_collection, actual_day):
     html_string = ""
     for assignment_group in a_course.assignment_groups:
         assignment_html_string = ""
@@ -306,7 +361,7 @@ def build_bootstrap_analyse(instances, a_course, learning_analytics, a_templates
                  'assignment_lock_date': get_date_time_loc(
                      assignment.assignment_date)})
             process_analyse(learning_analytics, assignment, a_level_serie_collection,
-                            instances.get_html_root_path() + file_name)
+                            instance.get_html_root_path() + file_name)
 
         html_string += a_templates["analyse_card"].substitute({'assignment_group_id': str(assignment_group.id),
                                                                'assignment_group_name': assignment_group.name,

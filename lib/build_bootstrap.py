@@ -1,5 +1,6 @@
-from lib.build_bootstrap_structure import build_bootstrap_analyse, \
-    build_learning_analytics, build_bootstrap_release_planning_tab
+from lib.build_bootstrap_structure import build_bootstrap_analyse_tab, \
+    build_learning_analytics, build_bootstrap_release_planning_tab, build_bootstrap_leeruitkomsten_tab
+from lib.build_bootstrap_werkvoorraad import build_bootstrap_canvas_werkvoorraad
 from lib.lib_date import get_date_time_loc
 
 
@@ -20,21 +21,6 @@ def build_student_button(course, student, templates, level_serie_collection):
          'student_role': role.name,
          'frame_right': index_file_name
          })
-
-
-def build_bootstrap_canvas_werkvoorraad(a_templates, a_course, a_perspectives, a_student_totals):
-    overzicht_html_string = ""
-    for perspective in a_perspectives:
-        list_html_string = ""
-        for selector in a_student_totals["perspectives"][perspective.name]["list"].keys():
-            # print(selector)
-            list_html_string += a_templates["selector"].substitute(
-                {'selector_file': "general//late_" + perspective.name + "_" + selector + ".html", 'selector': selector})
-        # if a_course.level_moments is not None:
-        #     selector in a_student_totals["perspectives"]["level_moments"]["list"].keys()
-        overzicht_html_string += a_templates["overzicht"].substitute(
-            {'perspective': perspective.title, 'buttons': list_html_string})
-    return overzicht_html_string
 
 
 def build_bootstrap_group(a_course, a_results, a_templates, level_series):
@@ -145,6 +131,7 @@ def build_bootstrap_students_tabs(a_instance, a_course, a_results, a_templates, 
     # tabs.append("Overzichten")
     tabs.append("Werkvoorraad")
     tabs.append("Release Planning")
+    tabs.append("Leeruitkomsten")
     tabs.append("Analyse")
     start_pages = {}
     start_pages["Groepen"] = "./general/standard.html"
@@ -153,6 +140,7 @@ def build_bootstrap_students_tabs(a_instance, a_course, a_results, a_templates, 
     # start_pages["Overzichten"] = "./general/totals_voortgang.html"
     start_pages["Werkvoorraad"] = "./general/totals_werkvoorraad.html"
     start_pages["Release Planning"] = "./general/standard.html"
+    start_pages["Leeruitkomsten"] = "./general/standard.html"
     start_pages["Analyse"] = "./general/standard.html"
     html_tabs = ""
     for tab in tabs:
@@ -168,13 +156,17 @@ def build_bootstrap_students_tabs(a_instance, a_course, a_results, a_templates, 
                 perspectives.append(perspective)
             if a_course.level_moments is not None:
                 perspectives.append(a_course.level_moments)
-            tabs_html_string = build_bootstrap_canvas_werkvoorraad(a_templates, a_course, perspectives, a_totals)
+            tabs_html_string = build_bootstrap_canvas_werkvoorraad(a_instance, a_templates, a_course, perspectives,
+                                                                   a_totals)
         elif tab == "Release Planning":
             tabs_html_string = build_bootstrap_release_planning_tab(a_instance, a_course, a_templates,
                                                                     a_level_serie_collection)
+        elif tab == "Leeruitkomsten":
+            tabs_html_string = build_bootstrap_leeruitkomsten_tab(a_instance, a_course, a_templates,
+                                                                    a_level_serie_collection)
         else:
             learning_analytics = build_learning_analytics(a_course, a_results, a_level_serie_collection)
-            tabs_html_string = build_bootstrap_analyse(a_instance, a_course, learning_analytics, a_templates,
+            tabs_html_string = build_bootstrap_analyse_tab(a_instance, a_course, learning_analytics, a_templates,
                                                        a_level_serie_collection, a_results.actual_day)
         html_tab = ""
         for tab1 in tabs:
