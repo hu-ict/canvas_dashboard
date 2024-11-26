@@ -1,3 +1,6 @@
+import logging
+import sys
+
 from flask import Flask
 
 from src.auth import auth_bp
@@ -9,6 +12,8 @@ def create_app():
     app.secret_key = 'your_random_generated_secret_key'  # Change This
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
+    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+
     return app
 
 

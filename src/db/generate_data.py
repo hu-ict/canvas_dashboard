@@ -5,13 +5,12 @@ from src.db.db_context import context, close_connection
 from src.db.model.Student import Student
 from src.db.model.Teacher import Teacher
 
-COURSES_PATH = os.path.join('../..', 'courses')
+COURSES_PATH = os.path.abspath(os.path.join(os.getcwd(), "courses"))
 
 
-def initialize_db():
+def initialize_db(cursor, connection):
     try:
         print("Start database-initialisatie")
-        cursor, connection = context()
 
         print("Aanmaken van tabellen...")
 
@@ -64,8 +63,6 @@ def initialize_db():
         connection.commit()
     except Exception as e:
         print(f"Fout bij initialisatie van de database: {e}")
-    finally:
-        close_connection(cursor, connection)
 
 
 def insert_student(cursor, student):
@@ -131,7 +128,7 @@ def insert_teacher_course_relation(cursor, teacher_id, course_id):
     """, (teacher_id, course_id))
 
 
-def read_and_import_courses():
+def read_and_import_courses(cursor, connection):
     try:
         print("Start importeren van cursussen en studenten...")
 
@@ -200,8 +197,6 @@ def read_and_import_courses():
         print("Cursus- en studentgegevens succesvol geïmporteerd in de database.")
     except Exception as e:
         print(f"Fout bij het importeren van cursussen en studenten: {e}")
-    finally:
-        close_connection(cursor, connection)
 
 
 if __name__ == "__main__":

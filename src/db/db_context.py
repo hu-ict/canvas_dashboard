@@ -1,4 +1,5 @@
 import os
+from contextlib import contextmanager
 
 import psycopg2
 
@@ -49,3 +50,15 @@ def close_connection(cursor, connection):
             connection.close()
     except Exception as e:
         print(f"Error closing cursor: {e}")
+
+@contextmanager
+def db_context():
+    cursor, connection = None, None
+    try:
+        cursor, connection = context()
+        yield cursor, connection
+    except Exception as e:
+        print(f"Fout in db_context: {e}")
+        raise
+    finally:
+        close_connection(cursor, connection)
