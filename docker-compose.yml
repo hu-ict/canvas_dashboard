@@ -22,11 +22,13 @@ services:
     ports:
       - "25432:5432"
     volumes:
-      - dashboard-database-data:/var/lib/postgresql/data/ # persist data even if container shuts down
+      - dashboard-database-data:/var/lib/postgresql/data/
     networks:
       - dashboard-network
+
 volumes:
   courses:
   dashboard-database-data:
+
 networks:
-    dashboard-network:
+  dashboard-network:

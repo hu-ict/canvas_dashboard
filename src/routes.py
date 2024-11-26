@@ -36,10 +36,8 @@ def auth():
         return redirect('/auth/login')
     try:
         roles = jwt.decode(token, options={"verify_signature": False}).get("realm_access", {}).get("roles", [])
-        if "students" in roles:
+        if "students" in roles or "teachers" in roles:
             return redirect(url_for('main.select_course'))
-        elif "teachers" in roles:
-            return redirect(url_for('main.teacher_dashboard'))
         else:
             return jsonify({'message': 'Unauthorized'}), 403
     except jwt.InvalidTokenError:
@@ -73,19 +71,26 @@ def dashboard():
 @main_bp.route('/select_course')
 @login_required
 def select_course():
-    # Get the student courses from the session
-    student_courses = session.get('student_courses', [])
-
-    # Render the select course page with the student courses
-    return render_template('select_course/index.html', courses=student_courses)
+    token = session.get('token', {}).get('access_token')
+    roles = jwt.decode(token, options={"verify_signature": False}).get("realm_access", {}).get("roles", [])
+    if "students" in roles:
+        student_courses = session.get('student_courses', [])
+        return render_template('select_course/index.html', courses=student_courses)
+    elif "teachers" in roles:
+        teacher_courses = session.get('teacher_courses', [])
+        return render_template('select_course/index.html', courses=teacher_courses)
 
 
 @main_bp.route('/set_course/<int:course_id>')
 @login_required
-@role_required('students')
 def set_course(course_id):
     session['selected_course_id'] = course_id
-    return redirect(url_for('main.student_dashboard', course_id=course_id))
+    token = session.get('token', {}).get('access_token')
+    roles = jwt.decode(token, options={"verify_signature": False}).get("realm_access", {}).get("roles", [])
+    if "students" in roles:
+        return redirect(url_for('main.student_dashboard', course_id=course_id))
+    if "teachers" in roles:
+        return redirect(url_for('main.teacher_dashboard'))
 
 
 @main_bp.route('/teacher_dashboard')
@@ -121,7 +126,6 @@ def serve_css(filename):
 @main_bp.route('/js/<path:filename>')
 def serve_js(filename):
     return send_from_directory('static/js', filename)
-
 
 # @main_bp.route('/student_dashboard/hardcoded')
 # @login_required
