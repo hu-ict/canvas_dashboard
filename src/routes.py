@@ -72,7 +72,6 @@ def dashboard():
 
 @main_bp.route('/select_course')
 @login_required
-@role_required('students')
 def select_course():
     # Get the student courses from the session
     student_courses = session.get('student_courses', [])
