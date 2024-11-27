@@ -3,7 +3,7 @@
 Deze Python modules genereren een set van statische html-pagina's op basis van gegevens uit Canvas. De basis zijn de Canvas opdrachten (Assignments). 
 # De workflow
 Er wordt gebruik gemaakt van verschillende stappen om tot het dashboard te komen.
-![Activity Diagram](dashboard.png)
+![Activity Diagram](dashboard_flow.jpg)
 ## Stap 1 - Genereren nieuwe instance (tenant)
 Om een nieuwe course omgeving te maken:
 - run het Python script `generate_start.py`
