@@ -139,10 +139,10 @@ De volgende stap is de resultaten/submissions uitlezen uit Canvas. Er wordt inte
 Als met attendance gewerkt wordt wordt het csv bestand ingelezen en gekoppeld aan het juiste perspectief. De voortgang wordt ook bepaald.
 ## Stap 8 - Dashboard
 Genereer de visuals:
-- `generate_plotly.py`
-- `generate_dashboard.py`
+- `generate_portfolio.py`: deze produceert voor elke studenten een index.html en zet deze in de directory `students`.
+- `generate_dashboard.py`: deze produceert het complete dashboard index.html en de files in `general` (zonder student index.html).
 ## Stap 9 - Publiceren
-Kopieer files naar de teams oneDrive voor docenten
+Kopieer files naar de teams oneDrive voor docenten. Dit als het dashboard lokaal draait.
 - `publish_dashboard.py`
 Kopieeer de JPG en HTML naar het private channel van de student
 - `publish_student_files.py`
@@ -150,6 +150,7 @@ Kopieeer de JPG en HTML naar het private channel van de student
 Bovenstaande stappen kunnen ook gemodelleerd worden met de 
 - `runner.py`
 # Werken met MSTeams kanalen
+Niet gebruiken als gebruik gemaakt wordt van de cloud oplossing.
 ## Stap 1 Aanmaken teams
 Aanmaken teams in MSTeams. Je hebt voor elke max 30 studenten een team nodig.
 ## Stap 2 Aanmaken kanalen
