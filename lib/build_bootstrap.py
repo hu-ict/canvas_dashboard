@@ -1,5 +1,6 @@
+from lib.build_bootstrap_learning_outcome import build_bootstrap_learning_outcome_tab
 from lib.build_bootstrap_structure import build_bootstrap_analyse_tab, \
-    build_learning_analytics, build_bootstrap_release_planning_tab, build_bootstrap_leeruitkomsten_tab
+    build_learning_analytics, build_bootstrap_release_planning_tab
 from lib.build_bootstrap_werkvoorraad import build_bootstrap_canvas_werkvoorraad
 from lib.lib_date import get_date_time_loc
 
@@ -162,7 +163,7 @@ def build_bootstrap_students_tabs(a_instance, a_course, a_results, a_templates, 
             tabs_html_string = build_bootstrap_release_planning_tab(a_instance, a_course, a_templates,
                                                                     a_level_serie_collection)
         elif tab == "Leeruitkomsten":
-            tabs_html_string = build_bootstrap_leeruitkomsten_tab(a_instance, a_course, a_templates,
+            tabs_html_string = build_bootstrap_learning_outcome_tab(a_instance, a_course, a_templates,
                                                                     a_level_serie_collection)
         else:
             learning_analytics = build_learning_analytics(a_course, a_results, a_level_serie_collection)

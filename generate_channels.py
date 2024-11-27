@@ -24,17 +24,17 @@ if get_me_for_check(msteams_api.gen_token) is None:
 
 print(f"Aantal studenten {len(course.students)}, aantal teams {len(teams)}")
 student_count = 1
-if len(teams) > 0:
-    for student in course.students:
-        print("GCH10 -", student.name)
-        team_id = teams[student_count % len(teams)]
-        print(team_id, student.email)
-        channel_id = create_channel(msteams_api.gen_token, team_id, student.name)
-        if channel_id:
-            print(channel_id, student.email)
-            add_member_to_team(msteams_api.gen_token, team_id, student.email)
-            add_member_to_channel(msteams_api.gen_token, team_id, channel_id, student.email)
-        student_count += 1
+# if len(teams) > 0:
+#     for student in course.students:
+#         print("GCH10 -", student.name)
+#         team_id = teams[student_count % len(teams)]
+#         print(team_id, student.email)
+#         channel_id = create_channel(msteams_api.gen_token, team_id, student.name)
+#         if channel_id:
+#             print(channel_id, student.email)
+#             add_member_to_team(msteams_api.gen_token, team_id, student.email)
+#             add_member_to_channel(msteams_api.gen_token, team_id, channel_id, student.email)
+#         student_count += 1
 
     # teams = {"TICT-ICT-V1A-24-TEST": {'id': "b7cf78ae-8c6f-460d-a47a-d4bc2b8b2f18"}}
     #
