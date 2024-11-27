@@ -14,97 +14,12 @@ Hier worden attributen in JSON formaat opgegeven:
 ```json 
 {
   "api_key": "api_key from Canvas",
-  "canvas_course_id": 39869,
-  "grade_levels": "grade",
+  "canvas_course_id": "22880",
   "projects_groep_name": "Project Groups",
-  "slb_groep_name": "SLB Groep",
-  "start_date": "2024-02-12T00:00:00Z",
-  "end_date": "2024-07-12T23:59:59Z",
-  "progress": {
-      "name": "progress",
-      "levels": "progress",
-      "show_points": true,
-      "assignment_groups": [
-      ]
-  },
-  "attendance_perspective": "",
-  "template_path": ".//courses//feb24_inno//templates//",
-  "target_path": "C://Users//berend.wilkens//OneDrive - Stichting Hogeschool Utrecht//General//dashboard//",
-  "target_slb_path": "C://Users//berend.wilkens//Stichting Hogeschool Utrecht//INNO - SLB - General//INNO dashboard - SLB//",
-  "config_file_name": ".//courses//feb24_inno//config_feb24_inno.json",
-  "course_file_name": ".//courses//feb24_inno//course_feb24_inno.json",
-  "results_file_name": ".//courses//feb24_inno//result_feb24_inno.json",
-  "progress_file_name": ".//courses//feb24_inno//progress_feb24_inno.json",
-  "workload_file_name": ".//courses//feb24_inno//workload_feb24_inno.json",
-  "attendance_report": ".//courses//feb24_inno//attendance_report.csv",
-  "perspectives": {
-    "team": {
-      "name": "team",
-      "levels": "samen",
-      "show_points": false
-    },
-    "gilde": {
-      "name": "gilde",
-      "levels": "samen5",
-      "show_points": false
-    },
-    "kennis": {
-      "name": "kennis",
-      "levels": "niveau",
-      "show_points": true
-    }
-  },
-  "roles": [
-    {
-      "short": "AI",
-      "name": "AI - Engineer",
-      "btn_color": "btn-warning",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "BIM",
-      "name": "Business Analist",
-      "btn_color": "btn-success",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "CSC-C",
-      "name": "Cloud",
-      "btn_color": "btn-danger",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "CSC_S",
-      "name": "Security",
-      "btn_color": "btn-danger",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "SD_B",
-      "name": "Back-end developer",
-      "btn_color": "btn-dark",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "SD_F",
-      "name": "Front-end developer",
-      "btn_color": "btn-primary",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "TI",
-      "name": "Embedded - Engineer",
-      "btn_color": "btn-info",
-      "assignment_groups": [],
-      "students": []
-    }
-  ]
+  "start_date": "2024-09-02T00:00:00Z",
+  "end_date": "2025-01-31T23:59:59Z",
+  "target_path": "onedrive",
+  "attendance_report": ""
 }
 ```
 ## Stap 2 - Aanpassen start.json
