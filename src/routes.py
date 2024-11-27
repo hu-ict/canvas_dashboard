@@ -1,3 +1,4 @@
+import threading
 import glob
 import os
 
@@ -5,14 +6,43 @@ import jwt
 from flask import Blueprint, jsonify, redirect, session, send_from_directory, request, render_template_string, \
     render_template, url_for
 
+
 from generate_start import main_generate
 from runner import main as runner
 from src.auth import login_required, role_required
 from src.db.dashboards import find_dashboard_by_student_name
 from src.db.db_context import db_context
 from src.db.generate_data import initialize_db, read_and_import_courses
+from generate_config import main as main_generate_config
+from flask import jsonify, request
+from werkzeug.exceptions import BadRequest
+
+
+import os
 
 main_bp = Blueprint('main', __name__)
+
+def run_in_background(instance_name, event_name):
+    def task():
+        try:
+            print(f"Starting runner for instance {instance_name} with event {event_name}")
+            runner(instance_name, event_name)
+            print("Runner completed successfully")
+        except Exception as e:
+            print(f"Error in runner: {e}")
+
+        try:
+            with db_context() as (cursor, connection):
+                initialize_db(cursor, connection)
+                read_and_import_courses(cursor, connection)
+        except Exception as e:
+            print(f"Fout in database-initialisatie of import: {e}")
+            return jsonify({'status': 'Error', 'message': f"Database operation failed: {e}"}), 500
+
+
+    thread = threading.Thread(target=task, daemon=True)
+    thread.start()
+
 
 
 @main_bp.route("/generate/login", methods=['GET', 'POST'])
@@ -40,25 +70,66 @@ def generate_start():
 
         try:
             main_generate(data['new_instance'], data['category'], data['canvas_course_id'], os.getenv('CANVAS_API_KEY'),)
+            main_generate_config(data['new_instance'])
         except Exception as e:
             return jsonify({'status': 'Error', 'message': f"main_generate failed: {e}"}), 500
         try:
-            runner(data['new_instance'], "course_create_event")
+            run_in_background(data['new_instance'], "course_create_event")
         except Exception as e:
             print(f"Fout in runner: {e}")
 
-        try:
-            with db_context() as (cursor, connection):
-                initialize_db(cursor, connection)
-                read_and_import_courses(cursor, connection)
-        except Exception as e:
-            print(f"Fout in database-initialisatie of import: {e}")
-            return jsonify({'status': 'Error', 'message': f"Database operation failed: {e}"}), 500
 
         return jsonify({'status': 'Success', 'message': 'Process completed'}), 200
 
     return render_template('generate_start/form.html')
 
+
+@main_bp.route("/course_event", methods=['POST'])
+def course_event():
+    try:
+        # Extract JSON data from the request
+        data = request.get_json()
+
+        # Check if the JSON data is valid and not empty
+        if not data:
+            raise BadRequest("Invalid JSON data provided.")
+
+        # Define the absolute path to the 'courses' directory
+        courses_dir = os.path.abspath(os.path.join(os.getcwd(), "courses"))
+
+        # Retrieve the 'course_instance' from the JSON data
+        course_instance = data.get('course_instance')
+
+        # Check if the specified course_instance exists in the 'courses' directory
+        if not os.path.exists(os.path.join(courses_dir, course_instance)):
+            raise BadRequest(f"Course instance '{course_instance}' does not exist in the courses directory.")
+
+        # Retrieve the 'event' type from the JSON data
+        event = data.get('event')
+
+        # Ensure both 'course_instance' and 'event' fields are present
+        if not course_instance or not event:
+            raise BadRequest("Both 'course_instance' and 'event' fields are required.")
+
+        # Define the list of valid event types
+        valid_events = ["course_update_event", "results_create_event", "results_update_event"]
+
+        # Check if the provided event is valid
+        if event not in valid_events:
+            raise BadRequest(f"Invalid event type '{event}'. Valid events are: {', '.join(valid_events)}.")
+
+        run_in_background(course_instance, event)
+
+        # Return a success response
+        return jsonify({"status": f"Runner Task started {event} on course instance {course_instance}"})
+
+    except BadRequest as e:
+        # Handle client-side errors (bad input) and return a 400 error
+        return jsonify({"error": str(e)}), 400
+
+    except Exception as e:
+        # Handle unexpected server-side errors and return a 500 error
+        return jsonify({"error": "An unexpected error occurred.", "details": str(e)}), 500
 
 @main_bp.route("/generate/logout", methods=['GET'])
 def generate_logout():

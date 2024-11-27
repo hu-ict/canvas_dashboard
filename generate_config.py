@@ -1,10 +1,10 @@
+import json
 import sys
 
 from canvasapi import Canvas
-import json
-from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
+
 from lib.file import read_start, read_course_instance
-from model.Assignment import Assignment
+from lib.lib_date import API_URL, date_to_day, get_actual_date
 from model.AssignmentGroup import AssignmentGroup
 from model.Bandwidth import Bandwidth
 from model.CourseConfig import CourseConfig
@@ -72,8 +72,9 @@ def main(instance_name):
         config.perspectives[perspective.name] = perspective
         policy = Policy([1], "WEEKLY", 19, [9, 17, 18])
         config.attendance = Attendance("attendance", "Aanwezigheid", "attendance", True, False, "ATTENDANCE", 100, 75,
-                                      90, Bandwidth(), policy)
-        config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", ["Week 6", "Week 12", "Beoordeling", "Eindbeslissing"],)
+                                       90, Bandwidth(), policy)
+        config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress",
+                                            ["Week 6", "Week 12", "Beoordeling", "Eindbeslissing"], )
 
     # ophalen secties
     course_sections = canvas_course.get_sections()
@@ -93,7 +94,8 @@ def main(instance_name):
         for canvas_assignment in canvas_assignment_group.assignments:
             if canvas_assignment['points_possible']:
                 assignment_group.total_points += canvas_assignment['points_possible']
-        print("GC05 assignment_group", canvas_assignment_group, "points", assignment_group.total_points, assignment_group.strategy)
+        print("GC05 assignment_group", canvas_assignment_group, "points", assignment_group.total_points,
+              assignment_group.strategy)
         config.assignment_groups.append(assignment_group)
 
     # retrieve Teachers
@@ -105,7 +107,7 @@ def main(instance_name):
         # print("GCONF14 -", canvas_user)
         # user = canvas.get_user(canvas_user.id)
         # print("GCONF15 -", user)
-        teacher = Teacher(canvas_user.id, canvas_user.name)
+        teacher = Teacher(canvas_user.id, canvas_user.name, canvas_user.email)
         if hasattr(user, 'login_id'):
             teacher.login_id = canvas_user.login_id
         else:
