@@ -9,47 +9,61 @@ from generate_start import main_generate
 from runner import main as runner
 from src.auth import login_required, role_required
 from src.db.dashboards import find_dashboard_by_student_name
-from src.db.db_context import context, close_connection, db_context
+from src.db.db_context import db_context
 from src.db.generate_data import initialize_db, read_and_import_courses
 
 main_bp = Blueprint('main', __name__)
 
 
-@main_bp.route("/generate/start", methods=['POST'])
+@main_bp.route("/generate/login", methods=['GET', 'POST'])
+def generate_login():
+    if request.method == 'POST':
+        data = request.get_json()
+        admin_password = data.get('password')
+        if admin_password == "admin123":
+            session['admin_authenticated'] = True
+            return redirect(url_for('main.generate_start'))
+        else:
+            return jsonify({'error': 'Ongeldig wachtwoord'}), 401
+    return render_template('generate_start/login.html')
+
+
+@main_bp.route("/generate/start", methods=['GET', 'POST'])
 def generate_start():
-    data = request.get_json()
+    if not session.get('admin_authenticated'):
+        return redirect(url_for('main.generate_login'))
 
-    try:
-        main_generate(data['new_instance'], data['category'], data['canvas_course_id'], os.getenv("CANVAS_API_KEY"))
-    except Exception as e:
-        return jsonify({'status': 'Error', 'message': f"main_generate failed: {e}"}), 500
-    try:
-        runner(data['new_instance'], "course_create_event")
-    except Exception as e:
-        print(f"Fout in runner: {e}")
+    if request.method == 'POST':
+        data = request.get_json()  # Haal JSON-data op
+        if not data:
+            return jsonify({'status': 'Error', 'message': 'Geen data ontvangen'}), 400
 
-    try:
-        with db_context() as (cursor, connection):
-            initialize_db(cursor, connection)
-            read_and_import_courses(cursor, connection)
-    except Exception as e:
-        print(f"Fout in database-initialisatie of import: {e}")
-        return jsonify({'status': 'Error', 'message': f"Database operation failed: {e}"}), 500
+        try:
+            main_generate(data['new_instance'], data['category'], data['canvas_course_id'], os.getenv('CANVAS_API_KEY'),)
+        except Exception as e:
+            return jsonify({'status': 'Error', 'message': f"main_generate failed: {e}"}), 500
+        try:
+            runner(data['new_instance'], "course_create_event")
+        except Exception as e:
+            print(f"Fout in runner: {e}")
 
-    return jsonify({'status': 'Success', 'message': 'Process completed'}), 200
+        try:
+            with db_context() as (cursor, connection):
+                initialize_db(cursor, connection)
+                read_and_import_courses(cursor, connection)
+        except Exception as e:
+            print(f"Fout in database-initialisatie of import: {e}")
+            return jsonify({'status': 'Error', 'message': f"Database operation failed: {e}"}), 500
 
-# @contextmanager
-# def db_context():
-#     cursor, connection = None, None
-#     try:
-#         cursor, connection = context()
-#         yield cursor, connection
-#     except Exception as e:
-#         print(f"Fout in db_context: {e}")
-#         raise
-#     finally:
-#         close_connection(cursor, connection)
+        return jsonify({'status': 'Success', 'message': 'Process completed'}), 200
 
+    return render_template('generate_start/form.html')
+
+
+@main_bp.route("/generate/logout", methods=['GET'])
+def generate_logout():
+    session.pop('admin_authenticated', None)
+    return redirect(url_for('main.generate_login'))
 
 @main_bp.route("/")
 def auth():
@@ -148,16 +162,3 @@ def serve_css(filename):
 @main_bp.route('/js/<path:filename>')
 def serve_js(filename):
     return send_from_directory('static/js', filename)
-
-# @main_bp.route('/student_dashboard/hardcoded')
-# @login_required
-# def dashboard_jeroen():
-#     student_email = "jeroen.cabri@student.hu.nl"
-#     stud_dashboard = find_dashboard_by_student_name(student_email)
-#
-#     if stud_dashboard:
-#         return render_template_string(open(stud_dashboard).read())
-#     else:
-#         return jsonify({'message': 'No dashboard found for the student'}), 404
-
-
