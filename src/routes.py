@@ -16,7 +16,7 @@ from src.db.generate_data import initialize_db, read_and_import_courses
 from generate_config import main as main_generate_config
 from flask import jsonify, request
 from werkzeug.exceptions import BadRequest
-from src.services.remote_doc_service import upload_files_with_overwrite
+from src.services.remote_doc_service import upload_files_with_overwrite, find_teacher_index
 
 
 import os
@@ -208,13 +208,21 @@ def set_course(course_id):
 @login_required
 @role_required('teachers')
 def teacher_dashboard():
-    matches = glob.glob('/src/courses/*/*/.html')
-    matches = glob.glob('/src/courses/*/*/index.html')
-    if not matches:
-        return jsonify({'message': 'No HTML files found in courses directory'}), 404
-        return jsonify({'message': 'No index.html files found in courses directory'}), 404
-    directory = os.path.dirname(matches[0])
-    return send_from_directory(directory, 'index.html')
+    if os.getenv('STORAGE_TYPE') == 'local':
+        matches = glob.glob('/src/courses/*/*/.html')
+        matches = glob.glob('/src/courses/*/*/index.html')
+        if not matches:
+            return jsonify({'message': 'No HTML files found in courses directory'}), 404
+            return jsonify({'message': 'No index.html files found in courses directory'}), 404
+        directory = os.path.dirname(matches[0])
+        return send_from_directory(directory, 'index.html')
+    else:
+        teacher_index = find_teacher_index()
+        if teacher_index:
+            return render_template_string(teacher_index)
+        else:
+            return jsonify({'message': 'No teacher index found'}), 404
+
 
 
 @main_bp.route('/student_dashboard/<int:course_id>')

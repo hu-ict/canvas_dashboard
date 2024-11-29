@@ -1,8 +1,8 @@
 from azure.storage.blob import BlobServiceClient
 import os
 
-CONNECTION_STRING = os.getenv('STORAGE_CONNECTION_STRING')
-CONTAINER_NAME = os.getenv('STORAGE_CONTAINER_NAME')
+CONNECTION_STRING = os.getenv('STORAGE_CONNECTION_STRING', 'DefaultEndpointsProtocol=https;AccountName=canvasdashboardstorage;AccountKey=f3e0CWszKW3E/dPJbaKz2Kenn5bq/nVrxY/wieDui6DL9Uu6U5LZD9UUNDn6tOjSu3JldqePwcKW+AStPJFEWw==;EndpointSuffix=core.windows.net')
+CONTAINER_NAME = os.getenv('STORAGE_CONTAINER_NAME', 'webapp')
 local_directory = os.path.abspath(os.path.join(os.getcwd(), "courses"))
 
 
@@ -58,6 +58,23 @@ def upload_files_with_overwrite():
 #     print(f"File {file_name} not found in {students_folder}.")
 #     return None
 
+def find_teacher_index():
+    service_client = BlobServiceClient.from_connection_string(CONNECTION_STRING)
+    container_client = service_client.get_container_client(CONTAINER_NAME)
+
+    print(f"Searching for index in the container '{CONTAINER_NAME}'...")
+
+    blobs = container_client.list_blobs()
+
+    for blob in blobs:
+        if f"index" in blob.name:
+            blob_url = f"https://{service_client.account_name}.blob.core.windows.net/{CONTAINER_NAME}/{blob.name}"
+            print(f"Found file: {blob_url}")
+            return read_blob_content(CONTAINER_NAME, blob.name)
+
+    print(f"File index not found in the container '{CONTAINER_NAME}'.")
+    return None
+
 def find_blob_by_name(file_name):
     service_client = BlobServiceClient.from_connection_string(CONNECTION_STRING)
     container_client = service_client.get_container_client(CONTAINER_NAME)
@@ -102,3 +119,11 @@ def read_blob_content(container_name, blob_name):
 # if blob_name:
 #     content = read_blob_content(CONTAINER_NAME, blob_name)
 #     print(f"\nContent of {file_to_find}:\n{content[:1200]}...")
+
+# find_teacher_index()
+#
+# blob_name = find_teacher_index()
+#
+# if blob_name:
+#     content = read_blob_content(CONTAINER_NAME, blob_name)
+#     print(f"\nContent of index:\n{content[:500]}...")
