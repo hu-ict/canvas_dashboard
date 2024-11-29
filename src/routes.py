@@ -16,6 +16,7 @@ from src.db.generate_data import initialize_db, read_and_import_courses
 from generate_config import main as main_generate_config
 from flask import jsonify, request
 from werkzeug.exceptions import BadRequest
+from src.services.remote_doc_service import upload_files_with_overwrite
 
 
 import os
@@ -35,6 +36,9 @@ def run_in_background(instance_name, event_name):
             with db_context() as (cursor, connection):
                 initialize_db(cursor, connection)
                 read_and_import_courses(cursor, connection)
+                if os.getenv('STORAGE_TYPE') == 'azure':
+                    upload_files_with_overwrite()
+
         except Exception as e:
             print(f"Fout in database-initialisatie of import: {e}")
             return jsonify({'status': 'Error', 'message': f"Database operation failed: {e}"}), 500
@@ -220,7 +224,11 @@ def student_dashboard(course_id):
     email = jwt.decode(session['token']['access_token'], options={"verify_signature": False}).get("email", "Student")
     stud_dashboard = find_dashboard_by_student_name(email, course_id)
     if stud_dashboard:
-        return render_template_string(open(stud_dashboard).read())
+
+        if os.getenv('STORAGE_TYPE') == 'local':
+            return render_template_string(open(stud_dashboard).read())
+
+        return render_template_string(stud_dashboard)
     else:
         return jsonify({'message': 'No dashboard found for the selected course'}), 404
 
