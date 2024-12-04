@@ -13,7 +13,7 @@ from src.auth import login_required, role_required
 from src.db.dashboards import find_dashboard_by_student_name
 from src.db.db_context import db_context
 from src.db.generate_data import initialize_db, read_and_import_courses
-from generate_config import main as main_generate_config
+from generate_config import generate_config as main_generate_config
 from flask import jsonify, request
 from werkzeug.exceptions import BadRequest
 from src.services.remote_doc_service import upload_files_with_overwrite, find_teacher_index

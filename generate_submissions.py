@@ -2,7 +2,7 @@ import sys
 from canvasapi import Canvas
 import json
 
-from lib.file import read_start, read_course, read_results, read_course_instance, read_progress
+from lib.file import read_start, read_course, read_results, read_course_instances, read_progress
 from lib.lib_attendance import read_attendance
 from lib.lib_progress import get_progress, get_overall_progress, get_attendance_progress
 from lib.lib_submission import submission_builder, count_graded, add_missed_assignments, read_submissions
@@ -13,7 +13,7 @@ from model.ProgressDay import ProgressDay
 def generate_submissions(instance_name):
     print("GSM01 - generate_submissions.py")
     g_actual_date = get_actual_date()
-    instances = read_course_instance()
+    instances = read_course_instances()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
     print("GSM02 - Instance:", instances.current_instance)
