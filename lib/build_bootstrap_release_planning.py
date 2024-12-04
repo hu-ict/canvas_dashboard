@@ -34,17 +34,16 @@ def write_release_planning(a_course, a_templates, a_assignment_group):
             url = "https://canvas.hu.nl/courses/" + str(a_course.canvas_id) + "/assignments/" + str(assignment.id)
             rubric_points = 0
             rubric_count = 0
-            rubrics_html_string = "<ul>"
+            rubrics_html_string = '<table class="table-sm">'
             for criterion in assignment.rubrics:
-                rubrics_html_string += "<li>" + str(round(criterion.points, 2)) + " ptn, " + criterion.description
+                rubrics_html_string += "<tr><td>" + str(round(criterion.points, 2)) + " ptn, " + criterion.description + "</td>"
                 rubric_points += criterion.points
                 rubric_count += 1
-                rubrics_html_string += "<ul>"
+                rubrics_html_string += "<td>"
                 for rating in criterion.ratings:
-                    rubrics_html_string += "<li>" + str(
-                        round(rating.points, 2)) + " ptn, " + rating.description + "</li>"
-                rubrics_html_string += "</ul></li>"
-            rubrics_html_string += "<ul>"
+                    rubrics_html_string += rating.description + ": " + str(round(rating.points, 2)) + " ptn, "
+                rubrics_html_string += "</td></tr>"
+            rubrics_html_string += "</table>"
             if rubric_count == 0:
                 rubrics_str = str(round(0, 2))
                 rubrics_html_string = "Geen criteria"

@@ -276,21 +276,8 @@ def generate_course(instance_name):
             assignment_sequence.name = assignment_sequence.name.split("(")[0].strip()
 
     for assignment_group in config.assignment_groups:
-        assignment_group.bandwidth = None
         assignment_group.assignment_sequences = sorted(assignment_group.assignment_sequences, key=lambda a: a.get_day())
-        if assignment_group.strategy == "NONE":
-            pass
-        elif assignment_group.total_points == 0:
-            message = "GCS81 - ERROR Couldn't calculate bandwidth for assignment_group", assignment_group.name, "total_points is zero"
-            print(message)
-        elif assignment_group.lower_points == 0:
-            message = "GCS82 - ERROR Couldn't calculate bandwidth for assignment_group", assignment_group.name, "lower_points is zero"
-            print(message)
-        elif assignment_group.upper_points == 0:
-            message = "GCS83 - ERROR Couldn't calculate bandwidth for assignment_group", assignment_group.name, "upper_points is zero"
-            print(message)
-        else:
-            assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
+        assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
     if config.attendance is not None:
         config.attendance.bandwidth = bandwidth_builder_attendance(config.attendance.lower_points, config.attendance.upper_points, config.attendance.total_points, config.days_in_semester)
 

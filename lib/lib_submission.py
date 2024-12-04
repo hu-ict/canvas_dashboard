@@ -45,10 +45,11 @@ def count_graded(results):
         for perspective in student.perspectives.values():
             for submission_sequence in perspective.submission_sequences:
                 for submission in submission_sequence.submissions:
-                    if submission.graded:
-                        l_graded += 1
-                    else:
-                        l_not_graded += 1
+                    if submission.submitted_day is not None and submission.submitted_day > 0:
+                        if submission.graded:
+                            l_graded += 1
+                        else:
+                            l_not_graded += 1
     return l_graded + l_not_graded, l_not_graded
 
 

@@ -230,6 +230,7 @@ def check_for_late(a_instance, a_course, a_student_totals, a_student_results, a_
         else:
             late_days = a_actual_day - a_submission.submitted_day
         # print("BT85", a_perspective, l_selector)
+        print("BT61 -", a_perspective, l_selector)
         a_student_totals['perspectives'][a_perspective]['list'][l_selector].append(a_submission.to_json())
         if late_days <= 7:
             a_student_totals['perspectives'][a_perspective]['pending'][l_selector] += 1

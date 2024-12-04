@@ -19,7 +19,7 @@ class Level:
 
     @staticmethod
     def from_dict(data_dict):
-        print("LE01 -", data_dict)
+        # print("LE01 -", data_dict)
         if 'fraction' in data_dict:
             level = Level(data_dict['level'], data_dict['label'], data_dict['color'], data_dict['fraction'], data_dict['value'])
         else:
