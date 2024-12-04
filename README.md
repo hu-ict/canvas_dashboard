@@ -3,7 +3,7 @@
 Deze Python modules genereren een set van statische html-pagina's op basis van gegevens uit Canvas. De basis zijn de Canvas opdrachten (Assignments). 
 # De workflow
 Er wordt gebruik gemaakt van verschillende stappen om tot het dashboard te komen.
-![Activity Diagram](dashboard.png)
+![Activity Diagram](dashboard_flow.jpg)
 ## Stap 1 - Genereren nieuwe instance (tenant)
 Om een nieuwe course omgeving te maken:
 - run het Python script `generate_start.py`
@@ -14,97 +14,12 @@ Hier worden attributen in JSON formaat opgegeven:
 ```json 
 {
   "api_key": "api_key from Canvas",
-  "canvas_course_id": 39869,
-  "grade_levels": "grade",
+  "canvas_course_id": "22880",
   "projects_groep_name": "Project Groups",
-  "slb_groep_name": "SLB Groep",
-  "start_date": "2024-02-12T00:00:00Z",
-  "end_date": "2024-07-12T23:59:59Z",
-  "progress": {
-      "name": "progress",
-      "levels": "progress",
-      "show_points": true,
-      "assignment_groups": [
-      ]
-  },
-  "attendance_perspective": "",
-  "template_path": ".//courses//feb24_inno//templates//",
-  "target_path": "C://Users//berend.wilkens//OneDrive - Stichting Hogeschool Utrecht//General//dashboard//",
-  "target_slb_path": "C://Users//berend.wilkens//Stichting Hogeschool Utrecht//INNO - SLB - General//INNO dashboard - SLB//",
-  "config_file_name": ".//courses//feb24_inno//config_feb24_inno.json",
-  "course_file_name": ".//courses//feb24_inno//course_feb24_inno.json",
-  "results_file_name": ".//courses//feb24_inno//result_feb24_inno.json",
-  "progress_file_name": ".//courses//feb24_inno//progress_feb24_inno.json",
-  "workload_file_name": ".//courses//feb24_inno//workload_feb24_inno.json",
-  "attendance_report": ".//courses//feb24_inno//attendance_report.csv",
-  "perspectives": {
-    "team": {
-      "name": "team",
-      "levels": "samen",
-      "show_points": false
-    },
-    "gilde": {
-      "name": "gilde",
-      "levels": "samen5",
-      "show_points": false
-    },
-    "kennis": {
-      "name": "kennis",
-      "levels": "niveau",
-      "show_points": true
-    }
-  },
-  "roles": [
-    {
-      "short": "AI",
-      "name": "AI - Engineer",
-      "btn_color": "btn-warning",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "BIM",
-      "name": "Business Analist",
-      "btn_color": "btn-success",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "CSC-C",
-      "name": "Cloud",
-      "btn_color": "btn-danger",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "CSC_S",
-      "name": "Security",
-      "btn_color": "btn-danger",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "SD_B",
-      "name": "Back-end developer",
-      "btn_color": "btn-dark",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "SD_F",
-      "name": "Front-end developer",
-      "btn_color": "btn-primary",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "TI",
-      "name": "Embedded - Engineer",
-      "btn_color": "btn-info",
-      "assignment_groups": [],
-      "students": []
-    }
-  ]
+  "start_date": "2024-09-02T00:00:00Z",
+  "end_date": "2025-01-31T23:59:59Z",
+  "target_path": "onedrive",
+  "attendance_report": ""
 }
 ```
 ## Stap 2 - Aanpassen start.json
@@ -224,10 +139,10 @@ De volgende stap is de resultaten/submissions uitlezen uit Canvas. Er wordt inte
 Als met attendance gewerkt wordt wordt het csv bestand ingelezen en gekoppeld aan het juiste perspectief. De voortgang wordt ook bepaald.
 ## Stap 8 - Dashboard
 Genereer de visuals:
-- `generate_plotly.py`
-- `generate_dashboard.py`
+- `generate_portfolio.py`: deze produceert voor elke studenten een index.html en zet deze in de directory `students`.
+- `generate_dashboard.py`: deze produceert het complete dashboard index.html en de files in `general` (zonder student index.html).
 ## Stap 9 - Publiceren
-Kopieer files naar de teams oneDrive voor docenten
+Kopieer files naar de teams oneDrive voor docenten. Dit als het dashboard lokaal draait.
 - `publish_dashboard.py`
 Kopieeer de JPG en HTML naar het private channel van de student
 - `publish_student_files.py`
@@ -235,6 +150,7 @@ Kopieeer de JPG en HTML naar het private channel van de student
 Bovenstaande stappen kunnen ook gemodelleerd worden met de 
 - `runner.py`
 # Werken met MSTeams kanalen
+Niet gebruiken als gebruik gemaakt wordt van de cloud oplossing.
 ## Stap 1 Aanmaken teams
 Aanmaken teams in MSTeams. Je hebt voor elke max 30 studenten een team nodig.
 ## Stap 2 Aanmaken kanalen
