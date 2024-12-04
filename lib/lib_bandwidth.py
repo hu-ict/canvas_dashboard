@@ -1,10 +1,6 @@
 import json
 
-import numpy as np
-from scipy.interpolate import interp1d
 from model.Bandwidth import Bandwidth, Point
-import plotly.express as px
-import plotly.graph_objs as go
 
 
 def calc_dev(iterations, r, a, b, c):

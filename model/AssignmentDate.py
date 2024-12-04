@@ -1,6 +1,3 @@
-from lib.file import read_start
-
-
 class AssignmentDate:
     def __init__(self, due_at, lock_at):
         self.due_at = due_at

@@ -2,8 +2,8 @@ from model.Rating import Rating
 
 
 class Criterion:
-    def __init__(self, id, points, description):
-        self.id = id
+    def __init__(self, criterion_id, points, description):
+        self.id = criterion_id
         self.points = points
         self.description = description
         self.ratings = []

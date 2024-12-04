@@ -1,5 +1,6 @@
 from model.perspective.LevelSerie import LevelSerie
 
+
 class LevelSerieCollection:
     def __init__(self):
         self.level_series = {}

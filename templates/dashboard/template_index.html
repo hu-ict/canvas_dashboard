@@ -10,13 +10,13 @@
     <meta name="author" content="">
 
     <title>Dashboard - $course_name</title>
-
-    <!-- Custom fonts for this template-->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    <!-- Custom styles for this template-->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/startbootstrap-sb-admin-2/4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
-    <script>
+<!--    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">-->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>    <script>
         function setStudent(name, number, role, frame_a) {
             document.getElementById("detail_name").innerHTML = name+' ('+number+') - '+role;
             document.getElementById("iframe_a").setAttribute("src", frame_a);
@@ -112,7 +112,7 @@
                     </div>
                     <!-- Content Row -->
                     <div class="row">
-                        <div class="col-xl-2 col-md-6 mb-4">
+                        <div class="col-xl-2 col-md-6 mb-2">
                             <div class="card border-left-primary shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
@@ -129,7 +129,7 @@
                             </div>
                         </div>
 
-                        <div class="col-xl-2 col-md-6 mb-4">
+                        <div class="col-xl-2 col-md-6 mb-2">
                             <div class="card border-left-success shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
@@ -146,7 +146,7 @@
                             </div>
                         </div>
 
-                        <div class="col-xl-2 col-md-6 mb-4">
+                        <div class="col-xl-2 col-md-6 mb-2">
                             <div class="card border-left-info shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
@@ -185,7 +185,7 @@
                         $tabs_html_string
                         <script>setView("Groepen")</script>
                         <div class="col-lg-8">
-                            <div class="card shadow mb-4">
+                            <div class="card shadow mb-2">
                                 <div class="card-header py-3">
                                     <div class="row">
                                         <h6 class="m-0 font-weight-bold text-primary" id="detail_name"></h6>

@@ -16,10 +16,6 @@ def load_templates(template_path):
         string_late_html = file_late_template.read()
         templates["overzicht"] = Template(string_late_html)
 
-    with open(template_path + 'release_planning//template_structure_index.html', mode='r', encoding="utf-8") as file_index_template:
-        string_index_html = file_index_template.read()
-        templates["index_structure"] = Template(string_index_html)
-
     with open(template_path + 'dashboard//template_studentgroup.html', mode='r', encoding="utf-8") as file_group_template:
         string_group_html = file_group_template.read()
         templates["group"] = Template(string_group_html)
@@ -60,9 +56,17 @@ def load_templates(template_path):
         string_html = file_template.read()
         templates["overzichten"] = Template(string_html)
 
+    with open(template_path + 'release_planning//template_release_planning_index.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["release_planning_index"] = Template(string_html)
+
     with open(template_path + 'release_planning//template_release_planning.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["release_planning"] = Template(string_html)
+
+    with open(template_path + 'release_planning//template_release_planning_perspective.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["release_planning_perspective"] = Template(string_html)
 
     with open(template_path + 'release_planning//template_release_planning_list.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
@@ -79,6 +83,22 @@ def load_templates(template_path):
     with open(template_path + 'release_planning//template_message.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["message"] = Template(string_html)
+
+    with open(template_path + 'learning_outcome//template_learning_outcome_index.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["learning_outcome_index"] = Template(string_html)
+
+    with open(template_path + 'learning_outcome//template_learning_outcome_portfolio_item.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["learning_outcome_portfolio_item"] = Template(string_html)
+
+    with open(template_path + 'learning_outcome//template_learning_outcome_card.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["learning_outcome_card"] = Template(string_html)
+
+    with open(template_path + 'learning_outcome//template_learning_outcome.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["learning_outcome"] = Template(string_html)
 
     with open(template_path + 'overview//template_late.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
@@ -103,6 +123,10 @@ def load_templates(template_path):
     with open(template_path + 'student//template_explanation.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["explanation"] = Template(string_html)
+
+    with open(template_path + 'student//template_reflection.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["reflection"] = Template(string_html)
 
     with open(template_path + 'student//template_portfolio.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
@@ -135,5 +159,25 @@ def load_templates(template_path):
     with open(template_path + 'student//template_students_tab.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["students_tab"] = Template(string_html)
+
+    with open(template_path + 'analyse//template_analyse_card.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["analyse_card"] = Template(string_html)
+
+    with open(template_path + 'analyse//template_analyse_assignment.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["analyse_assignment"] = Template(string_html)
+
+    with open(template_path + 'level_serie//template_level_serie_index.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["level_serie_index"] = Template(string_html)
+
+    with open(template_path + 'level_serie//template_level_status.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["level_status"] = Template(string_html)
+
+    with open(template_path + 'level_serie//template_level_level.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["level_level"] = Template(string_html)
 
     return templates

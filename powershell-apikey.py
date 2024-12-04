@@ -3,7 +3,8 @@ import io
 import json
 import requests
 
-from lib.file import read_msteams_api, read_course, read_start
+from lib.file import read_msteams_api, read_course, read_start, read_course_instances
+from lib.lib_date import get_actual_date
 from lib.teams_api_lib import get_me_for_check, get_access_token, get_sites
 
 """
@@ -96,8 +97,16 @@ def add_channel_member(a_token, team_id, channel_id, member_id):
 
 
 if __name__ == "__main__":
-    course_config_start = read_start()
-    course = read_course(course_config_start.course_file_name)
+    instance_name = ""
+    print("GPL01 - generate_plotly.py")
+    g_actual_date = get_actual_date()
+    instances = read_course_instances()
+    if len(instance_name) > 0:
+        instances.current_instance = instance_name
+    instance = instances.get_instance_by_name(instances.current_instance)
+    print("GPL02 - Instance:", instance.name)
+    course = read_course(instance.get_course_file_name())
+
     msteams_api = read_msteams_api("msteams_api.json")
     team_ids = ["b7cf78ae-8c6f-460d-a47a-d4bc2b8b2f18", "2d570ef0-7a51-489e-a2e3-681440e67d08",
                   "82e424d3-5baa-4ba2-b2f8-85b3659a150e", "a282ec15-7540-4c3b-bb3c-26b2f38377c7"]

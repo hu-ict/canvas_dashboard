@@ -1,10 +1,9 @@
-from model.Student import Student
 from model.StudentLink import StudentLink
 
 
 class StudentGroup:
-    def __init__(self, id, name):
-        self.id = id
+    def __init__(self, studenty_group_id, name):
+        self.id = studenty_group_id
         self.name = name
         self.teachers = []
         self.students = []

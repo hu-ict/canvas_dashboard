@@ -1,10 +1,10 @@
-from model.Submission import Submission
 from model.SubmissionSequence import SubmissionSequence
 
 
 class StudentPerspective:
-    def __init__(self, name, progress, sum_score, last_score):
+    def __init__(self, name, title, progress, sum_score, last_score):
         self.name = name
+        self.title = title
         self.progress = progress
         self.sum_score = sum_score
         self.last_score = last_score
@@ -14,6 +14,7 @@ class StudentPerspective:
     def to_json(self):
         return {
             'name': self.name,
+            'title': self.title,
             'progress': self.progress,
             'sum_score': self.sum_score,
             'last_score': self.last_score,
@@ -72,7 +73,9 @@ class StudentPerspective:
     def put_submission(self, a_assignment_sequence, a_submission):
         submission_sequence = self.get_submission_sequence_by_tag(a_assignment_sequence.tag)
         if submission_sequence is None:
-            submission_sequence = SubmissionSequence(a_assignment_sequence.name, a_assignment_sequence.tag, a_assignment_sequence.grading_type, a_assignment_sequence.points, 0)
+            submission_sequence = SubmissionSequence(a_assignment_sequence.name, a_assignment_sequence.tag,
+                                                     a_assignment_sequence.grading_type,
+                                                     a_assignment_sequence.points, 0)
             self.submission_sequences.append(submission_sequence)
         submission_sequence.put_submission(a_submission)
         return
@@ -81,11 +84,22 @@ class StudentPerspective:
     def from_dict(data_dict):
         # print("StudentPerspective.from_dict", data_dict)
         if 'last_score' in data_dict.keys():
-            new = StudentPerspective(data_dict['name'], data_dict['progress'], data_dict['sum_score'], data_dict['last_score'])
+            new = StudentPerspective(data_dict['name'], data_dict['title'], data_dict['progress'],
+                                     data_dict['sum_score'], data_dict['last_score'])
         else:
-            new = StudentPerspective(data_dict['name'], 0, 0, 0)
+            new = StudentPerspective(data_dict['name'], data_dict['title'], 0, 0, 0)
         if 'assignment_groups' in data_dict.keys():
             new.assignment_groups = data_dict['assignment_groups']
         if 'submission_sequences' in data_dict.keys():
-            new.submission_sequences = list(map(lambda s: SubmissionSequence.from_dict(s), data_dict['submission_sequences']))
+            new.submission_sequences = list(map(lambda s: SubmissionSequence.from_dict(s),
+                                                data_dict['submission_sequences']))
+        return new
+
+    @staticmethod
+    def copy_from(course, student, perspective):
+        new = StudentPerspective(perspective.name, perspective.title, -1, 0, 0)
+        if len(perspective.assignment_groups) > 1:
+            new.assignment_groups.append(course.find_assignment_group_by_role(student.role))
+        else:
+            new.assignment_groups = perspective.assignment_groups
         return new

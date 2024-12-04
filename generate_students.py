@@ -3,12 +3,9 @@ import sys
 
 from canvasapi import Canvas
 from lib.lib_date import API_URL, get_actual_date
-from lib.file import read_start, read_course_instance, read_course
+from lib.file import read_start, read_course_instances, read_course
 from model.Student import Student
 from model.StudentLink import StudentLink
-from model.perspective.AttendancePerspective import AttendancePerspective
-from model.perspective.StudentPerspective import StudentPerspective
-from model.perspective.StudentLevelMoments import StudentLevelMoments
 
 
 def link_teachers(config):
@@ -61,46 +58,34 @@ def get_section_students(canvas_course, start, course):
         else:
             print("GS29 -", "Section not found", course_section.name)
 
+def link_students_to_role(course):
+    # Link students to roles
+    print("GS50 - Link students to roles")
+    for role in course.roles:
+        students = course.find_students_by_role(role.short)
+        for student in students:
+            student_link = StudentLink.from_student(student)
+            # print("GS53 -", student_link)
+            role.students.append(student_link)
 
-def add_perspectives_to_student(course, student):
-    # StudentProgress toevoegen aan Students
-    if course.level_moments is not None:
-        student.student_level_moments = StudentLevelMoments(course.level_moments.name, course.level_moments.assignment_groups)
-    if course.attendance is not None:
-        # print("GS33 - Add attendance perspective to students")
-        student.attendance_perspective = AttendancePerspective(course.attendance.name, -1, 0, 0, 0, 0, 0)
-    # Perspectives toevoegen aan Students
-    student.perspectives = {}
-    for perspective in course.perspectives.values():
-        if len(perspective.assignment_groups) > 1:
-            # meerdere assignment_group: kennis
-            student.perspectives[perspective.name] = StudentPerspective(perspective.name, -1, 0, 0)
-            assignment_group_id = course.find_assignment_group_by_role(student.role)
-            student.perspectives[perspective.name].assignment_groups.append(assignment_group_id)
-        elif len(perspective.assignment_groups) == 1:
-            # één assignment_group: team, gilde en peil
-            student.perspectives[perspective.name] = StudentPerspective(perspective.name, -1, 0, 0)
-            assignment_group_id = course.perspectives[perspective.name].assignment_groups[0]
-            student.perspectives[perspective.name].assignment_groups.append(assignment_group_id)
-        else:
-            print("GS31 - ERROR: geen assignment_group for perspective")
-    return student
 
-def main(instance_name):
+def generate_students(instance_name):
+    print("GS01 - generate_students.py")
     g_actual_date = get_actual_date()
-    instances = read_course_instance()
+    instances = read_course_instances()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    print("GS02 - Instance:", instances.current_instance)
-    start = read_start(instances.get_start_file_name())
-    course = read_course(instances.get_course_file_name(instances.current_instance))
+    instance = instances.get_instance_by_name(instances.current_instance)
+    print("GST02 - Instance:", instance.name)
+    start = read_start(instance.get_start_file_name())
+    course = read_course(instance.get_course_file_name())
     # print("GS02 -", "Config", course)
     # Initialize a new Canvas object
     print(API_URL, start.api_key)
     canvas = Canvas(API_URL, start.api_key)
     user = canvas.get_current_user()
-    print("GS03 -", user.name)
-    # cleanup students in list roles, slb and project_groups
+    print("GST03 -", user.name)
+    # cleanup students in list roles and project_groups
     for role in course.roles:
         role.students = []
     for student_group in course.student_groups:
@@ -114,41 +99,38 @@ def main(instance_name):
     student_count = 0
     for user in users:
         if hasattr(user, 'login_id'):
-            print("GS15 - Create student", user.name, user.login_id, user.sis_user_id)
-            student = Student(user.id, 0, user.name, user.sis_user_id, user.sortable_name, 0, "", user.login_id, "", 0)
+            print("GST15 - Create student", user.name, user.login_id, user.sis_user_id)
+            student = Student(user.id, 0, user.name, user.sis_user_id, user.sortable_name, 0, "", user.login_id, "")
         else:
-            print("GS16 - Create student without login_id", user.name, user.sis_user_id)
-            student = Student(user.id, 0, user.name, user.sis_user_id, user.sortable_name, 0, "", "", "", 0)
+            print("GST16 - Create student without login_id", user.name, user.sis_user_id)
+            student = Student(user.id, 0, user.name, user.sis_user_id, user.sortable_name, 0, "", "", "")
         # print("GS17 ", student)
         course.students.append(student)
         student_count += 1
-    print("GS18 - Aantal Canvas users", student_count)
+    print("GST18 - Aantal Canvas users", student_count)
 
     get_section_students(canvas_course, start, course)
 
     link_teachers(course)
 
 
-    print("GS07 - Opschonen studenten zonder Role")
+    print("GST07 - Opschonen studenten zonder Role")
     for student in course.students:
         if len(student.role) == 0:
-            print("GS95 - Verwijder student uit lijst, heeft geen role", student.name)
+            print("GST95 - Verwijder student uit lijst, heeft geen role", student.name)
             course.students.remove(student)
-    for student in course.students:
-        student = add_perspectives_to_student(course, student)
-    # Students en StudentGroups koppelen
     if start.projects_groep_name == "SECTIONS":
-        print("GS36 - Werken met Canvas secties als groepen.")
+        print("GST36 - Werken met Canvas secties als groepen.")
     else:
         canvas_group_categories = canvas_course.get_group_categories()
         for canvas_group_category in canvas_group_categories:
-            print("GS37 -", canvas_group_category)
+            print("GST37 -", canvas_group_category)
             # Link students to student_groups
             if canvas_group_category.name == start.projects_groep_name:
-                print("GS38 - Link students to student_groups")
+                print("GST38 - Link students to student_groups")
                 canvas_groups = canvas_group_category.get_groups()
                 for canvas_group in canvas_groups:
-                    print("GS40 -", canvas_group)
+                    print("GST40 -", canvas_group)
                     student_group = course.find_student_group(canvas_group.id)
                     if student_group:
                         canvas_users = canvas_group.get_users()
@@ -162,40 +144,32 @@ def main(instance_name):
                                 # print("GS41 -", student_link)
                                 student_group.students.append(student_link)
                             else:
-                                print("GS42 - Student in Canvas project group not found", canvas_user.id, canvas_user.name)
+                                print("GST42 - Student in Canvas project group not found", canvas_user.id, canvas_user.name)
 
-    # Link students to roles
-    print("GS50 - Link students to roles")
-    for role in course.roles:
-        students = course.find_students_by_role(role.short)
-        for student in students:
-            student_link = StudentLink.from_student(student)
-            # print("GS53 -", student_link)
-            role.students.append(student_link)
+    link_students_to_role(course)
 
     for student_group in course.student_groups:
         student_group.students = sorted(student_group.students, key=lambda s: s.sortable_name)
 
-    print("GS08 - Opschonen studenten zonder StudentGroup")
+    print("GST08 - Opschonen studenten zonder StudentGroup")
     for student in course.students:
         if not course.exists_in_team(student.id):
-            print("GS95 - Verwijder student uit lijst, heeft geen team", student.name)
+            print("GST95 - Verwijder student uit lijst, heeft geen team", student.name)
             course.students.remove(student)
     course.student_count = len(course.students)
 
     for role in course.roles:
         role.students = sorted(role.students, key=lambda s: s.sortable_name)
 
-    with open(instances.get_course_file_name(instances.current_instance), 'w') as f:
+    with open(instance.get_course_file_name(), 'w') as f:
         dict_result = course.to_json(["assignment"])
         json.dump(dict_result, f, indent=2)
 
-    print("GS99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
+    print("GST99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":
-    print("GS01 - generate_students.py")
     if len(sys.argv) > 1:
-        main(sys.argv[1])
+        generate_students(sys.argv[1])
     else:
-        main("")
+        generate_students("")

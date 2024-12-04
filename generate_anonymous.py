@@ -26,27 +26,36 @@ def main(instance_name):
         lookup[student.name] = names[index]
         print(student.name, lookup[student.name])
         index += 1
-
     for student in course.students:
         alias = lookup[student.name]["voornaam"] + " " + lookup[student.name]["achternaam"]
+        sortable = lookup[student.name]["achternaam"] + ", " + lookup[student.name]["voornaam"]
         student.name = alias
-        student.sortable_name = alias
-        student.email = alias+"@student.hu.nl"
+        student.sortable_name = sortable
+        student.email = alias.lower().replace(" ", ".")+"@student.hu.nl"
     for group in course.student_groups:
         for student in group.students:
             alias = lookup[student.name]["voornaam"] + " " + lookup[student.name]["achternaam"]
+            sortable = lookup[student.name]["achternaam"] + ", " + lookup[student.name]["voornaam"]
             student.name = alias
-            student.sortable_name = alias
+            student.sortable_name = sortable
     for role in course.role_groups:
         for student in role.students:
             alias = lookup[student.name]["voornaam"] + " " + lookup[student.name]["achternaam"]
+            sortable = lookup[student.name]["achternaam"] + ", " + lookup[student.name]["voornaam"]
             student.name = alias
-            student.sortable_name = alias
+            student.sortable_name = sortable
     for student in results.students:
         alias = lookup[student.name]["voornaam"] + " " + lookup[student.name]["achternaam"]
+        sortable = lookup[student.name]["achternaam"] + ", " + lookup[student.name]["voornaam"]
         student.name = alias
-        student.sortable_name = alias
-        student.email = alias + "@student.hu.nl"
+        student.sortable_name = sortable
+        student.email = alias.lower().replace(" ", ".")+"@student.hu.nl"
+        for student_perspective in student.perspectives.values():
+            for submission_sequence in student_perspective.submission_sequences:
+                for submission in submission_sequence.submissions:
+                    for comment in submission.comments:
+                        if comment.author_name in lookup:
+                            comment.author_name = lookup[comment.author_name]["voornaam"] + " " + lookup[comment.author_name]["achternaam"]
 
     with open(instances.get_result_file_name(instances.current_instance), 'w') as f:
         dict_result = results.to_json(["perspectives"])

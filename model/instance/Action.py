@@ -6,7 +6,6 @@ class Action:
     def __str__(self):
         return f'  Action({self.name}, {self.run})'
 
-
     def to_json(self):
         dict_result = {
             'name': self.name,

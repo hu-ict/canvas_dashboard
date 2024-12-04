@@ -4,7 +4,6 @@ class StudentLink:
         self.name = a_name
         self.sortable_name = a_sortable_name
 
-
     def to_json(self, scope):
         return {
             'name': self.name,
@@ -23,4 +22,3 @@ class StudentLink:
     def from_dict(data_dict):
         # print("Student.from_dict", data_dict)
         return StudentLink(data_dict['id'], data_dict['name'], data_dict['sortable_name'])
-

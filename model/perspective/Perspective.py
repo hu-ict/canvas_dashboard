@@ -24,7 +24,8 @@ class Perspective:
     @staticmethod
     def from_dict(data_dict):
         # print("Perspective.from_dict", data_dict)
-        new = Perspective(data_dict['name'], data_dict['title'], data_dict['levels'], data_dict['show_points'], data_dict['show_flow'])
+        new = Perspective(data_dict['name'], data_dict['title'], data_dict['levels'], data_dict['show_points'],
+                          data_dict['show_flow'])
         if 'assignment_groups' in data_dict.keys():
             new.assignment_groups = data_dict['assignment_groups']
         return new

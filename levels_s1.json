@@ -16,22 +16,29 @@
       "4": {
         "label": "Niet gemaakt",
         "color": "#000000"
+      },
+      "5": {
+        "label": "Beoordeeld",
+        "color": "#3C7D22"
       }
     },
     "grades": {
       "0": {
-        "label": "Niet zichtbaar",
+        "level": "0",
+        "label": "Niet voldaan",
         "color": "#0070C0",
-        "fraction": 0.0,
+        "fraction": 0.00,
         "value": 0
       },
       "1": {
+        "level": "1",
         "label": "Niet voldaan",
         "color": "#0070C0",
         "fraction": 0.99,
         "value": 0
       },
       "2": {
+        "level": "2",
         "label": "Voldaan",
         "color": "#3C7D22",
         "fraction": 1.0,
@@ -56,22 +63,29 @@
       "4": {
         "label": "Niets ingeleverd",
         "color": "#E97132"
+      },
+      "5": {
+        "label": "Beoordeeld",
+        "color": "#3C7D22"
       }
     },
     "grades": {
       "0": {
+        "level": "0",
         "label": "Niet aanwezig",
         "color": "#B8E3C4",
         "fraction": 0.01,
         "value": 0
       },
       "1": {
+        "level": "1",
         "label": "Te laat/vroeg weg",
         "color": "#85e043",
         "fraction": 0.5,
         "value": 0.5
       },
       "2": {
+        "level": "2",
         "label": "Aanwezig",
         "color": "#2bad4e",
         "fraction": 1.0,
@@ -96,24 +110,40 @@
       "4": {
         "label": "Voortgang niet bepaald",
         "color": "#E97132"
+      },
+      "5": {
+        "label": "Voortgang bepaald",
+        "color": "#3C7D22"
       }
     },
     "grades": {
       "0": {
+        "level": "0",
         "label": "Voortgang niet zichtbaar",
-        "color": "#f25829"
+        "color": "#f25829",
+        "fraction": 0.01,
+        "value": 0
       },
       "1": {
+        "level": "1",
         "label": "Onvoldoende voortgang",
-        "color": "#f2a529"
+        "color": "#f2a529",
+        "fraction": 0.01,
+        "value": 0
       },
       "2": {
+        "level": "2",
         "label": "Voldoende voortgang",
-        "color": "#85e043"
+        "color": "#85e043",
+        "fraction": 0.01,
+        "value": 0
       },
       "3": {
+        "level": "3",
         "label": "Goede voortgang",
-        "color": "#2bad4e"
+        "color": "#2bad4e",
+        "fraction": 0.01,
+        "value": 0
       }
     }
   },
@@ -134,28 +164,47 @@
       "4": {
         "label": "Beslissing niet bepaald",
         "color": "#000000"
+      },
+      "5": {
+        "label": "Beslissing bepaald",
+        "color": "#3C7D22"
       }
     },
     "grades": {
       "0": {
+        "level": "0",
         "label": "Niet zichtbaar",
-        "color": "#f25829"
+        "color": "#f25829",
+        "fraction": 0.01,
+        "value": 0
       },
       "1": {
+        "level": "1",
         "label": "Onvoldoende",
-        "color": "#f2a529"
+        "color": "#f2a529",
+        "fraction": 0.01,
+        "value": 0
       },
       "2": {
+        "level": "2",
         "label": "Voldoende",
-        "color": "#85e043"
+        "color": "#85e043",
+        "fraction": 0.01,
+        "value": 0
       },
       "3": {
+        "level": "3",
         "label": "Goed",
-        "color": "#2bad4e"
+        "color": "#2bad4e",
+        "fraction": 0.01,
+        "value": 0
       },
       "4": {
+        "level": "4",
         "label": "Uitmuntend",
-        "color": "#2bad4e"
+        "color": "#2bad4e",
+        "fraction": 0.01,
+        "value": 0
       }
     }
   }

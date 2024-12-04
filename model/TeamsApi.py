@@ -20,5 +20,6 @@ class TeamsApi:
 
     @staticmethod
     def from_dict(data_dict):
-        new = TeamsApi(data_dict['tenant_id'], data_dict['tenant_name'], data_dict['client_id'], data_dict['gen_token'], data_dict['my_token'])
+        new = TeamsApi(data_dict['tenant_id'], data_dict['tenant_name'], data_dict['client_id'],
+                       data_dict['gen_token'], data_dict['my_token'])
         return new

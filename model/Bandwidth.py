@@ -7,8 +7,8 @@ class Point:
     def to_json(self):
         return {
             'day': self.day,
-            'lower': int(self.lower*100)/100,
-            'upper': int(self.upper*100)/100
+            'lower': int(self.lower * 100) / 100,
+            'upper': int(self.upper * 100) / 100
         }
 
     def __str__(self):
@@ -54,10 +54,10 @@ class Bandwidth:
             else:
                 return 3
         except IndexError:
-            if score < self.points[len(self.points)-1].lower:
+            if score < self.points[len(self.points) - 1].lower:
                 # print(score, "<", self.points[day].lower, 1, "exception")
                 return 1
-            elif score < self.points[len(self.points)-1].upper:
+            elif score < self.points[len(self.points) - 1].upper:
                 return 2
             else:
                 return 3
@@ -71,21 +71,20 @@ class Bandwidth:
             pass
         if type(day) == str:
             day = int(day)
-        if day > len(self.points)-1:
-            day = len(self.points)-1
+        if day > len(self.points) - 1:
+            day = len(self.points) - 1
         width = self.points[day].upper - self.points[day].lower
         # print("BW03 -", self.points[day].upper, self.points[day].lower)
         if score < self.points[day].lower:
-            return score / self.points[day].lower * 3/10
+            return score / self.points[day].lower * 3 / 10
         elif score < self.points[day].upper:
-            return 0.3 + (score - self.points[day].lower) / width * 4/10
+            return 0.3 + (score - self.points[day].lower) / width * 4 / 10
         else:
-            flow = 0.7 + (score - self.points[day].upper) / width * 3/10
+            flow = 0.7 + (score - self.points[day].upper) / width * 3 / 10
             if flow > 0.97:
                 # anders lopen de datapunten en het plaatje uit.
                 return 0.97
             return flow
-
 
     @staticmethod
     def from_dict(data_dict):

@@ -1,10 +1,10 @@
-import json
 import sys
 
 from canvasapi import Canvas
-
-from lib.file import read_start, read_course_instance
-from lib.lib_date import API_URL, date_to_day, get_actual_date
+import json
+from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
+from lib.file import read_start, read_course_instances
+from model.Assignment import Assignment
 from model.AssignmentGroup import AssignmentGroup
 from model.Bandwidth import Bandwidth
 from model.CourseConfig import CourseConfig
@@ -14,31 +14,34 @@ from model.StudentGroup import StudentGroup
 from model.Teacher import Teacher
 from model.instance.CourseInstances import CourseInstances
 from model.perspective.Attendance import Attendance
+from model.perspective.GradeMoments import GradeMoments
 from model.perspective.LevelMoments import LevelMoments
 from model.perspective.Perspective import Perspective
 from model.perspective.Policy import Policy
 
 
-def main(instance_name):
+def generate_config(instance_name):
+    print("GCF01 - generate_config.py")
     g_actual_date = get_actual_date()
-    instances = read_course_instance()
+    instances = read_course_instances()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    print("Instance:", instances.current_instance)
-    start1 = read_start(instances.get_start_file_name())
+    instance = instances.get_instance_by_name(instances.current_instance)
+    print("Instance:", instance.name)
+    start1 = read_start(instance.get_start_file_name())
     # Initialize a new Canvas object
     canvas = Canvas(API_URL, start1.api_key)
     user = canvas.get_current_user()
     print(user.name)
     canvas_course = canvas.get_course(start1.canvas_course_id)
+
     config = CourseConfig(start1.canvas_course_id, canvas_course.name,
                           start1.start_date,
                           start1.end_date,
                           date_to_day(start1.start_date, start1.end_date),
-                          "grade",
                           0)
 
-    if instances.is_instance_of("inno_courses"):
+    if instance.is_instance_of("inno_courses"):
         role = Role("AI", "AI - Engineer", "Artificial Intelligence", "border-warning")
         config.roles.append(role)
         role = Role("BIM", "Business Analist", "Business and IT Management", "border-success")
@@ -61,6 +64,7 @@ def main(instance_name):
         config.perspectives[perspective.name] = perspective
         config.attendance = None
         config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", [])
+        config.grade_moments = GradeMoments("grade_moments", "Beoordelingsmomenten", "grade", [])
     else:
         role = Role("role", "Student", "HBO-ICT", "border-dark")
         config.roles.append(role)
@@ -72,9 +76,8 @@ def main(instance_name):
         config.perspectives[perspective.name] = perspective
         policy = Policy([1], "WEEKLY", 19, [9, 17, 18])
         config.attendance = Attendance("attendance", "Aanwezigheid", "attendance", True, False, "ATTENDANCE", 100, 75,
-                                       90, Bandwidth(), policy)
-        config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress",
-                                            ["Week 6", "Week 12", "Beoordeling", "Eindbeslissing"], )
+                                      90, Bandwidth(), policy)
+        config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", ["Week 6", "Week 12", "Beoordeling", "Eindbeslissing"],)
 
     # ophalen secties
     course_sections = canvas_course.get_sections()
@@ -94,8 +97,7 @@ def main(instance_name):
         for canvas_assignment in canvas_assignment_group.assignments:
             if canvas_assignment['points_possible']:
                 assignment_group.total_points += canvas_assignment['points_possible']
-        print("GC05 assignment_group", canvas_assignment_group, "points", assignment_group.total_points,
-              assignment_group.strategy)
+        print("GC05 assignment_group", canvas_assignment_group, "points", assignment_group.total_points, assignment_group.strategy)
         config.assignment_groups.append(assignment_group)
 
     # retrieve Teachers
@@ -103,15 +105,13 @@ def main(instance_name):
     teacher_count = 0
     for canvas_user in canvas_users:
         teacher_count += 1
-        # werkt helaas niet om de secties op te halen, wordt vervolgd ...
-        # print("GCONF14 -", canvas_user)
-        # user = canvas.get_user(canvas_user.id)
-        # print("GCONF15 -", user)
-        teacher = Teacher(canvas_user.id, canvas_user.name, canvas_user.email)
-        if hasattr(user, 'login_id'):
-            teacher.login_id = canvas_user.login_id
+
+        if hasattr(canvas_user, 'email'):
+            teacher = Teacher(canvas_user.id, canvas_user.name, canvas_user.email)
+            # print("GCONF15 - Create teacher with email", canvas_user.email)
         else:
-            print("GCONF16 - Create teacher without login_id", canvas_user.name)
+            teacher = Teacher(canvas_user.id, canvas_user.name, "")
+            print("GCONF16 - Create teacher without email", canvas_user.name)
         config.teachers.append(teacher)
         print("GCONF18", teacher)
 
@@ -127,8 +127,8 @@ def main(instance_name):
                 print(canvas_group)
 
     config.learning_outcomes = []
-    print("GC98 - ConfigFileName:", CourseInstances.get_config_file_name(instances.current_instance))
-    with open(CourseInstances.get_config_file_name(instances.current_instance), 'w') as f:
+    print("GC98 - ConfigFileName:", instance.get_config_file_name())
+    with open(instance.get_config_file_name(), 'w') as f:
         dict_result = config.to_json([])
         json.dump(dict_result, f, indent=2)
 
@@ -137,6 +137,6 @@ def main(instance_name):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        main(sys.argv[1])
+        generate_config(sys.argv[1])
     else:
-        main("")
+        generate_config("")

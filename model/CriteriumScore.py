@@ -1,6 +1,6 @@
 class CriteriumScore:
-    def __init__(self, id, rating_id, score, comment):
-        self.id = id
+    def __init__(self, criterion_score_id, rating_id, score, comment):
+        self.id = criterion_score_id
         self.rating_id = rating_id
         self.score = score
         self.comment = comment
