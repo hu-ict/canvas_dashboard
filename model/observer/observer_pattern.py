@@ -102,4 +102,6 @@ class ConcreteObserver(Observer):
                 generate_portfolio(self.name)
             elif python_script == "publish_dashboard.py":
                 publish_dashboard(self.name)
+            else:
+                print("OP51 - Script wordt niet herkend.", python_script)
 

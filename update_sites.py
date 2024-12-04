@@ -3,7 +3,7 @@ import sys
 
 from lib.file import read_course, read_msteams_api, read_course_instances
 from lib.lib_date import get_actual_date
-from lib.teams_api_lib import teams, get_channels, get_drive
+from lib.teams_api_lib import teams, get_channels, get_drive, get_me_for_check, get_access_token
 
 
 def main(instance_name):
@@ -19,21 +19,21 @@ def main(instance_name):
         return
     course = read_course(instance.get_course_file_name())
     msteams_api = read_msteams_api("msteams_api.json")
-    # if get_me_for_check(msteams_api.gen_token) is None:
-    #     print("Obtain new token")
-    #     token = get_access_token(msteams_api.tenant_id, msteams_api.client_id)
-    #     print(token)
-    #     msteams_api.gen_token = token
-    #     with open("msteams_api.json", 'w') as f:
-    #         dict_result = msteams_api.to_json()
-    #         json.dump(dict_result, f, indent=2)
+    if get_me_for_check(msteams_api.gen_token) is None:
+        token = get_access_token(msteams_api.tenant_id, msteams_api.client_id)
+        print(token)
+        msteams_api.gen_token = token
+        with open("msteams_api.json", 'w') as f:
+            dict_result = msteams_api.to_json()
+            json.dump(dict_result, f, indent=2)
+
     # student_sites = get_sites(msteams_api.my_token, "Sep24")
     channel_count = 0
     site_count = 0
     for team_id in teams:
         # team = get_team(msteams_api.my_token, team_id)
         # print("US05 -", team)
-        student_channels = get_channels(msteams_api.my_token, team_id)
+        student_channels = get_channels(msteams_api.gen_token, team_id)
         channel_count += len(student_channels)
         for channel in student_channels:
 
@@ -41,7 +41,7 @@ def main(instance_name):
             if student is None:
                 print(f"US06 - Student not found in course: [{channel['display_name']}]")
             else:
-                drive = get_drive(msteams_api.my_token, team_id, channel["id"])
+                drive = get_drive(msteams_api.gen_token, team_id, channel["id"])
                 print("US81 - Drive", drive)
                 site_count += 1
                 student.site = drive["drive_id"]

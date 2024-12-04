@@ -1,5 +1,7 @@
 import sys
 from canvasapi import Canvas
+
+from generate_plotly import generate_plotly
 from lib.build_bootstrap_student import build_bootstrap_student_index
 from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_actual_date, API_URL
@@ -35,6 +37,8 @@ def generate_portfolio(instance_name):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
+        generate_plotly(sys.argv[1])
         generate_portfolio(sys.argv[1])
     else:
+        generate_plotly("")
         generate_portfolio("")
