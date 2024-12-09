@@ -88,6 +88,31 @@ def generate_start():
     return render_template('generate_start/form.html')
 
 
+@main_bp.route("/generate/start/nifi", methods=['GET', 'POST'])
+def generate_start_nifi():
+    session['admin_authenticated'] = True
+
+    if request.method == 'POST':
+        data = request.get_json()  # Haal JSON-data op
+        if not data:
+            return jsonify({'status': 'Error', 'message': 'Geen data ontvangen'}), 400
+
+        try:
+            main_generate(data['new_instance'], data['category'], data['canvas_course_id'], os.getenv('CANVAS_API_KEY'),)
+            main_generate_config(data['new_instance'])
+        except Exception as e:
+            return jsonify({'status': 'Error', 'message': f"main_generate failed: {e}"}), 500
+        try:
+            run_in_background(data['new_instance'], "course_create_event")
+        except Exception as e:
+            print(f"Fout in runner: {e}")
+
+
+        return jsonify({'status': 'Success', 'message': 'Process completed'}), 200
+
+
+
+
 @main_bp.route("/course_event", methods=['POST'])
 def course_event():
     try:
