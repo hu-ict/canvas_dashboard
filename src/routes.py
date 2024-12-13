@@ -14,6 +14,7 @@ from src.db.db_context import db_context
 from src.db.generate_data import initialize_db, read_and_import_courses
 from generate_config import generate_config as main_generate_config
 from flask import jsonify, request
+from generate_portfolio import generate_portfolio as main_generate_portfolio
 from werkzeug.exceptions import BadRequest
 from src.services.remote_doc_service import upload_files_with_overwrite, find_teacher_index
 
@@ -35,6 +36,7 @@ def run_in_background(instance_name, event_name):
             with db_context() as (cursor, connection):
                 initialize_db(cursor, connection)
                 read_and_import_courses(cursor, connection)
+                main_generate_portfolio(instance_name)
                 if os.getenv('STORAGE_TYPE') == 'azure':
                     upload_files_with_overwrite()
 
@@ -201,6 +203,7 @@ def course_event_nifi():
 
         run_in_background(course_instance, event)
 
+
         # Return a success response
         return jsonify({"status": f"Runner Task started {event} on course instance {course_instance}"})
 
@@ -327,3 +330,4 @@ def serve_css(filename):
 @main_bp.route('/js/<path:filename>')
 def serve_js(filename):
     return send_from_directory('static/js', filename)
+
