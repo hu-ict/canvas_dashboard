@@ -59,6 +59,19 @@ def initialize_db(cursor, connection):
                 PRIMARY KEY (student_id, course_id)
             );
         """)
+
+        # Create log table
+
+        cursor.execute("""
+             CREATE TABLE IF NOT EXISTS logs (
+                        id SERIAL PRIMARY KEY,
+                        course_instance VARCHAR(100),
+                        event VARCHAR(100),
+                        status VARCHAR(20),
+                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                """)
+
         print("Tabellen zijn succesvol aangemaakt.")
         connection.commit()
     except Exception as e:
@@ -127,30 +140,30 @@ def insert_teacher_course_relation(cursor, teacher_id, course_id):
         ON CONFLICT DO NOTHING
     """, (teacher_id, course_id))
 
+def insert_log(cursor, connection, course_instance, event, status):
+    cursor.execute("""
+        INSERT INTO logs (course_instance, event, status)
+        VALUES (%s, %s, %s)
+    """, (course_instance, event, status))
+    connection.commit()
 
 def read_and_import_courses(cursor, connection):
     try:
         print("Start importeren van cursussen en studenten...")
 
-        # Check if the 'courses' directory exists
         if not os.path.exists(COURSES_PATH):
             print(f"De 'courses' map bestaat niet op {COURSES_PATH}. Zorg ervoor dat deze map correct is ingesteld.")
             return
-
-        # Connect to the database
-        cursor, connection = context()
 
         # Loop through all directories in the 'courses' directory
         for course_dir in os.listdir(COURSES_PATH):
             course_path = os.path.join(COURSES_PATH, course_dir, f'result_{course_dir}.json')
             config_path = os.path.join(COURSES_PATH, course_dir, f'config_{course_dir}.json')
 
-            # Check if the course file exists
             if os.path.isfile(course_path):
                 with open(course_path, 'r') as file:
                     course_data = json.load(file)
 
-                    # Get the course ID and name
                     course_id = course_data.get("id")
                     course_name = course_data.get("name")
                     print(f"Importeer cursus: {course_name} met ID {course_id}")
@@ -159,8 +172,7 @@ def read_and_import_courses(cursor, connection):
                     insert_course(cursor, course_id, course_name, course_dir)
 
                     # Add students from the course to the database
-                    students = course_data.get("students", [])
-                    for data in students:
+                    for data in course_data.get("students", []):
                         first_name, surname = data["name"].split(' ', 1)
                         student = Student(
                             id=data["number"],  # Number = student ID
@@ -168,36 +180,29 @@ def read_and_import_courses(cursor, connection):
                             surname=surname,
                             email=data["email"]
                         )
-
-                        # Add the student to the database or get the existing student ID
                         student_id = insert_student(cursor, student)
-
-                        # Map the student to the course
                         insert_student_course_relation(cursor, student_id, course_id)
+
                 if os.path.isfile(config_path):
                     with open(config_path, 'r') as file:
                         config_data = json.load(file)
-                        # Add teachers from the course to the database
-                        teachers = config_data.get("teachers", [])
-                        for data in teachers:
+                        for data in config_data.get("teachers", []):
                             first_name, surname = data["name"].split(' ', 1)
                             teacher = Teacher(
-                                id=data["id"],  # Number = student ID
+                                id=data["id"],
                                 first_name=first_name,
                                 surname=surname,
                                 email=data["email"]
                             )
-                            # Add the student to the database or get the existing teacher ID
                             teacher_id = insert_teacher(cursor, teacher)
-                            # Map the teacher to the course
                             insert_teacher_course_relation(cursor, teacher_id, course_id)
 
-        # Save changes to the database and close the connection
+        # Log success after importing all courses
+
         connection.commit()
         print("Cursus- en studentgegevens succesvol geïmporteerd in de database.")
     except Exception as e:
         print(f"Fout bij het importeren van cursussen en studenten: {e}")
-
 
 if __name__ == "__main__":
     initialize_db()
