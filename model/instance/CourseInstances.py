@@ -1,6 +1,6 @@
 from model.instance.Event import Event
 from model.instance.Instance import Instance
-from model.instance.CourseCategory import CourseCatergory
+from model.instance.CourseCategory import CourseCategory
 
 
 class CourseInstances:
@@ -11,14 +11,13 @@ class CourseInstances:
         self.events = {}
 
     def new_environment(self):
-        self.course_categories['inno_courses'] = CourseCatergory('inno_courses', [])
-        self.course_categories['prop_courses'] = CourseCatergory('prop_courses', [])
-        self.course_categories['other_courses'] = CourseCatergory('other_courses', [])
+        self.course_categories['inno_courses'] = CourseCategory('inno_courses', [])
+        self.course_categories['prop_courses'] = CourseCategory('prop_courses', [])
+        self.course_categories['other_courses'] = CourseCategory('other_courses', [])
         self.events['course_create_event'] = Event('course_create_event', 'TIME')
         self.events['course_update_event'] = Event('course_update_event', 'TIME')
         self.events['results_create_event'] = Event('results_create_event', 'TIME')
         self.events['results_update_event'] = Event('results_update_event', 'TIME')
-
 
     def to_json(self):
         dict_result = {
@@ -70,23 +69,23 @@ class CourseInstances:
 
     @staticmethod
     def get_config_file_name(instance_name):
-        return CourseInstances.get_project_path(instance_name) + "config_"+instance_name+".json"
+        return CourseInstances.get_project_path(instance_name) + "config_" + instance_name + ".json"
 
     @staticmethod
     def get_course_file_name(instance_name):
-        return CourseInstances.get_project_path(instance_name) + "course_"+instance_name+".json"
+        return CourseInstances.get_project_path(instance_name) + "course_" + instance_name + ".json"
 
     @staticmethod
     def get_result_file_name(instance_name):
-        return CourseInstances.get_project_path(instance_name) + "result_"+instance_name+".json"
+        return CourseInstances.get_project_path(instance_name) + "result_" + instance_name + ".json"
 
     @staticmethod
     def get_progress_file_name(instance_name):
-        return CourseInstances.get_project_path(instance_name) + "progress_"+instance_name+".json"
+        return CourseInstances.get_project_path(instance_name) + "progress_" + instance_name + ".json"
 
     @staticmethod
     def get_workload_file_name(instance_name):
-        return CourseInstances.get_project_path(instance_name) + "workload_"+instance_name+".json"
+        return CourseInstances.get_project_path(instance_name) + "workload_" + instance_name + ".json"
 
     def get_category(self, instance_name):
         for category in self.course_categories.values():
@@ -95,12 +94,11 @@ class CourseInstances:
                     return category.category
         return None
 
-    def is_instance_of(self, category):
-        for key in self.instances.keys():
-            if self.current_instance == key:
-                if self.instances[key].category == category:
-                    return True
-        return False
+    def get_instance_by_name(self, instance_name):
+        for instance in self.instances.values():
+            if instance.name == instance_name:
+                return instance
+        return None
 
     def is_instance(self, instance_name):
         for key in self.course_categories.keys():
@@ -114,7 +112,7 @@ class CourseInstances:
         new = CourseInstances(data_dict["current_instance"])
         for key in data_dict["course_categories"].keys():
             # print(key, data_dict["course_categories"][key])
-            new.course_categories[key] = CourseCatergory.from_dict(key, data_dict["course_categories"][key])
+            new.course_categories[key] = CourseCategory.from_dict(key, data_dict["course_categories"][key])
         for key in data_dict["instances"].keys():
             new.instances[key] = Instance.from_dict(key, data_dict["instances"][key])
         for key in data_dict["events"].keys():

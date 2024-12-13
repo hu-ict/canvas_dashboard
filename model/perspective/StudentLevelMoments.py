@@ -48,3 +48,6 @@ class StudentLevelMoments:
             new.submissions = list(map(lambda s: Submission.from_dict(s), data_dict['submissions']))
         return new
 
+    @staticmethod
+    def copy_from(level_moments):
+        return StudentLevelMoments(level_moments.name, level_moments.assignment_groups)

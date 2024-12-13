@@ -1,7 +1,7 @@
 import sys
 from lib.lib_progress import get_overall_progress, get_attendance_progress, proces_progress
 import json
-from lib.file import read_start, read_course, read_progress, read_results, read_course_instance
+from lib.file import read_start, read_course, read_progress, read_results, read_course_instances
 from lib.lib_date import get_actual_date
 from lib.lib_progress import get_progress, flow_to_progress
 from model.ProgressDay import ProgressDay
@@ -32,22 +32,23 @@ def generate_history(results):
 
 def main(instance_name):
     g_actual_date = get_actual_date()
-    instances = read_course_instance()
+    instances = read_course_instances()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    print("GP02 - Instance:", instances.current_instance)
-    course = read_course(instances.get_course_file_name(instances.current_instance))
-    results = read_results(instances.get_result_file_name(instances.current_instance))
-    progress_history = read_progress(instances.get_progress_file_name(instances.current_instance))
+    instance = instances.get_instance_by_name(instances.current_instance)
+    print("GP02 - Instance:", instance.name)
+    course = read_course(instance.get_course_file_name())
+    results = read_results(instance.get_result_file_name())
+    progress_history = read_progress(instance.get_progress_file_name())
 
     # progress_history = generate_history(results)
     proces_progress(course, results, progress_history)
 
-    with open(instances.get_result_file_name(instances.current_instance), 'w') as f:
+    with open(instance.get_result_file_name(), 'w') as f:
         dict_result = results.to_json(['perspectives'])
         json.dump(dict_result, f, indent=2)
 
-    with open(instances.get_progress_file_name(instances.current_instance), 'w') as f:
+    with open(instance.get_progress_file_name(), 'w') as f:
         dict_result = progress_history.to_json()
         json.dump(dict_result, f, indent=2)
 

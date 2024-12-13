@@ -1,8 +1,7 @@
-from model.Submission import Submission
 from model.perspective.AttendanceSubmission import AttendanceSubmission
 
 
-class AttendancePerspective:
+class StudentAttendance:
     def __init__(self, name, progress, count, percentage, essential_count, essential_percentage, last_score):
         self.name = name
         self.progress = progress
@@ -14,19 +13,29 @@ class AttendancePerspective:
         self.attendance_submissions = []
 
     def to_json(self):
+        if self.percentage is None:
+            l_percentage = None
+        else:
+            l_percentage = round(self.percentage, 3)
+        if self.essential_percentage is None:
+            l_essential_percentage = None
+        else:
+            l_essential_percentage = round(self.essential_percentage, 3)
         return {
             'name': self.name,
             'progress': self.progress,
             'count': self.count,
-            'percentage': self.percentage,
+            'percentage': l_percentage,
             'essential_count': self.essential_count,
-            'essential_percentage': self.essential_percentage,
+            'essential_percentage': l_essential_percentage,
             'last_score': self.last_score,
             'attendance_submissions': list(map(lambda s: s.to_json(), self.attendance_submissions))
         }
 
     def __str__(self):
-        lines = f'AttendancePerspective({self.name} progress {self.progress}, count {self.count}, percentage {self.percentage}, essential_count {self.essential_count}, essential_percentage {self.essential_percentage}, last_score {self.last_score})'
+        lines = f'AttendancePerspective({self.name} progress {self.progress}, count {self.count}, ' \
+                f'percentage {self.percentage}, essential_count {self.essential_count}, ' \
+                f'essential_percentage {self.essential_percentage}, last_score {self.last_score})'
         for attendance_submission in self.attendance_submissions:
             lines += "\n s " + str(attendance_submission)
         return lines
@@ -49,9 +58,16 @@ class AttendancePerspective:
     def from_dict(data_dict):
         # print("StudentPerspective.from_dict", data_dict)
         if 'count' in data_dict.keys():
-            new = AttendancePerspective(data_dict['name'], data_dict['progress'], data_dict['count'], data_dict['percentage'], data_dict['essential_count'], data_dict['essential_percentage'], data_dict['last_score'])
+            new = StudentAttendance(data_dict['name'], data_dict['progress'], data_dict['count'],
+                                    data_dict['percentage'], data_dict['essential_count'],
+                                    data_dict['essential_percentage'], data_dict['last_score'])
         else:
-            new = AttendancePerspective(data_dict['name'], -1, 0, 0, 0, 0, 0)
+            new = StudentAttendance(data_dict['name'], -1, 0, 0, 0, 0, 0)
         if 'attendance_submissions' in data_dict.keys():
-            new.attendance_submissions = list(map(lambda s: AttendanceSubmission.from_dict(s), data_dict['attendance_submissions']))
+            new.attendance_submissions = list(
+                map(lambda s: AttendanceSubmission.from_dict(s), data_dict['attendance_submissions']))
         return new
+
+    @staticmethod
+    def copy_from(attendance):
+        return StudentAttendance(attendance.name, -1, 0, 0, 0, 0, 0)

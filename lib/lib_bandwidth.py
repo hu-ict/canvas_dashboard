@@ -1,10 +1,6 @@
 import json
 
-import numpy as np
-from scipy.interpolate import interp1d
 from model.Bandwidth import Bandwidth, Point
-import plotly.express as px
-import plotly.graph_objs as go
 
 
 def calc_dev(iterations, r, a, b, c):
@@ -36,6 +32,20 @@ def find_between(serie, level, x):
 
 
 def bandwidth_builder(assignment_group, days_in_semester):
+    if assignment_group.strategy == "NONE":
+        return None
+    elif assignment_group.total_points == 0:
+        message = "GCS81 - ERROR Couldn't calculate bandwidth for assignment_group", assignment_group.name, "total_points is zero"
+        print(message)
+        return None
+    elif assignment_group.lower_points == 0:
+        message = "GCS82 - ERROR Couldn't calculate bandwidth for assignment_group", assignment_group.name, "lower_points is zero"
+        print(message)
+        return None
+    elif assignment_group.upper_points == 0:
+        message = "GCS83 - ERROR Couldn't calculate bandwidth for assignment_group", assignment_group.name, "upper_points is zero"
+        print(message)
+        return None
     points = []
     x_reparatie_periode = 14
     y_start = assignment_group.upper_points/25
@@ -60,7 +70,7 @@ def bandwidth_builder(assignment_group, days_in_semester):
         print(f"LB04 - upper a {upper_a:5} b {upper_b:5.3} c {upper_c:5}")
         total_points = 0
         for assignment_sequence in assignment_group.assignment_sequences:
-            if "Aanvullend" not in assignment_sequence.name:
+            if "Verbeter" not in assignment_sequence.name:
                 total_points += assignment_sequence.points
                 serie[assignment_sequence.get_day()] = {"day": assignment_sequence.get_day(), "sum": total_points}
                 output = f"LB08 - Day points; {assignment_sequence.points:3};{assignment_sequence.get_day():4};{total_points:>4}"

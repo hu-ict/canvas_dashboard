@@ -4,7 +4,7 @@ import sys
 from canvasapi import Canvas
 from lib.lib_bandwidth import bandwidth_builder, bandwidth_builder_attendance
 from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
-from lib.file import read_start, read_course_instance, read_config_from_canvas
+from lib.file import read_start, read_course_instances, read_config_from_canvas
 from model.Assignment import Assignment
 from model.Criterion import Criterion
 from model.Rating import Rating
@@ -49,11 +49,11 @@ def get_rubrics(canvas_rubrics):
     return rubrics, rubrics_points
 
 
-def get_uses_assignment_groups(config):
-    uses_assignment_groups = []
+def get_used_assignment_groups(config):
+    used_assignment_groups = []
     if config.level_moments is not None:
         if len(config.level_moments.assignment_groups) > 0:
-            uses_assignment_groups += config.level_moments.assignment_groups
+            used_assignment_groups += config.level_moments.assignment_groups
         else:
             message = "GC01 - WARNING no assignments_group for level_moments perspective ", config.level_moments.name
             print(message)
@@ -62,13 +62,13 @@ def get_uses_assignment_groups(config):
 
     for perspective in config.perspectives.values():
         if len(perspective.assignment_groups) > 0:
-            uses_assignment_groups += perspective.assignment_groups
+            used_assignment_groups += perspective.assignment_groups
         else:
             message = "GC05 - WARNING no assignments_group for perspective ", perspective.name
             print(message)
 
-    print("GC07 - Used assignment_groups", uses_assignment_groups)
-    return uses_assignment_groups
+    print("GC07 - Used assignment_groups", used_assignment_groups)
+    return used_assignment_groups
 
 
 def get_attendance(attendance):
@@ -94,24 +94,26 @@ def get_attendance(attendance):
     return attendance
 
 
-def main(instance_name):
+def generate_course(instance_name):
+    print("GCS01 - generate_course.py")
     g_actual_date = get_actual_date()
-    instances = read_course_instance()
+    instances = read_course_instances()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    print("GC02 -", "Instance:", instances.current_instance)
-    start = read_start(instances.get_start_file_name())
+    instance = instances.get_instance_by_name(instances.current_instance)
+    print("GCS02 -", "Instance:", instance.name)
+    start = read_start(instance.get_start_file_name())
     canvas = Canvas(API_URL, start.api_key)
     canvas_course = canvas.get_course(start.canvas_course_id)
     config = read_config_from_canvas(canvas_course)
     user = canvas.get_current_user()
-    print("GC03 -", user.name)
+    print("GCS03 -", user.name)
     if config.attendance is not None:
         attendance = get_attendance(config.attendance)
         if attendance is not None:
             config.attendance = attendance
 
-    uses_assignment_groups = get_uses_assignment_groups(config)
+    uses_assignment_groups = get_used_assignment_groups(config)
 
     # Ophalen Assignments bij de AssignmentsGroups
     canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignments', 'overrides', 'online_quiz'])
@@ -122,8 +124,13 @@ def main(instance_name):
 
         if assignment_group and assignment_group.id in uses_assignment_groups:
             tags = []
+            role = config.get_role_by_assignment_groep(assignment_group.id)
+            if role is not None:
+                assignment_group.role = role.name
+            else:
+                assignment_group.role = "Iedereen"
 
-            print(f"GC22 - assignment_group {assignment_group.name} is used with strategy {assignment_group.strategy}")
+            print(f"GCS22 - assignment_group {assignment_group.name} is used with strategy {assignment_group.strategy}")
             for c_assignment in canvas_assignment_group.assignments:
                 message = ""
                 canvas_assignment = canvas_course.get_assignment(c_assignment['id'], include=['overrides', 'online_quiz'])
@@ -134,21 +141,18 @@ def main(instance_name):
                     if canvas_assignment.points_possible:
                         points_possible = canvas_assignment.points_possible
                     else:
-                        message = f"GC64 - WARNING [{canvas_assignment.grading_type}] points_possible is not set for", canvas_assignment.name
+                        message = f"GCS64 - WARNING [{canvas_assignment.grading_type}] points_possible is not set for", canvas_assignment.name
                         print(message)
                 elif canvas_assignment.grading_type == "pass_fail":
-                    if canvas_assignment.points_possible == 0:
-                        points_possible = 2
-                    else:
                         points_possible = canvas_assignment.points_possible
                 elif canvas_assignment.grading_type == 'letter_grade':
                     if canvas_assignment.points_possible:
                         points_possible = canvas_assignment.points_possible
                     else:
-                        message = f"GC65 - WARNING [{canvas_assignment.grading_type}] points_possible is not set for", canvas_assignment.name
+                        message = f"GCS65 - WARNING [{canvas_assignment.grading_type}] points_possible is not set for", canvas_assignment.name
                         print(message)
                 else:
-                    message = f"GC26 - ERROR - {canvas_assignment.grading_type} AFGEWEZEN grading_type {canvas_assignment.name} points_possible {canvas_assignment.points_possible}"
+                    message = f"GCS26 - ERROR - {canvas_assignment.grading_type} AFGEWEZEN grading_type {canvas_assignment.name} points_possible {canvas_assignment.points_possible}"
                     print(message)
                     continue
                 if canvas_assignment.overrides:
@@ -168,7 +172,7 @@ def main(instance_name):
                 assignment = Assignment(canvas_assignment.id, canvas_assignment.name,
                                         canvas_assignment.assignment_group_id, section_id,
                                         canvas_assignment.grading_type, canvas_assignment.grading_standard_id,
-                                        points_possible, new_assignment_date,
+                                        points_possible, canvas_assignment.submission_types, new_assignment_date,
                                         unlock_date, date_to_day(config.start_date, new_assignment_date), date_to_day(config.start_date, unlock_date))
                 if len(message) > 0:
                     assignment.messages.append(message)
@@ -198,43 +202,53 @@ def main(instance_name):
                 if assignment.grading_type == "pass_fail":
                     if hasattr(canvas_assignment, "rubric"):
                         assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
-                        assignment.points = rubrics_points
                         # print("GC31 - ",len(assignment.rubrics))
                         if assignment.points > 0 and assignment.points != rubrics_points:
-                            message = f"GC33 - WARNING inconsistency in assignment {assignment.name} assignment points {assignment.points} rubrics points {rubrics_points}"
+                            message = f"GCS33 - ERROR inconsistency in assignment {assignment.name} assignment points {assignment.points} rubrics points {rubrics_points}"
                             assignment.messages.append(message)
                             print(message)
+                        else:
+                            if rubrics_points > 0:
+                                assignment.points = rubrics_points
                     else:
                         print("GC34 - INFO No rubric", assignment.name, "grading_type", assignment.grading_type)
+                        if assignment.points == 0:
+                            assignment.points = 2
                 elif assignment.grading_type == "letter_grade":
                     if hasattr(canvas_assignment, "rubric"):
                         assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
-                        assignment.points = rubrics_points
+
                         # print("GC31 - ",len(assignment.rubrics))
                         if assignment.points > 0 and assignment.points != rubrics_points:
-                            message = f"GC33 - WARNING inconsistency in assignment {assignment.name} assignment points {assignment.points} rubrics points {rubrics_points}"
+                            message = f"GCS33 - WARNING inconsistency in assignment {assignment.name} assignment points {assignment.points} rubrics points {rubrics_points}"
                             assignment.messages.append(message)
                             print(message)
+                        else:
+                            if rubrics_points > 0:
+                                assignment.points = rubrics_points
                     else:
-                        message = f"GC34 - WARNING No rubric in assignment {assignment.name} grading_type {assignment.grading_type}"
+                        message = f"GCS34 - WARNING No rubric in assignment {assignment.name} grading_type {assignment.grading_type}"
                         assignment.messages.append(message)
                         print(message)
                 elif assignment.grading_type == "points":
                     if hasattr(canvas_assignment, "rubric"):
                         assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
                         if assignment.points > 0 and assignment.points != rubrics_points:
-                            message = f"GC36 - WARNING inconsistency in assignment {assignment.name} assignment points {assignment.points} rubrics points {rubrics_points}"
+                            message = f"GCS36 - WARNING inconsistency in assignment {assignment.name} assignment points {assignment.points} rubrics points {rubrics_points}"
                             assignment.messages.append(message)
                             print(message)
+                        else:
+                            if rubrics_points > 0:
+                                assignment.points = rubrics_points
                     else:
                         if "external_tool" in canvas_assignment.submission_types:
                             pass
                         else:
-                            message = f"GC38 - WARNING No rubric in assignment {assignment.name} grading_type {assignment.grading_type}"
+                            message = f"GCS38 - WARNING No rubric in assignment {assignment.name} grading_type {assignment.grading_type}"
                             assignment.messages.append(message)
                             print(message)
                 else:
-                    message = f"GC40 - ERROR Unsupported grading_type {assignment.grading_type}"
+                    message = f"GCS40 - ERROR Unsupported grading_type {assignment.grading_type}"
                     assignment.messages.append(message)
                     print(message)
                 assignment_group.append_assignment(tag_sequence, assignment)
@@ -245,10 +259,10 @@ def main(instance_name):
                 if "Aanvullende" not in assignment_sequence.name:
                     total_group_points += assignment_sequence.points
             assignment_group.total_points = total_group_points
-            print("GC47 -", tags_lu)
-            print("GC51 -", assignment_group.name, "punten:", assignment_group.total_points)
+            # print("GC47 -", tags_lu)
+            print("GCS51 -", assignment_group.name, "punten:", assignment_group.total_points)
         else:
-            print(f"GC41 - assignment_group {canvas_assignment_group.name} is not used")
+            print(f"GCS41 - assignment_group {canvas_assignment_group.name} is not used")
     # collect all LU from Assignment and copy them AssignmentSequence
     for assignment_group in config.assignment_groups:
         for assignment_sequence in assignment_group.assignment_sequences:
@@ -258,35 +272,24 @@ def main(instance_name):
                     learning_outcome = config.find_learning_outcome(learning_outcome_id)
                     assignment_sequence.add_learning_outcome(learning_outcome_id)
                     learning_outcome.add_assigment_sequence(assignment_sequence.tag)
+                assignment.name = assignment.name.split("(")[0].strip()
+            assignment_sequence.name = assignment_sequence.name.split("(")[0].strip()
+
     for assignment_group in config.assignment_groups:
-        assignment_group.bandwidth = None
         assignment_group.assignment_sequences = sorted(assignment_group.assignment_sequences, key=lambda a: a.get_day())
-        if assignment_group.strategy == "NONE":
-            pass
-        elif assignment_group.total_points == 0:
-            message = "GC81 - ERROR Couldn't calculate bandwidth for assignment_group", assignment_group.name, "total_points is zero"
-            print(message)
-        elif assignment_group.lower_points == 0:
-            message = "GC82 - ERROR Couldn't calculate bandwidth for assignment_group", assignment_group.name, "lower_points is zero"
-            print(message)
-        elif assignment_group.upper_points == 0:
-            message = "GC83 - ERROR Couldn't calculate bandwidth for assignment_group", assignment_group.name, "upper_points is zero"
-            print(message)
-        else:
-            assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
+        assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
     if config.attendance is not None:
         config.attendance.bandwidth = bandwidth_builder_attendance(config.attendance.lower_points, config.attendance.upper_points, config.attendance.total_points, config.days_in_semester)
 
-    with open(instances.get_course_file_name(instances.current_instance), 'w') as f:
+    with open(instance.get_course_file_name(), 'w') as f:
         dict_result = config.to_json(["assignment"])
         json.dump(dict_result, f, indent=2)
 
-    print("GC99 - Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
+    print("GCS99 - Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":
-    print("GC01 generate_course.py")
     if len(sys.argv) > 1:
-        main(sys.argv[1])
+        generate_course(sys.argv[1])
     else:
-        main("")
+        generate_course("")

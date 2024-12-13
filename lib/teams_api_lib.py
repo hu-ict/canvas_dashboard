@@ -221,7 +221,7 @@ def upload_file_to_onedrive(a_token, a_name, a_drive_id, a_file_path, a_file_nam
     url = f"https://graph.microsoft.com/v1.0/drives/{a_drive_id}/items/root:/{a_name.replace(' ', '%20')}/{l_remote_file_name.replace(' ', '%20')}:/content"
     print(url)
     response = requests.put(url, headers=l_headers, data=data)
-    if response.status_code != 200:
+    if response.status_code not in [200, 201]:
         print(f"Error {response.status_code} response: {response.json()}")
 
 
@@ -302,7 +302,7 @@ def get_channels(a_token, a_team_id):
         values = result['value']
         channels = []
         for value in values:
-            print("TA27 -", value)
+            # print("TA27 -", value)
             channel = {"display_name": value["displayName"], "id": value["id"]}
             # print("TA22 -", channel)
             channels.append(channel)
@@ -340,3 +340,38 @@ def get_drive(token, team_id, channel_id):
     else:
         print(f"TA38 - Error getting token: {response.json()}")
     return {"display_name": "", "drive_id": ""}
+
+
+def send_mail(token, recipient, body):
+    l_headers = {
+        "Authorization": "Bearer "+token,
+        "Content-Type": "application/json"
+    }
+    l_data = {"message": {
+                "subject": "Meet for lunch?",
+                "body": {
+                    "contentType": "Text",
+                    "content": "The new cafeteria is open."
+                },
+                "toRecipients": [
+                    {
+                        "emailAddress": {
+                            "address": "anita.grit@hu.nl"
+                        }
+                    }
+                ]
+            }
+        }
+    l_json_object = json.dumps(l_data)
+    print(l_json_object)
+    l_url = f"https://graph.microsoft.com/v1.0/me/sendMail"
+    print(l_url)
+    response = requests.post(l_url, headers=l_headers, data=l_json_object)
+    if response.status_code == 201:
+        l_result = response.json()
+        with open('teams-api/dump.json', 'w') as f:
+            json.dump(l_result, f, indent=2)
+        return l_result
+    print(f"TA04 - Response: {response.json()}")
+    return None
+

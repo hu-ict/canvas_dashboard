@@ -1,4 +1,3 @@
-from model.Student import Student
 from model.StudentLink import StudentLink
 
 

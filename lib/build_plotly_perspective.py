@@ -2,8 +2,8 @@ import copy
 import plotly.graph_objs as go
 
 from lib.build_plotly_generic import plot_bandbreedte_colored
-from lib.build_plotly_hover import get_hover_peiling, get_hover_assignment, get_hover_day_bar, get_hover_grade, \
-    get_hover_comments, get_hover_rubrics_comments, get_hover_status
+from lib.build_plotly_hover import get_hover_assignment, get_hover_day_bar, get_hover_grade, \
+    get_hover_comments, get_hover_rubrics_comments, get_hover_status, get_hover_level_moment, get_hover_grade_moment
 from lib.lib_date import date_to_day, get_date_time_loc
 from lib.lib_plotly import get_marker_size, hover_style
 from model.perspective.Status import BEFORE_DEADLINE
@@ -15,7 +15,7 @@ def find_submissions(a_student, a_peil_construction):
     l_peil_construction = copy.deepcopy(a_peil_construction)
     for l_perspective in l_peil_construction.values():
         for peil in l_perspective:
-            l_submission = a_student.get_peilmoment(peil['assignment'].id)
+            l_submission = a_student.get_level_moment(peil['assignment'].id)
             if l_submission:
                 peil['submission'] = l_submission
     return l_peil_construction
@@ -28,7 +28,7 @@ def plot_progress(a_row, a_col, a_fig, a_course, a_perspective, a_level_serie_co
         if pleiling['submission'] is not None and pleiling['submission'].graded:
             #Heeft submission en beoordeling
             series['size'].append(get_marker_size(True)+2)
-            series['hover'].append(get_hover_peiling(pleiling['submission'], a_course, a_level_serie_collection))
+            series['hover'].append(get_hover_level_moment(pleiling['submission'], a_course, a_level_serie_collection))
             series['x'].append(date_to_day(a_course.start_date, pleiling['submission'].submitted_date))
             if "beoordeling" in pleiling['assignment'].name.lower():
                 series['color'].append(a_level_serie_collection.level_series["grade"].grades[str(int(pleiling['submission'].score))].color)
@@ -80,13 +80,13 @@ def plot_assignments(a_row, a_col, a_fig, a_course, a_show_points, a_assignment_
             series['y'].append(cum_points)
             # print("PA05 -", a_course.grade_levels)
             # print("PA07 -",a_levels.level_series[a_course.grade_levels].levels["3"].color)
-            series['color'].append(a_levels.level_series[a_course.grade_levels].grades["3"].color)
+            series['color'].append(a_levels.level_series[a_course.grade_moments.levels].grades["3"].color)
             series['hover'].append(get_hover_assignment(a_show_points, assignment))
 
             series['size'].append(get_marker_size(True))
             series['x'].append(assignment.assignment_day)
             series['y'].append(cum_points)
-            series['color'].append(a_levels.level_series[a_course.grade_levels].grades["0"].color)
+            series['color'].append(a_levels.level_series[a_course.grade_moments.levels].grades["0"].color)
             series['hover'].append(get_hover_assignment(a_show_points, assignment))
 
         open_assignments = go.Scatter(
@@ -122,7 +122,7 @@ def plot_future_assignments(a_row, a_col, a_fig,
         series['size'].append(get_marker_size(False))
         series['x'].append(day)
         series['y'].append(0)
-        series['color'].append(a_levels.level_series[a_course.grade_levels].get_status(BEFORE_DEADLINE).color)
+        series['color'].append(a_levels.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).color)
         series['hover'].append(get_hover_assignment(a_show_points, assignment_sequence))
     future_assignments = go.Scatter(
         x=series['x'],
@@ -181,6 +181,7 @@ def plot_day_bar(a_row, a_col, a_fig,
 def plot_submissions(a_row, a_col, a_fig, a_course, a_perspective, a_level_serie_collection):
     l_assignment_group = a_course.find_assignment_group(a_perspective.assignment_groups[0])
     l_perspective = a_course.find_perspective_by_name(a_perspective.name)
+    l_level_serie = a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels]
     x_submission = [0]
     if l_perspective.show_flow:
         y_submission = [0.5]
@@ -191,35 +192,38 @@ def plot_submissions(a_row, a_col, a_fig, a_course, a_perspective, a_level_serie
     y_size = [get_marker_size(False)]
     cum_score = 0
     for submission_sequence in a_perspective.submission_sequences:
-
         y_size.append(get_marker_size(submission_sequence.is_graded()))
         x_submission.append(submission_sequence.get_day())
+
         if submission_sequence.is_graded():
             cum_score += submission_sequence.get_score()
             if submission_sequence.points == 0:
                 # lelijke hack
                 submission_sequence.points = 1
-            level = a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels].get_level_by_fraction(submission_sequence.get_score() / submission_sequence.points)
-            y_colors.append(a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels].grades[str(level)].color)
+            grade = l_level_serie.grades[submission_sequence.get_grade()]
+            y_colors.append(grade.color)
         else:
-            y_colors.append(a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels].get_status(submission_sequence.get_status()).color)
+            status = l_level_serie.status[submission_sequence.get_status()]
+            y_colors.append(status.color)
 
         submission_nr = 0
         l_hover = ""
         for submission in submission_sequence.submissions:
-            level_series = a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels]
-            level = a_level_serie_collection.level_series[a_course.perspectives[a_perspective.name].levels].get_level_by_fraction(submission.score / submission_sequence.points)
             l_hover += get_hover_assignment(l_perspective.show_points, submission)
             if submission.graded:
-                l_hover += get_hover_grade(a_course, submission, level_series.grades, level)
+                grade = l_level_serie.grades[submission.grade]
+                l_hover += get_hover_grade(a_course, submission, grade)
             else:
-                l_hover += get_hover_status(submission, level_series)
+                status = l_level_serie.status[submission.status]
+                l_hover += get_hover_status(submission, status)
             l_hover += get_hover_comments(submission.comments)
-            l_hover += get_hover_rubrics_comments(a_course, submission, level_series.grades)
+            if submission.graded:
+                grade = l_level_serie.grades[submission.grade]
+                l_hover += get_hover_rubrics_comments(a_course, submission, grade)
             if submission_nr < len(submission_sequence.submissions) - 1:
                 l_hover += "<br><br>"
         if len(l_hover) > 4000:
-            l_hover = l_hover[:4000] + "<br>Te veel commentaar/feedback voor pop-up. Ga naar Canvas voor alle gegevens."
+            l_hover = l_hover[:4000] + "<br>Te veel commentaar/feedback voor pop-up. Ga naar Canvas voor de complete tekst."
 
         y_hover.append(l_hover)
         if l_perspective.show_flow:
@@ -266,29 +270,44 @@ def remove_assignment_sequence(a_assignment_sequences, a_submission_sequence):
     return a_assignment_sequences
 
 
-def plot_overall_peilingen(a_row, a_col, a_fig, a_course, a_peiling, a_levels):
-    if "beoordeling" in a_peiling.assignment_name.lower():
-        # print(a_labels_colors.level_series[a_start.grade_levels].levels["-1"].color)
-        if a_peiling.graded:
-            label = a_levels.level_series[a_course.grade_levels].levels[str(int(a_peiling.score))].label
-            color = a_levels.level_series[a_course.grade_levels].levels[str(int(a_peiling.score))].color
-        else:
-            label = a_levels.level_series[a_course.grade_levels].get_status(BEFORE_DEADLINE).label
-            color = a_levels.level_series[a_course.grade_levels].get_status(BEFORE_DEADLINE).color
+def plot_overall_level_moment(a_row, a_col, a_fig, a_course, a_level_moment, a_levels):
+    if a_level_moment.graded:
+        label = a_levels.level_series[a_course.level_moments.levels].grades[str(int(a_level_moment.score))].label
+        color = a_levels.level_series[a_course.level_moments.levels].grades[str(int(a_level_moment.score))].color
     else:
-        if a_peiling.graded:
-            label = a_levels.level_series[a_course.level_moments.levels].grades[str(int(a_peiling.score))].label
-            color = a_levels.level_series[a_course.level_moments.levels].grades[str(int(a_peiling.score))].color
-        else:
-            label = a_levels.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).label
-            color = a_levels.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).color
+        label = a_levels.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).label
+        color = a_levels.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).color
 
-    if a_peiling.score <= 0:
+    if a_level_moment.score <= 0:
         y_niveau = [0.2]
     else:
-        y_niveau = [a_peiling.score]
-    x_labels = [a_peiling.assignment_name]
-    y_hover = get_hover_peiling(a_peiling, a_course, a_levels)
+        y_niveau = [a_level_moment.score]
+    x_labels = [a_level_moment.assignment_name]
+    y_hover = get_hover_level_moment(a_level_moment, a_course, a_levels)
+    a_fig.add_trace(go.Bar(x=x_labels, y=y_niveau,
+                           name="Hoi",
+                           hoverinfo="text",
+                           hovertext=y_hover,
+                           hoverlabel=hover_style,
+                           text=label,
+                           marker=dict(color=color)), row=a_row, col=a_col)
+    a_fig.update_yaxes(title_text="Niveau", range=[0, 3.5], dtick=1, row=a_row, col=a_col)
+
+
+def plot_overall_grade_moment(a_row, a_col, a_fig, a_course, a_grade_moment, a_levels):
+    if a_grade_moment.graded:
+        label = a_levels.level_series[a_course.grade_moments.levels].levels[str(int(a_grade_moment.score))].label
+        color = a_levels.level_series[a_course.grade_moments.levels].levels[str(int(a_grade_moment.score))].color
+    else:
+        label = a_levels.level_series[a_course.grade_moments.levels].get_status(BEFORE_DEADLINE).label
+        color = a_levels.level_series[a_course.grade_moments.levels].get_status(BEFORE_DEADLINE).color
+
+    if a_grade_moment.score <= 0:
+        y_niveau = [0.2]
+    else:
+        y_niveau = [a_grade_moment.score]
+    x_labels = [a_grade_moment.assignment_name]
+    y_hover = get_hover_grade_moment(a_grade_moment, a_course, a_levels)
     a_fig.add_trace(go.Bar(x=x_labels, y=y_niveau,
                            name="Hoi",
                            hoverinfo="text",

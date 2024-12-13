@@ -13,13 +13,11 @@ class ProgressHistory:
             i += 1
         return None
 
-
     def get_day(self, day):
         for d in self.days:
             if d.day == day:
                 return d
         return None
-
 
     def append_day(self, progress_day):
         index = self.find_day_index(progress_day.day)

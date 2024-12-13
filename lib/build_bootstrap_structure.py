@@ -1,8 +1,49 @@
 from string import Template
 
+from lib.build_bootstrap_release_planning import build_bootstrap_release_planning_tab
+from lib.build_plotly_analyse import process_analyse
+from lib.build_plotly_bandwidth import process_bandwidth
+from lib.file import read_plotly
 from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_date_time_loc
-from test_bandwidth import process_bandwidth
+
+
+def build_learning_analytics(course, results, level_serie_collection):
+    learning_analytics = {}
+    assignment_list = {}
+    for assignment_group in course.assignment_groups:
+        perspective = course.find_perspective_by_assignment_group(assignment_group.id)
+        if perspective is not None:
+            grades = level_serie_collection.level_series[perspective.levels].grades
+            for assignment_sequence in assignment_group.assignment_sequences:
+                for assignment in assignment_sequence.assignments:
+                    grades_dict = {}
+                    for grade in grades.keys():
+                        grades_dict[grade] = 0
+                    learning_analytics[str(assignment.id)] = {"assignment": assignment.id,
+                                                              "assignment_name": assignment.name,
+                                                              "level_serie": perspective.levels,
+                                                              "status": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0},
+                                                              "grades": grades_dict}
+
+    for student in results.students:
+        # print(l_peil_construction)
+        # print("GL10 -", student.name)
+        for perspective in student.perspectives.values():
+            for submission_sequence in perspective.submission_sequences:
+                for submission in submission_sequence.submissions:
+                    learning_analytics[str(submission.assignment_id)]["status"][str(submission.status)] += 1
+                    if submission.grade is not None:
+                        learning_analytics[str(submission.assignment_id)]["grades"][str(submission.grade)] += 1
+        for submission in student.student_level_moments.submissions:
+            learning_analytics[str(submission.assignment_id)]["status"][str(submission.status)] += 1
+            if submission.grade is not None:
+                learning_analytics[str(submission.assignment_id)]["grades"][str(submission.grade)] += 1
+        for submission in student.student_grade_moments.submissions:
+            learning_analytics[str(submission.assignment_id)]["status"][str(submission.status)] += 1
+            if submission.grade is not None:
+                learning_analytics[str(submission.assignment_id)]["grades"][str(submission.grade)] += 1
+    return learning_analytics
 
 
 def build_student_button(course, student, templates, labels_colors):
@@ -91,79 +132,37 @@ def build_bootstrap_progress(a_start, a_course, a_results, a_templates, a_labels
     return progress_html_string
 
 
-def write_release_planning(a_course, a_templates, a_assignment_group, a_file_name):
-    list_html_string = ""
-    for assignment_sequence in a_assignment_group.assignment_sequences:
-        messages_html_string = ""
-        assignment_sequence_html_string = ""
-        # print(assignment_sequence.name)
-        for assignment in assignment_sequence.assignments:
-            url = "https://canvas.hu.nl/courses/" + str(a_course.canvas_id) + "/assignments/" + str(assignment.id)
-            rubric_points = 0
-            rubric_count = 0
-            rubrics_html_string = "<ul>"
-            for criterion in assignment.rubrics:
-                rubrics_html_string += "<li>" + str(round(criterion.points, 2)) + " ptn, " + criterion.description
-                rubric_points += criterion.points
-                rubric_count += 1
-                rubrics_html_string += "<ul>"
-                for rating in criterion.ratings:
-                    rubrics_html_string += "<li>" + str(round(rating.points, 2)) + " ptn, " + rating.description + "</li>"
-                rubrics_html_string += "</ul></li>"
-            rubrics_html_string += "<ul>"
-            if rubric_count == 0:
-                rubrics_str = str(round(0, 2))
-                rubrics_html_string = "Geen criteria"
-            else:
-                rubrics_str = str(round(rubric_points,2))
-
-            assignment_sequence_html_string += a_templates["assignment"].substitute({'assignment_name': assignment.name,
-                                                                  'assignment_unlock_date': get_date_time_loc(assignment.unlock_date),
-                                                                  'assignment_lock_date': get_date_time_loc(assignment.assignment_date),
-                                                                  'assignment_grading_type': assignment.grading_type,
-                                                                  'assignment_points': assignment.points,
-                                                                  'rubrics_points': rubrics_str,
-                                                                  'rubrics' : rubrics_html_string,
-                                                                  'url': url})
-
-            for message in assignment.messages:
-                messages_html_string += a_templates["message"].substitute({'message': message})
-
-
-        list_html_string += a_templates["assignment_sequence"].substitute({'assignment_name': assignment_sequence.name,
-                                                                           'assignment_tag': assignment_sequence.tag,
-                                                                  'assignment_grading_type': assignment_sequence.grading_type,
-                                                                  'assignment_points': assignment_sequence.points,
-                                                                  'messages': messages_html_string,
-                                                                  'assignments': assignment_sequence_html_string})
-    file_html_string = a_templates["release_planning_list"].substitute({'assignment_group': a_assignment_group.name+" "+str(a_assignment_group.id),'total_points': int(a_assignment_group.total_points), 'lower_points': a_assignment_group.lower_points, 'upper_points': a_assignment_group.upper_points, 'strategie': a_assignment_group.strategy, 'assignments': list_html_string})
-
-    with open(a_file_name, mode='w', encoding="utf-8") as file_list:
-        file_list.write(file_html_string)
-
-
-def build_bootstrap_release_planning(a_instances, a_course, a_templates, a_labels_colors):
+def build_bootstrap_analyse_tab(instance, a_course, learning_analytics, a_templates, a_level_serie_collection, actual_day):
     html_string = ""
-    buttons_planning_html_string = ""
     for assignment_group in a_course.assignment_groups:
-        file_name = "general//release_planning_" + str(assignment_group.id) + ".html"
-        buttons_planning_html_string += a_templates["selector"].substitute(
-            {'selector_file': file_name,
-             'selector': assignment_group.name}) + "<br>"
-        write_release_planning(a_course, a_templates, assignment_group, a_instances.get_html_root_path() + file_name)
+        assignment_html_string = ""
+        assignment_list = []
+        for assignment_sequence in assignment_group.assignment_sequences:
+            for assignment in assignment_sequence.assignments:
+                assignment_list.append(assignment)
+        assignment_list = sorted(assignment_list, key=lambda a: a.assignment_day)
+        for assignment in assignment_list:
+            file_name = "general/analyse_" + str(assignment.id) + ".html"
+            if assignment.assignment_day < actual_day:
+                background_color = "#ffb3b3"
+            else:
+                background_color = "#c6ecd9"
+            assignment_html_string += a_templates["analyse_assignment"].substitute(
+                {'url': file_name,
+                 'assignment_name': assignment.name,
+                 'background_color': background_color,
+                 'assignment_lock_date': get_date_time_loc(
+                     assignment.assignment_date)})
+            process_analyse(learning_analytics, assignment, a_level_serie_collection,
+                            instance.get_html_root_path() + file_name)
 
-    buttons_flow_html_string = ""
-    for assignment_group in a_course.assignment_groups:
-        file_name = "general//bandwidth_" + str(assignment_group.id) + ".html"
-        buttons_flow_html_string += a_templates["selector"].substitute(
-            {'selector_file': file_name,
-             'selector': assignment_group.name}) + "<br>"
-        process_bandwidth(a_instances, a_course, assignment_group, a_labels_colors)
-    html_string += a_templates["release_planning"].substitute({'buttons_planning': buttons_planning_html_string, 'buttons_flow': buttons_flow_html_string})
+        html_string += a_templates["analyse_card"].substitute({'assignment_group_id': str(assignment_group.id),
+                                                               'assignment_group_name': assignment_group.name,
+                                                               'assignments': assignment_html_string})
     return html_string
 
 
-def build_bootstrap_tabs(a_instances, a_start, a_course, a_templates, a_labels_colors):
+def build_bootstrap_tabs(a_instance, a_start, a_course, a_templates, a_labels_colors):
     tabs = ["Groepen"]
     if len(a_course.roles) > 1:
         tabs.append("Rollen")
@@ -175,7 +174,8 @@ def build_bootstrap_tabs(a_instances, a_start, a_course, a_templates, a_labels_c
         elif tab == "Rollen":
             students_html_string = build_bootstrap_role(a_course, a_templates, a_labels_colors)
         elif tab == "Release Planning":
-            students_html_string = build_bootstrap_release_planning(a_instances, a_start, a_course, a_templates, a_labels_colors)
+            students_html_string = build_bootstrap_release_planning_tab(a_instance, a_start, a_course, a_templates,
+                                                                        a_labels_colors)
         else:
             pass
         html_tab = ""
@@ -200,7 +200,8 @@ def build_bootstrap_structure_index(a_instances, a_start, a_course, a_coaches, a
     coaches_html_string = ''
     for coach in a_coaches.values():
         coaches_html_string += l_templates["coach"].substitute(
-            {'coach_name': coach['teacher'].name, 'coach_initials': coach['teacher'].initials, 'coach_id': coach['teacher'].id})
+            {'coach_name': coach['teacher'].name, 'coach_initials': coach['teacher'].initials,
+             'coach_id': coach['teacher'].id})
 
     roles_string = ""
     for role in a_course.roles:

@@ -1,4 +1,3 @@
-from model.Assignment import Assignment
 from model.Submission import Submission
 from model.perspective.Status import MISSED_ITEM, GRADED, BEFORE_DEADLINE, NOT_CORRECT_GRADED, NOT_YET_GRADED
 
@@ -30,6 +29,16 @@ class SubmissionSequence:
                 score = submission.score
         return score
 
+    def get_grade(self):
+        '''
+        Look for the highest score
+        '''
+        grade = 0
+        for submission in self.submissions:
+            if submission.graded and (int(submission.grade) > grade):
+                grade = int(submission.grade)
+        return str(grade)
+
     def get_status(self):
         for submission in self.submissions:
             if submission.status == NOT_CORRECT_GRADED:
@@ -41,7 +50,7 @@ class SubmissionSequence:
         for submission in self.submissions:
             if submission.graded:
                 graded_count += 1
-        if graded_count == len(self.submissions):
+        if graded_count > 0:
             return GRADED
         if self.submissions[-1].score == 0:
             return MISSED_ITEM
@@ -107,7 +116,8 @@ class SubmissionSequence:
 
     @staticmethod
     def from_dict(data_dict):
-        new = SubmissionSequence(data_dict['name'], data_dict['tag'], data_dict['grading_type'], data_dict['points'], data_dict['flow'])
+        new = SubmissionSequence(data_dict['name'], data_dict['tag'], data_dict['grading_type'], data_dict['points'],
+                                 data_dict['flow'])
         if 'submissions' in data_dict.keys():
             new.submissions = list(map(lambda a: Submission.from_dict(a), data_dict['submissions']))
         return new

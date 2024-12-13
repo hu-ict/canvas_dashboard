@@ -4,7 +4,6 @@ class Section:
         self.name = name
         self.role = role
 
-
     def to_json(self):
         return {
             'id': self.id,
@@ -15,7 +14,6 @@ class Section:
     def __str__(self):
         line = f' Section({self.id}, {self.name}, {self.role})'
         return line
-
 
     @staticmethod
     def from_dict(data_dict):

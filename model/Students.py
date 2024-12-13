@@ -1,7 +1,4 @@
-from model.AssignmentGroup import AssignmentGroup
-from model.Statistics import Statistics
 from model.Student import *
-from model.StudentGroup import StudentGroup
 
 
 class Students:
