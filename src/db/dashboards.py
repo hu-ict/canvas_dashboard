@@ -22,7 +22,7 @@ def find_dashboard_by_student_name(email, course_id):
             return None
 
         # Name of the student
-        student_name = f"{student[0]} {student[1]}"
+        student_name = f"{student[0]}.{student[1]}"
 
         if os.getenv('STORAGE_TYPE') == 'local':
             return local(student_name, course_name)
@@ -41,7 +41,7 @@ def local(student, course_name):
     students_path = f'./courses/{course_name}/dashboard_{course_name}/students/'
 
     # Search for the student dashboard in the students directory
-    student_dashboard = glob.glob(f"{students_path}/{student} index.html")
+    student_dashboard = glob.glob(f"{students_path}/{student}_index.html")
 
     if student_dashboard:
         return student_dashboard[0]
