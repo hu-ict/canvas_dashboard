@@ -6,7 +6,6 @@ import jwt
 from flask import Blueprint, jsonify, redirect, session, send_from_directory, request, render_template_string, \
     render_template, url_for
 
-
 from generate_start import main_generate
 from runner import main as runner
 from src.auth import login_required, role_required
@@ -18,10 +17,10 @@ from flask import jsonify, request
 from werkzeug.exceptions import BadRequest
 from src.services.remote_doc_service import upload_files_with_overwrite, find_teacher_index
 
-
 import os
 
 main_bp = Blueprint('main', __name__)
+
 
 def run_in_background(instance_name, event_name):
     def task():
@@ -43,10 +42,8 @@ def run_in_background(instance_name, event_name):
             print(f"Fout in database-initialisatie of import: {e}")
             return jsonify({'status': 'Error', 'message': f"Database operation failed: {e}"}), 500
 
-
     thread = threading.Thread(target=task, daemon=True)
     thread.start()
-
 
 
 @main_bp.route("/generate/login", methods=['GET', 'POST'])
@@ -88,10 +85,14 @@ def generate_start():
     return render_template('generate_start/form.html')
 
 
+NIFI_AUTH_TOKEN = os.getenv("NIFI_AUTH_TOKEN", "your_default_secret_token")
+
+
 @main_bp.route("/generate/start/nifi", methods=['GET', 'POST'])
 def generate_start_nifi():
-    if not session.get('admin_authenticated'):
-        return jsonify({'message': 'Unauthorized'}), 403
+    auth_token = request.headers.get('Authorization')  # Token in header
+    if not auth_token or auth_token != f"Bearer {NIFI_AUTH_TOKEN}":
+        return jsonify({'status': 'Error', 'message': 'Unauthorized access'}), 401
 
     if request.method == 'POST':
         data = request.get_json()  # Haal JSON-data op
@@ -99,21 +100,73 @@ def generate_start_nifi():
             return jsonify({'status': 'Error', 'message': 'Geen data ontvangen'}), 400
 
         try:
-            main_generate(data['new_instance'], data['category'], data['canvas_course_id'],
-                          os.getenv('CANVAS_API_KEY'), )
+            main_generate(data['new_instance'], data['category'], data['canvas_course_id'], os.getenv('CANVAS_API_KEY'))
             main_generate_config(data['new_instance'])
         except Exception as e:
             return jsonify({'status': 'Error', 'message': f"main_generate failed: {e}"}), 500
+
         try:
             run_in_background(data['new_instance'], "course_create_event")
         except Exception as e:
             print(f"Fout in runner: {e}")
 
-        return jsonify({'status': 'Success', 'message': 'Process completed'}), 200
+        return jsonify({
+            'status': 'Success',
+            'message': f'Cursus instantie {data["new_instance"]} met id {data["canvas_course_id"]} succesvol aangemaakt'
+        }), 200
 
 
 @main_bp.route("/course_event", methods=['POST'])
 def course_event():
+    if not session.get('admin_authenticated'):
+        return redirect(url_for('main.generate_login'))
+
+    try:
+
+        data = request.get_json()
+
+        if not data:
+            raise BadRequest("Invalid JSON data provided.")
+
+        courses_dir = os.path.abspath(os.path.join(os.getcwd(), "courses"))
+
+        course_instance = data.get('course_instance')
+
+        if not os.path.exists(os.path.join(courses_dir, course_instance)):
+            raise BadRequest(f"Course instance '{course_instance}' does not exist in the courses directory.")
+
+        event = data.get('event')
+
+        if not course_instance or not event:
+            raise BadRequest("Both 'course_instance' and 'event' fields are required.")
+
+        valid_events = ["course_update_event", "results_create_event", "results_update_event"]
+
+        # Check if the provided event is valid
+        if event not in valid_events:
+            raise BadRequest(f"Invalid event type '{event}'. Valid events are: {', '.join(valid_events)}.")
+
+        run_in_background(course_instance, event)
+
+        # Return a success response
+        return jsonify({"status": f"Runner Task started {event} on course instance {course_instance}"})
+
+    except BadRequest as e:
+        # Handle client-side errors (bad input) and return a 400 error
+        return jsonify({"error": str(e)}), 400
+
+    except Exception as e:
+        # Handle unexpected server-side errors and return a 500 error
+        return jsonify({"error": "An unexpected error occurred.", "details": str(e)}), 500
+
+
+@main_bp.route("/course_event/nifi", methods=['POST'])
+def course_event_nifi():
+    # Controleer of een geldig token is meegegeven
+    auth_token = request.headers.get('Authorization')  # Token in header
+    if not auth_token or auth_token != f"Bearer {NIFI_AUTH_TOKEN}":
+        return jsonify({'status': 'Error', 'message': 'Unauthorized access'}), 401
+
     try:
         # Extract JSON data from the request
         data = request.get_json()
@@ -159,10 +212,12 @@ def course_event():
         # Handle unexpected server-side errors and return a 500 error
         return jsonify({"error": "An unexpected error occurred.", "details": str(e)}), 500
 
+
 @main_bp.route("/generate/logout", methods=['GET'])
 def generate_logout():
     session.pop('admin_authenticated', None)
     return redirect(url_for('main.generate_login'))
+
 
 @main_bp.route("/")
 def auth():
@@ -246,7 +301,6 @@ def teacher_dashboard():
             return render_template_string(teacher_index)
         else:
             return jsonify({'message': 'No teacher index found'}), 404
-
 
 
 @main_bp.route('/student_dashboard/<int:course_id>')
