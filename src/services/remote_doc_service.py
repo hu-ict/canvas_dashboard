@@ -1,8 +1,8 @@
 from azure.storage.blob import BlobServiceClient
 import os
 
-CONNECTION_STRING = os.getenv('STORAGE_CONNECTION_STRING', 'DefaultEndpointsProtocol=https;AccountName=canvasdashboardstorage;AccountKey=f3e0CWszKW3E/dPJbaKz2Kenn5bq/nVrxY/wieDui6DL9Uu6U5LZD9UUNDn6tOjSu3JldqePwcKW+AStPJFEWw==;EndpointSuffix=core.windows.net')
-CONTAINER_NAME = os.getenv('STORAGE_CONTAINER_NAME', 'webapp')
+CONNECTION_STRING = os.getenv('STORAGE_CONNECTION_STRING')
+CONTAINER_NAME = os.getenv('STORAGE_CONTAINER_NAME')
 local_directory = os.path.abspath(os.path.join(os.getcwd(), "courses"))
 
 
@@ -75,7 +75,7 @@ def find_teacher_index():
     print(f"File index not found in the container '{CONTAINER_NAME}'.")
     return None
 
-def find_blob_by_name(file_name):
+def find_blob_by_name(course_name,file_name):
     service_client = BlobServiceClient.from_connection_string(CONNECTION_STRING)
     container_client = service_client.get_container_client(CONTAINER_NAME)
 
@@ -84,7 +84,7 @@ def find_blob_by_name(file_name):
     blobs = container_client.list_blobs()
 
     for blob in blobs:
-        if f"students/{file_name}" in blob.name:
+        if f"{course_name}/dashboard_{course_name}/students/{file_name}" in blob.name:
             blob_url = f"https://{service_client.account_name}.blob.core.windows.net/{CONTAINER_NAME}/{blob.name}"
             print(f"Found file: {blob_url}")
             return read_blob_content(CONTAINER_NAME, blob.name)

@@ -22,12 +22,10 @@ def find_dashboard_by_student_name(email, course_id):
             return None
 
         # Name of the student
-        student_name = f"{student[0]}.{student[1]}"
+        student_name = f"{student[0].lower()}.{student[1].lower()}"
 
-        if os.getenv('STORAGE_TYPE') == 'local':
-            return local(student_name, course_name)
 
-        return storage(student_name, course_name)
+        return file_find_blob_by_name(student_name, course_name)
     except Exception as e:
         print(f"Fout bij het zoeken naar het dashboard van de student {email}: {e}")
         return None
@@ -50,4 +48,11 @@ def local(student, course_name):
         return None
 
 def storage(student, course_name):
-    return find_blob_by_name(f"{student} index.html")
+    return find_blob_by_name(course_name, f"{student}_index.html")
+
+def file_find_blob_by_name(student_name, course_name):
+    if os.getenv('STORAGE_TYPE') == 'azure':
+        return storage(student_name, course_name)
+    return local(student_name, course_name)
+
+
