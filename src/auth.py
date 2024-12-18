@@ -1,3 +1,5 @@
+import os
+
 import jwt
 import requests
 from flask import Blueprint, session, redirect, url_for, request, jsonify
@@ -125,10 +127,22 @@ def role_required(role):
         return decorated_function
     return wrapper
 
+
 @auth_bp.route('/logout')
 def logout():
+    print("Debug: Initiating logout process.")
     session.clear()
-    return redirect(url_for('auth.azure_ad_login'))
+    print("Debug: Session cleared successfully.")
+
+    # Redirect to Azure AD logout endpoint with post-logout redirect to the login page
+    logout_url = f"{AZURE_AD_CONFIG['AUTHORITY']}/oauth2/v2.0/logout"
+    post_logout_redirect_uri = url_for('auth.azure_ad_login', _external=True)
+    full_logout_url = f"{logout_url}?post_logout_redirect_uri={post_logout_redirect_uri}"
+
+    print(f"Debug: Redirecting to Azure AD logout URL: {full_logout_url}")
+
+    return redirect(full_logout_url)
+
 
 def get_user_roles():
     session_roles = session.get('roles')
