@@ -59,7 +59,9 @@ def generate_login():
     if request.method == 'POST':
         data = request.get_json()
         admin_password = data.get('password')
-        if admin_password == "admin123":
+
+        stored_password = os.environ.get('ADMIN_PASSWORD')
+        if admin_password == stored_password:
             session['admin_authenticated'] = True
             return redirect(url_for('main.generate_start'))
         else:
