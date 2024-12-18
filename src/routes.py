@@ -415,6 +415,28 @@ def student_dashboard(course_id):
         return jsonify({'message': 'No dashboard found for the selected course'}), 404
 
 
+@main_bp.route('/testz')
+def serve_test():
+    return send_from_directory('../courses/test_inno/dashboard_test_inno', 'index.html')
+
+@main_bp.route('/students/<path:filename>')
+def serve_students_view(filename):
+    local_directory = os.path.abspath(os.path.join(os.getcwd(), "courses"))
+
+    for root, dirs, files in os.walk(local_directory):
+        if filename in files:
+            return send_from_directory(os.path.join(root), filename)
+    return None
+
+@main_bp.route('/general/<path:filename>')
+def serve_general_view(filename):
+    local_directory = os.path.abspath(os.path.join(os.getcwd(), "courses"))
+
+    for root, dirs, files in os.walk(local_directory):
+        if filename in files:
+            return send_from_directory(os.path.join(root), filename)
+    return None
+
 @main_bp.route('/css/<path:filename>')
 def serve_css(filename):
     return send_from_directory('static/css', filename)

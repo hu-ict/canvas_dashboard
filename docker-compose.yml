@@ -1,7 +1,6 @@
 services:
   dashboard:
     container_name: canvas_dashboard
-    image: python:3.12-alpine
     build:
       dockerfile: Dockerfile
     ports:
