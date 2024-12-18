@@ -325,14 +325,15 @@ def dashboard():
 @main_bp.route('/select_course')
 @login_required
 def select_course():
-    token = session.get('token', {}).get('access_token')
-    roles = jwt.decode(token, options={"verify_signature": False}).get("realm_access", {}).get("roles", [])
-    if "students" in roles:
+    role = session.get('role')
+    if role == 'student':
         student_courses = session.get('student_courses', [])
         return render_template('select_course/index.html', courses=student_courses)
-    elif "teachers" in roles:
+    elif role == 'teacher':
         teacher_courses = session.get('teacher_courses', [])
         return render_template('select_course/index.html', courses=teacher_courses)
+    else:
+        return jsonify({'message': 'Unauthorized'}), 403
 
 
 @main_bp.route('/set_course/<int:course_id>')
@@ -340,12 +341,43 @@ def select_course():
 def set_course(course_id):
     session['selected_course_id'] = course_id
     token = session.get('token', {}).get('access_token')
-    roles = jwt.decode(token, options={"verify_signature": False}).get("realm_access", {}).get("roles", [])
-    if "students" in roles:
+    decoded_token = jwt.decode(token, options={"verify_signature": False})
+
+    # Extract email from token
+    email = decoded_token.get("email")
+
+    # Default role
+    role = None
+
+    # Check if the email belongs to a student
+    try:
+        with db_context() as (cursor, connection):
+            # Check in students table
+            cursor.execute("SELECT id FROM students WHERE email = %s", (email,))
+            student = cursor.fetchone()
+            if student:
+                role = "students"
+
+            # If not a student, check in teachers table
+            if not role:
+                cursor.execute("SELECT id FROM teachers WHERE email = %s", (email,))
+                teacher = cursor.fetchone()
+                if teacher:
+                    role = "teachers"
+
+    except Exception as e:
+        return jsonify({'message': 'Internal Server Error during role lookup'}), 500
+
+    if role:
+        session['roles'] = [role]
+
+    if role == "students":
         return redirect(url_for('main.student_dashboard', course_id=course_id))
-    if "teachers" in roles:
+    elif role == "teachers":
         return redirect(url_for('main.teacher_dashboard'))
 
+    # Default case if no role found
+    return jsonify({'message': 'Forbidden - No valid role found'}), 403
 
 @main_bp.route('/teacher_dashboard')
 @login_required
