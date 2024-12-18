@@ -90,7 +90,7 @@ def generate_start():
 
         return jsonify({'status': 'Success', 'message': 'Process completed'}), 200
 
-    return render_template('generate_start/form.html')
+    return render_template('generate_start/admin_dashboard.html')
 
 
 NIFI_AUTH_TOKEN = os.getenv("NIFI_AUTH_TOKEN", "your_default_secret_token")
@@ -223,6 +223,57 @@ def course_event_nifi():
         # Handle unexpected server-side errors and return a 500 error
         return jsonify({"error": "An unexpected error occurred.", "details": str(e)}), 500
 
+@main_bp.route('/get_active_courses', methods=['GET'])
+def get_active_courses():
+    try:
+        with db_context() as (cursor, connection):
+            # Query to get all active courses
+            cursor.execute("""
+                SELECT id, name, directory_name
+                FROM courses
+            """)
+            courses = cursor.fetchall()
+            courses_list = [
+                {"id": course[0], "name": course[1], "directory_name": course[2]}
+                for course in courses
+            ]
+            return jsonify({"status": "success", "courses": courses_list}), 200
+    except Exception as e:
+        print(f"Error fetching courses: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@main_bp.route('/get_logs', methods=['GET'])
+def get_logs():
+    try:
+        with db_context() as (cursor, connection):
+            # Query to get the most recent log for each course_instance
+            cursor.execute("""
+                SELECT l.id, l.course_instance, l.event, l.status, l.timestamp
+                FROM logs l
+                INNER JOIN (
+                    SELECT course_instance, MAX(timestamp) AS max_timestamp
+                    FROM logs
+                    GROUP BY course_instance
+                ) latest_logs
+                ON l.course_instance = latest_logs.course_instance
+                AND l.timestamp = latest_logs.max_timestamp
+                ORDER BY l.timestamp DESC
+            """)
+            logs = cursor.fetchall()
+            logs_list = [
+                {
+                    "id": log[0],
+                    "course_instance": log[1],
+                    "event": log[2],
+                    "status": log[3],
+                    "timestamp": log[4]
+                }
+                for log in logs
+            ]
+            return jsonify({"status": "success", "logs": logs_list}), 200
+    except Exception as e:
+        print(f"Error fetching logs: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @main_bp.route("/generate/logout", methods=['GET'])
 def generate_logout():
