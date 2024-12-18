@@ -17,6 +17,7 @@ from flask import jsonify, request
 from generate_portfolio import generate_portfolio as main_generate_portfolio
 from werkzeug.exceptions import BadRequest
 from src.services.remote_doc_service import upload_files_with_overwrite, find_teacher_index
+from src.db.generate_data import insert_log as log
 
 import os
 
@@ -34,20 +35,25 @@ def run_in_background(instance_name, event_name):
 
         try:
             with db_context() as (cursor, connection):
-                initialize_db(cursor, connection)
-                read_and_import_courses(cursor, connection)
+                initialize_db(cursor, connection)  # Initialize database if necessary
+                read_and_import_courses(cursor, connection)  # Import courses and students
                 main_generate_portfolio(instance_name)
+
                 if os.getenv('STORAGE_TYPE') == 'azure':
                     upload_files_with_overwrite()
 
+                # Log success after completing all tasks
+                log(cursor, connection, instance_name, event_name, "Success")
+                connection.commit()
+
         except Exception as e:
-            print(f"Fout in database-initialisatie of import: {e}")
-            return jsonify({'status': 'Error', 'message': f"Database operation failed: {e}"}), 500
+            print(f"Error in database operation or tasks: {e}")
+            with db_context() as (cursor, connection):
+                log(cursor, connection, instance_name, event_name, "Failed")
+                connection.commit()
 
     thread = threading.Thread(target=task, daemon=True)
     thread.start()
-
-
 @main_bp.route("/generate/login", methods=['GET', 'POST'])
 def generate_login():
     if request.method == 'POST':
@@ -67,7 +73,7 @@ def generate_start():
         return redirect(url_for('main.generate_login'))
 
     if request.method == 'POST':
-        data = request.get_json()  # Haal JSON-data op
+        data = request.get_json()
         if not data:
             return jsonify({'status': 'Error', 'message': 'Geen data ontvangen'}), 400
 
@@ -111,6 +117,8 @@ def generate_start_nifi():
             run_in_background(data['new_instance'], "course_create_event")
         except Exception as e:
             print(f"Fout in runner: {e}")
+
+
 
         return jsonify({
             'status': 'Success',
