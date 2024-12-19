@@ -75,6 +75,23 @@ def find_teacher_index():
     print(f"File index not found in the container '{CONTAINER_NAME}'.")
     return None
 
+def find_blob_by_file_name(container, file_name):
+    service_client = BlobServiceClient.from_connection_string(CONNECTION_STRING)
+    container_client = service_client.get_container_client(CONTAINER_NAME)
+
+    print(f"Searching for {file_name} in the container '{CONTAINER_NAME}'...")
+
+    blobs = container_client.list_blobs()
+
+    for blob in blobs:
+        if f"{container}/{file_name}" in blob.name:
+            blob_url = f"https://{service_client.account_name}.blob.core.windows.net/{CONTAINER_NAME}/{blob.name}"
+            print(f"Found file: {blob_url}")
+            return read_blob_content(CONTAINER_NAME, blob.name)
+
+    print(f"File {file_name} not found in the container '{CONTAINER_NAME}'.")
+    return None
+
 def find_blob_by_name(course_name,file_name):
     service_client = BlobServiceClient.from_connection_string(CONNECTION_STRING)
     container_client = service_client.get_container_client(CONTAINER_NAME)

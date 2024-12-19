@@ -16,7 +16,7 @@ from generate_config import generate_config as main_generate_config
 from flask import jsonify, request
 from generate_portfolio import generate_portfolio as main_generate_portfolio
 from werkzeug.exceptions import BadRequest
-from src.services.remote_doc_service import upload_files_with_overwrite, find_teacher_index
+from src.services.remote_doc_service import upload_files_with_overwrite, find_teacher_index, find_blob_by_file_name
 from src.db.generate_data import insert_log as log
 
 import os
@@ -421,21 +421,27 @@ def serve_test():
 
 @main_bp.route('/students/<path:filename>')
 def serve_students_view(filename):
-    local_directory = os.path.abspath(os.path.join(os.getcwd(), "courses"))
+    if os.getenv('STORAGE_TYPE') == 'azure':
 
-    for root, dirs, files in os.walk(local_directory):
-        if filename in files:
-            return send_from_directory(os.path.join(root), filename)
-    return None
+        local_directory = os.path.abspath(os.path.join(os.getcwd(), "courses"))
+
+        for root, dirs, files in os.walk(local_directory):
+            if filename in files:
+                return send_from_directory(os.path.join(root), filename)
+        return None
+    return render_template_string(find_blob_by_file_name("students", filename))
 
 @main_bp.route('/general/<path:filename>')
 def serve_general_view(filename):
-    local_directory = os.path.abspath(os.path.join(os.getcwd(), "courses"))
+    if os.getenv('STORAGE_TYPE') == 'azure':
 
-    for root, dirs, files in os.walk(local_directory):
-        if filename in files:
-            return send_from_directory(os.path.join(root), filename)
-    return None
+        local_directory = os.path.abspath(os.path.join(os.getcwd(), "courses"))
+
+        for root, dirs, files in os.walk(local_directory):
+            if filename in files:
+                return send_from_directory(os.path.join(root), filename)
+        return None
+    return render_template_string(find_blob_by_file_name("general", filename))
 
 @main_bp.route('/css/<path:filename>')
 def serve_css(filename):
