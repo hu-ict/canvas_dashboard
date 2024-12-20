@@ -423,7 +423,7 @@ def serve_test():
 
 @main_bp.route('/students/<path:filename>')
 def serve_students_view(filename):
-    if os.getenv('STORAGE_TYPE') == 'azure':
+    if os.getenv('STORAGE_TYPE') == 'local':
 
         local_directory = os.path.abspath(os.path.join(os.getcwd(), "courses"))
 
@@ -435,7 +435,7 @@ def serve_students_view(filename):
 
 @main_bp.route('/general/<path:filename>')
 def serve_general_view(filename):
-    if os.getenv('STORAGE_TYPE') == 'azure':
+    if os.getenv('STORAGE_TYPE') == 'local':
 
         local_directory = os.path.abspath(os.path.join(os.getcwd(), "courses"))
 
