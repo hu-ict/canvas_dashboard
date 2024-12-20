@@ -9,6 +9,7 @@ from flask import Blueprint, jsonify, redirect, session, send_from_directory, re
 from generate_start import main_generate
 from runner import main as runner
 from src.auth import login_required, role_required
+from src.db.course_data import get_course_instance_name
 from src.db.dashboards import find_dashboard_by_student_name
 from src.db.db_context import db_context
 from src.db.generate_data import initialize_db, read_and_import_courses
@@ -374,30 +375,31 @@ def set_course(course_id):
     if role == "students":
         return redirect(url_for('main.student_dashboard', course_id=course_id))
     elif role == "teachers":
-        return redirect(url_for('main.teacher_dashboard'))
+        return redirect(url_for('main.teacher_dashboard', course_id=course_id))
 
     # Default case if no role found
     return jsonify({'message': 'Forbidden - No valid role found'}), 403
 
-@main_bp.route('/teacher_dashboard')
-@login_required
-@role_required('teachers')
-def teacher_dashboard():
+@main_bp.route('/teacher_dashboard/<int:course_id>')
+def teacher_dashboard(course_id):
     if os.getenv('STORAGE_TYPE') == 'local':
-        matches = glob.glob('/src/courses/*/*/.html')
-        matches = glob.glob('/src/courses/*/*/index.html')
+        matches = glob.glob(f'./courses/{course_id}/dashboard_{course_id}/index.html')
         if not matches:
-            return jsonify({'message': 'No HTML files found in courses directory'}), 404
             return jsonify({'message': 'No index.html files found in courses directory'}), 404
         directory = os.path.dirname(matches[0])
         return send_from_directory(directory, 'index.html')
     else:
-        teacher_index = find_teacher_index()
+        # Haal de course_name op gebaseerd op de course_id
+        course_name = get_course_instance_name(course_id)
+
+        if not course_name:
+            return jsonify({'message': f'Course with ID {course_id} not found.'}), 404
+
+        teacher_index = find_teacher_index(course_name)
         if teacher_index:
             return render_template_string(teacher_index)
         else:
-            return jsonify({'message': 'No teacher index found'}), 404
-
+            return jsonify({'message': f'No index.html found for course {course_name}.'}), 404
 
 @main_bp.route('/student_dashboard/<int:course_id>')
 @login_required
