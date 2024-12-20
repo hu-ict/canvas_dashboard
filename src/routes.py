@@ -419,7 +419,7 @@ def student_dashboard(course_id):
         return jsonify({'message': 'No dashboard found for the selected course'}), 404
 
 
-@main_bp.route('teacher_dashboard/students/<path:filename>')
+@main_bp.route('/teacher_dashboard/students/<path:filename>')
 def serve_students_view(filename):
     if os.getenv('STORAGE_TYPE') == 'local':
 
@@ -431,7 +431,7 @@ def serve_students_view(filename):
         return None
     return render_template_string(find_blob_by_file_name("students", filename))
 
-@main_bp.route('teacher_dashboard/general/<path:filename>')
+@main_bp.route('/teacher_dashboard/general/<path:filename>')
 def serve_general_view(filename):
     if os.getenv('STORAGE_TYPE') == 'local':
 
