@@ -58,13 +58,13 @@ def upload_files_with_overwrite():
 #     print(f"File {file_name} not found in {students_folder}.")
 #     return None
 
-def find_teacher_index():
+def find_teacher_index(course_name):
     service_client = BlobServiceClient.from_connection_string(CONNECTION_STRING)
     container_client = service_client.get_container_client(CONTAINER_NAME)
 
-    print(f"Searching for index in the container '{CONTAINER_NAME}'...")
+    print(f"Searching for index.html for course '{course_name}' in the container '{CONTAINER_NAME}'...")
 
-    blobs = container_client.list_blobs()
+    blobs = container_client.list_blobs(name_starts_with=course_name)
 
     for blob in blobs:
         if f"index" in blob.name:
@@ -72,7 +72,7 @@ def find_teacher_index():
             print(f"Found file: {blob_url}")
             return read_blob_content(CONTAINER_NAME, blob.name)
 
-    print(f"File index not found in the container '{CONTAINER_NAME}'.")
+    print(f"File index.html not found for course '{course_name}' in the container '{CONTAINER_NAME}'.")
     return None
 
 def find_blob_by_file_name(container, file_name):
