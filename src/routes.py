@@ -381,6 +381,8 @@ def set_course(course_id):
     return jsonify({'message': 'Forbidden - No valid role found'}), 403
 
 @main_bp.route('/teacher_dashboard/<int:course_id>')
+@login_required
+@role_required('teachers')
 def teacher_dashboard(course_id):
     if os.getenv('STORAGE_TYPE') == 'local':
         matches = glob.glob(f'./courses/{course_id}/dashboard_{course_id}/index.html')
