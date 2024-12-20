@@ -64,10 +64,10 @@ def find_teacher_index(course_name):
 
     print(f"Searching for index.html for course '{course_name}' in the container '{CONTAINER_NAME}'...")
 
-    blobs = container_client.list_blobs(name_starts_with=f"courses/{course_name}/dashboard_{course_name}/")
+    blobs = container_client.list_blobs(name_starts_with=course_name)
 
     for blob in blobs:
-        if blob.name.endswith("index.html"):
+        if f"index" in blob.name:
             blob_url = f"https://{service_client.account_name}.blob.core.windows.net/{CONTAINER_NAME}/{blob.name}"
             print(f"Found file: {blob_url}")
             return read_blob_content(CONTAINER_NAME, blob.name)
