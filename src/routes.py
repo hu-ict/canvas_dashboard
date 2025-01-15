@@ -445,7 +445,7 @@ def serve_general_view(course_id, filename):
                 return send_from_directory(os.path.join(root), filename)
         return None
     course_name = get_course_instance_name(course_id)
-    return render_template_string(find_blob_by_file_name(f"{course_name}/students", filename))
+    return render_template_string(find_blob_by_file_name(f"{course_name}/general", filename))
 
 @main_bp.route('/css/<path:filename>')
 def serve_css(filename):
