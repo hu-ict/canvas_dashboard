@@ -213,6 +213,7 @@ def check_for_late(a_instance, a_course, a_student_totals, a_student_results, a_
                     l_selector = a_course.find_teacher(a_student_results.coach).initials
                 else:
                     l_selector = a_student_results.role
+                print("BT61 -", a_perspective, l_selector)
             elif a_instance.is_instance_of("prop_courses"):
                 group = a_course.find_student_group(a_student_results.group_id)
                 l_selector = group.name
@@ -220,17 +221,18 @@ def check_for_late(a_instance, a_course, a_student_totals, a_student_results, a_
                 l_selector = a_student_results.role
         else:
             if a_instance.is_instance_of("inno_courses"):
-                l_selector = a_student_results.role
+                # er moet een coach gekoppeld zijn
+                return
             else:
                 # print("BT83 Group id", a_student.group_id)
                 group = a_course.find_student_group(a_student_results.group_id)
                 l_selector = group.name
+            print("BT62 -", a_perspective, l_selector)
         if a_submission.submitted_day is None:
             late_days = a_actual_day - a_submission.assignment_day
         else:
             late_days = a_actual_day - a_submission.submitted_day
-        # print("BT85", a_perspective, l_selector)
-        print("BT61 -", a_perspective, l_selector)
+        print("BT85 -", a_perspective, l_selector)
         a_student_totals['perspectives'][a_perspective]['list'][l_selector].append(a_submission.to_json())
         if late_days <= 7:
             a_student_totals['perspectives'][a_perspective]['pending'][l_selector] += 1
@@ -247,7 +249,11 @@ def build_totals(a_instance, a_course, a_results, a_student_totals):
         for l_perspective in student_results.perspectives.values():
             for submission_sequence in l_perspective.submission_sequences:
                 for submission in submission_sequence.submissions:
-                    check_for_late(a_instance, a_course, a_student_totals, student_results, submission, l_perspective.name, a_results.actual_day)
+                    check_for_late(a_instance, a_course, a_student_totals, student_results, submission,
+                                   l_perspective.name, a_results.actual_day)
         for submission in student_results.student_level_moments.submissions:
-            check_for_late(a_instance, a_course, a_student_totals, student_results, submission, student_results.student_level_moments.name, a_results.actual_day)
+            # print("BT87 -", student_results.student_level_moments.name, submission)
+            # print("BT89 -", list(a_student_totals['perspectives'][student_results.student_level_moments.name]['list']))
+            check_for_late(a_instance, a_course, a_student_totals, student_results, submission,
+                           student_results.student_level_moments.name, a_results.actual_day)
 

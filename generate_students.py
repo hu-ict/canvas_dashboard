@@ -162,7 +162,7 @@ def generate_students(instance_name):
         role.students = sorted(role.students, key=lambda s: s.sortable_name)
 
     with open(instance.get_course_file_name(), 'w') as f:
-        dict_result = course.to_json(["assignment"])
+        dict_result = course.to_json()
         json.dump(dict_result, f, indent=2)
 
     print("GST99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")

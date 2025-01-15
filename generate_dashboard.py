@@ -30,6 +30,16 @@ def generate_dashboard(instance_name):
     # for teacher in course.teachers:
     #     print(teacher)
     results = read_results(instance.get_result_file_name())
+    # scores = []
+    # for student in results.students:
+    #     if student.role == "CSC_C":
+    #         scores.append(student.perspectives["kennis"].sum_score)
+    #         if "Rody" in student.name:
+    #             print(student.name, student.perspectives["kennis"].sum_score)
+    # scores.sort()
+    # for score in scores:
+    #     print(score)
+    # return
     templates = load_templates(instance.get_template_path())
     # level_serie_collection = read_levels("levels.json")
     start = read_start(instance.get_start_file_name())

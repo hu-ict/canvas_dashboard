@@ -18,7 +18,7 @@ def main(instance_name):
     if course.attendance is not None:
         course.attendance.bandwidth = bandwidth_builder_attendance(course.attendance.lower_points, course.attendance.upper_points, course.attendance.total_points, course.days_in_semester)
     with open(instance.get_course_file_name(), 'w') as f:
-        dict_result = course.to_json(["assignment"])
+        dict_result = course.to_json()
         json.dump(dict_result, f, indent=2)
     print("GB99 - Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 

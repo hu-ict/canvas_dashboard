@@ -229,7 +229,10 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
         print("SB53 -", errors[-1])
 
     if has_assignment_rubric and has_submission_rubrics and a_assignment.grading_type == "points":
-        submission_score = round(rubric_score, 2)
+        if a_canvas_submission.score is None:
+            submission_score = round(rubric_score, 2)
+        else:
+            submission_score = round(a_canvas_submission.score, 2)
         grade_value = submission_score
 
     if not has_assignment_rubric and a_assignment.grading_type == "letter_grade":
@@ -342,11 +345,12 @@ def add_open_level_moments(course, actual_day, student_id, student_level_moments
             return
         for assignment_sequence in assignment_group.assignment_sequences:
             for assignment in assignment_sequence.assignments:
-                print("AOL04 -", assignment.name)
+                # print("AOL04 -", assignment.name)
                 if assignment.unlock_day <= actual_day:
                     if (assignment.assignment_day - actual_day) <= 7:
+                        # komt 7 dagen voor de Canvas deadline als "openstaand" item in de werklijst
                         if student_level_moments.get_submission_by_assignment(assignment.id) is None:
-                            print("AOL08 -", assignment.name, assignment.unlock_day, actual_day, assignment.assignment_day+21)
+                            # print("AOL08 -", assignment.name, assignment.unlock_day, actual_day, assignment.assignment_day+21)
                             l_submission = Submission(0, assignment.group_id, assignment.id, student_id, assignment.name,
                                                       assignment.assignment_date,
                                                       assignment.assignment_day,
@@ -376,9 +380,10 @@ def read_submissions(a_instance, a_canvas_course, a_course, a_results, a_total_r
                     if assignment.unlock_date > a_results.actual_date:
                         # volgende assignment
                         continue
-                if (assignment.assignment_date - a_results.actual_date).days > 10:
-                    # deadline ligt nog 10 dagen ná actual_date
-                    continue
+
+                # if (assignment.assignment_day - a_results.actual_day) <= 10:
+                #     # deadline ligt nog 10 dagen ná actual_date
+                #     continue
                 canvas_assignment = a_canvas_course.get_assignment(assignment.id, include=['submissions'])
                 # print("LS12 -", canvas_assignment)
                 if canvas_assignment is None:

@@ -54,7 +54,7 @@ def main(instance_name):
         #     print("US13 - displayName:", student.name)
 
     with open(instance.get_course_file_name(), 'w') as f:
-        dict_result = course.to_json(["assignment"])
+        dict_result = course.to_json()
         json.dump(dict_result, f, indent=2)
 
     print("US99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")

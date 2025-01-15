@@ -129,7 +129,7 @@ def generate_config(instance_name):
     config.learning_outcomes = []
     print("GC98 - ConfigFileName:", instance.get_config_file_name())
     with open(instance.get_config_file_name(), 'w') as f:
-        dict_result = config.to_json([])
+        dict_result = config.to_json()
         json.dump(dict_result, f, indent=2)
 
     print("GC99 Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")

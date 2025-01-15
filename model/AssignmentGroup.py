@@ -17,12 +17,11 @@ class AssignmentGroup:
         self.bandwidth = bandwidth
         self.assignment_sequences = []
 
-    def to_json(self, scope):
+    def to_json(self):
         check = lambda x: self.bandwidth.to_json() if x is not None else None
         json_string = {
             'name': self.name,
             'id': self.id,
-            # 'teachers': self.teachers,
             'role': self.role,
             'strategy': self.strategy,
             'lower_c': self.lower_c,
@@ -32,7 +31,7 @@ class AssignmentGroup:
             'upper_points': self.upper_points,
             'bandwidth': check(self.bandwidth)
         }
-        if "assignment" in scope:
+        if len(self.assignment_sequences) > 0:
             json_string['assignment_sequences'] = list(map(lambda a: a.to_json(), self.assignment_sequences))
         return json_string
 

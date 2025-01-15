@@ -282,7 +282,7 @@ def generate_course(instance_name):
         config.attendance.bandwidth = bandwidth_builder_attendance(config.attendance.lower_points, config.attendance.upper_points, config.attendance.total_points, config.days_in_semester)
 
     with open(instance.get_course_file_name(), 'w') as f:
-        dict_result = config.to_json(["assignment"])
+        dict_result = config.to_json()
         json.dump(dict_result, f, indent=2)
 
     print("GCS99 - Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")

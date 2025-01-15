@@ -50,7 +50,7 @@ class CourseConfig:
             line += str(student)
         return line
 
-    def to_json(self, scope):
+    def to_json(self):
         dict_result = {
             'canvas_id': self.canvas_id,
             'name': self.name,
@@ -79,7 +79,7 @@ class CourseConfig:
         dict_result['learning_outcomes'] = list(map(lambda l: l.to_json(), self.learning_outcomes))
         dict_result['roles'] = list(map(lambda r: r.to_json([]), self.roles))
         dict_result['teachers'] = list(map(lambda t: t.to_json(), self.teachers))
-        dict_result['assignment_groups'] = list(map(lambda ag: ag.to_json(scope), self.assignment_groups))
+        dict_result['assignment_groups'] = list(map(lambda ag: ag.to_json(), self.assignment_groups))
         dict_result['student_groups'] = list(map(lambda sg: sg.to_json([]), self.student_groups))
         dict_result['students'] = list(map(lambda s: s.to_json(), self.students))
 

@@ -40,6 +40,7 @@ def get_me_for_check(a_token):
         "Content-type": "application/json; charset=ISO-8859-1"
     }
     url = f"https://graph.microsoft.com/v1.0/me"
+    print(url)
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
         l_result = response.json()
