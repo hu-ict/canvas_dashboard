@@ -419,8 +419,9 @@ def student_dashboard(course_id):
         return jsonify({'message': 'No dashboard found for the selected course'}), 404
 
 
-@main_bp.route('/teacher_dashboard/students/<path:filename>')
-def serve_students_view(filename):
+@main_bp.route('/teacher_dashboard/<int:course_id>/students/<path:filename>')
+# @main_bp.route('/teacher_dashboard/22880/students/<path:filename>')
+def serve_students_view(course_id, filename):
     if os.getenv('STORAGE_TYPE') == 'local':
 
         local_directory = os.path.abspath(os.path.join(os.getcwd(), "courses"))
@@ -429,10 +430,12 @@ def serve_students_view(filename):
             if filename in files:
                 return send_from_directory(os.path.join(root), filename)
         return None
-    return render_template_string(find_blob_by_file_name("students", filename))
 
-@main_bp.route('/teacher_dashboard/general/<path:filename>')
-def serve_general_view(filename):
+    course_name = get_course_instance_name(course_id)
+    return render_template_string(find_blob_by_file_name(f"{course_name}/students", filename))
+
+@main_bp.route('/teacher_dashboard/<int:course_id>/general/<path:filename>')
+def serve_general_view(course_id, filename):
     if os.getenv('STORAGE_TYPE') == 'local':
 
         local_directory = os.path.abspath(os.path.join(os.getcwd(), "courses"))
@@ -441,7 +444,8 @@ def serve_general_view(filename):
             if filename in files:
                 return send_from_directory(os.path.join(root), filename)
         return None
-    return render_template_string(find_blob_by_file_name("general", filename))
+    course_name = get_course_instance_name(course_id)
+    return render_template_string(find_blob_by_file_name(f"{course_name}/students", filename))
 
 @main_bp.route('/css/<path:filename>')
 def serve_css(filename):
