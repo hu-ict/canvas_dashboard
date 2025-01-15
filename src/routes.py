@@ -420,6 +420,8 @@ def student_dashboard(course_id):
 
 
 @main_bp.route('/teacher_dashboard/<int:course_id>/students/<path:filename>')
+@login_required
+@role_required('teachers')
 # @main_bp.route('/teacher_dashboard/22880/students/<path:filename>')
 def serve_students_view(course_id, filename):
     if os.getenv('STORAGE_TYPE') == 'local':
@@ -435,6 +437,8 @@ def serve_students_view(course_id, filename):
     return render_template_string(find_blob_by_file_name(f"{course_name}/students", filename))
 
 @main_bp.route('/teacher_dashboard/<int:course_id>/general/<path:filename>')
+@login_required
+@role_required('teachers')
 def serve_general_view(course_id, filename):
     if os.getenv('STORAGE_TYPE') == 'local':
 
