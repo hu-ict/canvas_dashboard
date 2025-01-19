@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}"/>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+<header>
+    <img src="{{ url_for('static', filename='images/hu-logo.svg') }}" alt="hu-logo">
+    <button id="logout-button">Uitloggen</button>
+</header>
+
+<main>
+    <div id="dashboard-container">
+        <div id="tabs">
+            <button class="tab-button active" data-tab="generate-course-tab">Genereer Cursus</button>
+            <button class="tab-button" data-tab="manage-courses-tab">Beheer Cursussen</button>
+        </div>
+
+        <div id="generate-course-tab" class="tab-content active">
+            <h2>Genereer Nieuwe Cursus</h2>
+            <form id="generate-form">
+                <div class="form-group">
+                    <label for="new_instance">Nieuwe Instance:</label>
+                    <input type="text" id="new_instance" name="new_instance" placeholder="Bijv. test_inno" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Categorie:</label>
+                    <input type="text" id="category" name="category" placeholder="Bijv. inno_courses" required>
+                </div>
+                <div class="form-group">
+                    <label for="canvas_course_id">Canvas Course ID:</label>
+                    <input type="text" id="canvas_course_id" name="canvas_course_id" placeholder="Bijv. 2600" required>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Genereer Cursus" id="submit-button">
+                </div>
+            </form>
+        </div>
+
+        <div id="manage-courses-tab" class="tab-content">
+            <h2>Beheer Cursussen</h2>
+            <form id="manage-courses-form">
+                <div class="form-group">
+                    <label for="course_instance">Cursus Instance:</label>
+                    <input type="text" id="course_instance" name="course_instance" placeholder="Bijv. test_inno" required>
+                </div>
+                <div class="form-group">
+                    <label for="event">Event Type:</label>
+                    <select id="event" name="event" required>
+                        <option value="course_update_event">Update Cursus</option>
+                        <option value="results_create_event">Resultaten Maken</option>
+                        <option value="results_update_event">Resultaten Bijwerken</option>
+                    </select>
+                </div>
+        <div class="form-group">
+            <input type="submit" value="Update Cursus" id="update-course-button">
+        </div>
+    </form>
+    <hr>
+   <h3>Actieve Cursussen</h3>
+<div id="courses-list-container" class="scroll-container">
+    <div id="courses-list">Laden...</div>
+</div>
+<hr>
+<h3>Logs</h3>
+<div id="logs-list-container" class="scroll-container">
+    <div id="logs-list">Laden...</div>
+</div>
+
+</div>
+    </div>
+</main>
+<footer><h3>© 2024 Hogeschool Utrecht</h3></footer>
+<script src="{{ url_for('static', filename='js/admin_dashboard.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+services:
+  dashboard:
+    container_name: canvas_dashboard
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "5101:5101"
+    env_file:
+      - .env
+    volumes:
+      - ./courses:/src/courses
+    networks:
+      - dashboard-network
+  database:
+    image: "postgres:14.7-alpine"
+    environment:
+        - POSTGRES_USER=innovation
+        - POSTGRES_PASSWORD=admin
+        - POSTGRES_DB=canvas_dashboard
+        - POSTGRES_PORT=5432
+    ports:
+      - "25432:5432"
+    volumes:
+      - dashboard-database-data:/var/lib/postgresql/data/
+    networks:
+      - dashboard-network
+
+volumes:
+  courses:
+  dashboard-database-data:
+
+networks:
+  dashboard-network:

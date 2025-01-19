@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}"/>
+    <title>INNO Dashboard Login</title>
+</head>
+<body>
+<header>
+    <img src="{{ url_for('static', filename='images/hu-logo.svg') }}" alt="hu-logo">
+</header>
+<main>
+    <!-- Inlogveld -->
+    <div id="inlog-blok">
+        <div class="login-container">
+            <h2>Inloggen</h2>
+            <form class="login-form">
+                <div class="form-group">
+                    <label for="username">E-mail:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Wachtwoord:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <input type="button" value="Inloggen" id="inloggen">
+                    <br>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer><h3>© 2024 Hogeschool Utrecht</h3></footer>
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+</html>
