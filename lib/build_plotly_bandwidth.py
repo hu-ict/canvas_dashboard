@@ -6,7 +6,7 @@ from lib.build_plotly_perspective import plot_assignments
 def process_bandwidth(a_course, a_assignment_group, a_labels_colors, a_file_name):
     if a_assignment_group.strategy == "NONE":
         print("BPB06 - No strategy defined for", a_assignment_group.id, "in perspective", a_assignment_group.name)
-    print("BPB07 - Processing", a_assignment_group.name, "strategy", a_assignment_group.strategy)
+    # print("BPB07 - Processing", a_assignment_group.name, "strategy", a_assignment_group.strategy)
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.update_layout(height=800, width=1200, showlegend=False)
     plot_bandbreedte_colored(0, 0, fig, a_course.days_in_semester, a_assignment_group.bandwidth, False,

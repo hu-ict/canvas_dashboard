@@ -14,7 +14,7 @@ def generate_portfolio(instance_name):
     instances = read_course_instances()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    instance = instances.get_instance_by_name((instances.current_instance))
+    instance = instances.get_instance_by_name(instances.current_instance)
     print("GPF02 - Instance:", instance.name)
     course = read_course(instance.get_course_file_name())
     results = read_results(instance.get_result_file_name())

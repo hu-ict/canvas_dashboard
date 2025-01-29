@@ -11,7 +11,7 @@ from lib.file import read_course, read_results, read_course_instances, read_leve
 from model.Submission import Submission
 
 
-def peil_construct(a_course):
+def level_construct(a_course):
     l_peilingen = {}
     if a_course.level_moments is None or len(a_course.level_moments.assignment_groups) == 0:
         return l_peilingen
@@ -30,7 +30,29 @@ def peil_construct(a_course):
     return l_peilingen
 
 
-def plot_student(instances, course, student, actual_date, actual_day, a_peil_construction, positions, subplot_titles, specs, level_serie_collection):
+def grade_construct(a_course):
+    l_grades = {}
+    if a_course.level_moments is None or len(a_course.grade_moments.assignment_groups) == 0:
+        return l_grades
+    for perspective in a_course.perspectives.values():
+        l_grades[perspective.name] = []
+    assignment_group = a_course.find_assignment_group(a_course.grade_moments.assignment_groups[0])
+    for assignment_sequence in assignment_group.assignment_sequences:
+        for assignment in assignment_sequence.assignments:
+            # zoek de juiste Assignment
+            for peil_label in a_course.grade_moments.moments:
+                if peil_label.lower() in assignment.name.lower():
+                    # zoek het juiste Perspective
+                    for perspective_name in l_grades:
+                        if perspective_name.lower() in assignment.name.lower():
+                            l_grades[perspective_name].append({'assignment': assignment, 'submission': None})
+    return l_grades
+
+
+def plot_student(instances, course, student, actual_date, actual_day,
+                 a_level_construction, a_grade_construction,
+                 positions, subplot_titles, specs,
+                 level_serie_collection):
     if instances.is_instance_of('inno_courses'):
         fig = make_subplots(rows=2, cols=6, subplot_titles=subplot_titles, specs=specs, vertical_spacing=0.10,
                             horizontal_spacing=0.08)
@@ -42,7 +64,11 @@ def plot_student(instances, course, student, actual_date, actual_day, a_peil_con
     for perspective in student.perspectives.values():
         row = positions[perspective.name]['row']
         col = positions[perspective.name]['col']
-        plot_perspective(row, col, fig, course, perspective, a_peil_construction, actual_day, get_date_time_loc(actual_date), level_serie_collection)
+        # print("GP19 -", perspective, a_level_construction, a_grade_construction)
+        plot_perspective(row, col, fig, course, perspective,
+                         a_level_construction, a_grade_construction,
+                         actual_day, get_date_time_loc(actual_date),
+                         level_serie_collection)
 
     if course.attendance is not None:
         row = positions["attendance"]['row']
@@ -75,7 +101,7 @@ def plot_student(instances, course, student, actual_date, actual_day, a_peil_con
             col = positions[grade_moment]['col']
             if l_grade_moment is None:
                 # nog niet ingevuld
-                l_assignment = course.get_first_level_moment_by_query([grade_moment, "overall"])
+                l_assignment = course.get_first_grade_moment_by_query([grade_moment, "overall"])
                 l_grade_moment = Submission(0, 0, 0, 0,
                                             l_assignment.name, l_assignment.get_date(), l_assignment.get_day(),
                                             None, None,
@@ -157,15 +183,19 @@ def generate_plotly(instance_name):
                 {'type': 'scatter', "colspan": 3}, None, None, {'type': 'scatter', "colspan": 3}, None, None
             ]
         ]
-    peil_construction = peil_construct(course)
+    l_level_construction = level_construct(course)
+    l_grade_construction = grade_construct(course)
     count = 0
     for student in results.students:
-        l_peil_construction = find_submissions(student, peil_construction)
+        l_level_construction = find_submissions(student, l_level_construction)
+        l_grade_construction = find_submissions(student, l_grade_construction)
         # print(l_peil_construction)
         print("GPL90 -", student.name)
 
-        plot_student(instance, course, student, results.actual_date, results.actual_day, l_peil_construction, positions,
-                         subplot_titles, specs, level_serie_collection)
+        plot_student(instance, course, student, results.actual_date, results.actual_day,
+                     l_level_construction, l_grade_construction,
+                     positions,
+                     subplot_titles, specs, level_serie_collection)
 
     print("GPL99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 

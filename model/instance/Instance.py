@@ -55,10 +55,10 @@ class Instance:
         return ".//templates//"
 
     def get_student_path(self):
-        return self.get_project_path() + "dashboard_" + self.name + "//students//"
+        return self.get_project_path() + "dashboard_" + self.name + "//" + self.name + "//students//"
 
     def get_html_path(self):
-        return self.get_project_path() + "dashboard_" + self.name + "//general//"
+        return self.get_project_path() + "dashboard_" + self.name + "//" + self.name + "//general//"
 
     def get_html_root_path(self):
         return self.get_project_path() + "dashboard_" + self.name + "//"

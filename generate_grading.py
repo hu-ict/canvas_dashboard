@@ -2,7 +2,7 @@ import sys
 
 from canvasapi import Canvas
 
-from lib.file import read_course_instance, read_start, read_course, read_results, read_levels_from_canvas, read_levels
+from lib.file import read_start, read_course, read_results, read_levels_from_canvas, read_levels
 from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_actual_date, get_date_time_loc, API_URL
 from lib.translation_table import translation_table

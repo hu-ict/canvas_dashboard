@@ -78,11 +78,11 @@ def write_release_planning(a_course, a_templates, a_assignment_group):
     return release_planning_html_string
 
 
-def get_perspective_assignment_group_release_planning(a_course, a_perspective, a_assignment_group_id, a_templates):
+def get_perspective_assignment_group_release_planning(a_instance, a_course, a_perspective, a_assignment_group_id, a_templates):
     assignment_group = a_course.find_assignment_group(a_assignment_group_id)
-    file_name_levels = ".//general//level_serie_" + str(a_perspective.levels) + ".html"
-    file_name_group = ".//general//release_planning_" + str(a_assignment_group_id) + ".html"
-    print("BBS31 -", file_name_group)
+    file_name_levels = ".//" + a_instance.name + "//general//level_serie_" + str(a_perspective.levels) + ".html"
+    file_name_group = ".//" + a_instance.name + "//general//release_planning_" + str(a_assignment_group_id) + ".html"
+    # print("BBS31 -", file_name_group)
 
     return a_templates["release_planning_perspective"].substitute(
         {'url_levels': file_name_levels,
@@ -137,17 +137,20 @@ def build_bootstrap_release_planning_tab(a_instance, a_course, a_templates, leve
     perspectives_html_string = ""
     for perspective in a_course.perspectives.values():
         for assignment_group_id in perspective.assignment_groups:
-            perspectives_html_string += get_perspective_assignment_group_release_planning(a_course, perspective,
+            perspectives_html_string += get_perspective_assignment_group_release_planning(a_instance,
+                                                                                          a_course, perspective,
                                                                                           assignment_group_id,
                                                                                           a_templates)
     if a_course.level_moments is not None:
         assignment_group_id = a_course.level_moments.assignment_groups[0]
-        perspectives_html_string += get_perspective_assignment_group_release_planning(a_course, a_course.level_moments,
+        perspectives_html_string += get_perspective_assignment_group_release_planning(a_instance,
+                                                                                      a_course, a_course.level_moments,
                                                                                       assignment_group_id,
                                                                                       a_templates)
     if a_course.grade_moments is not None:
         assignment_group_id = a_course.grade_moments.assignment_groups[0]
-        perspectives_html_string += get_perspective_assignment_group_release_planning(a_course, a_course.grade_moments,
+        perspectives_html_string += get_perspective_assignment_group_release_planning(a_instance,
+                                                                                      a_course, a_course.grade_moments,
                                                                                       assignment_group_id,
                                                                                       a_templates)
     html_string += a_templates["release_planning"].substitute(

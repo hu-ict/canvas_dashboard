@@ -54,20 +54,7 @@ def generate_dashboard(instance_name):
     #     print(team_coach['teacher'])
 
     student_totals = create_student_totals(instance, course, team_coaches)
-    with open("student_totals.json", 'w') as f:
-        dict_result = student_totals
-        json.dump(dict_result, f, indent=2)
-
-
-    # with open("dump.json", 'w') as f:
-    #     dict_result = json.dumps(student_totals, indent = 4)
-    #     json.dump(student_totals, f, indent=2)
-
-    # print("GD04", student_totals)
     print("GD05 - build_totals(start, course, results, student_totals, gilde, team_coaches)")
-    with open("student_totals.json", 'w') as f:
-        dict_result = student_totals
-        json.dump(dict_result, f, indent=2)
     build_totals(instance, course, results, student_totals)
     print("GD06 - build_bootstrap_general(start, course, results, team_coaches, labels_colors)")
     build_bootstrap_general(instance, course, results, templates, team_coaches, level_serie_collection, student_totals)
@@ -85,10 +72,11 @@ def generate_dashboard(instance_name):
     with open(instance.get_workload_file_name(), 'w') as f:
         dict_result = workload_history.to_json()
         json.dump(dict_result, f, indent=2)
-
+    print("GD09 - Generate werkvoorrad")
     plot_werkvoorraad(instance, course, student_totals, workload_history)
+    print("GD10 - Generate voortgang")
     plot_voortgang(instance, course, student_totals, read_progress(instance.get_progress_file_name()),
-                   level_serie_collection.level_series['progress'])
+                   level_serie_collection.level_series['progress'], level_serie_collection.level_series['grade'])
     print("GD99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
 

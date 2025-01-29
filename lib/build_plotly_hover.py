@@ -58,7 +58,7 @@ def get_hover_attendance(attendance, attendance_submission, grade):
     return l_hover
 
 
-def get_hover_level_moment(a_peil_submissions, a_course, a_level_serie_collections):
+def get_hover_level_moment1(a_peil_submissions, a_course, a_level_serie_collections):
     hover = NO_DATA
     if a_peil_submissions:
         hover = "<b>" + a_peil_submissions.assignment_name + "</b> " + get_date_time_loc(a_peil_submissions.assignment_date) + "<br>"
@@ -72,17 +72,31 @@ def get_hover_level_moment(a_peil_submissions, a_course, a_level_serie_collectio
     return hover
 
 
-def get_hover_grade_moment(a_grade_submissions, a_course, a_level_serie_collections):
+def get_hover_grade_moment1(a_grade_submissions, a_course, a_level_serie_collections):
     hover = NO_DATA
     if a_grade_submissions:
         hover = "<b>" + a_grade_submissions.assignment_name + "</b> " + get_date_time_loc(a_grade_submissions.assignment_date) + "<br>"
         if a_grade_submissions.graded:
-            hover += a_level_serie_collections.level_series[a_course.grade_levels].grades[str(int(a_grade_submissions.score))].label
+            hover += a_level_serie_collections.level_series[a_course.grade_moments.levels].grades[a_grade_submissions.grade].label
             hover += ", bepaald door " + str(a_grade_submissions.grader_name) + " op " + get_date_time_loc(a_grade_submissions.graded_date)
             hover += get_hover_comments(a_grade_submissions.comments)
             hover += get_hover_rubrics_comments(a_course, a_grade_submissions, a_level_serie_collections.level_series[a_course.grade_moments.levels].grades)
         else:
             hover += a_level_serie_collections.level_series[a_course.grade_moments.levels].get_status(BEFORE_DEADLINE).label
+    return hover
+
+
+def get_hover_moment(a_course, a_submission, a_level_serie):
+    hover = NO_DATA
+    if a_submission is not None:
+        hover = "<b>" + a_submission.assignment_name + "</b> " + get_date_time_loc(a_submission.assignment_date) + "<br>"
+        if a_submission.graded:
+            hover += a_level_serie.grades[a_submission.grade].label
+            hover += ", bepaald door " + str(a_submission.grader_name) + " op " + get_date_time_loc(a_submission.graded_date)
+            hover += get_hover_comments(a_submission.comments)
+            hover += get_hover_rubrics_comments(a_course, a_submission, a_level_serie.grades)
+        else:
+            hover += a_level_serie.get_status(BEFORE_DEADLINE).label
     return hover
 
 

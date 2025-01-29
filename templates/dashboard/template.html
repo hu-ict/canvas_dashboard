@@ -119,14 +119,14 @@
         }
         function setCoach(coach_id) {
             console.info("Coach! "+coach_id);
-            const leer_team = document.getElementsByClassName("coach");
+            const leer_team = document.getElementsByClassName(" coach");
             console.info("Boxes: "+leer_team.length);
             for (i = leer_team.length - 1; i >= 0; --i) {
-                console.info("check "+ leer_team[i].className)
-                console.info(leer_team[i].style.visibility)
-                if (leer_team[i].className.includes(coach_id)) {
+                if (leer_team[i].className.includes(coach_id) || coach_id == "0") {
+                    console.info("check " + leer_team[i].className + " block")
                     leer_team[i].style.display = "block";
                 } else {
+                    console.info("check " + leer_team[i].className + " none")
                     leer_team[i].style.display = "none";
                 }
             }
@@ -272,8 +272,11 @@
         const urlParams = new URLSearchParams(window.location.search);
         const teacher_id = urlParams.get('teacher_id');
         console.info("Teacher_id: "+teacher_id);
-        if (teacher_id > 0)
+        if (teacher_id > 0) {
             setCoach(teacher_id)
+        } else {
+            setCoach("0")
+        }
     </script>
     <!-- Bootstrap core JavaScript-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>

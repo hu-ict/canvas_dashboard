@@ -12,7 +12,7 @@ def build_bootstrap_learning_outcome_tab(instance, course, templates, a_level_se
         #         assignment_list.append(assignment)
         # assignment_list = sorted(assignment_list, key=lambda a: a.assignment_day)
         # for assignment in assignment_list:
-        file_name = "general/learning_outcome_" + str(learning_outcome.id).lower() + ".html"
+        file_name = ".//" + instance.name + "//general//learning_outcome_" + str(learning_outcome.id).lower() + ".html"
         print("BBL41 -", file_name)
         learning_outcomes_html_string += templates["learning_outcome"].substitute(
                 {'url': file_name,

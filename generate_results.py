@@ -5,7 +5,8 @@ import json
 from generate_progress import proces_progress
 from lib.file import read_start, read_course, read_course_instances, read_progress, read_levels_from_canvas
 from lib.lib_attendance import read_attendance
-from lib.lib_submission import count_graded, add_missed_assignments, read_submissions, add_open_level_moments
+from lib.lib_submission import count_graded, add_missed_assignments, read_submissions, add_open_level_moments, \
+    add_open_grade_moments
 from model.Result import *
 from lib.lib_date import get_actual_date, API_URL, date_to_day
 from model.StudentResults import StudentResults
@@ -56,7 +57,7 @@ def generate_results(instance_name):
             # Perspective aanvullen met missed Assignments waar nodig (niets ingeleverd)
             add_missed_assignments(course, results.actual_day, student_perspective)
         add_open_level_moments(course, results.actual_day, student.id, student.student_level_moments)
-
+        add_open_grade_moments(course, results.actual_day, student.id, student.student_grade_moments)
     # for student in results.students:
     #     print("GR75", student.name)
     # sorteer de attendance en submissions

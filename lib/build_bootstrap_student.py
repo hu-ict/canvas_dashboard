@@ -66,9 +66,10 @@ def build_level_moments(course_id, course, moment, moment_submissions, templates
         progress_label = levels.level_series[course.level_moments.levels].get_status(BEFORE_DEADLINE).label
         progress_color = levels.level_series[course.level_moments.levels].get_status(BEFORE_DEADLINE).color
         comments = "Leeg"
+        url = "https://canvas.hu.nl/courses/" + str(course_id)
         level_moment_html_string = templates['level_moment'].substitute(
             {'level_moment_title': moment,
-             'url':  "",
+             'url':  url,
              'progress_label': progress_label,
              'progress_color': progress_color,
              'submitted_date': "Leeg",

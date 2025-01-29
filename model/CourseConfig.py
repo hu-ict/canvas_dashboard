@@ -65,14 +65,17 @@ class CourseConfig:
             dict_result['attendance'] = self.attendance.to_json()
         else:
             dict_result['attendance'] = None
+
         if self.level_moments is not None:
             dict_result['level_moments'] = self.level_moments.to_json()
         else:
             dict_result['level_moments'] = None
+
         if self.grade_moments is not None:
             dict_result['grade_moments'] = self.grade_moments.to_json()
         else:
             dict_result['grade_moments'] = None
+
         dict_result['perspectives'] = {}
         for key in self.perspectives:
             dict_result['perspectives'][key] = self.perspectives[key].to_json()
@@ -223,6 +226,18 @@ class CourseConfig:
 
     def get_first_level_moment_by_query(self, a_query):
         for assignment_group_id in self.level_moments.assignment_groups:
+            assignment_group = self.find_assignment_group(assignment_group_id)
+            for assignment in assignment_group.assignment_sequences:
+                condition = 0
+                for selector in a_query:
+                    if selector.lower() in assignment.name.lower():
+                        condition += 1
+                if condition == len(a_query):
+                    return assignment
+        return None
+
+    def get_first_grade_moment_by_query(self, a_query):
+        for assignment_group_id in self.grade_moments.assignment_groups:
             assignment_group = self.find_assignment_group(assignment_group_id)
             for assignment in assignment_group.assignment_sequences:
                 condition = 0

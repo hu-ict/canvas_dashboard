@@ -10,7 +10,6 @@ from lib.lib_date import get_date_time_loc
 
 def build_learning_analytics(course, results, level_serie_collection):
     learning_analytics = {}
-    assignment_list = {}
     for assignment_group in course.assignment_groups:
         perspective = course.find_perspective_by_assignment_group(assignment_group.id)
         if perspective is not None:
@@ -38,10 +37,12 @@ def build_learning_analytics(course, results, level_serie_collection):
         for submission in student.student_level_moments.submissions:
             learning_analytics[str(submission.assignment_id)]["status"][str(submission.status)] += 1
             if submission.grade is not None:
+                print("BLA02 -", submission.assignment_name, submission.assignment_id, submission.grade)
                 learning_analytics[str(submission.assignment_id)]["grades"][str(submission.grade)] += 1
         for submission in student.student_grade_moments.submissions:
             learning_analytics[str(submission.assignment_id)]["status"][str(submission.status)] += 1
             if submission.grade is not None:
+                print("BLA03 -", submission.assignment_name, submission.assignment_id, submission.grade)
                 learning_analytics[str(submission.assignment_id)]["grades"][str(submission.grade)] += 1
     return learning_analytics
 
@@ -142,7 +143,7 @@ def build_bootstrap_analyse_tab(instance, a_course, learning_analytics, a_templa
                 assignment_list.append(assignment)
         assignment_list = sorted(assignment_list, key=lambda a: a.assignment_day)
         for assignment in assignment_list:
-            file_name = "general/analyse_" + str(assignment.id) + ".html"
+            file_name = instance.name + "/general/analyse_" + str(assignment.id) + ".html"
             if assignment.assignment_day < actual_day:
                 background_color = "#ffb3b3"
             else:

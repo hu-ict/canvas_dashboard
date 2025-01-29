@@ -60,14 +60,23 @@ def get_used_assignment_groups(config):
     else:
         print("GC03 - NO level_moments perspective ")
 
+    if config.grade_moments is not None:
+        if len(config.grade_moments.assignment_groups) > 0:
+            used_assignment_groups += config.grade_moments.assignment_groups
+        else:
+            message = "GC05 - WARNING no assignments_group for grade_moments perspective ", config.grade_moments.name
+            print(message)
+    else:
+        print("GC07 - NO level_moments perspective ")
+
     for perspective in config.perspectives.values():
         if len(perspective.assignment_groups) > 0:
             used_assignment_groups += perspective.assignment_groups
         else:
-            message = "GC05 - WARNING no assignments_group for perspective ", perspective.name
+            message = "GC09 - WARNING no assignments_group for perspective ", perspective.name
             print(message)
 
-    print("GC07 - Used assignment_groups", used_assignment_groups)
+    print("GC11 - Used assignment_groups", used_assignment_groups)
     return used_assignment_groups
 
 
@@ -256,7 +265,14 @@ def generate_course(instance_name):
 
             total_group_points = 0
             for assignment_sequence in assignment_group.assignment_sequences:
-                if "Aanvullende" not in assignment_sequence.name:
+                # Filter de verbeteropdrachten er uit
+                if "Verbeter" in assignment_sequence.name:
+                    continue
+                elif assignment_sequence.get_day() > (config.days_in_semester - 14):
+                    continue
+                elif "Aanvullend" in assignment_sequence.name:
+                    continue
+                else:
                     total_group_points += assignment_sequence.points
             assignment_group.total_points = total_group_points
             # print("GC47 -", tags_lu)
@@ -274,7 +290,6 @@ def generate_course(instance_name):
                     learning_outcome.add_assigment_sequence(assignment_sequence.tag)
                 assignment.name = assignment.name.split("(")[0].strip()
             assignment_sequence.name = assignment_sequence.name.split("(")[0].strip()
-
     for assignment_group in config.assignment_groups:
         assignment_group.assignment_sequences = sorted(assignment_group.assignment_sequences, key=lambda a: a.get_day())
         assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)

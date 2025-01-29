@@ -47,15 +47,15 @@ def bandwidth_builder(assignment_group, days_in_semester):
         print(message)
         return None
     points = []
-    x_reparatie_periode = 14
+    x_verbeter_periode = 14
     y_start = assignment_group.upper_points/25
     x_time = calc_dev(days_in_semester, 0, 0, 1, 0)
     # bereken bandbreedte
     if assignment_group.strategy == "EXPONENTIAL":
-        lower_a = assignment_group.lower_points / (days_in_semester-x_reparatie_periode) / (days_in_semester-x_reparatie_periode)
-        upper_a = (assignment_group.upper_points - y_start*3) / (days_in_semester-x_reparatie_periode) / (days_in_semester-x_reparatie_periode)
-        band_lower = calc_dev(days_in_semester, x_reparatie_periode, lower_a, 0.00, 0)
-        band_upper = calc_dev(days_in_semester, x_reparatie_periode, upper_a, 0.00, y_start*3)
+        lower_a = assignment_group.lower_points / (days_in_semester-x_verbeter_periode) / (days_in_semester-x_verbeter_periode)
+        upper_a = (assignment_group.upper_points - y_start*3) / (days_in_semester-x_verbeter_periode) / (days_in_semester-x_verbeter_periode)
+        band_lower = calc_dev(days_in_semester, x_verbeter_periode, lower_a, 0.00, 0)
+        band_upper = calc_dev(days_in_semester, x_verbeter_periode, upper_a, 0.00, y_start*3)
     elif assignment_group.strategy == "LIN_POINTS":
         lower_a = 0
         upper_a = 0
@@ -70,7 +70,11 @@ def bandwidth_builder(assignment_group, days_in_semester):
         print(f"LB04 - upper a {upper_a:5} b {upper_b:5.3} c {upper_c:5}")
         total_points = 0
         for assignment_sequence in assignment_group.assignment_sequences:
-            if "Verbeter" not in assignment_sequence.name:
+            if "Verbeter" in assignment_sequence.name:
+                continue
+            elif assignment_sequence.get_day() > (days_in_semester-x_verbeter_periode):
+                continue
+            else:
                 total_points += assignment_sequence.points
                 serie[assignment_sequence.get_day()] = {"day": assignment_sequence.get_day(), "sum": total_points}
                 output = f"LB08 - Day points; {assignment_sequence.points:3};{assignment_sequence.get_day():4};{total_points:>4}"
@@ -106,7 +110,13 @@ def bandwidth_builder(assignment_group, days_in_semester):
         # print(assignment.assignment_day, assignment.points, "value_day", total_points, "lower =", lower_y, "upper =", upper_y)
         serie[0] = {"day": 0, "value_day": 0, "lower": lower_y, "upper": upper_y}
         for assignment_sequence in assignment_group.assignment_sequences:
-            if "Aanvullend" not in assignment_sequence.name:
+            if "Verbeter" in assignment_sequence.name:
+                continue
+            elif assignment_sequence.get_day() > (days_in_semester-x_verbeter_periode):
+                continue
+            elif "Aanvullend" in assignment_sequence.name:
+                continue
+            else:
                 total_points += assignment_sequence.points
                 lower_y = lower_a * total_points * total_points + lower_b * total_points + lower_c
                 upper_y = upper_a * total_points * total_points + upper_b * total_points + upper_c
@@ -137,15 +147,15 @@ def bandwidth_builder(assignment_group, days_in_semester):
     elif assignment_group.strategy == "CONSTANT":
         # propedeuse perspectieven
         c = assignment_group.lower_points
-        band_lower = calc_dev(days_in_semester, x_reparatie_periode, 0, 0, c)
+        band_lower = calc_dev(days_in_semester, x_verbeter_periode, 0, 0, c)
         c = assignment_group.upper_points
-        band_upper = calc_dev(days_in_semester, x_reparatie_periode, 0, 0, c)
+        band_upper = calc_dev(days_in_semester, x_verbeter_periode, 0, 0, c)
     elif assignment_group.strategy == "ATTENDANCE":
         # propedeuse perspectieven
         c = assignment_group.lower_points
-        band_lower = calc_dev(days_in_semester, x_reparatie_periode, 0, 0, c)
+        band_lower = calc_dev(days_in_semester, x_verbeter_periode, 0, 0, c)
         c = assignment_group.upper_points
-        band_upper = calc_dev(days_in_semester, x_reparatie_periode, 0, 0, c)
+        band_upper = calc_dev(days_in_semester, x_verbeter_periode, 0, 0, c)
     elif assignment_group.strategy == "POINTS":
         serie = {0: {"day": 0, "sum": 0}}
         total_points = 0
@@ -180,10 +190,10 @@ def bandwidth_builder(assignment_group, days_in_semester):
             band_upper.append(assignment_group.upper_points)
     else:
         #assignment_group.strategy == "LINEAIR"
-        b = (assignment_group.lower_points + y_start) / (days_in_semester - x_reparatie_periode)
-        band_lower = calc_dev(days_in_semester, x_reparatie_periode, 0, b, -y_start)
-        b = (assignment_group.upper_points - y_start) / (days_in_semester - x_reparatie_periode)
-        band_upper = calc_dev(days_in_semester, x_reparatie_periode, 0, b, y_start)
+        b = (assignment_group.lower_points + y_start) / (days_in_semester - x_verbeter_periode)
+        band_lower = calc_dev(days_in_semester, x_verbeter_periode, 0, b, -y_start)
+        b = (assignment_group.upper_points - y_start) / (days_in_semester - x_verbeter_periode)
+        band_upper = calc_dev(days_in_semester, x_verbeter_periode, 0, b, y_start)
     for i in range(len(x_time)):
         if i < len(band_lower):
             points.append(Point(x_time[i], band_lower[i], band_upper[i]))
@@ -194,6 +204,7 @@ def bandwidth_builder(assignment_group, days_in_semester):
     new.points = points
 
     return new
+
 
 def bandwidth_builder_attendance(a_lower_points, a_upper_points, a_total_points, days_in_semester):
     points = []
