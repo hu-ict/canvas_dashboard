@@ -120,6 +120,7 @@ class StudentResults:
         grade_moments = []
         for grade_moment in self.student_grade_moments.submissions:
             condition = 0
+            # moet aan alle selectie criteria voldoen
             for selector in a_query:
                 if selector.lower() in grade_moment.assignment_name.lower():
                     condition += 1

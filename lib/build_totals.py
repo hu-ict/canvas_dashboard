@@ -94,7 +94,7 @@ def create_student_totals(instance, course, team_coaches):
             }
         for grade in course.grade_moments.moments:
             grades[grade] = {
-                'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+                'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0, 4: 0}
                 # ,
                 # 'team': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
                 # 'gilde': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0},
@@ -134,7 +134,7 @@ def create_student_totals(instance, course, team_coaches):
             }
         for grade in course.grade_moments.moments:
             grades[grade] = {
-                'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
+                'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0, 4: 0}
             }
         student_totals = {
             'student_count': 0,
@@ -167,7 +167,7 @@ def create_student_totals(instance, course, team_coaches):
         if course.grade_moments is not None:
             student_totals["grade_moments"] = {}
             for moment in course.grade_moments.moments:
-                student_totals["grade_moments"][moment] = {'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}}
+                student_totals["grade_moments"][moment] = {'overall': {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0, 4: 0}}
                 for perspective in course.perspectives.keys():
                     student_totals["grade_moments"][moment][perspective] = {-2: 0, -1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
 

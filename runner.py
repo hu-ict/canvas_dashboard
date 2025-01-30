@@ -40,7 +40,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         main(sys.argv[1], sys.argv[2])
     else:
-        # main("TICT-V1SE1-24_SEP2024", "course_create_event")
+        # main("TICT-V1SE1-24_SEP2024", "results_create_event")
         # main("test_inno", "course_create_event")
         main("sep24_inno", "results_create_event")
     total_seconds = (get_actual_date() - l_actual_date).seconds

@@ -8,6 +8,9 @@ class LevelSerie:
         self.status = {}
         self.grades = {}
 
+    def __str__(self):
+        return f'LevelSerie({self.name}, {self.status}, {self.grades})'
+
     def to_json(self):
         dict_result = {"status": {},
                        "grades": {}}

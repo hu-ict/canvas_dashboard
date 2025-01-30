@@ -36,6 +36,12 @@ class Result:
                 return student
         return None
 
+    def find_student_by_number(self, student_number):
+        for student in self.students:
+            if student.number == student_number:
+                return student
+        return None
+
     @staticmethod
     def from_dict(data_dict):
         new_course = Result(data_dict['id'], data_dict['name'], get_date_time_obj(data_dict['actual_date']), data_dict['actual_day'], data_dict['submission_count'], data_dict['not_graded_count'])

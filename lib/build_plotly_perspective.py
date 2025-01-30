@@ -284,7 +284,7 @@ def plot_overall_level_moment(a_row, a_col, a_fig, a_course, a_level_moment, a_l
     if a_level_moment.grade is None:
         y_niveau = [0.2]
     else:
-        y_niveau = [a_level_moment.grade]
+        y_niveau = [int(a_level_moment.grade)]
     x_labels = [a_level_moment.assignment_name]
     y_hover = get_hover_moment(a_course, a_level_moment, a_levels.level_series[a_course.level_moments.levels])
     a_fig.add_trace(go.Bar(x=x_labels, y=y_niveau,

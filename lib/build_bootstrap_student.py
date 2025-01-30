@@ -2,7 +2,6 @@ from lib.build_plotly_hover import get_hover_rubrics_comments, get_hover_assignm
     get_hover_grade, get_hover_status
 from lib.file import read_plotly
 from lib.lib_date import get_date_time_loc
-from lib.translation_table import translation_table
 from model.perspective.Status import NOT_YET_GRADED, BEFORE_DEADLINE, GRADED, MISSED_ITEM
 
 
@@ -58,13 +57,13 @@ def build_student_tabs(instance, course, student_tabs):
     return tabs_html_string
 
 
-def build_level_moments(course_id, course, moment, moment_submissions, templates, levels):
+def build_moments(course_id, course, moment, level_serie, moment_submissions, templates):
     assignments = course.get_level_moments_by_query(moment)
 
-    # print("BLM02 - len(level_moment_submissions)",len(level_moment_submissions), "for level_moment", level_moment)
+    # print("BLM02 - len(moment_submissions)",len(moment_submissions), "for level_moment", moment)
     if len(moment_submissions) == 0:
-        progress_label = levels.level_series[course.level_moments.levels].get_status(BEFORE_DEADLINE).label
-        progress_color = levels.level_series[course.level_moments.levels].get_status(BEFORE_DEADLINE).color
+        progress_label = level_serie.get_status(BEFORE_DEADLINE).label
+        progress_color = level_serie.get_status(BEFORE_DEADLINE).color
         comments = "Leeg"
         url = "https://canvas.hu.nl/courses/" + str(course_id)
         level_moment_html_string = templates['level_moment'].substitute(
@@ -82,17 +81,18 @@ def build_level_moments(course_id, course, moment, moment_submissions, templates
     else:
         level_moment_html_string = ""
         for moment_submission in moment_submissions:
-            # print("BLM04 -", level_moment_submission.assignment_name)
+            # print("BLM04 -", moment_submission.assignment_name)
+            # print("BLM05 -", level_serie)
             comments = get_comments(moment_submission.comments)
             url = "https://canvas.hu.nl/courses/" + str(course_id) + "/gradebook/speed_grader?assignment_id=" + str(
                 moment_submission.assignment_id) + "&student_id=" + str(moment_submission.student_id)
             if moment_submission.graded:
-                progress_label = levels.level_series[course.level_moments.levels].grades[str(int(moment_submission.score))].label
-                progress_color = levels.level_series[course.level_moments.levels].grades[str(int(moment_submission.score))].color
+                progress_label = level_serie.grades[moment_submission.grade].label
+                progress_color = level_serie.grades[moment_submission.grade].color
             else:
                 # Niet bepaald
-                progress_label = levels.level_series[course.level_moments.levels].get_status(NOT_YET_GRADED).label
-                progress_color = levels.level_series[course.level_moments.levels].get_status(NOT_YET_GRADED).color
+                progress_label = level_serie.get_status(NOT_YET_GRADED).label
+                progress_color = level_serie.get_status(NOT_YET_GRADED).color
             assignment = course.find_assignment(moment_submission.assignment_id)
             if "online_text_entry" in assignment.submission_types:
                 if moment_submission.body is None or moment_submission.body == "":
@@ -305,7 +305,7 @@ def build_bootstrap_portfolio(instances, course_id, course, student, actual_date
     return portfolio_html_string
 
 
-def build_bootstrap_student_index(instance, course_id, course, student, actual_date, actual_day, templates, levels):
+def build_bootstrap_student_index(instance, course_id, course, student, actual_date, actual_day, templates, level_serie_collection):
     student_group = course.find_student_group(student.group_id)
     teacher_str = ""
     for teacher in student_group.teachers:
@@ -317,15 +317,18 @@ def build_bootstrap_student_index(instance, course_id, course, student, actual_d
     student_group = course.find_student_group(student.group_id)
     student_tabs = {}
     for moment in course.level_moments.moments:
-        level_moment_submissions = student.get_level_moment_submissions_by_query(moment)
+        level_moment_submissions = student.get_level_moment_submissions_by_query([moment])
         # print("BBS31 -", moment, len(level_moment_submissions))
-        student_tabs[moment.replace(" ", "_").lower()] = build_level_moments(course_id, course, moment, level_moment_submissions, templates, levels)
+        level_serie = level_serie_collection.level_series[course.level_moments.levels]
+        student_tabs[moment.replace(" ", "_").lower()] = build_moments(course_id, course, moment, level_serie, level_moment_submissions, templates)
     for moment in course.grade_moments.moments:
-        grade_moment_submissions = student.get_grade_moment_submissions_by_query(moment)
-        student_tabs[moment.replace(" ", "_").lower()] = build_level_moments(course_id, course, moment, grade_moment_submissions, templates, levels)
-
+        grade_moment_submissions = student.get_grade_moment_submissions_by_query([moment])
+        level_serie = level_serie_collection.level_series[course.grade_moments.levels]
+        # print("BBSI04 -", len(grade_moment_submissions))
+        student_tabs[moment.replace(" ", "_").lower()] = build_moments(course_id, course, moment, level_serie, grade_moment_submissions, templates)
+    # print("BBSI02 -", student_tabs)
     if instance.is_instance_of("prop_courses"):
-        student_tabs['portfolio'] = build_bootstrap_portfolio(instance, course_id, course, student, actual_date, actual_day, templates, levels)
+        student_tabs['portfolio'] = build_bootstrap_portfolio(instance, course_id, course, student, actual_date, actual_day, templates, level_serie_collection)
 
     #Importeren plotly html in index html file
     student_name = student.email.split("@")[0].lower()
