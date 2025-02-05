@@ -78,7 +78,8 @@ def main(instance_name):
             pass
     problems = sorted(problems, key=lambda s: s["teacher"])
     for item in problems:
-        print("Issue:", item["problem"], item["teacher"], item["message"])
+        if item["problem"] == 3:
+            print("Issue:", item["problem"], item["teacher"], item["message"])
 
     print("GC99 Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 

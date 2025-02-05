@@ -2,6 +2,8 @@ import sys
 
 from canvasapi import Canvas
 import json
+
+from lib.lib_bandwidth import IMPROVEMENT_PERIOD
 from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
 from lib.file import read_start, read_course_instances
 from model.Assignment import Assignment
@@ -39,6 +41,7 @@ def generate_config(instance_name):
                           start1.start_date,
                           start1.end_date,
                           date_to_day(start1.start_date, start1.end_date),
+                          IMPROVEMENT_PERIOD,
                           0)
 
     if instance.is_instance_of("inno_courses"):
@@ -63,8 +66,8 @@ def generate_config(instance_name):
         perspective = Perspective("kennis", "Kennis", "niveau", True, False)
         config.perspectives[perspective.name] = perspective
         config.attendance = None
-        config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", [])
-        config.grade_moments = GradeMoments("grade_moments", "Beoordelingsmomenten", "grade", [])
+        config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", ["Sprint 4", "Sprint 7"])
+        config.grade_moments = GradeMoments("grade_moments", "Beoordelingsmomenten", "grade", ["Beoordeling"])
     else:
         role = Role("role", "Student", "HBO-ICT", "border-dark")
         config.roles.append(role)
@@ -72,12 +75,15 @@ def generate_config(instance_name):
         config.perspectives[perspective.name] = perspective
         perspective = Perspective("verbreding", "Kennis", "bin2", True, False)
         config.perspectives[perspective.name] = perspective
-        perspective = Perspective("shills", "Professional shills", "bin2", True, False)
+        perspective = Perspective("skills", "Professional shills", "bin2", True, False)
         config.perspectives[perspective.name] = perspective
         policy = Policy([1], "WEEKLY", 19, [9, 17, 18])
         config.attendance = Attendance("attendance", "Aanwezigheid", "attendance", True, False, "ATTENDANCE", 100, 75,
                                       90, Bandwidth(), policy)
-        config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", ["Week 6", "Week 12", "Beoordeling", "Eindbeslissing"],)
+        config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress",
+                                            ["Peilmoment 1", "Peilmoment 2"],)
+        config.grade_moments = GradeMoments("grade_moments", "Beoordelingsmomenten", "grade",
+                                        ["Semester-beslissing", "Semester-eindbeslissing"], )
 
     # ophalen secties
     course_sections = canvas_course.get_sections()

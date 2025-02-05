@@ -70,11 +70,14 @@ class AssignmentSequence:
                 passed_assignments.append(assignment)
         return passed_assignments
 
-    def get_missed_assignments(self, submission_sequence, actual_day):
+    def get_missed_assignments(self, instance, course, submission_sequence, actual_day):
         missed_assignments = []
         last_in_completed = False
         for assignment in self.assignments:
             if assignment.assignment_day < actual_day:
+                if instance.is_instance_of("inno_courses") and (assignment.assignment_day > (course.days_in_semester - course.improvement_period)):
+                    #missed alleen in de reguliere tijd
+                    continue
                 # deadline is verstreken
                 if submission_sequence is None:
                     missed_assignments.append(assignment)

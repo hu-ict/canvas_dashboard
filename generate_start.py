@@ -34,12 +34,14 @@ canvas_course_id = input("Canvas course_id: ")
 canvas_api_key = input("Canvas API-key: ")
 if instance.is_instance_of("prop_courses"):
     attendance_path = instance.get_project_path() + "attendance_report.csv"
+    projects_groep_name = "SECTIONS"
 else:
     attendance_path = None
+    projects_groep_name = "Project Groups"
 start = Start(canvas_course_id,
-              "Project Groups",
-              get_date_time_obj("2024-09-02T00:00:00Z"),
-              get_date_time_obj("2025-01-31T23:59:59Z"),
+              projects_groep_name,
+              get_date_time_obj("2025-02-10T00:00:00Z"),
+              get_date_time_obj("2025-06-11T23:59:59Z"),
               "onedrive",
               attendance_path,
               canvas_api_key)

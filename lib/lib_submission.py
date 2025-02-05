@@ -167,17 +167,23 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
     # maak een submission en voeg de commentaren toe
     # print("LS31 -", f"submission_builder [{graded}] [{a_canvas_submission.submitted_at}] grade {a_canvas_submission.grade} grader_id {a_canvas_submission.grader_id} comments {len(canvas_comments)} score {a_canvas_submission.score} grading_type {a_assignment.grading_type} and student {a_student.name}.")
     if has_assignment_rubric and has_submission_rubrics and a_assignment.grading_type == "pass_fail":
-        if a_canvas_submission.grade == 'complete':
-            if a_canvas_submission.score is not None:
-                # INNO en PROP-peil vd/nvd met rubrics voor de "echte" punten (verborgen voor studenten)
-                if a_canvas_submission.score == 0:
-                    submission_score = round(rubric_score, 1)
+        if a_instance.is_instance_of("prop_courses"):
+            if a_canvas_submission.grade == 'complete':
+                submission_score = round(a_assignment.points, 1)
+            elif a_canvas_submission.grade == 'incomplete':
+                submission_score = 0
+        else:
+            if a_canvas_submission.grade == 'complete':
+                if a_canvas_submission.score is not None:
+                    # INNO en PROP-peil vd/nvd met rubrics voor de "echte" punten (verborgen voor studenten)
+                    if a_canvas_submission.score == 0:
+                        submission_score = round(rubric_score, 1)
+                    else:
+                        submission_score = round(a_canvas_submission.score, 1)
                 else:
-                    submission_score = round(a_canvas_submission.score, 1)
-            else:
-                submission_score = round(rubric_score, 1)
-        elif a_canvas_submission.grade == 'incomplete':
-            submission_score = rubric_score
+                    submission_score = round(rubric_score, 1)
+            elif a_canvas_submission.grade == 'incomplete':
+                submission_score = rubric_score
 
     if not has_assignment_rubric and a_assignment.grading_type == "pass_fail":
         if a_canvas_submission.grade == 'complete':
@@ -187,40 +193,45 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
             submission_score = round(0, 1)
 
     if has_assignment_rubric and not has_submission_rubrics and a_assignment.grading_type == "pass_fail":
-        if a_assignment.group_id == a_course.level_moments.assignment_groups[0]:
-            # als er rubrics achter een peilmoment zit moet deze gebuikt worden, zo niet fout
-            errors.append(
-                f"FOUT Er is een rubric gedefinieerd bij het peilmonent (Canvas-opdracht), maar deze wordt niet gebruikt of is niet compleet ingevuld. Opdracht is nu niet zichtbaar in portfolio of voortgang. Actie vereist!")
-            print("SB51 -", errors[-1])
-        elif a_canvas_submission.grade == 'complete':
-            if a_instance.is_instance_of('inno_courses'):
+        if a_instance.is_instance_of('inno_courses'):
+            # zeer kritisch op niet ingevulde rubrics
+            if a_assignment.group_id == a_course.level_moments.assignment_groups[0]:
+                errors.append(
+                    f"FOUT Er is een rubric gedefinieerd bij het peilmonent (Canvas-opdracht), maar deze wordt niet gebruikt of is niet compleet ingevuld. Opdracht is nu niet zichtbaar in portfolio of voortgang. Actie vereist!")
+            if a_assignment.group_id == a_course.grade_moments.assignment_groups[0]:
+                errors.append(
+                    f"FOUT Er is een rubric gedefinieerd bij de beoordeling (Canvas-opdracht), maar deze wordt niet gebruikt of is niet compleet ingevuld. Opdracht is nu niet zichtbaar in portfolio of voortgang. Actie vereist!")
+            elif a_canvas_submission.grade == 'complete':
                 errors.append(
                     f"FOUT Er is een rubric gedefinieerd bij de opdracht (Canvas-opdracht resultaat COMPLETE), maar deze wordt niet gebruikt of is niet compleet ingevuld. Opdracht is nu niet zichtbaar in portfolio of voortgang. Actie vereist!")
-                print("SB52 -", errors[-1])
-            else:
-                # PROP als rubrics niet ingevuld dan toch goed keuren bij "complete"
-                submission_score = a_assignment.points
-        elif a_canvas_submission.grade == 'incomplete':
-            if a_instance.is_instance_of('inno_courses'):
+            elif a_canvas_submission.grade == 'incomplete':
                 errors.append(
                     f"FOUT Er is een rubric gedefinieerd bij de opdracht (Canvas-opdracht resultaat INCOMPLETE), maar deze wordt niet gebruikt of is niet compleet ingevuld. Opdracht is nu niet zichtbaar in portfolio of voortgang. Actie vereist!")
-                print("SB52 -", errors[-1])
+            print("SB52 -", errors[-1])
+        else:
+            if a_assignment.group_id == a_course.level_moments.assignment_groups[0]:
+                submission_score = round(a_assignment.points, 1)
+            if a_assignment.group_id == a_course.grade_moments.assignment_groups[0]:
+                submission_score = round(a_assignment.points, 1)
+            elif a_canvas_submission.grade == 'complete':
+                submission_score = round(a_assignment.points, 1)
+            elif a_canvas_submission.grade == 'incomplete':
+                submission_score = round(0, 1)
             else:
-                # PROP als rubrics niet ingevuld dan toch goedkeuren bij "incomplete, maar geen punten"
-                submission_score = 0
+                pass
 
     if not has_assignment_rubric and a_assignment.grading_type == "points":
         if a_canvas_submission.score is None:
             errors.append(
                 f"FOUT Score is leeg {a_canvas_submission.grade} {a_canvas_submission.grader_id} voor opdracht {a_assignment.name} en student {a_student.name} groep_id {a_student.group_id}.")
-            print("SB55 -", errors[-1])
+            print("SB54 -", errors[-1])
         else:
             submission_score = round(a_canvas_submission.score, 2)
 
     if has_assignment_rubric and not has_submission_rubrics and a_assignment.grading_type == "points":
         errors.append(
             f"FOUT Er is een rubric gedefinieerd bij de opdracht, maar deze wordt niet gebruikt of is niet compleet ingevuld. Opdracht is nu niet zichtbaar in portfolio of voortgang. Actie vereist!")
-        print("SB53 -", errors[-1])
+        print("SB56 -", errors[-1])
 
     if has_assignment_rubric and has_submission_rubrics and a_assignment.grading_type == "points":
         if a_canvas_submission.score is None:
@@ -297,7 +308,7 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
     return l_submission
 
 
-def add_missed_assignments(course, actual_day, student_perspective):
+def add_missed_assignments(instance, course, actual_day, student_perspective):
     if len(student_perspective.assignment_groups) == 1:
         assignment_group = course.find_assignment_group(student_perspective.assignment_groups[0])
         if assignment_group is None:
@@ -307,7 +318,7 @@ def add_missed_assignments(course, actual_day, student_perspective):
 
         for assignment_sequence in assignment_group.assignment_sequences:
             submission_sequence = student_perspective.get_submission_sequence_by_tag(assignment_sequence.tag)
-            missed_assignments = assignment_sequence.get_missed_assignments(submission_sequence, actual_day)
+            missed_assignments = assignment_sequence.get_missed_assignments(instance, course, submission_sequence, actual_day)
             # print("ASA07 - Missed assignments", len(missed_assignments))
             for assignment in missed_assignments:
                 l_submission = Submission(0, assignment.group_id, assignment.id, 0, assignment.name,

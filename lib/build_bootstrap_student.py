@@ -58,10 +58,9 @@ def build_student_tabs(instance, course, student_tabs):
 
 
 def build_moments(course_id, course, moment, level_serie, moment_submissions, templates):
-    assignments = course.get_level_moments_by_query(moment)
-
-    # print("BLM02 - len(moment_submissions)",len(moment_submissions), "for level_moment", moment)
+    # print("BLM02 - len(moment_submissions)", len(moment_submissions), "for level_moment", moment)
     if len(moment_submissions) == 0:
+        # print("BLM03 - len(moment_submissions) == 0")
         progress_label = level_serie.get_status(BEFORE_DEADLINE).label
         progress_color = level_serie.get_status(BEFORE_DEADLINE).color
         comments = "Leeg"
@@ -81,7 +80,7 @@ def build_moments(course_id, course, moment, level_serie, moment_submissions, te
     else:
         level_moment_html_string = ""
         for moment_submission in moment_submissions:
-            # print("BLM04 -", moment_submission.assignment_name)
+            # print("BLM04 -", moment_submission.assignment_name, moment_submission.graded, moment_submission.grade)
             # print("BLM05 -", level_serie)
             comments = get_comments(moment_submission.comments)
             url = "https://canvas.hu.nl/courses/" + str(course_id) + "/gradebook/speed_grader?assignment_id=" + str(
@@ -169,9 +168,9 @@ def build_bootstrap_portfolio(instances, course_id, course, student, actual_date
                     if submission_sequence.get_status() is GRADED:
                         cell_status = submission_sequence.get_complete_status()
                         if cell_status == "status_incomplete":
-                            status_label = level_serie.grades["1"].label
+                            status_label = level_serie.grades["0"].label
                         else:
-                            status_label = level_serie.grades["2"].label
+                            status_label = level_serie.grades["1"].label
                             for learning_outcome_id in assignment_sequence.learning_outcomes:
                                 learning_outcome_summary[learning_outcome_id]['total_points'] += submission_sequence.get_score()
                     else:
@@ -324,7 +323,7 @@ def build_bootstrap_student_index(instance, course_id, course, student, actual_d
     for moment in course.grade_moments.moments:
         grade_moment_submissions = student.get_grade_moment_submissions_by_query([moment])
         level_serie = level_serie_collection.level_series[course.grade_moments.levels]
-        # print("BBSI04 -", len(grade_moment_submissions))
+        # print("BBSI04 -", moment, len(grade_moment_submissions))
         student_tabs[moment.replace(" ", "_").lower()] = build_moments(course_id, course, moment, level_serie, grade_moment_submissions, templates)
     # print("BBSI02 -", student_tabs)
     if instance.is_instance_of("prop_courses"):

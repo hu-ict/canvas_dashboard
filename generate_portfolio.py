@@ -29,16 +29,15 @@ def generate_portfolio(instance_name):
 
     for student in results.students:
         # print(l_peil_construction)
-        print("GPF10 -", student.name)
-
+        print("GPF11 -", student.name)
         build_bootstrap_student_index(instance, results.id, course, student, results.actual_date, results.actual_day, templates, level_serie_collection)
     print("GPF99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        # generate_plotly(sys.argv[1])
+        generate_plotly(sys.argv[1])
         generate_portfolio(sys.argv[1])
     else:
-        # generate_plotly("")
+        generate_plotly("")
         generate_portfolio("")

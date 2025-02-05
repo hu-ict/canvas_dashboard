@@ -55,7 +55,7 @@ def generate_results(instance_name):
     for student in results.students:
         for student_perspective in student.perspectives.values():
             # Perspective aanvullen met missed Assignments waar nodig (niets ingeleverd)
-            add_missed_assignments(course, results.actual_day, student_perspective)
+            add_missed_assignments(instance, course, results.actual_day, student_perspective)
         add_open_level_moments(course, results.actual_day, student.id, student.student_level_moments)
         add_open_grade_moments(course, results.actual_day, student.id, student.student_grade_moments)
     # for student in results.students:
@@ -82,11 +82,14 @@ def generate_results(instance_name):
         dict_result = progress_history.to_json()
         json.dump(dict_result, f, indent=2)
 
-    # for student_results in results.students:
-    #     with open(".//output//"+student_results.name+".json", 'w') as f:
-    #         dict_results = student_results.to_json()
-    #         print(student_results.name)
-    #         json.dump(dict_results, f, indent=2)
+    for student in results.students:
+        # print(l_peil_construction)
+        print("GR41 -", student.name)
+        student_name = student.email.split("@")[0].lower()
+        file_name_json = instance.get_student_path() + student_name + ".json"
+        with open(file_name_json, 'w') as f:
+            dict_result = student.to_json()
+            json.dump(dict_result, f, indent=2)
 
     with open(instance.get_result_file_name(), 'w') as f:
         dict_result = results.to_json()

@@ -48,18 +48,25 @@ def main(instance_name):
     results = read_results(instance.get_result_file_name())
     osiris_results = read_osiris("Osiris-Sep24.csv")
     problems = []
-    for student in results.students:
-        overall_grade_determined = student.get_grade_moment_submission_by_query(["overall", "Beoordeling"]).grade
-        osiris_result = get_student_by_number(osiris_results, student.number)
-        if osiris_result is None:
-            print("1 Wel Canvas", overall_grade_determined, "niet in Osiris", student.name)
+    # for student in results.students:
+    #     overall_grade_determined = student.get_grade_moment_submission_by_query(["overall", "Beoordeling"]).grade
+    #     osiris_result = get_student_by_number(osiris_results, student.number)
+    #     if osiris_result is None:
+    #         print("1 Wel Canvas", overall_grade_determined, "niet in Osiris", student.name)
+    #
+    # for student in results.students:
+    #     overall_grade_determined = student.get_grade_moment_submission_by_query(["overall", "Beoordeling"]).grade
+    #     osiris_result = get_student_by_number(osiris_results, student.number)
+    #     if osiris_result is None:
+    #         continue
+    #     if overall_grade_determined == "1":
+    #         print("2 Canvas:", overall_grade_determined, "Osiris", osiris_result["result"], student.name, student.role)
 
     for student in results.students:
         overall_grade_determined = student.get_grade_moment_submission_by_query(["overall", "Beoordeling"]).grade
         osiris_result = get_student_by_number(osiris_results, student.number)
         if osiris_result is None:
             continue
-        # print("Canvas:", overall_grade_determined, "Osiris", osiris_result["result"])
         if overall_grade_determined == "1" and osiris_result["result"] == "NN":
             continue
         elif overall_grade_determined == "2" and osiris_result["result"] == "ON":
@@ -67,27 +74,28 @@ def main(instance_name):
         elif overall_grade_determined == "3" and osiris_result["result"] == "BN":
             continue
         else:
-            print("2 Canvas:", overall_grade_determined, "Osiris", osiris_result["result"], osiris_result["name"])
+            # print(osiris_result)
+            print("3 Canvas:", overall_grade_determined, "Osiris", osiris_result["result"], osiris_result["name"])
 
-    for osiris_result in osiris_results:
-        student = results.find_student_by_number(osiris_result["number"])
-        if student is None and osiris_result["result"] != "NA":
-            print("3 Canvas:", "niet aanwezig,", "Osiris", osiris_result["result"], osiris_result["name"])
-
-    for osiris_result in osiris_results:
-        student = results.find_student_by_number(osiris_result["number"])
-        if student is None:
-            continue
-        else:
-            overall_grade_determined = student.get_grade_moment_submission_by_query(["overall", "Beoordeling"]).grade
-            if overall_grade_determined == "1" and osiris_result["result"] == "NN":
-                continue
-            elif overall_grade_determined == "2" and osiris_result["result"] == "ON":
-                continue
-            elif overall_grade_determined == "3" and osiris_result["result"] == "BN":
-                continue
-            else:
-                print("4 Canvas:", overall_grade_determined, "Osiris", osiris_result["result"], osiris_result["name"])
+    # for osiris_result in osiris_results:
+    #     student = results.find_student_by_number(osiris_result["number"])
+    #     if student is None and osiris_result["result"] != "NA":
+    #         print("4 Canvas:", "niet aanwezig,", "Osiris", osiris_result["result"], osiris_result["name"])
+    #
+    # for osiris_result in osiris_results:
+    #     student = results.find_student_by_number(osiris_result["number"])
+    #     if student is None:
+    #         continue
+    #     else:
+    #         overall_grade_determined = student.get_grade_moment_submission_by_query(["overall", "Beoordeling"]).grade
+    #         if overall_grade_determined == "1" and osiris_result["result"] == "NN":
+    #             continue
+    #         elif overall_grade_determined == "2" and osiris_result["result"] == "ON":
+    #             continue
+    #         elif overall_grade_determined == "3" and osiris_result["result"] == "BN":
+    #             continue
+    #         else:
+    #             print("5 Canvas:", overall_grade_determined, "Osiris", osiris_result["result"], osiris_result["name"])
     # problems = sorted(problems, key=lambda s: s["teacher"])
     # for item in problems:
     #     print("Issue:", item["problem"], item["teacher"], item["message"])

@@ -354,6 +354,7 @@ def plot_perspective(a_row, a_col, a_fig, a_course, a_student_perspective, a_lev
     # for submission_sequence in a_student_perspective.submission_sequences:
     #    assignment_sequences = remove_assignment_sequence(assignment_sequences, submission_sequence)
     # # print("BPP09 -", a_perspective.name, "assignment_group.assignment_sequences",  len(assignment_sequences))
+
     plot_future_assignments(a_row, a_col, a_fig,
                             a_course, show_points,
                             assignment_group.assignment_sequences, a_student_perspective, a_actual_day,

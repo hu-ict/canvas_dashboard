@@ -135,7 +135,7 @@ def generate_plotly(instance_name):
     level_serie_collection = read_levels_from_canvas(canvas_course)
 
     if results.actual_day > course.days_in_semester:
-        course.days_in_semester = results.actual_day + 1
+        results.actual_day = course.days_in_semester
 
     # Define bar properties
 

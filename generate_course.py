@@ -268,7 +268,7 @@ def generate_course(instance_name):
                 # Filter de verbeteropdrachten er uit
                 if "Verbeter" in assignment_sequence.name:
                     continue
-                elif assignment_sequence.get_day() > (config.days_in_semester - 14):
+                elif assignment_sequence.get_day() > (config.days_in_semester - config.improvement_period):
                     continue
                 elif "Aanvullend" in assignment_sequence.name:
                     continue

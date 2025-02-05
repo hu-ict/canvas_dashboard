@@ -1,3 +1,4 @@
+from lib.lib_bandwidth import IMPROVEMENT_PERIOD
 from lib.lib_date import get_date_time_obj, get_date_time_str
 from model.AssignmentGroup import AssignmentGroup
 from model.LearningOutcome import LearningOutcome
@@ -13,11 +14,12 @@ from model.perspective.Perspective import Perspective
 
 
 class CourseConfig:
-    def __init__(self, canvas_id, name, start_date, end_date, days_in_semester, student_count):
+    def __init__(self, canvas_id, name, start_date, end_date, days_in_semester, improvement_period, student_count):
         self.canvas_id = canvas_id
         self.name = name
         self.student_count = student_count
         self.days_in_semester = days_in_semester
+        self.improvement_period = improvement_period
         self.start_date = start_date
         self.end_date = end_date
         self.sections = []
@@ -58,6 +60,7 @@ class CourseConfig:
             'start_date': get_date_time_str(self.start_date),
             'end_date': get_date_time_str(self.end_date),
             'days_in_semester': self.days_in_semester,
+            'improvement_period': self.improvement_period,
             'sections': list(map(lambda s: s.to_json(), self.sections))
         }
         # print("CC10 -", self.attendance)
@@ -293,8 +296,13 @@ class CourseConfig:
             get_date_time_obj(data_dict['start_date']),
             get_date_time_obj(data_dict['end_date']),
             data_dict['days_in_semester'],
+            IMPROVEMENT_PERIOD,
             data_dict['student_count'])
         new.perspectives = {}
+        if 'improvement_period' in data_dict.keys() and data_dict['improvement_period'] is not None:
+            new.improvement_period = data_dict['improvement_period']
+        else:
+            new.improvement_period = IMPROVEMENT_PERIOD
         if 'level_moments' in data_dict.keys() and data_dict['level_moments'] is not None:
             new.level_moments = LevelMoments.from_dict(data_dict['level_moments'])
         if 'grade_moments' in data_dict.keys() and data_dict['grade_moments'] is not None:
