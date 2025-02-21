@@ -269,6 +269,7 @@ def generate_course(instance_name):
                 if "Verbeter" in assignment_sequence.name:
                     continue
                 elif assignment_sequence.get_day() > (config.days_in_semester - config.improvement_period):
+                    print("GCS49 - assigment_date ligt in verbeterperiode", assignment_sequence.name, assignment_sequence.get_day())
                     continue
                 elif "Aanvullend" in assignment_sequence.name:
                     continue

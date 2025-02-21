@@ -50,7 +50,7 @@ def get_section_students(canvas_course, start, course):
                                 print(f"GS25 - ERROR - section.name ({section.name}) not found in list student_group for student {student.name}.")
                         student.role = section.role
                         if student.role is None:
-                            print("GS26 - Student.Role", student.name)
+                            print("GS26 - student.role is leeg", student.name)
                     else:
                         print("GS27 -", "Student not found", section_student["id"])
             else:

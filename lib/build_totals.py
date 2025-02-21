@@ -239,7 +239,8 @@ def count_student(a_instance, a_course, a_student_totals, a_student_results):
             if submission is None or submission.status == NOT_YET_GRADED:
                 a_student_totals["grade_moments"][grade_label]['overall'][-1] += 1
             else:
-                a_student_totals["grade_moments"][grade_label]['overall'][int(submission.grade)] += 1
+                if submission.grade is not None:
+                    a_student_totals["grade_moments"][grade_label]['overall'][int(submission.grade)] += 1
 
 
 def check_for_late(a_instance, a_course, a_student_totals, a_student_results, a_submission, a_perspective,

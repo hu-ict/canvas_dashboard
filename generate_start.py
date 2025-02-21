@@ -41,7 +41,7 @@ else:
 start = Start(canvas_course_id,
               projects_groep_name,
               get_date_time_obj("2025-02-10T00:00:00Z"),
-              get_date_time_obj("2025-06-11T23:59:59Z"),
+              get_date_time_obj("2025-07-11T23:59:59Z"),
               "onedrive",
               attendance_path,
               canvas_api_key)
