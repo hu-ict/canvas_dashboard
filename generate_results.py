@@ -84,7 +84,7 @@ def generate_results(instance_name):
 
     for student in results.students:
         # print(l_peil_construction)
-        print("GR41 -", student.name)
+        # print("GR41 -", student.name)
         student_name = student.email.split("@")[0].lower()
         file_name_json = instance.get_student_path() + student_name + ".json"
         with open(file_name_json, 'w') as f:

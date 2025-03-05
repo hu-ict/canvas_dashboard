@@ -262,7 +262,6 @@ def generate_course(instance_name):
                     print(message)
                 assignment_group.append_assignment(tag_sequence, assignment)
 
-
             total_group_points = 0
             for assignment_sequence in assignment_group.assignment_sequences:
                 # Filter de verbeteropdrachten er uit

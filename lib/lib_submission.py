@@ -239,6 +239,9 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
         else:
             submission_score = round(a_canvas_submission.score, 2)
 
+    if not has_assignment_rubric and a_assignment.grading_type == "points":
+       submission_score = round(a_canvas_submission.score, 2)
+
     if not has_assignment_rubric and a_assignment.grading_type == "letter_grade":
         submission_score = round(a_canvas_submission.score, 2)
 

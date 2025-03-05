@@ -110,7 +110,7 @@ def get_hover_comments(comments):
             wrapper = textwrap.TextWrapper(width=125)
             word_list = wrapper.wrap(text=value)
             for line in word_list:
-                if line_nr > 5:
+                if line_nr > 15:
                     l_hover += "<br>Te veel commentaar/feedback zie Canvas."
                     return l_hover
                 l_hover += "<br>" + line
