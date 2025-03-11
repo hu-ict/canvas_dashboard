@@ -146,6 +146,7 @@ def generate_course(instance_name):
                 str_print = f"GC23 - {canvas_assignment.name} grading_type [{canvas_assignment.grading_type}] grading_standard_id [{canvas_assignment.grading_standard_id}]"
                 print(str_print)
                 points_possible = 0
+                sections = []
                 if canvas_assignment.grading_type == "points":
                     if canvas_assignment.points_possible:
                         points_possible = canvas_assignment.points_possible
@@ -172,6 +173,7 @@ def generate_course(instance_name):
                             new_assignment_date = assignment_date
                         if hasattr(overrides, "course_section_id"):
                             section_id = overrides.course_section_id
+                            sections.append(overrides.course_section_id)
                         else:
                             section_id = 0
                 else:
@@ -183,6 +185,7 @@ def generate_course(instance_name):
                                         canvas_assignment.grading_type, canvas_assignment.grading_standard_id,
                                         points_possible, canvas_assignment.submission_types, new_assignment_date,
                                         unlock_date, date_to_day(config.start_date, new_assignment_date), date_to_day(config.start_date, unlock_date))
+                assignment.sections = sections
                 if len(message) > 0:
                     assignment.messages.append(message)
                 # print(assignment)

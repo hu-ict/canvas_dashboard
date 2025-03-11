@@ -20,6 +20,7 @@ class Assignment:
         self.messages = []
         self.rubrics = []
         self.learning_outcomes = []
+        self.sections = []
 
     def __str__(self):
         return f'Assignment({self.id}, {self.name}, {self.group_id}, {self.section_id}, {self.grading_type}, ' \
@@ -42,7 +43,8 @@ class Assignment:
             'points': int(self.points),
             'messages': self.messages,
             'rubrics': list(map(lambda r: r.to_json(), self.rubrics)),
-            'learning_outcomes': self.learning_outcomes
+            'learning_outcomes': self.learning_outcomes,
+            'sections': self.sections
         }
 
     def get_criterion(self, criterion_id):
@@ -70,6 +72,8 @@ class Assignment:
         new.rubrics = list(map(lambda c: Criterion.from_dict(c), data_dict['rubrics']))
         if 'learning_outcomes' in data_dict:
             new.learning_outcomes = data_dict['learning_outcomes']
+        if 'sections' in data_dict:
+            new.sections = data_dict['sections']
         if 'messages' in data_dict:
             new.messages = data_dict['messages']
         return new

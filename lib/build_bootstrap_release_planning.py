@@ -49,6 +49,17 @@ def write_release_planning(a_course, a_templates, a_assignment_group):
                 rubrics_html_string = "Geen criteria"
             else:
                 rubrics_str = str(round(rubric_points, 2))
+            if len(assignment.sections) > 0:
+                sections_html_string = ""
+                for section_id in assignment.sections:
+                    section = a_course.find_section(section_id)
+                    if section is None:
+                        sections_html_string += str(section_id)+", "
+                    else:
+                        role = a_course.get_role(section.role)
+                        sections_html_string += section.name+" ("+role.name+"), "
+            else:
+                sections_html_string = "Geen specifieke secties"
 
             assignment_sequence_html_string += a_templates["assignment"].substitute({'assignment_name': assignment.name,
                                                                                      'assignment_unlock_date': get_date_time_loc(
@@ -59,6 +70,7 @@ def write_release_planning(a_course, a_templates, a_assignment_group):
                                                                                      'assignment_points': assignment.points,
                                                                                      'rubrics_points': rubrics_str,
                                                                                      'rubrics': rubrics_html_string,
+                                                                                     'sections': sections_html_string,
                                                                                      'url': url})
 
             for message in assignment.messages:
