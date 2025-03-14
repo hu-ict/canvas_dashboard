@@ -1,6 +1,7 @@
 from lib.lib_date import get_date_time_obj, get_date_time_str
 from model.Comment import Comment
 from model.CriteriumScore import CriteriumScore
+from model.perspective.Status import NOT_CORRECT_GRADED, NOT_YET_GRADED, GRADED, MISSED_ITEM, BEFORE_DEADLINE
 
 
 class Submission:
@@ -32,9 +33,6 @@ class Submission:
         self.messages = []
         self.comments = []
         self.rubrics = []
-
-    def toJson(self):
-        return self.to_json()
 
     def to_json(self):
         if self.flow is None:
@@ -73,6 +71,29 @@ class Submission:
             'comments': list(map(lambda c: c.to_json(), self.comments)),
             'rubrics': list(map(lambda r: r.to_json(), self.rubrics)),
         }
+
+    def get_status(self):
+        if self.status == NOT_CORRECT_GRADED:
+            return NOT_CORRECT_GRADED
+        if self.status == NOT_YET_GRADED:
+            return NOT_YET_GRADED
+        if self.graded:
+            return GRADED
+        if self.score == 0:
+            return MISSED_ITEM
+        return BEFORE_DEADLINE
+
+    def get_complete_status_css(self):
+        if self.get_status() == GRADED:
+            if self.graded and self.score == self.points:
+                return "status_complete"
+            return "status_incomplete"
+        else:
+            if self.status is MISSED_ITEM:
+                return "status_missed"
+            else:
+                return "status_pending"
+        return "status_unknown"
 
     def __str__(self):
         return f'Submission({self.id}, {self.assignment_group_id}, {self.assignment_id}, {self.student_id}, ' \

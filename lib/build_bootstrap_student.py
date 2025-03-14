@@ -165,19 +165,15 @@ def build_bootstrap_portfolio(instances, course_id, course, student, actual_date
                     status_label = level_serie.get_status(BEFORE_DEADLINE).label
                     cell_status = "status_comming"
                 else:
+                    cell_status = submission_sequence.get_complete_status_css()
                     if submission_sequence.get_status() is GRADED:
-                        cell_status = submission_sequence.get_complete_status()
                         if cell_status == "status_incomplete":
                             status_label = level_serie.grades["0"].label
                         else:
-                            status_label = level_serie.grades["1"].label
+                            status_label = level_serie.grades["2"].label
                             for learning_outcome_id in assignment_sequence.learning_outcomes:
                                 learning_outcome_summary[learning_outcome_id]['total_points'] += submission_sequence.get_score()
                     else:
-                        if submission_sequence.get_status() is MISSED_ITEM:
-                            cell_status = "status_missed"
-                        else:
-                            cell_status = "status_pending"
                         status_label = level_serie.get_status(submission_sequence.get_status()).label
 
                 for learning_outcome_id in assignment_sequence.learning_outcomes:
@@ -208,16 +204,7 @@ def build_bootstrap_portfolio(instances, course_id, course, student, actual_date
                          "content": modal_content_html_string})
                     portfolio_items_modal_html_string += '<a class="badge btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#target' + assignment_sequence.tag + '"' + " onclick='scrollToTop()'>Detail</a>"
                     for submission in submission_sequence.submissions:
-                        if submission.status == GRADED:
-                            if submission.score == submission.points:
-                                badge_status = "status_complete"
-                            else:
-                                badge_status = "status_incomplete"
-                        else:
-                            if submission.status is MISSED_ITEM:
-                                badge_status = "status_missed"
-                            else:
-                                badge_status = "status_pending"
+                        badge_status = submission.get_complete_status_css()
                         teller += 1
                         url = "https://canvas.hu.nl/courses/" + str(
                             course_id) + "/gradebook/speed_grader?assignment_id=" + str(

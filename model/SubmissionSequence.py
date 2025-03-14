@@ -56,12 +56,17 @@ class SubmissionSequence:
             return MISSED_ITEM
         return BEFORE_DEADLINE
 
-    def get_complete_status(self):
+    def get_complete_status_css(self):
         if self.get_status() == GRADED:
             for submission in self.submissions:
                 if submission.graded and submission.score == self.points:
                     return "status_complete"
             return "status_incomplete"
+        else:
+            if self.get_status() is MISSED_ITEM:
+                return "status_missed"
+            else:
+                return "status_pending"
         return "status_unknown"
 
     def is_graded(self):

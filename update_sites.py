@@ -15,7 +15,7 @@ def main(instance_name):
     instance = instances.get_instance_by_name(instances.current_instance)
     print("PB02 - Instance:", instance.name)
 
-    if instances.current_instance != "sep24_inno":
+    if instances.current_instance != "TICT-VINNO1-22-FEB25":
         print("US04 - No student channels defined for this course")
         return
     course = read_course(instance.get_course_file_name())
@@ -41,8 +41,9 @@ def main(instance_name):
             if student is None:
                 print(f"US06 - Student not found in course: [{channel['display_name']}]")
             else:
+                print("US07 - Student", student.name)
                 drive = get_drive(msteams_api.gen_token, team_id, channel["id"])
-                print("US81 - Drive", drive)
+                # print("US81 - Drive", drive)
                 site_count += 1
                 student.site = drive["drive_id"]
                 msteams_api.channels.append(Channel(student.id, student.name, drive["drive_id"]))

@@ -4,7 +4,7 @@ class Channel:
         self.name = a_name
         self.channel = a_channel
 
-    def to_json(self, scope):
+    def to_json(self):
         return {
             'id': self.id,
             'name': self.name,

@@ -4,7 +4,11 @@ from lib.translation_table import translation_table
 import subprocess
 import io
 
-teams = ["1c99e1b3-d604-4344-b160-70a6f0607ae1", "0f18c8bc-c414-4323-a79a-9653032d984a", "b48382c5-40aa-4301-a004-40f24be15201", "a8ddf781-d19f-437f-a8c5-24ab8227f291", "4a6a0e07-561a-4e82-85ed-457083db7ba5"]
+teams = ["8d309e88-cdae-4720-aed8-47384bc36820", "59a9f9c3-4a23-4f74-ad75-a269f0e70891", "f66f15ab-36cf-4af7-8e36-9f380e8f8a5c", "68ab52d4-8c10-4316-9a88-229854794074"]
+# https://teams.microsoft.com/l/team/19%3AcxEwbQY-TpX23Y4slSrFCWgIutGGF2JDk829QxLhmFY1%40thread.tacv2/conversations?groupId=8d309e88-cdae-4720-aed8-47384bc36820&tenantId=98932909-9a5a-4d18-ace4-7236b5b5e11d
+# https://teams.microsoft.com/l/team/19%3A3l-_a4EUOq-9AwvkU6dAVddcELw_bL3xU0xW2-hKWmg1%40thread.tacv2/conversations?groupId=59a9f9c3-4a23-4f74-ad75-a269f0e70891&tenantId=98932909-9a5a-4d18-ace4-7236b5b5e11d
+# https://teams.microsoft.com/l/team/19%3AJ0cuUcTJg79b1IGafrNhQxKV8xJSgIgP9BoDhBUEZOM1%40thread.tacv2/conversations?groupId=f66f15ab-36cf-4af7-8e36-9f380e8f8a5c&tenantId=98932909-9a5a-4d18-ace4-7236b5b5e11d
+# https://teams.microsoft.com/l/team/19%3AOUGszdnbXVRK76ZqNgLxZkTRa80goO2f3ozej08peGA1%40thread.tacv2/conversations?groupId=68ab52d4-8c10-4316-9a88-229854794074&tenantId=98932909-9a5a-4d18-ace4-7236b5b5e11d
 
 def get_access_token(a_tenant_id, a_client_id):
     print("get_access_token", a_tenant_id, a_client_id)
@@ -329,7 +333,7 @@ def get_team(a_token, a_team_id):
 
 def get_drive(token, team_id, channel_id):
     url = f"https://graph.microsoft.com/v1.0/teams/{team_id}/channels/{channel_id}/filesFolder"
-    # print("TA36 -", url)
+    print("TA36 -", url)
     headers = {
         "Authorization": "Bearer " + token,
         "Content-Type": "application/json"

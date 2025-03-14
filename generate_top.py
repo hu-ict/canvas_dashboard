@@ -28,7 +28,7 @@ def generate_dashboard(instance_name):
                 scores[student.role].append(student.perspectives[perspective].sum_score)
             else:
                 scores[perspective].append(student.perspectives[perspective].sum_score)
-    high_scores = {"BIM": max(scores["BIM"]), "CSC_C": max(scores["CSC_C"]), "CSC_S": max(scores["CSC_S"]), "SD_B": max(scores["SD_B"]), "TI": max(scores["TI"]), "gilde": max(scores["gilde"]), "team": max(scores["team"])}
+    high_scores = {"AI": max(scores["AI"]), "BIM": max(scores["BIM"]), "CSC_S": max(scores["CSC_S"]), "SD_B": max(scores["SD_B"]), "SD_F": max(scores["SD_F"]), "gilde": max(scores["gilde"]), "team": max(scores["team"])}
     # high_scores = {"kennis": max(scores["kennis"]), "verbreding": max(scores["verbreding"]), "skills": max(scores["skills"])}
     print(high_scores)
     student_scores = []
@@ -41,7 +41,7 @@ def generate_dashboard(instance_name):
                 student_score += student.perspectives[perspective].sum_score / high_scores[perspective]
         student_scores.append({"student": student.name, "score": student_score})
         team_scores[student.group_id]["scores"].append(student_score)
-    student_scores = sorted(student_scores, key=lambda s: s["score"])
+    student_scores = sorted(student_scores, key=lambda s: s["score"], reverse=True)
     for score in student_scores:
         print("Student", score["student"], int(score["score"]*100)/100)
     team_scores = list(team_scores.values())
@@ -51,7 +51,7 @@ def generate_dashboard(instance_name):
         else:
             team_score = 0
         team["score"] = int(team_score*100)/100
-    team_scores = sorted(team_scores, key=lambda s: s["score"])
+    team_scores = sorted(team_scores, key=lambda s: s["score"], reverse=True)
     for team in team_scores:
         print("Team", team["team"], team["score"])
     print("GT99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
