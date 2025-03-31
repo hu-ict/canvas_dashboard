@@ -86,8 +86,12 @@ def build_moments(course_id, course, moment, level_serie, moment_submissions, te
             url = "https://canvas.hu.nl/courses/" + str(course_id) + "/gradebook/speed_grader?assignment_id=" + str(
                 moment_submission.assignment_id) + "&student_id=" + str(moment_submission.student_id)
             if moment_submission.graded:
-                progress_label = level_serie.grades[moment_submission.grade].label
-                progress_color = level_serie.grades[moment_submission.grade].color
+                if moment_submission.grade is not None:
+                    progress_label = level_serie.grades[moment_submission.grade].label
+                    progress_color = level_serie.grades[moment_submission.grade].color
+                else:
+                    progress_label = level_serie.grades["0"].label
+                    progress_color = level_serie.grades["0"].color
             else:
                 # Niet bepaald
                 progress_label = level_serie.get_status(NOT_YET_GRADED).label

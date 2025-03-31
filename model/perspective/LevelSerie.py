@@ -26,8 +26,8 @@ class LevelSerie:
     def get_grade_by_fraction(self, fraction):
         last_fraction = -0.05
         for grade in self.grades.values():
+            # print("LS10", last_fraction, "<", fraction, "<=", grade.fraction, grade)
             if last_fraction < fraction <= grade.fraction:
-                # print(last_fraction, "<", fraction, "<", self.levels[level].fraction, level)
                 return grade
             last_fraction = grade.fraction
         return None

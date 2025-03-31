@@ -218,7 +218,9 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
             elif a_canvas_submission.grade == 'incomplete':
                 errors.append(
                     f"FOUT Er is een rubric gedefinieerd bij de opdracht (Canvas-opdracht resultaat INCOMPLETE), maar deze wordt niet gebruikt of is niet compleet ingevuld. Opdracht is nu niet zichtbaar in portfolio of voortgang. Actie vereist!")
-            print("SB52 -", errors[-1])
+
+            if len(errors) > 0:
+                print("SB52 -", errors[-1])
 
         if not has_assignment_rubric and a_assignment.grading_type == "points":
             if a_canvas_submission.score is None:
@@ -254,6 +256,7 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
         status = NOT_CORRECT_GRADED
     else:
         status = GRADED
+
     if a_canvas_submission.grader_id is not None and a_canvas_submission.grader_id > 0:
         teacher = a_course.find_teacher(a_canvas_submission.grader_id)
         if teacher:
@@ -275,9 +278,9 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
             submission_grade_obj = level_series.get_grade_by_fraction(0)
         else:
             submission_grade_obj = level_series.get_grade_by_fraction(submission_score / a_assignment.points)
-        # print("LS44 -", submission_score, submission_grade_obj.level)
+            # print("LS44", submission_score, a_assignment.points, "fraction", submission_score / a_assignment.points, level_series)
         if submission_grade_obj is None:
-            print("LS45 -", level_series.name, submission_score, a_assignment.points)
+            print("LS45 - Error, submission_grade is None", level_series.name, submission_score, a_assignment.points)
         else:
             submission_value = round(submission_grade_obj.value * a_assignment.points, 1)
             submission_grade = submission_grade_obj.level

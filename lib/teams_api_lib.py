@@ -30,7 +30,7 @@ def get_access_token(a_tenant_id, a_client_id):
     captured_output.writelines(chars)
 
     resulting_object = captured_output.getvalue()
-    print(resulting_object)
+    # print(resulting_object)
     obj = json.loads(resulting_object)
 
     print("Accesstoken: ", obj["AccessToken"])
