@@ -79,12 +79,13 @@ def plot_student(instances, course, student, actual_date, actual_day,
         # Peil overall drie peilmomenten
         for peil in course.level_moments.moments:
             # print("GP21 - Peilmoment", peil, "overall")
-            l_level_moment = student.get_level_moment_submission_by_query([peil, "overall"])
+            # overall peilmoment
+            l_level_moment = student.get_level_moment_submission_by_query([peil, "student"])
             row = positions[peil]['row']
             col = positions[peil]['col']
             if l_level_moment is None:
                 # nog niet ingevuld
-                l_assignment = course.get_first_level_moment_by_query([peil, "overall"])
+                l_assignment = course.get_first_level_moment_by_query([peil, "student"])
 
                 l_level_moment = Submission(0, 0, 0, 0,
                                             l_assignment.name, l_assignment.get_date(), l_assignment.get_day(),
@@ -96,12 +97,12 @@ def plot_student(instances, course, student, actual_date, actual_day,
 
         for grade_moment in course.grade_moments.moments:
             # print("GP21 - Beordelingsmoment", grade_moment, "overall")
-            l_grade_moment = student.get_grade_moment_submission_by_query([grade_moment, "overall"])
+            l_grade_moment = student.get_grade_moment_submission_by_query([grade_moment, "student"])
             row = positions[grade_moment]['row']
             col = positions[grade_moment]['col']
             if l_grade_moment is None:
                 # nog niet ingevuld
-                l_assignment = course.get_first_grade_moment_by_query([grade_moment, "overall"])
+                l_assignment = course.get_first_grade_moment_by_query([grade_moment, "student"])
                 l_grade_moment = Submission(0, 0, 0, 0,
                                             l_assignment.name, l_assignment.get_date(), l_assignment.get_day(),
                                             None, None,
@@ -169,6 +170,18 @@ def generate_plotly(instance_name):
         specs = [
             [{'type': 'scatter', 'colspan': 3}, None, None, {'type': 'scatter', 'colspan': 3}, None, None],
             [{'type': 'scatter', "colspan": 3}, None, None, {'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
+        ]
+    elif instance.is_instance_of('inno_courses_2026'):
+        subplot_titles.append("Halfweg")
+        subplot_titles.append("Sprint 7")
+        subplot_titles.append("Eindbeoordeling")
+        positions = {'portfolio': {'row': 1, 'col': 1},
+                     'Sprint 4': {'row': 1, 'col': 4},
+                     'Sprint 7': {'row': 1, 'col': 5},
+                     'Beoordeling': {'row': 1, 'col': 6}}
+        specs = [
+            [{'type': 'scatter', 'colspan': 3}, None, None, {'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
+            [None, None, None, None, None, None],
         ]
     else:
         subplot_titles = ["Kennis", "Project"]

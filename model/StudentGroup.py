@@ -2,8 +2,8 @@ from model.StudentLink import StudentLink
 
 
 class StudentGroup:
-    def __init__(self, studenty_group_id, name):
-        self.id = studenty_group_id
+    def __init__(self, student_group_id, name):
+        self.id = student_group_id
         self.name = name
         self.teachers = []
         self.students = []
@@ -17,7 +17,7 @@ class StudentGroup:
         }
 
     def __str__(self):
-        line = f'StudentGroup({self.id}, {self.name}, {self.teachers})\n'
+        line = f'StudentGroup({self.id}, {self.name}, {self.teachers})'
         for s in self.students:
             line += " s "+str(s)
         return line

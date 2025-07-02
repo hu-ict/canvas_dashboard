@@ -15,21 +15,22 @@ class WorkloadDay:
     def __str__(self):
         return f'WorkloadDay({self.day}, {self.workload})\n'
 
-    def from_late_list(self, late_list):
-        workload_aspects["count"] = len(late_list)
-        over_14 = 0
-        over_7 = 0
-        week = 0
-        for item in late_list:
-            if item > 14:
-                over_14 += 1
-            elif item > 7:
-                over_7 += 1
-            else:
-                week += 1
-        workload_aspects["week"] = week
-        workload_aspects["over_week"] = over_7
-        workload_aspects["over_14"] = over_14
+    def from_actual_workload(self, workload):
+        pending = 0
+        late = 0
+        to_late = 0
+        for perspective in workload["perspectives"]:
+            for selector in workload["perspectives"][perspective]["pending"]:
+                pending += workload["perspectives"][perspective]["pending"][selector]
+            for selector in workload["perspectives"][perspective]["late"]:
+                late += workload["perspectives"][perspective]["late"][selector]
+            for selector in workload["perspectives"][perspective]["to_late"]:
+                to_late += workload["perspectives"][perspective]["to_late"][selector]
+
+        workload_aspects["week"] = pending
+        workload_aspects["over_week"] = late
+        workload_aspects["over_14"] = to_late
+        workload_aspects["count"] = pending + late + to_late
 
     @staticmethod
     def from_dict(data_dict):

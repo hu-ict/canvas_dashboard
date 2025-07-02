@@ -1,5 +1,4 @@
 from model.Assignment import Assignment
-from model.LearningOutcome import LearningOutcome
 from model.perspective.Status import MISSED_ITEM
 
 

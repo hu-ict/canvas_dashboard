@@ -12,6 +12,7 @@ from model.perspective.LevelSerieCollection import LevelSerieCollection
 
 ENVIRONMENT_FILE_NAME = ".//courses//course_instances.json"
 
+
 def read_course_instances():
     print("F001 - read_course_instances", ENVIRONMENT_FILE_NAME)
     if os.path.isfile(ENVIRONMENT_FILE_NAME):

@@ -1,11 +1,9 @@
-from string import Template
-
 from lib.build_bootstrap_release_planning import build_bootstrap_release_planning_tab
-from lib.build_plotly_analyse import process_analyse
-from lib.build_plotly_bandwidth import process_bandwidth
-from lib.file import read_plotly
+from lib.build_plotly_analyse import process_analytics
 from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_date_time_loc
+from lib.lib_progress import get_overall_progress
+from model.perspective.LevelSerie import STR_GRADES
 
 
 def build_learning_analytics(course, results, level_serie_collection):
@@ -23,7 +21,7 @@ def build_learning_analytics(course, results, level_serie_collection):
                                                               "assignment_name": assignment.name,
                                                               "level_serie": perspective.levels,
                                                               "status": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0},
-                                                              "grades": grades_dict}
+                                                              STR_GRADES: grades_dict}
 
     for student in results.students:
         # print(l_peil_construction)
@@ -33,17 +31,17 @@ def build_learning_analytics(course, results, level_serie_collection):
                 for submission in submission_sequence.submissions:
                     learning_analytics[str(submission.assignment_id)]["status"][str(submission.status)] += 1
                     if submission.grade is not None:
-                        learning_analytics[str(submission.assignment_id)]["grades"][str(submission.grade)] += 1
+                        learning_analytics[str(submission.assignment_id)][STR_GRADES][str(submission.grade)] += 1
         for submission in student.student_level_moments.submissions:
             learning_analytics[str(submission.assignment_id)]["status"][str(submission.status)] += 1
             if submission.grade is not None:
-                print("BLA02 -", submission.assignment_name, submission.assignment_id, submission.grade)
-                learning_analytics[str(submission.assignment_id)]["grades"][str(submission.grade)] += 1
+                # print("BLA02 -", submission.assignment_name, submission.assignment_id, submission.grade)
+                learning_analytics[str(submission.assignment_id)][STR_GRADES][str(submission.grade)] += 1
         for submission in student.student_grade_moments.submissions:
             learning_analytics[str(submission.assignment_id)]["status"][str(submission.status)] += 1
             if submission.grade is not None:
-                print("BLA03 -", submission.assignment_name, submission.assignment_id, submission.grade)
-                learning_analytics[str(submission.assignment_id)]["grades"][str(submission.grade)] += 1
+                # print("BLA03 -", submission.assignment_name, submission.assignment_id, submission.grade)
+                learning_analytics[str(submission.assignment_id)][STR_GRADES][str(submission.grade)] += 1
     return learning_analytics
 
 
@@ -133,7 +131,8 @@ def build_bootstrap_progress(a_start, a_course, a_results, a_templates, a_labels
     return progress_html_string
 
 
-def build_bootstrap_analyse_tab(instance, a_course, learning_analytics, a_templates, a_level_serie_collection, actual_day):
+def build_bootstrap_analytics_tab(instance, a_course, learning_analytics, a_templates, a_level_serie_collection,
+                                  actual_day):
     html_string = ""
     for assignment_group in a_course.assignment_groups:
         assignment_html_string = ""
@@ -143,23 +142,186 @@ def build_bootstrap_analyse_tab(instance, a_course, learning_analytics, a_templa
                 assignment_list.append(assignment)
         assignment_list = sorted(assignment_list, key=lambda a: a.assignment_day)
         for assignment in assignment_list:
-            file_name = instance.name + "/general/analyse_" + str(assignment.id) + ".html"
+            file_name = instance.name + "/general/analytics_" + str(assignment.id) + ".html"
             if assignment.assignment_day < actual_day:
                 background_color = "#ffb3b3"
             else:
                 background_color = "#c6ecd9"
-            assignment_html_string += a_templates["analyse_assignment"].substitute(
+            assignment_html_string += a_templates["analytics_assignment"].substitute(
                 {'url': file_name,
                  'assignment_name': assignment.name,
                  'background_color': background_color,
                  'assignment_lock_date': get_date_time_loc(
                      assignment.assignment_date)})
-            process_analyse(learning_analytics, assignment, a_level_serie_collection,
-                            instance.get_html_root_path() + file_name)
+            process_analytics(learning_analytics, assignment, a_level_serie_collection,
+                              instance.get_html_root_path() + file_name)
 
-        html_string += a_templates["analyse_card"].substitute({'assignment_group_id': str(assignment_group.id),
-                                                               'assignment_group_name': assignment_group.name,
-                                                               'assignments': assignment_html_string})
+        html_string += a_templates["analytics_card"].substitute({'assignment_group_id': str(assignment_group.id),
+                                                                 'assignment_group_name': assignment_group.name,
+                                                                 'assignments': assignment_html_string})
+    return html_string
+
+
+def process_analyse_level_moment(course, results, level_moment, level_serie_collection, a_templates, a_file_name):
+    student_html_string = ""
+    for student in results.students:
+        level_perspectives = []
+        perspectives_html = ""
+        for perspective in student.perspectives.values():
+            level_moment_submission = student.get_level_moment_submission_by_query([level_moment, perspective.name])
+            if level_moment_submission is None:
+                level_determined = 0
+            else:
+                grade = level_moment_submission.grade
+                if grade is not None:
+                    level_determined = int(grade)
+                else:
+                    level_determined = 0
+            level_perspectives.append(level_determined)
+            level_determined_label = level_serie_collection.level_series[course.level_moments.levels].grades[
+                str(level_determined)].label
+            level_determined_color = level_serie_collection.level_series[course.level_moments.levels].grades[
+                str(level_determined)].color
+            perspectives_html += '<td style="background-color: '+level_determined_color+';">'+level_determined_label+"</td>"
+        # print("BBS21 -", course.level_moments.levels, perspective.progress)
+        level_flow_calculated_label = level_serie_collection.level_series[course.level_moments.levels].grades[
+            str(perspective.progress)].label.upper()
+        overall_level_calculated = get_overall_progress(level_perspectives)
+        level_moment_submission = student.get_level_moment_submission_by_query(["student", level_moment])
+        if level_moment_submission is not None:
+            overall_level_determined = level_moment_submission.grade
+            if overall_level_determined is None:
+                overall_level_determined = 0
+        else:
+            overall_level_determined = 0
+        overall_level_determined_label = level_serie_collection.level_series[course.level_moments.levels].grades[
+            str(overall_level_determined)].label
+        overall_level_determined_color = level_serie_collection.level_series[course.level_moments.levels].grades[
+            str(overall_level_determined)].color
+        # print("PA11 -", course.level_moments.levels, overall_level_calculated, level_perspectives)
+        overall_level_calculated_label = level_serie_collection.level_series[course.level_moments.levels].grades[
+            str(overall_level_calculated)].label
+        overall_level_calculated_color = level_serie_collection.level_series[course.level_moments.levels].grades[
+            str(overall_level_calculated)].color
+        # file_name = instance.name + "/general/analyse_" + str(level_moment) + ".html"
+        if int(overall_level_determined) != int(overall_level_calculated):
+            message = f"FOUT {student.name} OVERALL, bepaalde beoordeling {overall_level_determined_label} inconsistent met regels voor berekende beoordeling {overall_level_calculated_label}"
+        else:
+            message = ""
+
+        student_html_string += a_templates["moment"].substitute(
+            {'url': "hoi",
+             'student_name': student.name,
+             'perspectives': perspectives_html,
+             'overall_calculated_label': overall_level_determined_label,
+             'overall_determined_label': overall_level_calculated_label,
+             'overall_calculated_color': overall_level_determined_color,
+             'overall_determined_color': overall_level_calculated_color,
+             'message': message})
+
+    perspectives_html = ""
+    for perspective in course.perspectives:
+        perspectives_html += "<th>" + perspective + "</th>"
+
+    moment_html_string = a_templates["moments_list"].substitute(
+            {'url': "hoi",
+             'perspectives': perspectives_html,
+             'moments': student_html_string})
+    with open(a_file_name, mode='w', encoding="utf-8") as file_index:
+        print("BS89 - Schrijf momenten HTML:", a_file_name)
+        file_index.write(moment_html_string)
+
+
+def process_analyse_grade_moment(course, results, grade_moment, level_serie_collection, a_templates, a_file_name):
+    student_html_string = ""
+    for student in results.students:
+        grade_perspectives = []
+        perspectives_html = ""
+        for perspective in student.perspectives.values():
+            level_moment_submission = student.get_grade_moment_submission_by_query([grade_moment, perspective.name])
+            print("BBS32 -", grade_moment, perspective.name)
+            if level_moment_submission is None:
+                grade_determined = 0
+            else:
+                grade = level_moment_submission.grade
+                if grade is not None:
+                    grade_determined = int(grade)
+                else:
+                    grade_determined = 0
+            grade_perspectives.append(grade_determined)
+            level_determined_label = level_serie_collection.level_series[course.grade_moments.levels].grades[
+                str(grade_determined)].label
+            level_determined_color = level_serie_collection.level_series[course.grade_moments.levels].grades[
+                str(grade_determined)].color
+            perspectives_html += '<td style="background-color: '+level_determined_color+';">'+level_determined_label+"</td>"
+        # print("BBS21 -", course.level_moments.levels, perspective.progress)
+        level_flow_calculated_label = level_serie_collection.level_series[course.grade_moments.levels].grades[
+            str(perspective.progress)].label.upper()
+        overall_level_calculated = get_overall_progress(grade_perspectives)
+        level_moment_submission = student.get_grade_moment_submission_by_query(["student", grade_moment])
+        if level_moment_submission is not None:
+            overall_level_determined = level_moment_submission.grade
+            if overall_level_determined is None:
+                overall_level_determined = 0
+        else:
+            overall_level_determined = 0
+        overall_level_determined_label = level_serie_collection.level_series[course.grade_moments.levels].grades[
+            str(overall_level_determined)].label
+        overall_level_determined_color = level_serie_collection.level_series[course.grade_moments.levels].grades[
+            str(overall_level_determined)].color
+        # print("PA11 -", course.level_moments.levels, overall_level_calculated, level_perspectives)
+        overall_level_calculated_label = level_serie_collection.level_series[course.grade_moments.levels].grades[
+            str(overall_level_calculated)].label
+        overall_level_calculated_color = level_serie_collection.level_series[course.grade_moments.levels].grades[
+            str(overall_level_calculated)].color
+        # file_name = instance.name + "/general/analyse_" + str(level_moment) + ".html"
+        if int(overall_level_determined) != int(overall_level_calculated):
+            message = f"FOUT {student.name} OVERALL, bepaalde beoordeling {overall_level_determined_label} inconsistent met regels voor berekende beoordeling {overall_level_calculated_label}"
+        else:
+            message = ""
+
+        student_html_string += a_templates["moment"].substitute(
+            {'url': "hoi",
+             'student_name': student.name,
+             'perspectives': perspectives_html,
+             'overall_calculated_label': overall_level_determined_label,
+             'overall_determined_label': overall_level_calculated_label,
+             'overall_calculated_color': overall_level_determined_color,
+             'overall_determined_color': overall_level_calculated_color,
+             'message': message})
+
+    perspectives_html = ""
+    for perspective in course.perspectives:
+        perspectives_html += "<th>" + perspective + "</th>"
+
+    moment_html_string = a_templates["moments_list"].substitute(
+            {'url': "hoi",
+             'perspectives': perspectives_html,
+             'moments': student_html_string})
+    with open(a_file_name, mode='w', encoding="utf-8") as file_index:
+        print("BS89 - Schrijf momenten HTML:", a_file_name)
+        file_index.write(moment_html_string)
+
+
+def build_bootstrap_analyse_tab(instance, a_course, a_results, a_templates, a_level_serie_collection):
+    html_string = ""
+    moments_html_string = ""
+    for level_moment in a_course.level_moments.moments:
+        file_name = instance.name + "/general/analyse1_" + str(level_moment) + ".html"
+        moments_html_string += a_templates["analyse_moment"].substitute(
+            {'url': file_name,
+             'assignment_name': level_moment})
+        process_analyse_level_moment(a_course, a_results, level_moment, a_level_serie_collection, a_templates,
+                                     instance.get_html_root_path() + file_name)
+    for grade_moment in a_course.grade_moments.moments:
+        file_name = instance.name + "/general/analyse_" + str(grade_moment) + ".html"
+        moments_html_string += a_templates["analyse_moment"].substitute(
+            {'url': file_name,
+             'assignment_name': grade_moment})
+        process_analyse_grade_moment(a_course, a_results, grade_moment, a_level_serie_collection, a_templates,
+                                     instance.get_html_root_path() + file_name)
+
+    html_string += a_templates["analyse_card"].substitute({'moments': moments_html_string})
     return html_string
 
 

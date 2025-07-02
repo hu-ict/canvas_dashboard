@@ -21,9 +21,17 @@ class LearningOutcome:
             'assignment_sequences': self.assignment_sequences
         }
 
-    def add_assigment_sequence(self, tag):
-        if tag not in self.assignment_sequences:
-            self.assignment_sequences.append(tag)
+    def add_assigment_sequence(self, assigment_sequence_tag):
+        if assigment_sequence_tag not in self.assignment_sequences:
+            self.assignment_sequences.append(assigment_sequence_tag)
+
+    def add_criterion_id(self, assigment_sequence_tag, criterion_id):
+        if criterion_id not in self.assignment_sequences:
+            self.assignment_sequences.append(assigment_sequence_tag+":"+criterion_id)
+
+    def add_assignment_tag_id(self, assigment_sequence_tag):
+        if assigment_sequence_tag not in self.assignment_sequences:
+            self.assignment_sequences.append(assigment_sequence_tag)
 
     def get_grade(self, items, score):
         if items == 0:

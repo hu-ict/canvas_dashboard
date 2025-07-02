@@ -1,3 +1,5 @@
+from model.learning_outcome.Feedback import Feedback
+from model.learning_outcome.StudentLearningOutcome import StudentLearningOutcome
 from model.perspective.StudentAttendance import StudentAttendance
 from model.perspective.StudentGradeMoments import StudentGradeMoments
 from model.perspective.StudentLevelMoments import StudentLevelMoments
@@ -5,14 +7,12 @@ from model.perspective.StudentPerspective import StudentPerspective
 
 
 class StudentResults:
-    def __init__(self, a_student_id, a_group_id, a_name, a_number, a_sortable_name, a_coach, a_role, a_email, a_site,
+    def __init__(self, a_student_id, a_name, a_number, a_sortable_name, a_role, a_email, a_site,
                  a_progress):
         self.id = a_student_id
-        self.group_id = a_group_id
         self.name = a_name
         self.number = a_number
         self.sortable_name = a_sortable_name
-        self.coach = a_coach
         self.email = a_email
         self.site = a_site
         self.progress = a_progress
@@ -21,9 +21,11 @@ class StudentResults:
         self.student_grade_moments = None
         self.student_attendance = None
         self.perspectives = {}
+        self.learning_outcomes = {}
+        self.general_feedback_list = []
 
     def __str__(self):
-        line = f'StudentResults({self.id}, {self.group_id}, {self.name}, {self.number}, {self.coach}, {self.role}, {self.email}, {self.progress})\n'
+        line = f'StudentResults({self.id}, {self.name}, {self.number}, {self.role}, {self.email}, {self.progress})\n'
         if self.perspectives is not None:
             for perspective in self.perspectives:
                 line += " p "+str(self.perspectives[perspective])
@@ -49,13 +51,13 @@ class StudentResults:
             'id': self.id,
             'number': self.number,
             'sortable_name': self.sortable_name,
-            'group_id': self.group_id,
-            'coach': self.coach,
             'email': self.email,
             'site': self.site,
             'role': self.role,
             'progress': self.progress,
-            'perspectives': {}
+            'perspectives': {},
+            'learning_outcomes': {},
+            'general_feedback_list': []
         }
         if self.student_level_moments is not None:
             dict_result['student_level_moments'] = self.student_level_moments.to_json()
@@ -65,6 +67,11 @@ class StudentResults:
             dict_result['student_attendance'] = self.student_attendance.to_json()
         for key in self.perspectives:
             dict_result['perspectives'][key] = self.perspectives[key].to_json()
+        for key in self.learning_outcomes:
+            dict_result['learning_outcomes'][key] = self.learning_outcomes[key].to_json()
+        for general_feedback in self.general_feedback_list:
+            dict_result['general_feedback_list'].append(general_feedback.to_json())
+
         return dict_result
 
     def get_perspective(self, name):
@@ -146,12 +153,12 @@ class StudentResults:
     def from_dict(data_dict):
         # print("Student.from_dict", data_dict)
         if 'number' in data_dict.keys():
-            new = StudentResults(data_dict['id'], data_dict['group_id'], data_dict['name'], data_dict['number'],
-                                 data_dict['sortable_name'], data_dict['coach'], data_dict['role'], data_dict['email'],
+            new = StudentResults(data_dict['id'], data_dict['name'], data_dict['number'],
+                                 data_dict['sortable_name'], data_dict['role'], data_dict['email'],
                                  data_dict[ 'site'], data_dict['progress'])
         else:
-            new = StudentResults(data_dict['id'], data_dict['group_id'], data_dict['name'], "x",
-                                 data_dict['sortable_name'], data_dict['coach'], data_dict['role'], data_dict['email'],
+            new = StudentResults(data_dict['id'], data_dict['name'], "x",
+                                 data_dict['sortable_name'], data_dict['role'], data_dict['email'],
                                  data_dict[ 'site'], data_dict['progress'])
 
         if 'student_level_moments' in data_dict.keys() and data_dict['student_level_moments'] is not None:
@@ -163,13 +170,18 @@ class StudentResults:
             new.student_attendance = StudentAttendance.from_dict(data_dict['student_attendance'])
         for key in data_dict['perspectives'].keys():
             new.perspectives[key] = StudentPerspective.from_dict(data_dict['perspectives'][key])
+        for key in data_dict['learning_outcomes'].keys():
+            new.learning_outcomes[key] = StudentLearningOutcome.from_dict(data_dict['learning_outcomes'][key])
+        if 'general_feedback_list' in data_dict.keys():
+            for general_feedback in data_dict['general_feedback_list']:
+                new.general_feedback_list.append(Feedback.from_dict(general_feedback))
         return new
 
     @staticmethod
     def copy_from(student, course):
         # print("Student.from_dict", data_dict)
-        new = StudentResults(student.id, student.group_id, student.name, student.number, student.sortable_name,
-                             student.coach, student.role, student.email, student.site, -1)
+        new = StudentResults(student.id, student.name, student.number, student.sortable_name,
+                             student.role, student.email, student.site, -1)
         for perspective in course.perspectives.values():
             new.perspectives[perspective.name] = StudentPerspective.copy_from(course, student, perspective)
         if course.level_moments is not None:
@@ -178,5 +190,8 @@ class StudentResults:
             new.student_grade_moments = StudentGradeMoments.copy_from(course.grade_moments)
         if course.attendance is not None:
             new.student_attendance = StudentAttendance.copy_from(course.attendance)
+        if course.learning_outcomes is not None:
+            for learning_outcome in course.learning_outcomes:
+                new.learning_outcomes[learning_outcome.id] = StudentLearningOutcome.copy_from(learning_outcome)
         return new
 

@@ -6,10 +6,11 @@ from generate_progress import proces_progress
 from lib.file import read_start, read_course, read_course_instances, read_progress, read_levels_from_canvas
 from lib.lib_attendance import read_attendance
 from lib.lib_submission import count_graded, add_missed_assignments, read_submissions, add_open_level_moments, \
-    add_open_grade_moments
+    add_open_grade_moments, get_feedback_from_submission
 from model.Result import *
 from lib.lib_date import get_actual_date, API_URL, date_to_day
 from model.StudentResults import StudentResults
+from model.learning_outcome.Feedback import Feedback
 
 
 def generate_results(instance_name):
@@ -30,11 +31,13 @@ def generate_results(instance_name):
     canvas_course = canvas.get_course(course.canvas_id)
     level_serie_collection = read_levels_from_canvas(canvas_course)
     if g_actual_date > course.end_date:
-        results = Result(course.canvas_id, course.name, course.end_date, date_to_day(course.start_date, course.end_date), 0, 0)
+        results = Result(course.canvas_id, course.name, course.end_date,
+                         date_to_day(course.start_date, course.end_date), 0, 0)
     elif g_actual_date < course.start_date:
         results = Result(course.canvas_id, course.name, course.start_date, 1, 0, 0)
     else:
-        results = Result(course.canvas_id, course.name, g_actual_date, date_to_day(course.start_date, g_actual_date), 0, 0)
+        results = Result(course.canvas_id, course.name, g_actual_date, date_to_day(course.start_date, g_actual_date), 0,
+                         0)
     # for student in course.students:
     #     print("GR05 -", student.name, student.number)
     for student in course.students:
@@ -63,24 +66,34 @@ def generate_results(instance_name):
     # sorteer de attendance en submissions
     for student in results.students:
         if course.attendance is not None:
-            student.student_attendance.attendance_submissions = sorted(student.student_attendance.attendance_submissions, key=lambda s: s.day)
+            student.student_attendance.attendance_submissions = sorted(
+                student.student_attendance.attendance_submissions, key=lambda s: s.day)
         for perspective in student.perspectives.values():
             for submission_sequence in perspective.submission_sequences:
-                submission_sequence.submissions = sorted(submission_sequence.submissions, key=lambda s: s.assignment_day)
+                submission_sequence.submissions = sorted(submission_sequence.submissions,
+                                                         key=lambda s: s.assignment_day)
             perspective.submission_sequences = sorted(perspective.submission_sequences, key=lambda s: s.get_day())
 
-    results.submission_count, results.not_graded_count = count_graded(results)
+    for student in results.students:
+        print("GRE81 -", student.name)
+        for student_perspective in student.perspectives.values():
+            for submission_sequence in student_perspective.submission_sequences:
+                for submission in submission_sequence.submissions:
+                    get_feedback_from_submission(course, student, submission)
+        if student.student_level_moments is not None:
+            for submission in student.student_level_moments.submissions:
+                get_feedback_from_submission(course, student, submission)
+        if student.student_grade_moments is not None:
+            for submission in student.student_grade_moments.submissions:
+                get_feedback_from_submission(course, student, submission)
 
+    results.submission_count, results.not_graded_count = count_graded(results)
     # with open(instances.get_result_file_name(instances.current_instance), 'w') as f:
     #     dict_result = results.to_json(["perspectives"])
     #     json.dump(dict_result, f, indent=2)
     progress_history = read_progress(instance.get_progress_file_name())
     proces_progress(course, results, progress_history)
     # progress_history = generate_history(results)
-
-    with open(instance.get_progress_file_name(), 'w') as f:
-        dict_result = progress_history.to_json()
-        json.dump(dict_result, f, indent=2)
 
     for student in results.students:
         # print(l_peil_construction)
@@ -95,7 +108,12 @@ def generate_results(instance_name):
         dict_result = results.to_json()
         json.dump(dict_result, f, indent=2)
 
-    print("GR99 Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
+    with open(instance.get_progress_file_name(), 'w') as f:
+        dict_result = progress_history.to_json()
+        json.dump(dict_result, f, indent=2)
+
+    print("GR99 Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

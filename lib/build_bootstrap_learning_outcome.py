@@ -13,7 +13,7 @@ def build_bootstrap_learning_outcome_tab(instance, course, templates, a_level_se
         # assignment_list = sorted(assignment_list, key=lambda a: a.assignment_day)
         # for assignment in assignment_list:
         file_name = ".//" + instance.name + "//general//learning_outcome_" + str(learning_outcome.id).lower() + ".html"
-        print("BBL41 -", file_name)
+        # print("BBL51 -", file_name)
         learning_outcomes_html_string += templates["learning_outcome"].substitute(
                 {'url': file_name,
                  'learning_outcome_short': learning_outcome.short})
@@ -53,6 +53,9 @@ def get_learning_outcome_assignments(a_course, a_templates, a_learning_outcome):
     html_string = ""
     portfolio_items = []
     for assignment_sequence_tag in a_learning_outcome.assignment_sequences:
+        print("BBL41 - assignment_sequence_tag", assignment_sequence_tag)
+        if ":" in assignment_sequence_tag:
+            assignment_sequence_tag = assignment_sequence_tag.split(":")[0]
         assignment_sequence = a_course.find_assignment_sequence(assignment_sequence_tag)
         portfolio_items.append({
                 'portfolio_item': assignment_sequence.name,

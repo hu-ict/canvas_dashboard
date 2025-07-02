@@ -1,12 +1,12 @@
 from lib.lib_bandwidth import IMPROVEMENT_PERIOD
 from lib.lib_date import get_date_time_obj, get_date_time_str
 from model.AssignmentGroup import AssignmentGroup
-from model.LearningOutcome import LearningOutcome
 from model.Role import Role
 from model.Section import Section
 from model.Student import Student
 from model.StudentGroup import StudentGroup
 from model.Teacher import Teacher
+from model.learning_outcome.LearningOutcome import LearningOutcome
 from model.perspective.Attendance import Attendance
 from model.perspective.GradeMoments import GradeMoments
 from model.perspective.LevelMoments import LevelMoments
@@ -31,7 +31,8 @@ class CourseConfig:
         self.learning_outcomes = []
         self.teachers = []
         self.assignment_groups = []
-        self.student_groups = []
+        self.project_groups = []
+        self.guild_groups = []
         self.role_groups = []
         self.students = []
 
@@ -46,8 +47,10 @@ class CourseConfig:
         line += str(self.perspectives)
         for assignment_group in self.assignment_groups:
             line += str(assignment_group)
-        for student_group in self.student_groups:
-            line += str(student_group)
+        for project_groups in self.project_groups:
+            line += str(project_groups)
+        for guild_groups in self.guild_groups:
+            line += str(guild_groups)
         for student in self.students:
             line += str(student)
         return line
@@ -86,13 +89,20 @@ class CourseConfig:
         dict_result['roles'] = list(map(lambda r: r.to_json([]), self.roles))
         dict_result['teachers'] = list(map(lambda t: t.to_json(), self.teachers))
         dict_result['assignment_groups'] = list(map(lambda ag: ag.to_json(), self.assignment_groups))
-        dict_result['student_groups'] = list(map(lambda sg: sg.to_json([]), self.student_groups))
+        dict_result['project_groups'] = list(map(lambda sg: sg.to_json([]), self.project_groups))
+        dict_result['guild_groups'] = list(map(lambda sg: sg.to_json([]), self.guild_groups))
         dict_result['students'] = list(map(lambda s: s.to_json(), self.students))
 
         return dict_result
 
-    def find_student_group(self, group_id):
-        for group in self.student_groups:
+    def find_project_group(self, group_id):
+        for group in self.project_groups:
+            if group.id == group_id:
+                return group
+        return None
+
+    def find_guild_group(self, group_id):
+        for group in self.guild_groups:
             if group.id == group_id:
                 return group
         return None
@@ -103,15 +113,25 @@ class CourseConfig:
                 return learning_outcome
         return None
 
-    def exists_in_team(self, student_id):
-        for group in self.student_groups:
+    def exists_in_group(self, student_id):
+        for group in self.project_groups:
             for student in group.students:
                 if student.id == student_id:
                     return True
         return False
 
-    def find_student_group_by_name(self, group_name):
-        for group in self.student_groups:
+    def find_project_group_by_name(self, group_name):
+        if (type(group_name)) is int:
+            return None
+        for group in self.project_groups:
+            if group_name in group.name:
+                return group
+        return None
+
+    def find_guild_group_by_name(self, group_name):
+        if (type(group_name)) is int:
+            return None
+        for group in self.guild_groups:
             if group_name in group.name:
                 return group
         return None
@@ -288,6 +308,12 @@ class CourseConfig:
                 return teacher
         return None
 
+    def find_teacher_by_initials(self, initials):
+        for teacher in self.teachers:
+            if initials == teacher.initials:
+                return teacher
+        return None
+
     @staticmethod
     def from_dict(data_dict):
         new = CourseConfig(
@@ -320,6 +346,13 @@ class CourseConfig:
         new.roles = list(map(lambda r: Role.from_dict(r), data_dict['roles']))
         new.assignment_groups = list(
             map(lambda g: AssignmentGroup.from_dict(g), data_dict['assignment_groups']))
-        new.student_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['student_groups']))
+        if 'project_groups' in data_dict:
+            new.project_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['project_groups']))
+        else:
+            new.project_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['student_groups']))
+        if 'guild_groups' in data_dict:
+            new.guild_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['guild_groups']))
+        else:
+            new.guild_groups = []
         new.students = list(map(lambda s: Student.from_dict(s), data_dict['students']))
         return new

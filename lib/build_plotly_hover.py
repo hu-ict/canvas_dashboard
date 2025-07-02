@@ -106,7 +106,7 @@ def get_hover_comments(comments):
         l_hover += "<br><b>Commentaar/Feedback:</b>"
         line_nr = 0
         for comment in comments:
-            value = comment.author_name + " - <i>" + comment.comment + "</i>"
+            value = get_date_time_loc(comment.date) + " " + comment.author_name + " - <i>" + comment.comment + "</i>"
             wrapper = textwrap.TextWrapper(width=125)
             word_list = wrapper.wrap(text=value)
             for line in word_list:

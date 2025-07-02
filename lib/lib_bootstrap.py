@@ -12,7 +12,7 @@ def load_templates(template_path):
         string_index_html = file_index_template.read()
         templates["standard"] = Template(string_index_html)
 
-    with open(template_path + 'overview//template_overzicht.html', mode='r', encoding="utf-8") as file_late_template:
+    with open(template_path + 'workload//template_overzicht.html', mode='r', encoding="utf-8") as file_late_template:
         string_late_html = file_late_template.read()
         templates["overzicht"] = Template(string_late_html)
 
@@ -52,7 +52,7 @@ def load_templates(template_path):
         string_html = file_template.read()
         templates["index_tab"] = Template(string_html)
 
-    with open(template_path + 'overview//template_overzichten.html', mode='r', encoding="utf-8") as file_template:
+    with open(template_path + 'workload//template_overzichten.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["overzichten"] = Template(string_html)
 
@@ -100,21 +100,33 @@ def load_templates(template_path):
         string_html = file_template.read()
         templates["learning_outcome"] = Template(string_html)
 
-    with open(template_path + 'overview//template_late.html', mode='r', encoding="utf-8") as file_template:
+    with open(template_path + 'workload//template_late.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["late"] = Template(string_html)
 
-    with open(template_path + 'overview//template_late_perspective.html', mode='r', encoding="utf-8") as file_template:
+    with open(template_path + 'workload//template_late_perspective.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["late_perspective"] = Template(string_html)
 
-    with open(template_path + 'overview//template_late_list.html', mode='r', encoding="utf-8") as file_template:
+    with open(template_path + 'workload//template_late_list.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["late_list"] = Template(string_html)
 
-    with open(template_path + 'overview//template_submission.html', mode='r', encoding="utf-8") as file_template:
+    with open(template_path + 'workload//template_submission.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["submission"] = Template(string_html)
+
+    with open(template_path + 'workload//template_workload_index.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["workload_index"] = Template(string_html)
+
+    with open(template_path + 'workload//template_workload_problems.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["workload_problems"] = Template(string_html)
+
+    with open(template_path + 'workload//template_workload_problem.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["workload_problem"] = Template(string_html)
 
     with open(template_path + 'student//template_grading.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
@@ -131,6 +143,10 @@ def load_templates(template_path):
     with open(template_path + 'student//template_portfolio.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["portfolio"] = Template(string_html)
+
+    with open(template_path + 'student//template_attendance.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["attendance"] = Template(string_html)
 
     with open(template_path + 'student//template_portfolio_item.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
@@ -160,13 +176,41 @@ def load_templates(template_path):
         string_html = file_template.read()
         templates["students_tab"] = Template(string_html)
 
+    with open(template_path + 'student//template_submission_feedback.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["submission_feedback"] = Template(string_html)
+
+    with open(template_path + 'student//template_learning_outcome_feedback.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["learning_outcome_feedback"] = Template(string_html)
+
+    with open(template_path + 'student//template_feedback.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["feedback"] = Template(string_html)
+
+    with open(template_path + 'analyse//template_analytics_card.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["analytics_card"] = Template(string_html)
+
+    with open(template_path + 'analyse//template_analytics_assignment.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["analytics_assignment"] = Template(string_html)
+
     with open(template_path + 'analyse//template_analyse_card.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["analyse_card"] = Template(string_html)
 
-    with open(template_path + 'analyse//template_analyse_assignment.html', mode='r', encoding="utf-8") as file_template:
+    with open(template_path + 'analyse//template_analyse_moment.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
-        templates["analyse_assignment"] = Template(string_html)
+        templates["analyse_moment"] = Template(string_html)
+
+    with open(template_path + 'analyse//template_moments_list.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["moments_list"] = Template(string_html)
+
+    with open(template_path + 'analyse//template_moment.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["moment"] = Template(string_html)
 
     with open(template_path + 'level_serie//template_level_serie_index.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()

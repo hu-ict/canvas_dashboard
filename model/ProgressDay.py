@@ -1,22 +1,22 @@
 class ProgressDay:
-    def __init__(self, day, perspectives):
+    def __init__(self, day, course_perspectives):
         self.day = day
         self.progress = {"-2": 0, "-1": 0, "0": 0, "1": 0, "2": 0, "3": 0}
         self.attendance = {"-2": 0, "-1": 0, "0": 0, "1": 0, "2": 0, "3": 0}
-        self.perspective = {}
-        for perspective in perspectives:
-            self.perspective[perspective] = {"-2": 0, "-1": 0, "0": 0, "1": 0, "2": 0, "3": 0}
+        self.perspectives = {}
+        for perspective in course_perspectives:
+            self.perspectives[perspective] = {"-2": 0, "-1": 0, "0": 0, "1": 0, "2": 0, "3": 0}
 
     def to_json(self):
         return {
             'day': self.day,
             'progress': self.progress,
             'attendance': self.attendance,
-            'perspective': self.perspective
+            'perspectives': self.perspectives
         }
 
     def __str__(self):
-        return f'ProgressDay({self.day}, {self.progress}, {self.progress}, {self.perspective})\n'
+        return f'ProgressDay({self.day}, progress {self.progress}, attendance {self.attendance}, {self.perspectives})\n'
 
     @staticmethod
     def from_dict(data_dict):
@@ -26,7 +26,7 @@ class ProgressDay:
             new.attendance = data_dict['attendance']
         if "-2" not in new.progress.keys():
             new.progress["-2"] = 0
-        if "perspective" in data_dict:
-            new.perspective = data_dict['perspective']
+        if "perspectives" in data_dict:
+            new.perspectives = data_dict['perspectives']
         return new
 

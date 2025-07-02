@@ -29,7 +29,6 @@ def generate_history(results):
     return progress_history
 
 
-
 def main(instance_name):
     g_actual_date = get_actual_date()
     instances = read_course_instances()

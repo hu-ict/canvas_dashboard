@@ -2,8 +2,9 @@ import json
 from operator import itemgetter
 from string import Template
 
-from lib.build_totals import init_sections_list
+from lib.build_total_workload import init_sections_list
 from lib.lib_date import get_date_time_loc, get_date_time_obj
+
 
 def build_late_item(a_templates, a_result, l_submission):
     student_id = l_submission['student_id']
@@ -25,19 +26,6 @@ def build_late_item(a_templates, a_result, l_submission):
 
 
 def build_bootstrap_late_list(a_instance, a_templates, a_course, a_result, a_student_totals):
-
-    # all_late_substitute = ""
-    # for perspective in a_student_totals['perspectives'].keys():
-    #     late_substitute = ""
-    #     for selector in a_student_totals['perspectives'][perspective]['list'].keys():
-    #         # print("BL11 -", perspective, selector)
-    #         file_name = "late_"+perspective+"_"+selector+".html"
-    #         late_substitute += a_templates["selector"].substitute({'selector_file': file_name, 'selector': selector})
-    #     all_late_substitute += a_templates["late_perspective"].substitute({"perspective": perspective, "buttons": late_substitute})
-    # late_html_string = a_templates["late"].substitute({"perspectives": all_late_substitute})
-    #
-    # with open(a_instance.get_html_path()+'late.html', mode='w', encoding="utf-8") as file_late:
-    #     file_late.write(late_html_string)
     if a_instance.is_instance_of("prop_courses"):
         all_late_items = init_sections_list(a_course)
     for perspective in a_student_totals['perspectives'].keys():
@@ -48,6 +36,8 @@ def build_bootstrap_late_list(a_instance, a_templates, a_course, a_result, a_stu
             late_list = sorted(late_list_temp, key=itemgetter('submitted_date'))
             late_list_html_total_string = ''
             for l_submission in late_list:
+                # if l_submission["submitted_day"]+7 < a_result.actual_day:
+                #     print("BL22 -", l_submission)
                 late_item = build_late_item(a_templates, a_result, l_submission)
                 late_list_html_total_string += late_item
                 if l_submission["submitted_day"] is None:
@@ -74,3 +64,4 @@ def build_bootstrap_late_list(a_instance, a_templates, a_course, a_result, a_stu
             file_name = "late_" + selector + ".html"
             with open(a_instance.get_html_path() + file_name, mode='w', encoding="utf-8") as file_late_list:
                 file_late_list.write(late_list_html_string)
+

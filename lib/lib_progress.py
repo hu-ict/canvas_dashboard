@@ -44,6 +44,7 @@ def get_overall_progress(a_progress):
             return 1
     return -1
 
+
 def get_progress(course, perspective):
     # bepaal de voortgang
     if len(perspective.assignment_groups) == 1:
@@ -59,9 +60,9 @@ def get_progress(course, perspective):
                             perspective.last_score = submission_sequence.get_day()
                             total_score += round(submission_sequence.get_score(), 2)
                             total_count += 1
-                            # print("LP62 -", submission_sequence.name, perspective.last_score, round(total_score, 2))
+                            # print("LP62 -", submission_sequence.name, perspective.last_score, submission_sequence.get_score(), round(total_score, 2))
                             submission_sequence.flow = assignment_group.bandwidth.get_progress_range(perspective.last_score, total_score)
-                            # print(submission.flow)
+                            # print("LP63 -", submission_sequence.flow)
                             perspective.sum_score = round(total_score, 2)
                             last_flow = submission_sequence.flow
                             # print("Graded")
@@ -70,37 +71,40 @@ def get_progress(course, perspective):
                             # print("Not graded")
                     if total_count == 0:
                         # Niet te bepalen
-                        perspective.progress = 0
+                        return 0
                     elif perspective.last_score != 0:
-                        perspective.progress = assignment_group.bandwidth.get_progress(perspective.last_score,
+                        return assignment_group.bandwidth.get_progress(perspective.last_score,
                                                                                        perspective.sum_score)
                     else:
                         # Niet te bepalen
-                        perspective.progress = 0
+                        return 0
                 else:
                     # Niet te bepalen
-                    perspective.progress = 0
+                    return 0
             else:
                 # Niet te bepalen
-                perspective.progress = 0
+                return 0
         else:
             print("LP63 - Perspective assignment_group is not set [None]")
+            return 0
     elif len(perspective.assignment_groups) > 1:
-        print("LP64 - Perspective has more then one assignment_groups attached", perspective.name,
-              perspective.assignment_groups)
+        print("LP64 - Perspective has more then one assignment_groups attached", perspective.name, perspective.assignment_groups)
+        return 0
     else:
         print("LP65 - Perspective has no assignment_groups attached", perspective.name, perspective.assignment_groups)
+        return 0
 
 
 def proces_progress(course, results, progress_history):
     progress_day = ProgressDay(results.actual_day, course.perspectives.keys())
     for student in results.students:
         if course.attendance is not None:
-            get_attendance_progress(course.attendance, student)
+            student.student_attendance.progress = get_attendance_progress(course.attendance, student)
             progress_day.attendance[str(student.student_attendance.progress)] += 1
         for perspective in student.perspectives.values():
-            get_progress(course, perspective)
-            progress_day.perspective[perspective.name][str(perspective.progress)] += 1
+            perspective.progress = get_progress(course, perspective)
+            # print("LP71 -", perspective.name, progress_day)
+            progress_day.perspectives[perspective.name][str(perspective.progress)] += 1
     # bepaal de totaal voortgang
     for student in results.students:
         perspectives = []

@@ -65,14 +65,14 @@ def get_attendance_progress(attendance, student):
         student.student_attendance.last_score = submission.day
     if student.student_attendance.essential_count == 0:
         # Niet te bepalen
-        student.student_attendance.progress = 0
+        return 0
     elif student.student_attendance.last_score != 0:
         # print(f"LP54 - Laatste dag {attendance_perspective.last_score}, laatste waarde {attendance_perspective.sum_score}")
-        student.student_attendance.progress = attendance.bandwidth.get_progress(student.student_attendance.last_score,  student.student_attendance.essential_percentage*100)
+        return attendance.bandwidth.get_progress(student.student_attendance.last_score,  student.student_attendance.essential_percentage*100)
         # print(f"LP55 - Laatste dag {attendance_perspective.last_score}, laatste waarde {attendance_perspective.sum_score*100}, voortgang {attendance_perspective.progress}")
     else:
         # Niet te bepalen
-        student.student_attendance.progress = 0
+        return 0
 
 
 def read_attendance(start, course, results):

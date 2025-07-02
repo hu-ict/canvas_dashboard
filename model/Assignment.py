@@ -22,6 +22,10 @@ class Assignment:
         self.learning_outcomes = []
         self.sections = []
 
+    def add_learning_outcome(self, learning_outcome_id):
+        if learning_outcome_id not in self.learning_outcomes:
+            self.learning_outcomes.append(learning_outcome_id)
+
     def __str__(self):
         return f'Assignment({self.id}, {self.name}, {self.group_id}, {self.section_id}, {self.grading_type}, ' \
                f'{self.grading_standard_id}, {self.points}, {self.submission_types}, ' \

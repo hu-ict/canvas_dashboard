@@ -68,6 +68,22 @@ def generate_config(instance_name):
         config.attendance = None
         config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", ["Sprint 4", "Sprint 7"])
         config.grade_moments = GradeMoments("grade_moments", "Beoordelingsmomenten", "grade", ["Beoordeling"])
+    elif instance.is_instance_of("inno_courses_2026"):
+        role = Role("AI", "AI and data Engineer", "Artificial Intelligence", "border-warning")
+        config.roles.append(role)
+        role = Role("BIM", "Business Analist", "Business and IT Management", "border-success")
+        config.roles.append(role)
+        role = Role("CSC", "Cloud and Security engineer", "Cyber Security and Cloud", "border-danger")
+        config.roles.append(role)
+        role = Role("SD", "Full stack developer", "Software Development", "border-dark")
+        config.roles.append(role)
+        role = Role("TI", "Embedded engineer", "Technische Informatica", "border-primary")
+        config.roles.append(role)
+        perspective = Perspective("team", "Team", "samen", False, True)
+        config.perspectives[perspective.name] = perspective
+        config.attendance = None
+        config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", ["Sprint 4", "Sprint 7"])
+        config.grade_moments = GradeMoments("grade_moments", "Beoordelingsmomenten", "grade", ["Beoordeling"])
     else:
         role = Role("role", "Student", "HBO-ICT", "border-dark")
         config.roles.append(role)
@@ -81,19 +97,16 @@ def generate_config(instance_name):
         config.attendance = Attendance("attendance", "Aanwezigheid", "attendance", True, False, "ATTENDANCE", 100, 75,
                                       90, Bandwidth(), policy)
         config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress",
-                                            ["Peilmoment 1", "Peilmoment 2"],)
+                                            ["Peilmoment 1", "Peilmoment 2"])
         config.grade_moments = GradeMoments("grade_moments", "Beoordelingsmomenten", "grade",
-                                        ["Semester-beslissing", "Semester-eindbeslissing"], )
+                                        ["Semester-beslissing", "Semester-eindbeslissing"])
 
     # ophalen secties
     course_sections = canvas_course.get_sections()
     for course_section in course_sections:
         new_section = Section(course_section.id, course_section.name, "role")
         config.sections.append(new_section)
-        if start1.projects_groep_name == "SECTIONS":
-            new_student_group = StudentGroup(new_section.id, new_section.name)
-            config.student_groups.append(new_student_group)
-        print("course_section", new_section)
+        print("GCONF08 - course_section", new_section)
 
     # retrieve assignments_groups and score
     canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignments', 'overrides'])
@@ -103,7 +116,7 @@ def generate_config(instance_name):
         for canvas_assignment in canvas_assignment_group.assignments:
             if canvas_assignment['points_possible']:
                 assignment_group.total_points += canvas_assignment['points_possible']
-        print("GC05 assignment_group", canvas_assignment_group, "points", assignment_group.total_points, assignment_group.strategy)
+        print("GC05 - assignment_group", canvas_assignment_group, "points", assignment_group.total_points, assignment_group.strategy)
         config.assignment_groups.append(assignment_group)
 
     # retrieve Teachers
@@ -119,26 +132,16 @@ def generate_config(instance_name):
             teacher = Teacher(canvas_user.id, canvas_user.name, "")
             print("GCONF16 - Create teacher without email", canvas_user.name)
         config.teachers.append(teacher)
-        print("GCONF18", teacher)
+        print("GCONF18 -", teacher)
 
-    canvas_group_categories = canvas_course.get_group_categories()
-    for canvas_group_category in canvas_group_categories:
-        print(canvas_group_category)
-        # retrieve project_groups
-        if canvas_group_category.name == start1.projects_groep_name:
-            canvas_groups = canvas_group_category.get_groups()
-            for canvas_group in canvas_groups:
-                studentGroup = StudentGroup(canvas_group.id, canvas_group.name)
-                config.student_groups.append(studentGroup)
-                print(canvas_group)
 
     config.learning_outcomes = []
-    print("GC98 - ConfigFileName:", instance.get_config_file_name())
+    print("GCONF98 - ConfigFileName:", instance.get_config_file_name())
     with open(instance.get_config_file_name(), 'w') as f:
         dict_result = config.to_json()
         json.dump(dict_result, f, indent=2)
 
-    print("GC99 Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
+    print("GCONF99 Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":

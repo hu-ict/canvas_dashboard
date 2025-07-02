@@ -18,8 +18,8 @@ def plot_progress_history(a_fig, a_row, a_col, a_progress_history, a_perspective
                 y.append(day.progress[str(level)])
                 y_hover.append("Dag: "+str(day.day) + ", " + l_label + ", aantal: " + str(day.progress[str(level)]))
             else:
-                y.append(day.perspective[a_perspective_name][str(level)])
-                y_hover.append("Dag: "+str(day.day) + ", " + l_label + ", aantal: " + str(day.perspective[a_perspective_name][str(level)]))
+                y.append(day.perspectives[a_perspective_name][str(level)])
+                y_hover.append("Dag: "+str(day.day) + ", " + l_label + ", aantal: " + str(day.perspectives[a_perspective_name][str(level)]))
 
         # print(level)
         # print(x)
