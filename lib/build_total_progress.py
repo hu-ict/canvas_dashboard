@@ -6,21 +6,21 @@ def create_total_progress(instance, course):
     grades = {}
     for peil in course.level_moments.moments:
         peilen[peil] = {
-            'overall': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0, 4: 0}
+            'overall': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
         }
     for grade in course.grade_moments.moments:
         grades[grade] = {
-            'overall': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0, 4: 0}
+            'overall': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
         }
     student_total_progress = {
         'level_moments': peilen,
         'grade_moments': grades,
         'actual_progress': {
-            'overall': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0, 4: 0},
+            'overall': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0},
         }
     }
     for perspective in course.perspectives.keys():
-        student_total_progress["actual_progress"][perspective] = {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0, 4: 0}
+        student_total_progress["actual_progress"][perspective] = {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
     return student_total_progress
 
 

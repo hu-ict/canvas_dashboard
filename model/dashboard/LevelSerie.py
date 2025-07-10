@@ -1,4 +1,4 @@
-from model.perspective.Level import Level
+from model.dashboard.Level import Level
 from model.perspective.Status import Status
 
 STR_STATUS = "status"

@@ -103,7 +103,7 @@ def get_rubric_score(rubrics_submission, student):
     return criterium_scores, round(total_rubric_score, 2), error
 
 
-def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_submission, a_level_serie_collection):
+def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_submission, a_dashboard):
     grader_name = None
     grader_date = None
     submission_grade = None
@@ -111,7 +111,7 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
     submission_value = 0
     submission_flow = 0
     perspective = a_course.find_perspective_by_assignment_group(a_assignment.group_id)
-    level_series = a_level_serie_collection.level_series[perspective.levels]
+    level_series = a_dashboard.level_serie_collection.level_series[perspective.levels]
     # print("SB01 -", perspective)
     # print("SB03 -", level_series.grades)
     if a_canvas_submission.grade:
@@ -410,7 +410,7 @@ def add_open_grade_moments(course, actual_day, student_id, student_grade_moments
               student_grade_moments.assignment_groups)
 
 
-def read_submissions(a_instance, a_canvas_course, a_course, a_results, a_total_refresh, level_serie_collection):
+def read_submissions(a_instance, a_canvas_course, a_course, a_results, a_total_refresh, dashboard):
     for assignment_group in a_course.assignment_groups:
         for assignment_sequence in assignment_group.assignment_sequences:
             for assignment in assignment_sequence.assignments:
@@ -446,7 +446,7 @@ def read_submissions(a_instance, a_canvas_course, a_course, a_results, a_total_r
                         # print("RS20 Could not find student", canvas_submission.user_id)
                         continue
                     l_submission = submission_builder(a_instance, a_course, student, assignment, canvas_submission,
-                                                      level_serie_collection)
+                                                      dashboard)
                     # voeg een submission toe aan een van de perspectieven
                     if l_submission is None:
                         # print(f"RS25 - Error creating submission {assignment.name} for student {student.name}")
@@ -481,9 +481,10 @@ def read_submissions(a_instance, a_canvas_course, a_course, a_results, a_total_r
 
 
 def get_feedback_from_submission(course, student, submission):
-    print("LSU81 -", submission.assignment_name)
+    # print("LSU81 -", submission.assignment_name)
     for comment in submission.comments:
-        feedback = Feedback(comment.author_id, comment.author_name, comment.date, comment.comment,
+        comment_day = date_to_day(course.start_date, comment.date)
+        feedback = Feedback(comment.author_id, comment.author_name, comment.date, comment_day, comment.comment,
                             submission.assignment_name, submission.id, submission.grade)
         if '@' in comment.comment:
             sign_words, text = get_and_remove_at_sign_words(comment.comment)
@@ -512,8 +513,8 @@ def get_feedback_from_submission(course, student, submission):
                     rating_description = submission.grade
                 else:
                     rating_description = ""
-
-                feedback = Feedback("id", submission.grader_name, submission.graded_date, criterion_score.comment,
+                submission_day = date_to_day(course.start_date, submission.graded_date)
+                feedback = Feedback("id", submission.grader_name, submission.graded_date, submission_day, criterion_score.comment,
                                     submission.assignment_name + " (" + assignment_criterion.description + ")",
                                     submission.id, rating_description)
                 if '@' in criterion_score.comment:

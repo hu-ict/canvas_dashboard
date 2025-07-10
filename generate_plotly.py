@@ -5,9 +5,9 @@ from plotly.subplots import make_subplots
 
 from lib.build_plotly_attendance import plot_attendance_perspective
 from lib.build_plotly_perspective import plot_perspective, find_submissions, plot_overall_level_moment, \
-    plot_overall_grade_moment
+    plot_overall_grade_moment, plot_timeline
 from lib.lib_date import get_date_time_loc, get_actual_date, API_URL
-from lib.file import read_course, read_results, read_course_instances, read_levels_from_canvas, read_start
+from lib.file import read_course, read_results, read_course_instances, read_start, read_dashboard_from_canvas
 from model.Submission import Submission
 
 
@@ -51,19 +51,16 @@ def grade_construct(a_course):
 
 def plot_student(instances, course, student, actual_date, actual_day,
                  a_level_construction, a_grade_construction,
-                 positions, subplot_titles, specs,
+                 subplots,
                  level_serie_collection):
-    if instances.is_instance_of('inno_courses'):
-        fig = make_subplots(rows=2, cols=6, subplot_titles=subplot_titles, specs=specs, vertical_spacing=0.10,
-                            horizontal_spacing=0.08)
-    else:
-        fig = make_subplots(rows=2, cols=6, subplot_titles=subplot_titles, specs=specs, vertical_spacing=0.10,
-                            horizontal_spacing=0.08)
+    fig = make_subplots(rows=subplots.rows, cols=subplots.cols, subplot_titles=subplots.titles, specs=subplots.specs, vertical_spacing=0.10,
+                        horizontal_spacing=0.08)
+
 
     fig.update_layout(height=900, width=1200, showlegend=False)
     for perspective in student.perspectives.values():
-        row = positions[perspective.name]['row']
-        col = positions[perspective.name]['col']
+        row = subplots.positions[perspective.name]['row']
+        col = subplots.positions[perspective.name]['col']
         # print("GP19 -", perspective, a_level_construction, a_grade_construction)
         plot_perspective(row, col, fig, course, perspective,
                          a_level_construction, a_grade_construction,
@@ -71,18 +68,58 @@ def plot_student(instances, course, student, actual_date, actual_day,
                          level_serie_collection)
 
     if course.attendance is not None:
-        row = positions["attendance"]['row']
-        col = positions["attendance"]['col']
-        plot_attendance_perspective(row, col, fig, course, student.student_attendance, actual_day, get_date_time_loc(actual_date), level_serie_collection)
+        row = subplots.positions["attendance"]['row']
+        col = subplots.positions["attendance"]['col']
+        plot_attendance_perspective(row, col, fig, course, student.student_attendance, actual_day,
+                                    get_date_time_loc(actual_date), level_serie_collection)
 
+    if instances.is_instance_of('inno_courses_2026'):
+        row = subplots.positions["timeline"]['row']
+        col = subplots.positions["timeline"]['col']
+        plot_timeline(row, col, fig, course, student, level_serie_collection)
+
+    if instances.is_instance_of('inno_courses_2026'):
+        for peil in course.level_moments.moments:
+            print("GP21 - Peilmoment", peil, "overall", subplots.positions[peil]['row'], subplots.positions[peil]['col'])
+            # overall peilmoment
+            l_level_moment = student.get_level_moment_submission_by_query([peil])
+            row = subplots.positions[peil]['row']
+            col = subplots.positions[peil]['col']
+            if l_level_moment is None:
+                # nog niet ingevuld
+                l_assignment = course.get_first_level_moment_by_query([peil])
+
+                l_level_moment = Submission(0, 0, 0, 0,
+                                            l_assignment.name, l_assignment.get_date(), l_assignment.get_day(),
+                                            None, None,
+                                            "1", False,
+                                            None, None, None,
+                                            -1, None, 3, 0)
+            plot_overall_level_moment(row, col, fig, course, l_level_moment, level_serie_collection)
+
+        for grade_moment in course.grade_moments.moments:
+            # print("GP21 - Beordelingsmoment", grade_moment, "overall")
+            l_grade_moment = student.get_grade_moment_submission_by_query([grade_moment])
+            row = subplots.positions[grade_moment]['row']
+            col = subplots.positions[grade_moment]['col']
+            if l_grade_moment is None:
+                # nog niet ingevuld
+                l_assignment = course.get_first_grade_moment_by_query([grade_moment])
+                l_grade_moment = Submission(0, 0, 0, 0,
+                                            l_assignment.name, l_assignment.get_date(), l_assignment.get_day(),
+                                            None, None,
+                                            "1", False, None, None, None,
+                                            -1, None, 3, 0)
+
+            plot_overall_grade_moment(row, col, fig, course, l_grade_moment, level_serie_collection)
     if instances.is_instance_of('inno_courses'):
         # Peil overall drie peilmomenten
         for peil in course.level_moments.moments:
-            # print("GP21 - Peilmoment", peil, "overall")
+            print("GP21 - Peilmoment", peil, "overall", subplots.positions[peil]['row'], subplots.positions[peil]['col'])
             # overall peilmoment
             l_level_moment = student.get_level_moment_submission_by_query([peil, "student"])
-            row = positions[peil]['row']
-            col = positions[peil]['col']
+            row = subplots.positions[peil]['row']
+            col = subplots.positions[peil]['col']
             if l_level_moment is None:
                 # nog niet ingevuld
                 l_assignment = course.get_first_level_moment_by_query([peil, "student"])
@@ -98,8 +135,8 @@ def plot_student(instances, course, student, actual_date, actual_day,
         for grade_moment in course.grade_moments.moments:
             # print("GP21 - Beordelingsmoment", grade_moment, "overall")
             l_grade_moment = student.get_grade_moment_submission_by_query([grade_moment, "student"])
-            row = positions[grade_moment]['row']
-            col = positions[grade_moment]['col']
+            row = subplots.positions[grade_moment]['row']
+            col = subplots.positions[grade_moment]['col']
             if l_grade_moment is None:
                 # nog niet ingevuld
                 l_assignment = course.get_first_grade_moment_by_query([grade_moment, "student"])
@@ -133,69 +170,13 @@ def generate_plotly(instance_name):
     user = canvas.get_current_user()
     print("GRL03 - Username", user.name)
     canvas_course = canvas.get_course(course.canvas_id)
-    level_serie_collection = read_levels_from_canvas(canvas_course)
-
+    # level_serie_collection = read_levels_from_canvas(canvas_course)
+    dashboard = read_dashboard_from_canvas(canvas_course)
     if results.actual_day > course.days_in_semester:
         results.actual_day = course.days_in_semester
 
     # Define bar properties
 
-    subplot_titles = []
-    for perspective in course.perspectives.values():
-        subplot_titles.append(perspective.title)
-    if instance.is_instance_of('prop_courses'):
-        positions = {'kennis': {'row': 1, 'col': 1},
-                     'verbreding': {'row': 1, 'col': 4},
-                     'skills': {'row': 2, 'col': 1},
-                     'attendance': {'row': 2, 'col': 4}
-                     }
-        specs = [
-            [
-                {'type': 'scatter', 'colspan': 3}, None, None, {'type': 'scatter', 'colspan': 3}, None, None
-            ],
-            [
-                {'type': 'scatter', "colspan": 3}, None, None, {'type': 'scatter', "colspan": 3}, None, None
-            ]
-        ]
-    elif instance.is_instance_of('inno_courses'):
-        subplot_titles.append("Halfweg")
-        subplot_titles.append("Sprint 7")
-        subplot_titles.append("Eindbeoordeling")
-        positions = {'team': {'row': 1, 'col': 1},
-                     'gilde': {'row': 1, 'col': 4},
-                     'kennis': {'row': 2, 'col': 1},
-                     'Sprint 4': {'row': 2, 'col': 4},
-                     'Sprint 7': {'row': 2, 'col': 5},
-                     'Beoordeling': {'row': 2, 'col': 6}}
-        specs = [
-            [{'type': 'scatter', 'colspan': 3}, None, None, {'type': 'scatter', 'colspan': 3}, None, None],
-            [{'type': 'scatter', "colspan": 3}, None, None, {'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
-        ]
-    elif instance.is_instance_of('inno_courses_2026'):
-        subplot_titles.append("Halfweg")
-        subplot_titles.append("Sprint 7")
-        subplot_titles.append("Eindbeoordeling")
-        positions = {'portfolio': {'row': 1, 'col': 1},
-                     'Sprint 4': {'row': 1, 'col': 4},
-                     'Sprint 7': {'row': 1, 'col': 5},
-                     'Beoordeling': {'row': 1, 'col': 6}}
-        specs = [
-            [{'type': 'scatter', 'colspan': 3}, None, None, {'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
-            [None, None, None, None, None, None],
-        ]
-    else:
-        subplot_titles = ["Kennis", "Project"]
-        positions = {'kennis': {'row': 1, 'col': 1},
-                     'skills': {'row': 1, 'col': 4}
-                     }
-        specs = [
-            [
-                {'type': 'scatter', 'colspan': 3}, None, None, {'type': 'scatter', 'colspan': 3}, None, None
-            ],
-            [
-                {'type': 'scatter', "colspan": 3}, None, None, {'type': 'scatter', "colspan": 3}, None, None
-            ]
-        ]
     l_level_construction = level_construct(course)
     l_grade_construction = grade_construct(course)
     count = 0
@@ -207,8 +188,8 @@ def generate_plotly(instance_name):
 
         plot_student(instance, course, student, results.actual_date, results.actual_day,
                      l_level_construction, l_grade_construction,
-                     positions,
-                     subplot_titles, specs, level_serie_collection)
+                     dashboard.subplot,
+                     dashboard.level_serie_collection)
 
     print("GPL99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 

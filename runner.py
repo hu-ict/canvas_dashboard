@@ -41,8 +41,8 @@ if __name__ == "__main__":
         main(sys.argv[1], sys.argv[2])
     else:
         main("TICT-VINNO1-22-FEB25", "results_create_event")
-        # main("TICT-V1SE1-24_FEB2025", "course_create_event")
-        # main("TICT-V3SE6-25_SEP25", "course_create_event")
+        # main("TICT-V1SE1-24_FEB2025", "results_create_event")
+        # main("TICT-V3SE6-25_SEP25", "results_create_event")
         # main("stage_test_sep25", "course_create_event")
         # main("sep24_inno", "results_create_event")
     total_seconds = (get_actual_date() - l_actual_date).seconds

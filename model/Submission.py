@@ -72,6 +72,12 @@ class Submission:
             'rubrics': list(map(lambda r: r.to_json(), self.rubrics)),
         }
 
+    def get_criterium_score(self, criterium_id):
+        for criterium in self.rubrics:
+            if criterium.id == criterium_id:
+                return criterium
+        return None
+
     def get_status(self):
         if self.status == NOT_CORRECT_GRADED:
             return NOT_CORRECT_GRADED

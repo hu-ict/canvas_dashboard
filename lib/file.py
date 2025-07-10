@@ -1,4 +1,3 @@
-import csv
 import json
 import os
 from model.ProgressHistory import ProgressHistory
@@ -7,8 +6,10 @@ from model.CourseConfig import CourseConfig
 from model.Start import Start
 from model.TeamsApi import TeamsApi
 from model.WorkloadHistory import WorkloadHistory
+from model.dashboard.Dashboard import Dashboard
+from model.dashboard.Subplot import Subplot
 from model.instance.CourseInstances import CourseInstances
-from model.perspective.LevelSerieCollection import LevelSerieCollection
+from model.dashboard.LevelSerieCollection import LevelSerieCollection
 
 ENVIRONMENT_FILE_NAME = ".//courses//course_instances.json"
 
@@ -124,7 +125,7 @@ def read_config_from_canvas(canvas_course):
     return CourseConfig.from_dict(data)
 
 
-def read_levels_from_canvas(canvas_course):
+def read_levels_from_canvas1(canvas_course):
     print("F022 - read levels_file from Canvas", "levels-dot-json")
     page = canvas_course.get_page("levels-dot-json")
     config_file = remove_html_tags(page.body)
@@ -132,6 +133,22 @@ def read_levels_from_canvas(canvas_course):
     level_series = LevelSerieCollection.from_dict(data)
     return level_series
 
+
+def read_subplots_from_canvas1(canvas_course):
+    print("F022 - read subplot_file from Canvas", "subplot-dot-json")
+    page = canvas_course.get_page("subplot-dot-json")
+    config_file = remove_html_tags(page.body)
+    data = json.loads(config_file)
+    subplot = Subplot.from_dict(data)
+    return subplot
+
+def read_dashboard_from_canvas(canvas_course):
+    print("F023 - read dashboard_file from Canvas", "dashboard-dot-json")
+    page = canvas_course.get_page("dashboard-dot-json")
+    dashboard_file = remove_html_tags(page.body)
+    data = json.loads(dashboard_file)
+    dashboard = Dashboard.from_dict(data)
+    return dashboard
 
 def read_plotly(plotly_file_name):
     with open(plotly_file_name, mode='r', encoding="utf-8") as file_result:

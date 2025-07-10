@@ -108,6 +108,7 @@ def build_moments(course_id, course, moment, level_serie, moment_submissions, te
         progress_color = level_serie.get_status(BEFORE_DEADLINE).color
         comments = "Leeg"
         url = "https://canvas.hu.nl/courses/" + str(course_id)
+        learning_outcomes_table = ""
         level_moment_html_string = templates['level_moment'].substitute(
             {'level_moment_title': moment,
              'url': url,
@@ -117,6 +118,7 @@ def build_moments(course_id, course, moment, level_serie, moment_submissions, te
              'grader_name': "leeg",
              'graded_date': "Leeg",
              'comments': comments,
+             'learning_outcomes_table': learning_outcomes_table,
              'reflection': ""
              }
         )
@@ -150,6 +152,25 @@ def build_moments(course_id, course, moment, level_serie, moment_submissions, te
                 )
             else:
                 reflection_html_string = ""
+            learning_outcome_list = ""
+            for rubric in assignment.rubrics:
+                criterium = moment_submission.get_criterium_score(rubric.id)
+                if criterium:
+                    l_score = str(int(criterium.score))
+                    l_comment = criterium.comment
+                else:
+                    l_score = "-1"
+                    l_comment = ""
+
+                l_label = level_serie.grades[l_score].label
+                l_color = level_serie.grades[l_score].color
+                learning_outcome_list += templates['learning_outcome_row'].substitute(
+                    {'learning_outcome': rubric.description,
+                     'color': l_color,
+                     'label': l_label,
+                     'argumentatie': l_comment})
+            learning_outcomes_table = templates['learning_outcomes_table'].substitute(
+                {'learning_outcome_list': learning_outcome_list})
             level_moment_html_string += templates['level_moment'].substitute(
                 {'level_moment_title': moment_submission.assignment_name,
                  'url': url,
@@ -158,6 +179,7 @@ def build_moments(course_id, course, moment, level_serie, moment_submissions, te
                  'submitted_date': get_date_time_loc(moment_submission.submitted_date),
                  'grader_name': moment_submission.grader_name,
                  'graded_date': get_date_time_loc(moment_submission.graded_date),
+                 'learning_outcomes_table': learning_outcomes_table,
                  'comments': comments,
                  'reflection': reflection_html_string
                  }
@@ -370,7 +392,8 @@ def build_bootstrap_feedback(course, student_results, templates, level_serie_col
             {
                 'learning_outcome_short': student_results.learning_outcomes[learning_outcome].short,
                 'learning_outcome_id': student_results.learning_outcomes[learning_outcome].id,
-                'feedback_rows': get_feedback_list_html(student_results.learning_outcomes[learning_outcome].feedback_list, templates)
+                'feedback_rows': get_feedback_list_html(
+                    student_results.learning_outcomes[learning_outcome].feedback_list, templates)
             })
 
     # for perspective in student_results.perspectives.values():
@@ -391,7 +414,7 @@ def build_bootstrap_feedback(course, student_results, templates, level_serie_col
 
 
 def build_bootstrap_student_index(instance, course_id, course, student_results, actual_date, actual_day, templates,
-                                  level_serie_collection):
+                                  dashboard):
     student = course.find_student(student_results.id)
 
     project_group_teacher_str = ""
@@ -424,33 +447,33 @@ def build_bootstrap_student_index(instance, course_id, course, student_results, 
     for moment in course.level_moments.moments:
         level_moment_submissions = student_results.get_level_moment_submissions_by_query([moment])
         # print("BBS31 -", moment, len(level_moment_submissions))
-        level_serie = level_serie_collection.level_series[course.level_moments.levels]
+        level_serie = dashboard.level_serie_collection.level_series[course.level_moments.levels]
         student_tab_content[moment.replace(" ", "_").lower()] = build_moments(course_id, course, moment, level_serie,
                                                                               level_moment_submissions, templates)
     for moment in course.grade_moments.moments:
         grade_moment_submissions = student_results.get_grade_moment_submissions_by_query([moment])
-        level_serie = level_serie_collection.level_series[course.grade_moments.levels]
+        level_serie = dashboard.level_serie_collection.level_series[course.grade_moments.levels]
         # print("BBSI04 -", moment, len(grade_moment_submissions))
         student_tab_content[moment.replace(" ", "_").lower()] = build_moments(course_id, course, moment, level_serie,
                                                                               grade_moment_submissions, templates)
 
     # print("BBSI02 -", student_tabs)
-    if 'voortgang' in level_serie_collection.student_tabs:
+    if 'voortgang' in dashboard.student_tabs:
         # Importeren plotly html in index html file
         student_name = student.email.split("@")[0].lower()
         file_name_html = instance.get_temp_path() + student_name + "_progress.html"
         student_tab_content['voortgang'] = '<h2 class="mt-2">Voortgang</h2>' + read_plotly(file_name_html)
-    if 'portfolio' in level_serie_collection.student_tabs:
+    if 'portfolio' in dashboard.student_tabs:
         student_tab_content['portfolio'] = build_bootstrap_portfolio(instance, course_id, course, student,
                                                                      student_results, actual_date, actual_day,
-                                                                     templates, level_serie_collection)
-    if 'feedback' in level_serie_collection.student_tabs:
+                                                                     templates, dashboard.level_serie_collection)
+    if 'feedback' in dashboard.student_tabs:
         student_tab_content['feedback'] = build_bootstrap_feedback(course, student_results, templates,
-                                                                   level_serie_collection)
+                                                                   dashboard.level_serie_collection)
 
     # print("BSI10 - ", student_tabs.keys())
     student_tabs_html_string = build_student_tabs(instance, course, student_tab_content,
-                                                  level_serie_collection.student_tabs)
+                                                  dashboard.student_tabs)
     student_index_html_string = templates['student_index'].substitute(
         {
             'semester': course.name,

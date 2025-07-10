@@ -14,7 +14,7 @@ def get_groups(start, course, canvas_course):
         print("GST12 - Werken met Canvas secties als groepen (meestal S1 propedeuse).")
         for section in course.sections:
             new_student_group = StudentGroup(section.id, section.name)
-            course.student_groups.append(new_student_group)
+            course.project_groups.append(new_student_group)
     else:
         canvas_group_categories = canvas_course.get_group_categories()
         for canvas_group_category in canvas_group_categories:

@@ -3,7 +3,7 @@ from canvasapi import Canvas
 import json
 
 from generate_progress import proces_progress
-from lib.file import read_start, read_course, read_course_instances, read_progress, read_levels_from_canvas
+from lib.file import read_start, read_course, read_course_instances, read_progress, read_dashboard_from_canvas
 from lib.lib_attendance import read_attendance
 from lib.lib_submission import count_graded, add_missed_assignments, read_submissions, add_open_level_moments, \
     add_open_grade_moments, get_feedback_from_submission
@@ -29,7 +29,7 @@ def generate_results(instance_name):
     user = canvas.get_current_user()
     print("GR03 - Username", user.name)
     canvas_course = canvas.get_course(course.canvas_id)
-    level_serie_collection = read_levels_from_canvas(canvas_course)
+    dashboard = read_dashboard_from_canvas(canvas_course)
     if g_actual_date > course.end_date:
         results = Result(course.canvas_id, course.name, course.end_date,
                          date_to_day(course.start_date, course.end_date), 0, 0)
@@ -54,7 +54,7 @@ def generate_results(instance_name):
         read_attendance(start, course, results)
     else:
         print("GR10 - No attendance")
-    read_submissions(instance, canvas_course, course, results, True, level_serie_collection)
+    read_submissions(instance, canvas_course, course, results, True, dashboard)
     for student in results.students:
         for student_perspective in student.perspectives.values():
             # Perspective aanvullen met missed Assignments waar nodig (niets ingeleverd)
@@ -75,7 +75,7 @@ def generate_results(instance_name):
             perspective.submission_sequences = sorted(perspective.submission_sequences, key=lambda s: s.get_day())
 
     for student in results.students:
-        print("GRE81 -", student.name)
+        # print("GRE81 -", student.name)
         for student_perspective in student.perspectives.values():
             for submission_sequence in student_perspective.submission_sequences:
                 for submission in submission_sequence.submissions:

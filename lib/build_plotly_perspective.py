@@ -285,8 +285,9 @@ def plot_overall_level_moment(a_row, a_col, a_fig, a_course, a_level_moment, a_l
         y_niveau = [0.2]
     else:
         y_niveau = [int(a_level_moment.grade)]
-    x_labels = [a_level_moment.assignment_name]
+    x_labels = ["Peilmoment"]#[a_level_moment.assignment_name]
     y_hover = get_hover_moment(a_course, a_level_moment, a_levels.level_series[a_course.level_moments.levels])
+    print("BPP11 - plot_overall_level_moment", a_level_moment.assignment_name)
     a_fig.add_trace(go.Bar(x=x_labels, y=y_niveau,
                            name="Hoi",
                            hoverinfo="text",
@@ -311,7 +312,7 @@ def plot_overall_grade_moment(a_row, a_col, a_fig, a_course, a_grade_moment, a_l
         y_niveau = [0.2]
     else:
         y_niveau = [int(a_grade_moment.grade)]
-    x_labels = [a_grade_moment.assignment_name]
+    x_labels = ["Beoordelingsmoment"] # [a_grade_moment.assignment_name]
     y_hover = get_hover_moment(a_course, a_grade_moment, a_levels.level_series[a_course.grade_moments.levels])
 
     a_fig.add_trace(go.Bar(x=x_labels, y=y_niveau,
@@ -359,3 +360,85 @@ def plot_perspective(a_row, a_col, a_fig, a_course, a_student_perspective, a_lev
                             a_course, show_points,
                             assignment_group.assignment_sequences, a_student_perspective, a_actual_day,
                             a_level_serie_collection)
+
+
+def plot_timeline(a_row, a_col, a_fig, a_course, a_student, a_level_serie_collection):
+    a_fig.update_yaxes(title_text="Leeruitkomsten",
+                       # range=[0, len(a_student.learning_outcomes)+1],
+                       row=a_row, col=a_col)
+    plot_timeline_gf(a_row, a_col, a_fig, a_course, a_student.general_feedback_list, a_level_serie_collection)
+
+    for timeline_lu in a_student.learning_outcomes.values():
+        plot_timeline_lu(a_row, a_col, a_fig, a_course, timeline_lu, a_level_serie_collection)
+
+
+def plot_timeline_gf(a_row, a_col, a_fig, a_course, a_feedback_list, a_level_serie_collection):
+    x_feedback = [0]
+    y_feedback = ["AF"]
+    y_hover = ['<b>Start</b> '+get_date_time_loc(a_course.start_date)]
+    y_colors = [a_level_serie_collection.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).color]
+    y_size = [get_marker_size(False)]
+    cum_score = 0
+    for feedback in a_feedback_list:
+        y_size.append(get_marker_size(True))
+        x_feedback.append(feedback.day)
+        y_feedback.append("AF")
+        l_hover = f"{feedback.author_name} ({feedback.date}): {feedback.comment}"
+        y_hover.append(l_hover)
+        y_colors.append(a_level_serie_collection.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).color)
+    a_fig.add_trace(
+        go.Scatter(
+            x=x_feedback,
+            y=y_feedback,
+            hoverinfo="text",
+            hovertext=y_hover,
+            mode='lines+markers',
+            marker_color=y_colors,
+            line_color="#444444",
+            hoverlabel=hover_style,
+            marker=dict(
+                size=y_size,
+                opacity=1.0,
+                line=dict(
+                    width=2
+                )
+            )
+        ),
+        row=a_row, col=a_col
+    )
+
+def plot_timeline_lu(a_row, a_col, a_fig, a_course, a_timeline_lu, a_level_serie_collection):
+    x_feedback = [0]
+    y_feedback = [a_timeline_lu.id]
+    y_hover = ['<b>Start</b> '+get_date_time_loc(a_course.start_date)]
+    y_colors = [a_level_serie_collection.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).color]
+    y_size = [get_marker_size(False)]
+    cum_score = 0
+    for feedback in a_timeline_lu.feedback_list:
+        y_size.append(get_marker_size(True))
+        x_feedback.append(feedback.day)
+        y_feedback.append(a_timeline_lu.id)
+        l_hover = f"{feedback.author_name} ({feedback.date}): {feedback.comment}"
+        y_hover.append(l_hover)
+        y_colors.append(a_level_serie_collection.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).color)
+    a_fig.add_trace(
+        go.Scatter(
+            x=x_feedback,
+            y=y_feedback,
+            hoverinfo="text",
+            hovertext=y_hover,
+            mode='lines+markers',
+            marker_color=y_colors,
+            line_color="#444444",
+            hoverlabel=hover_style,
+            marker=dict(
+                size=y_size,
+                opacity=1.0,
+                line=dict(
+                    width=2
+                )
+            )
+        ),
+        row=a_row, col=a_col
+    )
+    a_fig.update_xaxes(title_text="Dagen in onderwijsperiode", range=[0, a_course.days_in_semester], row=a_row, col=a_col)

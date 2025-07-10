@@ -160,6 +160,14 @@ def load_templates(template_path):
         string_html = file_template.read()
         templates["level_moment"] = Template(string_html)
 
+    with open(template_path + 'student//template_learning_outcomes_table.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["learning_outcomes_table"] = Template(string_html)
+
+    with open(template_path + 'student//template_learning_outcome_row.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["learning_outcome_row"] = Template(string_html)
+
     with open(template_path + 'student//template_portfolio_leeg.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["portfolio_leeg"] = Template(string_html)

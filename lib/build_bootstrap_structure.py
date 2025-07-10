@@ -3,7 +3,7 @@ from lib.build_plotly_analyse import process_analytics
 from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_date_time_loc
 from lib.lib_progress import get_overall_progress
-from model.perspective.LevelSerie import STR_GRADES
+from model.dashboard.LevelSerie import STR_GRADES
 
 
 def build_learning_analytics(course, results, level_serie_collection):

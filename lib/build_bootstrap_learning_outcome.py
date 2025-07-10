@@ -53,7 +53,7 @@ def get_learning_outcome_assignments(a_course, a_templates, a_learning_outcome):
     html_string = ""
     portfolio_items = []
     for assignment_sequence_tag in a_learning_outcome.assignment_sequences:
-        print("BBL41 - assignment_sequence_tag", assignment_sequence_tag)
+        # print("BBL41 - assignment_sequence_tag", assignment_sequence_tag)
         if ":" in assignment_sequence_tag:
             assignment_sequence_tag = assignment_sequence_tag.split(":")[0]
         assignment_sequence = a_course.find_assignment_sequence(assignment_sequence_tag)

@@ -99,7 +99,7 @@ def plot_grades(a_fig, a_row, a_col, student_totals, a_course, a_grade_levels):
         y_hover = []
         if a_course.level_moments is not None:
             for label in a_course.grade_moments.moments:
-                # print("PT10 moment", label, level, student_totals[a_start.level_moments.name][label])
+                print("PTG10 moment", label, level)
                 x_labels.append(label)
                 y_counts.append(student_totals["grade_moments"][label]["overall"][int(level)])
                 y_hover.append(label+" "+a_grade_levels.grades[str(level)].label+" "+str(student_totals["grade_moments"][label]["overall"][int(level)]))

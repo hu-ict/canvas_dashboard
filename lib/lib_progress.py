@@ -15,12 +15,15 @@ def flow_to_progress(flow):
 
 
 def get_overall_progress(a_progress):
+    # print("LP11 - get_overall_progress", a_progress)
     if 0 in a_progress:
         return 0
     if 1 in a_progress:
         return 1
     if -1 in a_progress:
         return -1
+    if len(a_progress) == 1:
+        return a_progress[0]
     boven = 8
     if len(a_progress) == 3: # 3 perspectieven
         if a_progress[0] >= 2 and a_progress[1] >= 2 and a_progress[2] >= 2:
@@ -111,9 +114,9 @@ def proces_progress(course, results, progress_history):
         for perspective in student.perspectives.values():
             # print("GP08 -", perspective.name, perspective.progress)
             perspectives.append(perspective.progress)
-        # print("GP10 -", perspectives)
+        # print("LP21 - proces_progress", perspectives)
         progress = get_overall_progress(perspectives)
-        # print("GP20 - student.progress =", progress, student.name)
+        # print("LP22 - student.progress =", progress, student.name)
         student.progress = progress
         progress_day.progress[str(progress)] += 1
         # print(f"{student.name}, {student.role}, {student.progress}, {student.perspectives['team'].progress}, {student.perspectives['gilde'].progress}, {student.perspectives['kennis'].progress}")
