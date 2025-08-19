@@ -34,23 +34,11 @@ class Student:
 
     @staticmethod
     def from_dict(data_dict):
-        if 'project_id' in data_dict:
-            project_id = data_dict['project_id']
-        else:
-            project_id = data_dict['group_id']
-        if 'guild_id' in data_dict:
-            guild_id = data_dict['guild_id']
-        else:
-            guild_id = None
-        new = Student(data_dict['id'], project_id, guild_id, data_dict['name'],
+        new = Student(data_dict['id'], data_dict['project_id'], data_dict['guild_id'], data_dict['name'],
                       data_dict['number'], data_dict['sortable_name'],
                       data_dict['role'], data_dict['email'], data_dict['site'])
-        if 'project_teachers'in data_dict:
-            project_teachers = data_dict['project_teachers']
-        else:
-            project_teachers = [data_dict['coach']]
+        if 'project_teachers' in data_dict:
+            new.project_teachers = data_dict['project_teachers']
         if 'guild_teachers' in data_dict:
-            guild_teachers = data_dict['guild_teachers']
-        new.project_teachers = project_teachers
-        new.guild_teachers = guild_teachers
+            new.guild_teachers = data_dict['guild_teachers']
         return new

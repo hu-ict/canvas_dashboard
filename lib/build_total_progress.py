@@ -47,8 +47,6 @@ def process_total_progress(a_instance, a_course, a_results, a_total_progress):
             for level_label in a_course.level_moments.moments:
                 if a_instance.is_instance_of("inno_courses"):
                     submission = student_results.get_level_moment_submission_by_query([level_label, "student"])
-                elif a_instance.is_instance_of("inno_courses_2026"):
-                    submission = student_results.get_level_moment_submission_by_query([level_label, "student"])
                 else:
                     submission = student_results.get_level_moment_submission_by_query([level_label])
                 if submission is None or submission.status == NOT_YET_GRADED:
@@ -58,8 +56,6 @@ def process_total_progress(a_instance, a_course, a_results, a_total_progress):
         if a_course.grade_moments is not None:
             for grade_label in a_course.grade_moments.moments:
                 if a_instance.is_instance_of("inno_courses"):
-                    submission = student_results.get_grade_moment_submission_by_query([grade_label, "student"])
-                elif a_instance.is_instance_of("inno_courses_2026"):
                     submission = student_results.get_grade_moment_submission_by_query([grade_label, "student"])
                 else:
                     submission = student_results.get_grade_moment_submission_by_query([grade_label])

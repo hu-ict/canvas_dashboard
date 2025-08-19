@@ -4,7 +4,7 @@ import json
 from canvasapi import Canvas
 
 from lib.file import read_start, read_course, read_progress, read_results, read_course_instances, \
-    read_levels_from_canvas
+    read_dashboard_from_canvas
 from lib.lib_date import get_actual_date, API_URL
 from lib.lib_progress import get_overall_progress
 from model.ProgressDay import ProgressDay
@@ -24,7 +24,7 @@ def check_level(instance_name, level_moment):
     results = read_results(instance.get_result_file_name())
     canvas = Canvas(API_URL, start.api_key)
     canvas_course = canvas.get_course(course.canvas_id)
-    level_serie_collection = read_levels_from_canvas(canvas_course)
+    level_serie_collection = read_dashboard_from_canvas(canvas_course)
     problems = []
     for student_results in results.students:
         student = course.find_student(student_results.id)
@@ -110,7 +110,7 @@ def check_beoordeling(instance_name):
     results = read_results(instance.get_result_file_name())
     canvas = Canvas(API_URL, start.api_key)
     canvas_course = canvas.get_course(course.canvas_id)
-    level_serie_collection = read_levels_from_canvas(canvas_course)
+    dashboard = read_dashboard_from_canvas(canvas_course)
     problems = []
     for student_results in results.students:
         student = course.find_student(student_results.id)
@@ -139,8 +139,8 @@ def check_beoordeling(instance_name):
             else:
                 grade_determined = int(grade)
             grade_perspectives.append(grade_determined)
-            grade_determined_label = level_serie_collection.level_series[course.grade_moments.levels].grades[str(grade_determined)].label.upper()
-            grade_flow_calculated_label = level_serie_collection.level_series[course.grade_moments.levels].grades[str(perspective.progress)].label.upper()
+            grade_determined_label = dashboard.level_serie_collection.level_series[course.grade_moments.levels].grades[str(grade_determined)].label.upper()
+            grade_flow_calculated_label = dashboard.level_serie_collection.level_series[course.grade_moments.levels].grades[str(perspective.progress)].label.upper()
             # print("GCR11 -", student.name, perspective.name, grade_determined != int(perspective.progress), grade_determined, perspective.progress)
             # print("GCR12 -", grade_determined, perspective.progress, grade_determined != int(perspective.progress))
             submission_grade_verantwoordingsdocument = 0
@@ -157,12 +157,12 @@ def check_beoordeling(instance_name):
                     if submission.grade is not None:
                         submission_grade_verantwoordingsdocument = int(submission.grade)
             if perspective.name.upper() == "GILDE" and (grade_determined >= 2 and submission_grade_verantwoordingsdocument < 3):
-                grade_flow_calculated_label = level_serie_collection.level_series[course.perspectives[perspective.name].levels].grades[str(submission_grade_verantwoordingsdocument)].label.upper()
+                grade_flow_calculated_label = dashboard.level_serie_collection.level_series[course.perspectives[perspective.name].levels].grades[str(submission_grade_verantwoordingsdocument)].label.upper()
                 problems.append({"problem": 7,
                                  "teacher": teacher_name,
                                  "message": f"{student.name} {perspective.name.upper()} perspectief, bepaalde beoordeling {grade_determined_label} inconsistent met verantwoordingsdocument {grade_flow_calculated_label}"})
             elif perspective.name.upper() == "GILDE" and (grade_determined >= 2 and submission_grade_deep_dive < 3):
-                grade_flow_calculated_label = level_serie_collection.level_series[course.perspectives[perspective.name].levels].grades[str(submission_grade_deep_dive)].label.upper()
+                grade_flow_calculated_label = dashboard.level_serie_collection.level_series[course.perspectives[perspective.name].levels].grades[str(submission_grade_deep_dive)].label.upper()
                 problems.append({"problem": 8,
                                  "teacher": teacher_name,
                                  "message": f"{student.name} {perspective.name.upper()} perspectief, bepaalde beoordeling {grade_determined_label} inconsistent met deep dive {grade_flow_calculated_label}"})
@@ -180,9 +180,9 @@ def check_beoordeling(instance_name):
         overall_grade_determined = student_results.get_grade_moment_submission_by_query(["student", fase]).grade
         if overall_grade_determined is None:
             overall_grade_determined = 0
-        overall_grade_determined_label = level_serie_collection.level_series[course.grade_moments.levels].grades[str(overall_grade_determined)].label.upper()
-        overall_grade_calculated_label = level_serie_collection.level_series[course.grade_moments.levels].grades[str(overall_grade_calculated)].label.upper()
-        overall_grade_flow_calculated_label = level_serie_collection.level_series[course.grade_moments.levels].grades[str(student_results.progress)].label.upper()
+        overall_grade_determined_label = dashboard.level_serie_collection.level_series[course.grade_moments.levels].grades[str(overall_grade_determined)].label.upper()
+        overall_grade_calculated_label = dashboard.level_serie_collection.level_series[course.grade_moments.levels].grades[str(overall_grade_calculated)].label.upper()
+        overall_grade_flow_calculated_label = dashboard.level_serie_collection.level_series[course.grade_moments.levels].grades[str(student_results.progress)].label.upper()
         if int(overall_grade_determined) != int(overall_grade_calculated) and int(overall_grade_determined) > 0:
             problems.append({"problem": 2,
                              "teacher": teacher_name,

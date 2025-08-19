@@ -1,17 +1,9 @@
 import csv
 import sys
-import json
 
-from canvasapi import Canvas
 
-from lib.file import read_start, read_course, read_progress, read_results, read_course_instances, \
-    read_levels_from_canvas
-from lib.lib_date import get_actual_date, API_URL
-from lib.lib_progress import get_overall_progress
-from model.ProgressDay import ProgressDay
-from model.perspective.Perspectives import Perspectives
-from model.perspective.StudentPerspective import StudentPerspective
-from model.perspective.StudentPerspectives import StudentPerspectives
+from lib.file import read_start, read_course, read_results, read_course_instances
+from lib.lib_date import get_actual_date
 
 
 def read_osiris(file_name):
@@ -42,11 +34,11 @@ def main(instance_name):
     instances = read_course_instances()
     if len(instance_name) > 0:
         instances.current_instance = instance_name
-    instance = instances.get_instance_by_name("sep24_inno")
+    instance = instances.get_instance_by_name(instances.current_instance)
     start = read_start(instance.get_start_file_name())
     course = read_course(instance.get_course_file_name())
     results = read_results(instance.get_result_file_name())
-    osiris_results = read_osiris("Osiris-Sep24.csv")
+    osiris_results = read_osiris("Osiris-Feb25.csv")
     problems = []
     # for student in results.students:
     #     overall_grade_determined = student.get_grade_moment_submission_by_query(["overall", "Beoordeling"]).grade
@@ -63,18 +55,22 @@ def main(instance_name):
     #         print("2 Canvas:", overall_grade_determined, "Osiris", osiris_result["result"], student.name, student.role)
 
     for student in results.students:
-        overall_grade_determined = student.get_grade_moment_submission_by_query(["overall", "Beoordeling"]).grade
+        overall_grade_determined = student.get_grade_moment_submission_by_query(["student", "Beoordeling"]).grade
         osiris_result = get_student_by_number(osiris_results, student.number)
         if osiris_result is None:
+            print("COR11 - student niet in Osiris", student.name)
             continue
         if overall_grade_determined == "1" and osiris_result["result"] == "NN":
+            print("COR12 -", overall_grade_determined, osiris_result["result"])
             continue
         elif overall_grade_determined == "2" and osiris_result["result"] == "ON":
+            print("COR13 -", overall_grade_determined, osiris_result["result"])
             continue
         elif overall_grade_determined == "3" and osiris_result["result"] == "BN":
+            print("COR14 -", overall_grade_determined, osiris_result["result"])
             continue
         else:
-            # print(osiris_result)
+            # print("COR14 -", overall_grade_determined, osiris_result["result"])
             print("3 Canvas:", overall_grade_determined, "Osiris", osiris_result["result"], osiris_result["name"])
 
     # for osiris_result in osiris_results:

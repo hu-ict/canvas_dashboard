@@ -422,11 +422,11 @@ def read_submissions(a_instance, a_canvas_course, a_course, a_results, a_total_r
                 if not a_total_refresh and ((a_results.actual_date - assignment.assignment_date).days > 10):
                     # deadline langer dan twee weken geleden. Alle feedback is gegeven.
                     continue
-                # TODO
-                # if assignment.unlock_date is not None:
-                #     if assignment.unlock_date > a_results.actual_date:
-                #         # volgende assignment
-                #         continue
+
+                if assignment.unlock_date is not None:
+                    if assignment.unlock_date > a_results.actual_date:
+                        # volgende assignment
+                        continue
 
                 # TODO
                 # if (assignment.assignment_day - a_results.actual_day) <= 10:

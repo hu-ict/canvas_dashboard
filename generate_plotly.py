@@ -73,12 +73,12 @@ def plot_student(instances, course, student, actual_date, actual_day,
         plot_attendance_perspective(row, col, fig, course, student.student_attendance, actual_day,
                                     get_date_time_loc(actual_date), level_serie_collection)
 
-    if instances.is_instance_of('inno_courses_2026'):
+    if instances.is_instance_of('courses_2026'):
         row = subplots.positions["timeline"]['row']
         col = subplots.positions["timeline"]['col']
         plot_timeline(row, col, fig, course, student, level_serie_collection)
 
-    if instances.is_instance_of('inno_courses_2026'):
+    if instances.is_instance_of('courses_2026'):
         for peil in course.level_moments.moments:
             print("GP21 - Peilmoment", peil, "overall", subplots.positions[peil]['row'], subplots.positions[peil]['col'])
             # overall peilmoment

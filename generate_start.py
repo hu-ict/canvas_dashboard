@@ -35,13 +35,13 @@ canvas_api_key = input("Canvas API-key: ")
 if instance.is_instance_of("prop_courses"):
     attendance_path = instance.get_project_path() + "attendance_report.csv"
     project_group_name = "SECTIONS"
-    gilde_group_name = ""
+    guild_group_name = ""
 else:
     attendance_path = None
-    project_groep_name = "Project Groups"
+    project_group_name = "Project Groups"
     guild_group_name = "Gildemeesters"
 start = Start(canvas_course_id,
-              project_groep_name,
+              project_group_name,
               guild_group_name,
               get_date_time_obj("2025-09-01T00:00:00Z"),
               get_date_time_obj("2026-01-30T23:59:59Z"),

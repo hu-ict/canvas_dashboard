@@ -3,6 +3,7 @@ import sys
 from canvasapi import Canvas
 import json
 
+from generate_students import get_groups
 from lib.lib_bandwidth import IMPROVEMENT_PERIOD
 from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
 from lib.file import read_start, read_course_instances
@@ -30,17 +31,17 @@ def generate_config(instance_name):
         instances.current_instance = instance_name
     instance = instances.get_instance_by_name(instances.current_instance)
     print("Instance:", instance.name)
-    start1 = read_start(instance.get_start_file_name())
+    start = read_start(instance.get_start_file_name())
     # Initialize a new Canvas object
-    canvas = Canvas(API_URL, start1.api_key)
+    canvas = Canvas(API_URL, start.api_key)
     user = canvas.get_current_user()
     print(user.name)
-    canvas_course = canvas.get_course(start1.canvas_course_id)
+    canvas_course = canvas.get_course(start.canvas_course_id)
 
-    config = CourseConfig(start1.canvas_course_id, canvas_course.name,
-                          start1.start_date,
-                          start1.end_date,
-                          date_to_day(start1.start_date, start1.end_date),
+    config = CourseConfig(start.canvas_course_id, canvas_course.name,
+                          start.start_date,
+                          start.end_date,
+                          date_to_day(start.start_date, start.end_date),
                           IMPROVEMENT_PERIOD,
                           0)
 
@@ -66,32 +67,32 @@ def generate_config(instance_name):
         perspective = Perspective("kennis", "Kennis", "niveau", True, False)
         config.perspectives[perspective.name] = perspective
         config.attendance = None
-        config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", ["Sprint 4", "Sprint 7"])
+        config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", ["Peilmoment 1", "Peilmoment 2"])
         config.grade_moments = GradeMoments("grade_moments", "Beoordelingsmomenten", "grade", ["Beoordeling"])
-    elif instance.is_instance_of("inno_courses_2026"):
+    elif instance.is_instance_of("courses_2026"):
         role = Role("AI", "AI and data Engineer", "Artificial Intelligence", "border-warning")
         config.roles.append(role)
         role = Role("BIM", "Business Analist", "Business and IT Management", "border-success")
         config.roles.append(role)
-        role = Role("CSC", "Cloud and Security engineer", "Cyber Security and Cloud", "border-danger")
+        role = Role("CSC", "Cloud and Security Engineer", "Cyber Security and Cloud", "border-danger")
         config.roles.append(role)
         role = Role("SD", "Full stack developer", "Software Development", "border-dark")
         config.roles.append(role)
         role = Role("TI", "Embedded engineer", "Technische Informatica", "border-primary")
         config.roles.append(role)
-        perspective = Perspective("team", "Team", "samen", False, True)
+        perspective = Perspective("portfolio", "Portfolio", "samen", False, True)
         config.perspectives[perspective.name] = perspective
         config.attendance = None
-        config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", ["Sprint 4", "Sprint 7"])
+        config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", ["Peilmoment 1", "Peilmoment 2"])
         config.grade_moments = GradeMoments("grade_moments", "Beoordelingsmomenten", "grade", ["Beoordeling"])
     else:
         role = Role("role", "Student", "HBO-ICT", "border-dark")
         config.roles.append(role)
         perspective = Perspective("kennis", "Kennis", "bin2", True, False)
         config.perspectives[perspective.name] = perspective
-        perspective = Perspective("verbreding", "Kennis", "bin2", True, False)
+        perspective = Perspective("verbreding", "Oriëntatie", "bin2", True, False)
         config.perspectives[perspective.name] = perspective
-        perspective = Perspective("skills", "Professional shills", "bin2", True, False)
+        perspective = Perspective("skills", "Professional skills", "bin2", True, False)
         config.perspectives[perspective.name] = perspective
         policy = Policy([1], "WEEKLY", 19, [9, 17, 18])
         config.attendance = Attendance("attendance", "Aanwezigheid", "attendance", True, False, "ATTENDANCE", 100, 75,
@@ -104,7 +105,10 @@ def generate_config(instance_name):
     # ophalen secties
     course_sections = canvas_course.get_sections()
     for course_section in course_sections:
-        new_section = Section(course_section.id, course_section.name, "role")
+        if instance.is_instance_of("courses_2026"):
+            new_section = Section(course_section.id, course_section.name, course_section.name)
+        else:
+            new_section = Section(course_section.id, course_section.name, "role")
         config.sections.append(new_section)
         print("GCONF08 - course_section", new_section)
 
@@ -136,6 +140,9 @@ def generate_config(instance_name):
 
 
     config.learning_outcomes = []
+
+    get_groups(start, config, canvas_course)
+
     print("GCONF98 - ConfigFileName:", instance.get_config_file_name())
     with open(instance.get_config_file_name(), 'w') as f:
         dict_result = config.to_json()

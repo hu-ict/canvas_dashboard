@@ -139,7 +139,7 @@ def build_bootstrap_students_tabs(a_instance, a_course, a_results, a_templates, 
     tabs.append("Release Planning")
     tabs.append("Leeruitkomsten")
     tabs.append("Analytics")
-    if a_instance.is_instance_of("inno_courses") or a_instance.is_instance_of("inno_courses_2026"):
+    if a_instance.is_instance_of("inno_courses") or a_instance.is_instance_of("courses_2026"):
         tabs.append("Analyse")
     start_pages = {}
     start_pages["Groepen"] = "./" + a_instance.name + "/general/standard.html"

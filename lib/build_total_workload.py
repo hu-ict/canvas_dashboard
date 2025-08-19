@@ -113,7 +113,7 @@ def create_total_workload(instance, course, project_teachers, guild_teachers):
             },
             'late': {'count': []}
         }
-    elif instance.is_instance_of("inno_courses_2026"):
+    elif instance.is_instance_of("courses_2026"):
         for peil in course.level_moments.moments:
             peilen[peil] = {
                 'overall': {-1: 0, 0: 0, 1: 0, 2: 0, 3: 0}
@@ -229,7 +229,7 @@ def check_for_late(a_instance, a_course, a_total_workload, a_student_results, a_
         # print("BT81", a_student.name, a_perspective, a_submission.assignment_name)
         if len(student.project_teachers) > 0:
             # print("BT82", a_student.name, a_student.coach)
-            if a_instance.is_instance_of("inno_courses") or a_instance.is_instance_of("inno_courses_2026"):
+            if a_instance.is_instance_of("inno_courses") or a_instance.is_instance_of("courses_2026"):
                 if a_perspective == 'team':
                     l_selector = a_course.find_teacher(student.project_teachers[0]).initials
                 elif a_perspective == 'gilde' and len(student.guild_teachers) > 0:
@@ -245,7 +245,7 @@ def check_for_late(a_instance, a_course, a_total_workload, a_student_results, a_
             else:
                 l_selector = a_student_results.role
         else:
-            if a_instance.is_instance_of("inno_courses") or a_instance.is_instance_of("inno_courses_2026"):
+            if a_instance.is_instance_of("inno_courses") or a_instance.is_instance_of("courses_2026"):
                 # er moet een coach gekoppeld zijn
                 return
             else:
