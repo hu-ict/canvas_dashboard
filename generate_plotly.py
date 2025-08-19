@@ -149,9 +149,10 @@ def plot_student(instances, course, student, actual_date, actual_day,
             plot_overall_grade_moment(row, col, fig, course, l_grade_moment, level_serie_collection)
     student_name = student.email.split("@")[0].lower()
     file_name_html = instances.get_temp_path() + student_name + "_progress.html"
-    file_name_jpg = instances.get_student_path() + student_name + "_progress.jpg"
     fig.write_html(file_name_html, include_plotlyjs="cdn")
-    fig.write_image(file_name_jpg)
+    if not instances.is_instance_of('prop_courses'):
+        file_name_jpg = instances.get_student_path() + student_name + "_progress.jpg"
+        fig.write_image(file_name_jpg)
 
 
 def generate_plotly(instance_name):
