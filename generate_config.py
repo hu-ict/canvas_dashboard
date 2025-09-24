@@ -43,7 +43,7 @@ def generate_config(instance_name):
                           start.end_date,
                           date_to_day(start.start_date, start.end_date),
                           IMPROVEMENT_PERIOD,
-                          0)
+                          0, 0)
 
     if instance.is_instance_of("inno_courses"):
         role = Role("AI", "AI - Engineer", "Artificial Intelligence", "border-warning")
