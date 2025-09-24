@@ -416,32 +416,25 @@ def build_bootstrap_feedback(course, student_results, templates, level_serie_col
 def build_bootstrap_student_index(instance, course_id, course, student_results, actual_date, actual_day, templates,
                                   dashboard):
     student = course.find_student(student_results.id)
-
-    project_group_teacher_str = ""
-
     project_group = course.find_project_group(student.project_id)
     if project_group is not None:
         project_group_name = project_group.name
-        i = 0
-        for teacher in project_group.teachers:
-            project_group_teacher_str += course.find_teacher(teacher).name
-            if i < len(project_group.teachers) - 1:
-                project_group_teacher_str += ", "
-            i += 1
     else:
         project_group_name = "leeg"
 
-    guild_group_teacher_str = ""
     guild_group_name = ""
     guild_group = course.find_guild_group(student.guild_id)
     if guild_group is not None:
         guild_group_name = guild_group.name
-        i = 0
-        for teacher in guild_group.teachers:
-            guild_group_teacher_str += course.find_teacher(teacher).name
-            if i < len(guild_group.teachers) - 1:
-                guild_group_teacher_str += ", "
-            i += 1
+
+    project_group_teacher_str = ""
+    guild_group_teacher_str = ""
+    for assessor in student.assessors:
+        # print("BBS41 -", assessor)
+        if assessor.student_group_collection == "project_groups":
+            project_group_teacher_str += "<li>"+course.find_teacher(assessor.teacher_id).name+" voor "+course.get_assignment_group(assessor.assignment_group_id).name+"</li>"
+        if assessor.student_group_collection == "guild_groups":
+            guild_group_teacher_str += "<li>"+course.find_teacher(assessor.teacher_id).name+" voor "+course.get_assignment_group(assessor.assignment_group_id).name+"</li>"
 
     student_tab_content = {}
     for moment in course.level_moments.moments:

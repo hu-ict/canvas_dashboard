@@ -80,7 +80,7 @@ def generate_config(instance_name):
         config.roles.append(role)
         role = Role("TI", "Embedded engineer", "Technische Informatica", "border-primary")
         config.roles.append(role)
-        perspective = Perspective("portfolio", "Portfolio", "samen", False, True)
+        perspective = Perspective("portfolio", "Portfolio", "samen", False, True, 0)
         config.perspectives[perspective.name] = perspective
         config.attendance = None
         config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", ["Peilmoment 1", "Peilmoment 2"])
@@ -115,8 +115,8 @@ def generate_config(instance_name):
     # retrieve assignments_groups and score
     canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignments', 'overrides'])
     for canvas_assignment_group in canvas_assignment_groups:
-        assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name, [], "POINTS",
-                                           0, 0, 0, 0, 0, None)
+        assignment_group = AssignmentGroup(canvas_assignment_group.id, "project", canvas_assignment_group.name, [], "POINTS",
+                                           0, 0, 0, 0, 0)
         for canvas_assignment in canvas_assignment_group.assignments:
             if canvas_assignment['points_possible']:
                 assignment_group.total_points += canvas_assignment['points_possible']

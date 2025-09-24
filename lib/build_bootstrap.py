@@ -13,7 +13,7 @@ def build_student_button(instance, role, student, templates, level_serie_collect
     if student.progress >= 0:
         l_progress_color = level_serie_collection.level_series['progress'].grades[str(student.progress)].color
     else:
-        l_progress_color = level_serie_collection.level_series['progress'].grades[str(0)].color
+        l_progress_color = level_serie_collection.level_series['progress'].grades[str(-1)].color
     return templates['student'].substitute(
         {'btn_color': color,
          'progress_color': l_progress_color,
@@ -24,37 +24,44 @@ def build_student_button(instance, role, student, templates, level_serie_collect
          })
 
 
-def build_bootstrap_group(a_instance, a_course, a_student_groups, a_results, a_templates, level_series):
+def build_bootstrap_group(a_instance, a_course, a_student_groups, a_results, a_templates, level_series, group_type):
     # coaches = {}
     groups_html_string = ''
     for group in a_student_groups:
-        # print(group.name, len(group.students))
+        # print("BBS05 -", group.name, len(group.assessors))
         students_html_string = ""
-        coaches_string = ""
-        if len(group.teachers) > 0:
-            coaches = ""
-            for coach in group.teachers:
-                teacher = a_course.find_teacher(coach)
-                coaches += " " + str(teacher.id)
-                coaches_string += ", " + teacher.name
+        if group_type == "Project" and group.principal_assessor > 0:
+            assessors_string = a_course.find_teacher(group.principal_assessor).name
         else:
-            coaches = None
+            assessors_string = ""
+            for assessor in group.assessors:
+                teacher = a_course.find_teacher(assessor.teacher_id)
+                if teacher is not None:
+                    assessors_string += ", " + teacher.name
+                else:
+                    print("BBS07 - teacher_id not found:", assessor.teacher_id)
+
+        # print("BBS08 -", group.principal_assessor,  assessors_string)
+        coaches = ""
+        for assessor in group.assessors:
+            coaches += " "+str(assessor.teacher_id)
+
         for student in group.students:
             l_student = a_results.find_student(student.id)
             if l_student is None:
-                print("BB05 - ERROR Student not found in results", student, "re-run generate_results")
+                print("BB08 - ERROR Student not found in results", student, "re-run generate_results")
             else:
                 # print('BB07 -', l_student.name, "[", l_student.number, "]")
                 role = a_course.get_role(l_student.role)
                 if role is not None:
                     students_html_string += build_student_button(a_instance, role, l_student, a_templates, level_series)
-        if coaches:
+        if len(coaches) > 0:
             group_html_string = a_templates['group'].substitute(
-                {'selector_type': 'coach', 'selector': coaches, 'student_group_name': group.name + coaches_string,
+                {'selector_type': 'coach', 'selector': coaches, 'student_group_name': group.name + ", " + assessors_string,
                  'students': students_html_string})
         else:
             group_html_string = a_templates['group'].substitute(
-                {'selector_type': 'coach', 'selector': 'leeg', 'student_group_name': group.name + coaches_string,
+                {'selector_type': 'coach', 'selector': 'leeg', 'student_group_name': group.name,
                  'students': students_html_string})
         groups_html_string += group_html_string
 
@@ -128,7 +135,7 @@ def write_release_planning(a_start, a_templates, a_assignment_group, a_file_name
         file_list.write(file_html_string)
 
 
-def build_bootstrap_students_tabs(a_instance, a_course, a_results, a_templates, a_level_serie_collection, a_total_workload):
+def build_bootstrap_students_tabs(a_instance, a_course, a_results, a_templates, a_level_serie_collection, a_workload):
     tabs = ["Groepen"]
     if len(a_course.guild_groups) > 0:
         tabs.append("Gilden")
@@ -155,10 +162,10 @@ def build_bootstrap_students_tabs(a_instance, a_course, a_results, a_templates, 
     for tab in tabs:
         if tab == "Groepen":
             print("BB51 - Tab groepen")
-            tabs_html_string = build_bootstrap_group(a_instance, a_course, a_course.project_groups, a_results, a_templates, a_level_serie_collection)
+            tabs_html_string = build_bootstrap_group(a_instance, a_course, a_course.project_groups, a_results, a_templates, a_level_serie_collection, "Project")
         elif tab == "Gilden":
             print("BB52 - Tab gilden")
-            tabs_html_string = build_bootstrap_group(a_instance, a_course, a_course.guild_groups, a_results, a_templates, a_level_serie_collection)
+            tabs_html_string = build_bootstrap_group(a_instance, a_course, a_course.guild_groups, a_results, a_templates, a_level_serie_collection, "Guild")
         elif tab == "Rollen":
             print("BB53 - Tab rollen")
             tabs_html_string = build_bootstrap_role(a_instance, a_course, a_results, a_templates, a_level_serie_collection)
@@ -174,8 +181,7 @@ def build_bootstrap_students_tabs(a_instance, a_course, a_results, a_templates, 
                 perspectives.append(a_course.level_moments)
             if a_course.grade_moments is not None:
                 perspectives.append(a_course.grade_moments)
-            tabs_html_string = build_bootstrap_canvas_werkvoorraad_tab(a_instance, a_templates, a_course, perspectives,
-                                                                   a_total_workload)
+            tabs_html_string = build_bootstrap_canvas_werkvoorraad_tab(a_instance, a_templates, a_course, a_workload)
         elif tab == "Release Planning":
             print("BB56 - Tab release planning")
             tabs_html_string = build_bootstrap_release_planning_tab(a_instance, a_course, a_templates,
@@ -216,10 +222,10 @@ def build_bootstrap_general(a_instance, a_course, a_results, a_templates, a_teac
     tabs_html_string = build_bootstrap_students_tabs(a_instance, a_course, a_results, a_templates, level_series,
                                                      a_total_workload)
     teacher_html_string = ''
-    for teacher in a_teachers.values():
+    for teacher in a_teachers:
         teacher_html_string += a_templates["coach"].substitute(
-            {'coach_name': teacher['teacher'].name, 'coach_id': teacher['teacher'].id,
-             'coach_initials': teacher['teacher'].initials})
+            {'teacher_name': teacher.name, 'teacher_id': teacher.id,
+             'teacher_initials': teacher.initials})
 
     roles_string = ""
     for role in a_course.roles:

@@ -5,7 +5,7 @@ from model.Result import Result
 from model.CourseConfig import CourseConfig
 from model.Start import Start
 from model.TeamsApi import TeamsApi
-from model.WorkloadHistory import WorkloadHistory
+from model.workload.WorkloadHistory import WorkloadHistory
 from model.dashboard.Dashboard import Dashboard
 from model.dashboard.Subplot import Subplot
 from model.instance.CourseInstances import CourseInstances

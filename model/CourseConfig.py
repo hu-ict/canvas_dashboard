@@ -14,7 +14,7 @@ from model.perspective.Perspective import Perspective
 
 
 class CourseConfig:
-    def __init__(self, canvas_id, name, start_date, end_date, days_in_semester, improvement_period, student_count):
+    def __init__(self, canvas_id, name, start_date, end_date, days_in_semester, improvement_period, student_count, principal_assignment_group_id):
         self.canvas_id = canvas_id
         self.name = name
         self.student_count = student_count
@@ -22,6 +22,7 @@ class CourseConfig:
         self.improvement_period = improvement_period
         self.start_date = start_date
         self.end_date = end_date
+        self.principal_assignment_group_id = principal_assignment_group_id
         self.sections = []
         self.level_moments = None
         self.attendance = None
@@ -37,7 +38,7 @@ class CourseConfig:
         self.students = []
 
     def __str__(self):
-        line = f'CourseConfig({self.canvas_id}, {self.name})\n'
+        line = f'CourseConfig({self.canvas_id}, {self.name}, {self.principal_assignment_group_id})\n'
         for section in self.sections:
             line += str(section)
         for teacher in self.teachers:
@@ -64,6 +65,7 @@ class CourseConfig:
             'end_date': get_date_time_str(self.end_date),
             'days_in_semester': self.days_in_semester,
             'improvement_period': self.improvement_period,
+            'principal_assignment_group_id': self.principal_assignment_group_id,
             'sections': list(map(lambda s: s.to_json(), self.sections))
         }
         # print("CC10 -", self.attendance)
@@ -89,8 +91,8 @@ class CourseConfig:
         dict_result['roles'] = list(map(lambda r: r.to_json([]), self.roles))
         dict_result['teachers'] = list(map(lambda t: t.to_json(), self.teachers))
         dict_result['assignment_groups'] = list(map(lambda ag: ag.to_json(), self.assignment_groups))
-        dict_result['project_groups'] = list(map(lambda sg: sg.to_json([]), self.project_groups))
-        dict_result['guild_groups'] = list(map(lambda sg: sg.to_json([]), self.guild_groups))
+        dict_result['project_groups'] = list(map(lambda sg: sg.to_json(), self.project_groups))
+        dict_result['guild_groups'] = list(map(lambda sg: sg.to_json(), self.guild_groups))
         dict_result['students'] = list(map(lambda s: s.to_json(), self.students))
 
         return dict_result
@@ -143,7 +145,7 @@ class CourseConfig:
                 students.append(student)
         return students
 
-    def find_assignment_group(self, group_id):
+    def get_assignment_group(self, group_id):
         for group in self.assignment_groups:
             if group.id == group_id:
                 return group
@@ -222,11 +224,11 @@ class CourseConfig:
 
     def find_perspective_by_assignment_group(self, assignment_group_id):
         for perspective in self.perspectives.values():
-            if assignment_group_id in perspective.assignment_groups:
+            if assignment_group_id in perspective.assignment_group_ids:
                 return perspective
-        if self.level_moments is not None and assignment_group_id in self.level_moments.assignment_groups:
+        if self.level_moments is not None and assignment_group_id in self.level_moments.assignment_group_ids:
             return self.level_moments
-        if self.grade_moments is not None and assignment_group_id in self.grade_moments.assignment_groups:
+        if self.grade_moments is not None and assignment_group_id in self.grade_moments.assignment_group_ids:
             return self.grade_moments
         # if self.attendance is not None and assignment_group_id in self.attendance.assignment_groups:
         #     return self.attendance
@@ -236,7 +238,8 @@ class CourseConfig:
         # print("find_assignment_group_by_role", a_role)
         for role in self.roles:
             if role.short == a_role:
-                return role.assignment_groups[0]
+                if len(role.assignment_groups) > 0:
+                    return role.assignment_groups[0]
         return None
 
     def find_assignment_by_group(self, assigment_group_id, assignment_id):
@@ -255,8 +258,8 @@ class CourseConfig:
         return None
 
     def get_first_level_moment_by_query(self, a_query):
-        for assignment_group_id in self.level_moments.assignment_groups:
-            assignment_group = self.find_assignment_group(assignment_group_id)
+        for assignment_group_id in self.level_moments.assignment_group_ids:
+            assignment_group = self.get_assignment_group(assignment_group_id)
             for assignment in assignment_group.assignment_sequences:
                 condition = 0
                 for selector in a_query:
@@ -267,8 +270,8 @@ class CourseConfig:
         return None
 
     def get_first_grade_moment_by_query(self, a_query):
-        for assignment_group_id in self.grade_moments.assignment_groups:
-            assignment_group = self.find_assignment_group(assignment_group_id)
+        for assignment_group_id in self.grade_moments.assignment_group_ids:
+            assignment_group = self.get_assignment_group(assignment_group_id)
             for assignment in assignment_group.assignment_sequences:
                 condition = 0
                 for selector in a_query:
@@ -280,7 +283,7 @@ class CourseConfig:
 
     def get_level_moments_by_query(self, a_query):
         assignments = []
-        for assignment_group_id in self.level_moments.assignment_groups:
+        for assignment_group_id in self.level_moments.assignment_group_ids:
             assignment_group = self.find_assignment_group(assignment_group_id)
             for assignment in assignment_group.assignment_sequences:
                 condition = 0
@@ -330,7 +333,8 @@ class CourseConfig:
             get_date_time_obj(data_dict['end_date']),
             data_dict['days_in_semester'],
             IMPROVEMENT_PERIOD,
-            data_dict['student_count'])
+            data_dict['student_count'],
+            data_dict['principal_assignment_group_id'])
         new.perspectives = {}
         if 'improvement_period' in data_dict.keys() and data_dict['improvement_period'] is not None:
             new.improvement_period = data_dict['improvement_period']

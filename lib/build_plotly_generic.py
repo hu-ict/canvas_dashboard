@@ -15,10 +15,10 @@ def plot_bandbreedte_colored(a_row, a_col, a_fig, a_days, a_bandwidth, a_flow, a
         l_days = calc_dev(a_days, 0, 0, 1, 0)
     else:
         band_min = calc_dev(a_days, 0, 0, 0, 0)
-        band_upper = a_bandwidth.uppers
-        band_lower = a_bandwidth.lowers
+        band_upper = a_bandwidth.get_uppers()
+        band_lower = a_bandwidth.get_lowers()
         band_max = calc_dev(a_days, 0, 0, 0, a_total_points)
-        l_days = a_bandwidth.days
+        l_days = a_bandwidth.get_days()
     # print("BPG01 - plot_bandbreedte_colored")
     boven_niveau = go.Scatter(
         x=l_days + l_days[::-1],  # x, then x reversed

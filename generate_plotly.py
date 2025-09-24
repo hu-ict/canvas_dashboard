@@ -13,11 +13,11 @@ from model.Submission import Submission
 
 def level_construct(a_course):
     l_peilingen = {}
-    if a_course.level_moments is None or len(a_course.level_moments.assignment_groups) == 0:
+    if a_course.level_moments is None or len(a_course.level_moments.assignment_group_ids) == 0:
         return l_peilingen
     for perspective in a_course.perspectives.values():
         l_peilingen[perspective.name] = []
-    assignment_group = a_course.find_assignment_group(a_course.level_moments.assignment_groups[0])
+    assignment_group = a_course.get_assignment_group(a_course.level_moments.assignment_group_ids[0])
     for assignment_sequence in assignment_group.assignment_sequences:
         for assignment in assignment_sequence.assignments:
             # zoek de juiste Assignment
@@ -32,11 +32,11 @@ def level_construct(a_course):
 
 def grade_construct(a_course):
     l_grades = {}
-    if a_course.level_moments is None or len(a_course.grade_moments.assignment_groups) == 0:
+    if a_course.level_moments is None or len(a_course.grade_moments.assignment_group_ids) == 0:
         return l_grades
     for perspective in a_course.perspectives.values():
         l_grades[perspective.name] = []
-    assignment_group = a_course.find_assignment_group(a_course.grade_moments.assignment_groups[0])
+    assignment_group = a_course.get_assignment_group(a_course.grade_moments.assignment_group_ids[0])
     for assignment_sequence in assignment_group.assignment_sequences:
         for assignment in assignment_sequence.assignments:
             # zoek de juiste Assignment
@@ -76,11 +76,11 @@ def plot_student(instances, course, student, actual_date, actual_day,
     if instances.is_instance_of('courses_2026'):
         row = subplots.positions["timeline"]['row']
         col = subplots.positions["timeline"]['col']
-        plot_timeline(row, col, fig, course, student, level_serie_collection)
+        plot_timeline(row, col, fig, course, student, actual_day, get_date_time_loc(actual_date), level_serie_collection)
 
     if instances.is_instance_of('courses_2026'):
         for peil in course.level_moments.moments:
-            print("GP21 - Peilmoment", peil, "overall", subplots.positions[peil]['row'], subplots.positions[peil]['col'])
+            # print("GP21 - Peilmoment", peil, "overall", subplots.positions[peil]['row'], subplots.positions[peil]['col'])
             # overall peilmoment
             l_level_moment = student.get_level_moment_submission_by_query([peil])
             row = subplots.positions[peil]['row']
@@ -115,7 +115,7 @@ def plot_student(instances, course, student, actual_date, actual_day,
     if instances.is_instance_of('inno_courses'):
         # Peil overall drie peilmomenten
         for peil in course.level_moments.moments:
-            print("GP21 - Peilmoment", peil, "overall", subplots.positions[peil]['row'], subplots.positions[peil]['col'])
+            # print("GP21 - Peilmoment", peil, "overall", subplots.positions[peil]['row'], subplots.positions[peil]['col'])
             # overall peilmoment
             l_level_moment = student.get_level_moment_submission_by_query([peil, "student"])
             row = subplots.positions[peil]['row']

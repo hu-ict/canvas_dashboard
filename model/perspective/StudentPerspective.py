@@ -8,7 +8,7 @@ class StudentPerspective:
         self.progress = progress
         self.sum_score = sum_score
         self.last_score = last_score
-        self.assignment_groups = []
+        self.assignment_group_ids = []
         self.submission_sequences = []
 
     def to_json(self):
@@ -18,7 +18,7 @@ class StudentPerspective:
             'progress': self.progress,
             'sum_score': self.sum_score,
             'last_score': self.last_score,
-            'assignment_groups': self.assignment_groups,
+            'assignment_group_ids': self.assignment_group_ids,
             'submission_sequences': list(map(lambda s: s.to_json(), self.submission_sequences))
         }
 
@@ -88,8 +88,8 @@ class StudentPerspective:
                                      data_dict['sum_score'], data_dict['last_score'])
         else:
             new = StudentPerspective(data_dict['name'], data_dict['title'], 0, 0, 0)
-        if 'assignment_groups' in data_dict.keys():
-            new.assignment_groups = data_dict['assignment_groups']
+        if 'assignment_group_ids' in data_dict.keys():
+            new.assignment_group_ids = data_dict['assignment_group_ids']
         if 'submission_sequences' in data_dict.keys():
             new.submission_sequences = list(map(lambda s: SubmissionSequence.from_dict(s),
                                                 data_dict['submission_sequences']))
@@ -98,8 +98,8 @@ class StudentPerspective:
     @staticmethod
     def copy_from(course, student, perspective):
         new = StudentPerspective(perspective.name, perspective.title, -1, 0, 0)
-        if len(perspective.assignment_groups) > 1:
-            new.assignment_groups.append(course.find_assignment_group_by_role(student.role))
+        if len(perspective.assignment_group_ids) > 1:
+            new.assignment_group_ids.append(course.find_assignment_group_by_role(student.role))
         else:
-            new.assignment_groups = perspective.assignment_groups
+            new.assignment_group_ids = perspective.assignment_group_ids
         return new

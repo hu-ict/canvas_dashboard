@@ -211,10 +211,10 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
                 pass
         else:
             # zeer kritisch op niet ingevulde rubrics
-            if a_assignment.group_id == a_course.level_moments.assignment_groups[0]:
+            if a_assignment.group_id == a_course.level_moments.assignment_group_ids[0]:
                 errors.append(
                     f"FOUT Er is een rubric gedefinieerd bij het peilmonent (Canvas-opdracht), maar deze wordt niet gebruikt of is niet compleet ingevuld. Opdracht is nu niet zichtbaar in portfolio of voortgang. Actie vereist!")
-            if a_assignment.group_id == a_course.grade_moments.assignment_groups[0]:
+            if a_assignment.group_id == a_course.grade_moments.assignment_group_ids[0]:
                 errors.append(
                     f"FOUT Er is een rubric gedefinieerd bij de beoordeling (Canvas-opdracht), maar deze wordt niet gebruikt of is niet compleet ingevuld. Opdracht is nu niet zichtbaar in portfolio of voortgang. Actie vereist!")
             elif a_canvas_submission.grade == 'complete':
@@ -320,38 +320,25 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
 
 
 def add_missed_assignments(instance, course, actual_day, student_perspective):
-    if len(student_perspective.assignment_groups) == 1:
-        assignment_group = course.find_assignment_group(student_perspective.assignment_groups[0])
-        if assignment_group is None:
-            print("ASA06 - Assignment_group for perspective not found in course",
-                  student_perspective.assignment_groups[0])
-            return
-
-        for assignment_sequence in assignment_group.assignment_sequences:
-            submission_sequence = student_perspective.get_submission_sequence_by_tag(assignment_sequence.tag)
-            missed_assignments = assignment_sequence.get_missed_assignments(instance, course, submission_sequence,
-                                                                            actual_day)
-            # print("ASA07 - Missed assignments", len(missed_assignments))
-            for assignment in missed_assignments:
-                l_submission = Submission(0, assignment.group_id, assignment.id, 0, assignment.name,
-                                          assignment.assignment_date,
-                                          assignment.assignment_day,
-                                          None,
-                                          None,
-                                          MISSED_ITEM, False, None, 0, 0, 0, 0, assignment.points, 0)
-                l_submission.comments.append(Comment(0, ROBOT, assignment.assignment_date, NO_SUBMISSION))
-                student_perspective.put_submission(assignment_sequence, l_submission)
-    elif len(student_perspective.assignment_groups) > 1:
-        print("LS07 - Perspective has more then one assignment_groups attached", student_perspective.name,
-              student_perspective.assignment_groups)
-    else:
-        print("LS08 - Perspective has no assignment_groups attached", student_perspective.name,
-              student_perspective.assignment_groups)
+    for assignment_sequence in course.perspectives[student_perspective.name].assignment_sequences:
+        submission_sequence = student_perspective.get_submission_sequence_by_tag(assignment_sequence.tag)
+        missed_assignments = assignment_sequence.get_missed_assignments(instance, course, submission_sequence,
+                                                                        actual_day)
+        # print("ASA07 - Missed assignments", len(missed_assignments))
+        for assignment in missed_assignments:
+            l_submission = Submission(0, assignment.group_id, assignment.id, 0, assignment.name,
+                                      assignment.assignment_date,
+                                      assignment.assignment_day,
+                                      None,
+                                      None,
+                                      MISSED_ITEM, False, None, 0, 0, 0, 0, assignment.points, 0)
+            l_submission.comments.append(Comment(0, ROBOT, assignment.assignment_date, NO_SUBMISSION))
+            student_perspective.put_submission(assignment_sequence, l_submission)
 
 
 def add_open_level_moments(course, actual_day, student_id, student_level_moments):
     if len(student_level_moments.assignment_groups) == 1:
-        assignment_group = course.find_assignment_group(student_level_moments.assignment_groups[0])
+        assignment_group = course.get_assignment_group(student_level_moments.assignment_groups[0])
         if assignment_group is None:
             print("AOL02 - Assignment_group for perspective not found in course",
                   student_level_moments.assignment_groups[0])
@@ -359,11 +346,10 @@ def add_open_level_moments(course, actual_day, student_id, student_level_moments
         for assignment_sequence in assignment_group.assignment_sequences:
             for assignment in assignment_sequence.assignments:
                 # print("AOL04 -", assignment.name)
-                if assignment.unlock_day <= actual_day:
-
+                if (actual_day + 7) > assignment.assignment_day:
                     # komt 7 dagen voor de Canvas deadline als "openstaand" item in de werklijst
                     if student_level_moments.get_submission_by_assignment(assignment.id) is None:
-                        # print("AOL08 -", assignment.name, assignment.unlock_day, actual_day, assignment.assignment_day+21)
+                        print("AOL08 -", assignment.name, assignment.unlock_day, actual_day, assignment.assignment_day+21)
                         l_submission = Submission(0, assignment.group_id, assignment.id, student_id, assignment.name,
                                                   assignment.assignment_date,
                                                   assignment.assignment_day,
@@ -382,7 +368,7 @@ def add_open_level_moments(course, actual_day, student_id, student_level_moments
 
 def add_open_grade_moments(course, actual_day, student_id, student_grade_moments):
     if len(student_grade_moments.assignment_groups) == 1:
-        assignment_group = course.find_assignment_group(student_grade_moments.assignment_groups[0])
+        assignment_group = course.get_assignment_group(student_grade_moments.assignment_groups[0])
         if assignment_group is None:
             print("AOL02 - Assignment_group for perspective not found in course",
                   student_grade_moments.assignment_groups[0])
@@ -486,10 +472,10 @@ def get_feedback_from_submission(course, student, submission):
         comment_day = date_to_day(course.start_date, comment.date)
         feedback = Feedback(comment.author_id, comment.author_name, comment.date, comment_day, comment.comment,
                             submission.assignment_name, submission.id, submission.grade)
-        if '@' in comment.comment:
-            sign_words, text = get_and_remove_at_sign_words(comment.comment)
+        if '@' in feedback.comment:
+            sign_words, feedback.comment = get_and_remove_at_sign_words(feedback.comment)
             for sign_word in sign_words:
-                # print("LSU83 -", text, sign_word)
+                # print("LSU83 -", feedback.comment, sign_word)
                 if sign_word in student.learning_outcomes:
                     student.learning_outcomes[sign_word].feedback_list.append(feedback)
         else:
@@ -517,10 +503,11 @@ def get_feedback_from_submission(course, student, submission):
                 feedback = Feedback("id", submission.grader_name, submission.graded_date, submission_day, criterion_score.comment,
                                     submission.assignment_name + " (" + assignment_criterion.description + ")",
                                     submission.id, rating_description)
-                if '@' in criterion_score.comment:
-                    sign_words, text = get_and_remove_at_sign_words(comment.comment)
+                if '@' in feedback.comment:
+                    sign_words, feedback.comment = get_and_remove_at_sign_words(feedback.comment)
+                    # print("LSU85 -", sign_words, feedback.comment)
                     for sign_word in sign_words:
-                        # print("LSU85 -", text, sign_word)
+                        # print("LSU86 -", text, sign_word)
                         if sign_word in student.learning_outcomes:
                             student.learning_outcomes[sign_word].feedback_list.append(feedback)
                 else:

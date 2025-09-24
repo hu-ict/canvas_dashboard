@@ -99,7 +99,7 @@ def plot_grades(a_fig, a_row, a_col, student_totals, a_course, a_grade_levels):
         y_hover = []
         if a_course.level_moments is not None:
             for label in a_course.grade_moments.moments:
-                print("PTG10 moment", label, level)
+                # print("PTG10 moment", label, level)
                 x_labels.append(label)
                 y_counts.append(student_totals["grade_moments"][label]["overall"][int(level)])
                 y_hover.append(label+" "+a_grade_levels.grades[str(level)].label+" "+str(student_totals["grade_moments"][label]["overall"][int(level)]))
@@ -148,29 +148,21 @@ def plot_voortgang(a_instance, a_course, student_totals, a_progress_history, a_p
     fig.write_html(file_name, include_plotlyjs="cdn")
 
 
-def plot_werkvoorraad(a_instance, a_course, student_totals, a_workload_history):
+def plot_werkvoorraad(a_instance, a_course, a_workload, a_workload_history):
     specs = [
-        [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}],
-        [{'type': 'bar'}, {'type': 'bar'}, {'type': 'bar'}]
+        [{'type': 'bar'}, {'type': 'bar'}],
+        [{'type': 'bar'}, {'type': 'bar'}]
     ]
     titles = []
     for perspective in a_course.perspectives.values():
         titles.append(perspective.title)
-    titles.append("Peilmomenten")
-    titles.append("Beoordeling")
-    titles.append('Dagelijkse werkvoorraad <b>docenten</b>')
-    fig = make_subplots(rows=2, cols=3, specs=specs, subplot_titles=titles)
+    fig = make_subplots(rows=2, cols=2, specs=specs, subplot_titles=titles)
     fig.update_layout(height=800, width=1200, showlegend=False)
 
     fig.update_layout(
         title_text='Werkvoorraad',  # title of plot
-        # xaxis_title_text='Pending',  # xaxis perspective
-        # xaxis2_title_text='Pending',  # xaxis perspective
-        # xaxis3_title_text='Pending',  # xaxis perspective
         yaxis_title_text='Aantal',  # yaxis perspective
-        yaxis4_title_text='Aantal',  # yaxis perspective
-        # xaxis4_title_text='Pending',  # xaxis perspective
-        xaxis5_title_text='dag in semester',  # xaxis perspective
+        yaxis3_title_text='Aantal',  # yaxis perspective
 
         # yaxis9_title_text='Aantal',  # yaxis perspective
         bargap=0.2,  # gap between bars of adjacent location coordinates
@@ -178,24 +170,17 @@ def plot_werkvoorraad(a_instance, a_course, student_totals, a_workload_history):
         barmode='stack'
     )
 
-    col = 1
-    row = 1
-    for l_perspective in student_totals['perspectives'].values():
-        if col > 3:
-            col = 1
-            row += 1
-        x_selector = list(l_perspective['pending'].keys())
-        y_counts = list(l_perspective['pending'].values())
-        fig.add_trace(go.Bar(x=x_selector, y=y_counts, name="Pending", marker=dict(color="#4e73df")), row, col)
-        x_selector = list(l_perspective['late'].keys())
-        y_counts = list(l_perspective['late'].values())
-        fig.add_trace(go.Bar(x=x_selector, y=y_counts, name="Late", marker=dict(color="#e74a3b")), row, col)
-        x_selector = list(l_perspective['to_late'].keys())
-        y_counts = list(l_perspective['to_late'].values())
-        fig.add_trace(go.Bar(x=x_selector, y=y_counts, name="To Late", marker=dict(color="#555555")), row, col)
-        col += 1
+    x_initials = a_workload.get_initials()
+    y_counts = a_workload.get_w1_count()
+    fig.add_trace(go.Bar(x=x_initials, y=y_counts, name="Pending", marker=dict(color="#4e73df")), 1, 1)
+    x_initials = a_workload.get_initials()
+    y_counts = a_workload.get_w2_count()
+    fig.add_trace(go.Bar(x=x_initials, y=y_counts, name="Pending", marker=dict(color="#e74a3b")), 1, 1)
+    x_initials = a_workload.get_initials()
+    y_counts = a_workload.get_w3_count()
+    fig.add_trace(go.Bar(x=x_initials, y=y_counts, name="Pending", marker=dict(color="#555555")), 1, 1)
 
-    plot_workload_history(fig, 2, 3, a_workload_history)
+    # plot_workload_history(fig, 2, 3, a_workload_history)
     # data = go.Histogram(x=np.array(student_totals['late']['count']))
     # fig.add_trace(data, 2, 3)
     file_name = a_instance.get_html_path() + "totals_werkvoorraad" + ".html"

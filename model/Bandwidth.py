@@ -21,9 +21,9 @@ class Point:
 
 class Bandwidth:
     def __init__(self):
-        self.days = []
-        self.lowers = []
-        self.uppers = []
+        # self.days = []
+        # self.lowers = []
+        # self.uppers = []
         self.points = []
 
     def to_json(self):
@@ -32,10 +32,28 @@ class Bandwidth:
         }
 
     def __str__(self):
-        line = f'Bandwidth({self.lowers})'
+        line = f'Bandwidth() - self.points: {type(self.points)}'
         for point in self.points:
-            line += str(point)
+            line += " "+str(point)
         return line
+
+    def get_uppers(self):
+        uppers = []
+        for point in self.points:
+            uppers.append(point.upper)
+        return uppers
+
+    def get_lowers(self):
+        lowers = []
+        for point in self.points:
+            lowers.append(point.lower)
+        return lowers
+
+    def get_days(self):
+        days = []
+        for point in self.points:
+            days.append(point.day)
+        return days
 
     def get_progress(self, day, score):
         if day == 0:
@@ -92,9 +110,4 @@ class Bandwidth:
             return None
         new = Bandwidth()
         new.points = list(map(lambda p: Point.from_dict(p), data_dict['points']))
-        for point in new.points:
-            new.lowers.append(point.lower)
-            new.uppers.append(point.upper)
-            new.days.append(point.day)
-
         return new

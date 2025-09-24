@@ -1,3 +1,6 @@
+from model.Responsibility import Responsibility
+
+
 class Teacher:
     def __init__(self, teacher_id, name, email):
         self.id = teacher_id
@@ -6,6 +9,7 @@ class Teacher:
         self.email = email
         self.project_groups = []
         self.guild_groups = []
+        self.responsibilities = []
 
     def to_json(self):
         return {
@@ -14,10 +18,11 @@ class Teacher:
             'email': self.email,
             'project_groups': self.project_groups,
             'guild_groups': self.guild_groups,
+            'responsibilities': list(map(lambda r: r.to_json(), self.responsibilities))
         }
 
     def __str__(self):
-        return f'Teacher({self.id}, {self.name}, {self.initials}, {self.email}, {self.project_groups}, {self.guild_groups}'
+        return f'Teacher({self.id}, {self.name}, {self.initials}, {self.email}, {self.project_groups}, {self.guild_groups})'
 
     @staticmethod
     def from_dict(data_dict):
@@ -31,7 +36,7 @@ class Teacher:
             new_teacher.project_groups = data_dict['teams']
         if 'guild_groups' in data_dict:
             new_teacher.guild_groups = data_dict['guild_groups']
-        else:
-            new_teacher.guild_groups = []
-
+        if 'responsibilities' in data_dict:
+            # print("TE41 - read responsibilities", new_teacher.name, data_dict['responsibilities'])
+            new_teacher.responsibilities = list(map(lambda r: Responsibility.from_dict(r), data_dict['responsibilities']))
         return new_teacher

@@ -239,7 +239,7 @@ def process_analyse_grade_moment(course, results, grade_moment, level_serie_coll
         perspectives_html = ""
         for perspective in student.perspectives.values():
             level_moment_submission = student.get_grade_moment_submission_by_query([grade_moment, perspective.name])
-            print("BBS32 -", grade_moment, perspective.name)
+            # print("BBS32 -", grade_moment, perspective.name)
             if level_moment_submission is None:
                 grade_determined = 0
             else:

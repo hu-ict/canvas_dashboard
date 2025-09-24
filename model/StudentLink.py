@@ -4,7 +4,7 @@ class StudentLink:
         self.name = a_name
         self.sortable_name = a_sortable_name
 
-    def to_json(self, scope):
+    def to_json(self):
         return {
             'name': self.name,
             'id': self.id,

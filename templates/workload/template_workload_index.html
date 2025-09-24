@@ -107,7 +107,7 @@
                         <li class="nav-item"><a onclick="setWorkloadView('workload_plot')" class="nav-link active"
                                                 aria-current="page" href="#">Werkvoorraad</a></li>
                         <li class="nav-item"><a onclick="setWorkloadView('workload_late')" class="nav-link "
-                                                aria-current="false" href="#">Probleem</a></li>
+                                                aria-current="false" href="#">Overzicht</a></li>
                     </ul>
                 </div>
                 <div style="display: None" class="workload_view workload_late">
@@ -115,7 +115,7 @@
                         <li class="nav-item"><a onclick="setWorkloadView('workload_plot')" class="nav-link "
                                                 aria-current="false" href="#">Werkvoorraad</a></li>
                         <li class="nav-item"><a onclick="setWorkloadView('workload_late')" class="nav-link active"
-                                                aria-current="page" href="#">Probleem</a></li>
+                                                aria-current="page" href="#">Overzicht</a></li>
                     </ul>
                 </div>
                 <div class="workload_view workload_plot">
@@ -123,11 +123,14 @@
                     $workload_plot
                 </div>
                 <div class="workload_view workload_late">
-                    <h2 class="mt-2">Problemen</h2>
+                    <h2 class="mt-2">Overzicht</h2>
                     $workload_late
                 </div>
             </div>
         </div>
+        <script>
+            setWorkloadView('workload_plot');
+        </script>
     </div>
 </div>
 <!-- Bootstrap core JavaScript-->

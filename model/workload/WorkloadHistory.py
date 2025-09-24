@@ -1,4 +1,4 @@
-from model.WorkloadDay import WorkloadDay
+from model.workload.WorkloadDay import WorkloadDay
 
 
 class WorkloadHistory:

@@ -3,17 +3,18 @@ from lib.file import read_plotly
 from lib.lib_date import get_date_time_loc
 
 
-def write_release_planning_index(course, templates, assignment_group, file_name, file_name_bandwidth):
+def write_release_planning_index(course, templates, assignment_group_id, file_name, file_name_bandwidth):
+    assignment_group = course.get_assignment_group(assignment_group_id)
     bandwith_html_string = '<h2 class="mt-2">Opbouw</h2>' + read_plotly(file_name_bandwidth)
-    release_planning_html_string = write_release_planning(course, templates, assignment_group)
+    release_planning_html_string = write_release_planning(course, templates, assignment_group_id)
     release_planning_index_html_string = templates['release_planning_index'].substitute(
         {
             'assignment_group_name': assignment_group.name,
-            'assignment_group_id': str(assignment_group.id),
+            'assignment_group_id': assignment_group.id,
             'total_points': int(assignment_group.total_points),
-            'lower_points': assignment_group.lower_points,
-            'upper_points': assignment_group.upper_points,
-            'strategie': assignment_group.strategy,
+            'lower_points': "assignment_group.lower_points",
+            'upper_points': "assignment_group.upper_points",
+            'strategie': "assignment_group.strategy",
             'planning': release_planning_html_string,
             'flow': bandwith_html_string
         }
@@ -24,9 +25,10 @@ def write_release_planning_index(course, templates, assignment_group, file_name,
     return
 
 
-def write_release_planning(a_course, a_templates, a_assignment_group):
+def write_release_planning(a_course, a_templates, a_assignment_group_id):
     list_html_string = ""
-    for assignment_sequence in a_assignment_group.assignment_sequences:
+    assignment_group = a_course.get_assignment_group(a_assignment_group_id)
+    for assignment_sequence in assignment_group.assignment_sequences:
         messages_html_string = ""
         assignment_sequence_html_string = ""
         # print(assignment_sequence.name)
@@ -83,22 +85,21 @@ def write_release_planning(a_course, a_templates, a_assignment_group):
                                                                            'messages': messages_html_string,
                                                                            'assignments': assignment_sequence_html_string})
     release_planning_html_string = a_templates["release_planning_list"].substitute(
-        {'assignment_group': a_assignment_group.name + " " + str(a_assignment_group.id),
-         'total_points': int(a_assignment_group.total_points), 'lower_points': a_assignment_group.lower_points,
-         'upper_points': a_assignment_group.upper_points, 'strategie': a_assignment_group.strategy,
+        {'assignment_group': assignment_group.name + " " + str(assignment_group.id),
+         'total_points': int(assignment_group.total_points), 'lower_points': "a_perspective.lower_points",
+         'upper_points': "a_perspective.upper_points", 'strategie': "a_perspective.strategy",
          'assignments': list_html_string})
     return release_planning_html_string
 
 
-def get_perspective_assignment_group_release_planning(a_instance, a_course, a_perspective, a_assignment_group_id, a_templates):
-    assignment_group = a_course.find_assignment_group(a_assignment_group_id)
+def get_assignment_group_release_planning(a_instance, a_perspective, assignment_group, a_templates):
     file_name_levels = ".//" + a_instance.name + "//general//level_serie_" + str(a_perspective.levels) + ".html"
-    file_name_group = ".//" + a_instance.name + "//general//release_planning_" + str(a_assignment_group_id) + ".html"
+    file_name_release_planning = ".//" + a_instance.name + "//general//release_planning_" + str(assignment_group.id) + ".html"
     # print("BBS31 -", file_name_group)
 
     return a_templates["release_planning_perspective"].substitute(
         {'url_levels': file_name_levels,
-         'url_group': file_name_group,
+         'url_group': file_name_release_planning,
          'perspective_name': a_perspective.title,
          'levels': a_perspective.levels,
          'assignment_group_name': assignment_group.name,
@@ -123,7 +124,6 @@ def write_level_serie(a_course, a_templates, level_serie, a_file_name):
              'fraction': grades.fraction,
              'value': grades.value})
     file_html_string = a_templates["level_serie_index"].substitute(
-
         {'level_serie_name': level_serie.name,
          'status_list': status_list_html_string,
          'value_list': value_list_html_string})
@@ -136,35 +136,30 @@ def build_bootstrap_release_planning_tab(a_instance, a_course, a_templates, leve
     for level_serie in level_serie_collection.level_series.values():
         file_name = a_instance.get_html_path() + "level_serie_" + str(level_serie.name) + ".html"
         write_level_serie(a_course, a_templates, level_serie, file_name)
-    for assignment_group in a_course.assignment_groups:
-        file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group.id) + ".html"
-        process_bandwidth(a_course, assignment_group, level_serie_collection, file_name_bandwidth)
-    for assignment_group in a_course.assignment_groups:
-        file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group.id) + ".html"
-        file_name_release_planning = a_instance.get_html_path() + "release_planning_" + str(
-            assignment_group.id) + ".html"
-        write_release_planning_index(a_course, a_templates, assignment_group, file_name_release_planning,
+    for perspective in a_course.perspectives.values():
+        for assignment_group_id in perspective.assignment_group_ids:
+            file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group_id) + ".html"
+            process_bandwidth(a_course, perspective, level_serie_collection, file_name_bandwidth)
+    for perspective in a_course.perspectives.values():
+        for assignment_group_id in perspective.assignment_group_ids:
+            file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group_id) + ".html"
+            file_name_release_planning = a_instance.get_html_path() + "release_planning_" + str(assignment_group_id) + ".html"
+            write_release_planning_index(a_course, a_templates, assignment_group_id, file_name_release_planning,
                                      file_name_bandwidth)
 
     perspectives_html_string = ""
     for perspective in a_course.perspectives.values():
-        for assignment_group_id in perspective.assignment_groups:
-            perspectives_html_string += get_perspective_assignment_group_release_planning(a_instance,
-                                                                                          a_course, perspective,
-                                                                                          assignment_group_id,
-                                                                                          a_templates)
+        for assignment_group_id in perspective.assignment_group_ids:
+            assignment_group = a_course.get_assignment_group(assignment_group_id)
+            perspectives_html_string += get_assignment_group_release_planning(a_instance, perspective, assignment_group, a_templates)
     if a_course.level_moments is not None:
-        assignment_group_id = a_course.level_moments.assignment_groups[0]
-        perspectives_html_string += get_perspective_assignment_group_release_planning(a_instance,
-                                                                                      a_course, a_course.level_moments,
-                                                                                      assignment_group_id,
-                                                                                      a_templates)
+        for assignment_group_id in a_course.level_moments.assignment_group_ids:
+            assignment_group = a_course.get_assignment_group(assignment_group_id)
+            perspectives_html_string += get_assignment_group_release_planning(a_instance, a_course.level_moments, assignment_group, a_templates)
     if a_course.grade_moments is not None:
-        assignment_group_id = a_course.grade_moments.assignment_groups[0]
-        perspectives_html_string += get_perspective_assignment_group_release_planning(a_instance,
-                                                                                      a_course, a_course.grade_moments,
-                                                                                      assignment_group_id,
-                                                                                      a_templates)
+        for assignment_group_id in a_course.grade_moments.assignment_group_ids:
+            assignment_group = a_course.get_assignment_group(assignment_group_id)
+            perspectives_html_string += get_assignment_group_release_planning(a_instance, a_course.grade_moments, assignment_group, a_templates)
     html_string += a_templates["release_planning"].substitute(
         {'perspectives': perspectives_html_string})
     return html_string

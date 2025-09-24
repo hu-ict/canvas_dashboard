@@ -58,15 +58,23 @@
                 <div class="col-lg-12 mt-1 mb-1">
                     <div class="card border-primary">
                         <div class="row card-body">
-                            <div class="col-lg-6">
+                            <div class="col-lg-4">
                                 $student_name ($student_number)<br>
                                 Email: $student_email<br>
-                                Projectgroep: $project_group ($project_group_teachers)
-                            </div>
-                            <div class="col-lg-6">
                                 HBO-ICT, $semester<br>
-                                Datum: $actual_date<br>
-                                Gilde: $guild_group ($guild_group_teachers)
+                                Datum: $actual_date
+                            </div>
+                            <div class="col-lg-4">
+                                Projectgroep: $project_group
+                                <ul>
+                                    $project_group_teachers
+                                </ul>
+                            </div>
+                            <div class="col-lg-4">
+                                Gilde: $guild_group
+                                <ul>
+                                    $guild_group_teachers
+                                </ul>
                             </div>
                         </div>
                     </div>

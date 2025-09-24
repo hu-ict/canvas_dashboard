@@ -50,5 +50,5 @@ class StudentGradeMoments:
 
     @staticmethod
     def copy_from(grade_moments):
-        return StudentGradeMoments(grade_moments.name, grade_moments.assignment_groups)
+        return StudentGradeMoments(grade_moments.name, grade_moments.assignment_group_ids)
 

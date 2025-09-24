@@ -1,7 +1,7 @@
 import plotly.graph_objs as go
 
 from lib.build_plotly_hover import get_hover_attendance
-from lib.build_plotly_perspective import plot_bandbreedte_colored, plot_day_bar
+from lib.build_plotly_perspective import plot_bandbreedte_colored, plot_day_bar_persp
 from lib.lib_date import date_to_day, get_date_time_loc
 from lib.lib_plotly import get_marker_size, hover_style
 from model.perspective.Status import BEFORE_DEADLINE
@@ -64,7 +64,7 @@ def plot_attendance_perspective(a_row, a_col, a_fig, a_course, a_attendance_pers
     plot_bandbreedte_colored(a_row, a_col, a_fig,
                              a_course.days_in_semester, a_course.attendance.bandwidth, a_course.attendance.show_flow,
                              a_course.attendance.total_points)
-    plot_day_bar(a_row, a_col, a_fig,
+    plot_day_bar_persp(a_row, a_col, a_fig,
                  a_course,
                  a_course.attendance.total_points, a_actual_day, a_actual_date, a_attendance_perspective.progress,
                  a_level_serie_collection.level_series[a_course.level_moments.levels].grades, a_course.attendance.show_points, a_course.attendance.show_flow,

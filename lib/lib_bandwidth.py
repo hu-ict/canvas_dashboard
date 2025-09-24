@@ -174,10 +174,10 @@ def bandwidth_builder(assignment_group, days_in_semester):
         band_upper = []
         lower_fraction = assignment_group.lower_points/assignment_group.total_points
         upper_fraction = assignment_group.upper_points/assignment_group.total_points
-        print("LB71 -", assignment_group.name, round(lower_fraction, 1), round(upper_fraction, 1))
-        print(f"LB72 - lower_points {assignment_group.lower_points} upper_points {assignment_group.upper_points} total_points {assignment_group.total_points}")
-        for item in serie.values():
-            print("LB73 -", item)
+        # print("LB71 -", assignment_group.name, round(lower_fraction, 1), round(upper_fraction, 1))
+        # print(f"LB72 - lower_points {assignment_group.lower_points} upper_points {assignment_group.upper_points} total_points {assignment_group.total_points}")
+        # for item in serie.values():
+        #     print("LB73 -", item)
         for x in x_time:
             x1, y1, x2, y2 = find_between(serie, "sum", x)
             if (x2-x1) != 0:
@@ -215,6 +215,22 @@ def bandwidth_builder(assignment_group, days_in_semester):
     new.points = points
 
     return new
+
+
+def get_bandwidth_sum(course, assignment_group_ids):
+    assignment_groups = []
+    for assignment_group_id in assignment_group_ids:
+        assignment_group = course.get_assignment_group(assignment_group_id)
+        assignment_groups.append(assignment_group)
+    bandwidth = Bandwidth()
+    for day in range(course.days_in_semester):
+        new_point = Point(day, 0, 0)
+        for assignment_group in assignment_groups:
+            point = assignment_group.bandwidth.points[day]
+            new_point.lower += point.lower
+            new_point.upper += point.upper
+        bandwidth.points.append(new_point)
+    return bandwidth
 
 
 def bandwidth_builder_attendance(a_lower_points, a_upper_points, a_total_points, days_in_semester):

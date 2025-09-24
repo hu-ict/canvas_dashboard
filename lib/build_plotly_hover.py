@@ -164,3 +164,17 @@ def get_hover_day_bar(l_label, a_actual_day, a_actual_date, a_show_points, a_sco
         l_hover += f"<br>{int(a_score)} {get_punten_str(int(a_score))}"
     return l_hover
 
+
+def get_hover_feedback(titel, feedback):
+    l_hover = ""
+    value = titel+"<br>"+feedback.author_name + get_date_time_loc(feedback.date) + " " + "<br><i>" + feedback.comment + "</i>"
+    wrapper = textwrap.TextWrapper(width=80)
+    word_list = wrapper.wrap(text=value)
+    line_nr = 0
+    for line in word_list:
+        if line_nr > 15:
+            l_hover += "<br>Te veel tekst/feedback zie Canvas."
+            return l_hover
+        l_hover += "<br>" + line
+        line_nr += 1
+    return l_hover

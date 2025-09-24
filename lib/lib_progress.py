@@ -48,54 +48,42 @@ def get_overall_progress(a_progress):
     return -1
 
 
-def get_progress(course, perspective):
+def get_progress(course, student_perspective):
     # bepaal de voortgang
-    if len(perspective.assignment_groups) == 1:
-        assignment_group = course.find_assignment_group(perspective.assignment_groups[0])
-        if assignment_group is not None:
-            if assignment_group.bandwidth is not None:
-                if len(perspective.submission_sequences) > 0:
-                    total_score = 0.00
-                    total_count = 0
-                    last_flow = 0.5
-                    for submission_sequence in perspective.submission_sequences:
-                        if submission_sequence.is_graded() or submission_sequence.get_status() == MISSED_ITEM:
-                            perspective.last_score = submission_sequence.get_day()
-                            total_score += round(submission_sequence.get_score(), 2)
-                            total_count += 1
-                            # print("LP62 -", submission_sequence.name, perspective.last_score, submission_sequence.get_score(), round(total_score, 2))
-                            submission_sequence.flow = assignment_group.bandwidth.get_progress_range(perspective.last_score, total_score)
-                            # print("LP63 -", submission_sequence.flow)
-                            perspective.sum_score = round(total_score, 2)
-                            last_flow = submission_sequence.flow
-                            # print("Graded")
-                        else:
-                            submission_sequence.flow = last_flow
-                            # print("Not graded")
-                    if total_count == 0:
-                        # Niet te bepalen
-                        return 0
-                    elif perspective.last_score != 0:
-                        return assignment_group.bandwidth.get_progress(perspective.last_score,
-                                                                                       perspective.sum_score)
-                    else:
-                        # Niet te bepalen
-                        return 0
+    if course.perspectives[student_perspective.name].bandwidth is not None:
+        if len(student_perspective.submission_sequences) > 0:
+            total_score = 0.00
+            total_count = 0
+            last_flow = 0.5
+            for submission_sequence in student_perspective.submission_sequences:
+                if submission_sequence.is_graded() or submission_sequence.get_status() == MISSED_ITEM:
+                    student_perspective.last_score = submission_sequence.get_day()
+                    total_score += round(submission_sequence.get_score(), 2)
+                    total_count += 1
+                    # print("LP62 -", submission_sequence.name, perspective.last_score, submission_sequence.get_score(), round(total_score, 2))
+                    submission_sequence.flow = course.perspectives[student_perspective.name].bandwidth.get_progress_range(student_perspective.last_score, total_score)
+                    # print("LP63 -", submission_sequence.flow)
+                    student_perspective.sum_score = round(total_score, 2)
+                    last_flow = submission_sequence.flow
+                    # print("Graded")
                 else:
-                    # Niet te bepalen
-                    return 0
+                    submission_sequence.flow = last_flow
+                    # print("Not graded")
+            if total_count == 0:
+                # Niet te bepalen
+                return -1
+            elif student_perspective.last_score != 0:
+                return course.perspectives[student_perspective.name].bandwidth.get_progress(student_perspective.last_score, student_perspective.sum_score)
             else:
                 # Niet te bepalen
-                return 0
+                return -1
         else:
-            print("LP63 - Perspective assignment_group is not set [None]")
-            return 0
-    elif len(perspective.assignment_groups) > 1:
-        print("LP64 - Perspective has more then one assignment_groups attached", perspective.name, perspective.assignment_groups)
-        return 0
+            # Niet te bepalen
+            return -1
     else:
-        print("LP65 - Perspective has no assignment_groups attached", perspective.name, perspective.assignment_groups)
-        return 0
+        # Niet te bepalen
+        return -1
+
 
 
 def proces_progress(course, results, progress_history):

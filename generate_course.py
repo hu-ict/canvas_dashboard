@@ -3,7 +3,7 @@ import sys
 import re
 
 from canvasapi import Canvas
-from lib.lib_bandwidth import bandwidth_builder, bandwidth_builder_attendance
+from lib.lib_bandwidth import bandwidth_builder, bandwidth_builder_attendance, get_bandwidth_sum
 from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
 from lib.file import read_start, read_course_instances, read_config_from_canvas
 from model.Assignment import Assignment
@@ -63,8 +63,8 @@ def get_rubrics(canvas_rubrics):
 def get_used_assignment_groups(config):
     used_assignment_groups = []
     if config.level_moments is not None:
-        if len(config.level_moments.assignment_groups) > 0:
-            used_assignment_groups += config.level_moments.assignment_groups
+        if len(config.level_moments.assignment_group_ids) > 0:
+            used_assignment_groups += config.level_moments.assignment_group_ids
         else:
             message = "GC01 - WARNING no assignments_group for level_moments perspective ", config.level_moments.name
             print(message)
@@ -72,8 +72,8 @@ def get_used_assignment_groups(config):
         print("GC03 - NO level_moments perspective ")
 
     if config.grade_moments is not None:
-        if len(config.grade_moments.assignment_groups) > 0:
-            used_assignment_groups += config.grade_moments.assignment_groups
+        if len(config.grade_moments.assignment_group_ids) > 0:
+            used_assignment_groups += config.grade_moments.assignment_group_ids
         else:
             message = "GC05 - WARNING no assignments_group for grade_moments perspective ", config.grade_moments.name
             print(message)
@@ -81,8 +81,8 @@ def get_used_assignment_groups(config):
         print("GC07 - NO level_moments perspective ")
 
     for perspective in config.perspectives.values():
-        if len(perspective.assignment_groups) > 0:
-            used_assignment_groups += perspective.assignment_groups
+        if len(perspective.assignment_group_ids) > 0:
+            used_assignment_groups += perspective.assignment_group_ids
         else:
             message = "GC09 - WARNING no assignments_group for perspective ", perspective.name
             print(message)
@@ -139,7 +139,7 @@ def generate_course(instance_name):
     canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignments', 'overrides', 'online_quiz'])
     for canvas_assignment_group in canvas_assignment_groups:
         # use only relevant assignment_groups
-        assignment_group = config.find_assignment_group(canvas_assignment_group.id)
+        assignment_group = config.get_assignment_group(canvas_assignment_group.id)
         # print("GC21 -", "assignment_group", canvas_assignment_group.id)
 
         if assignment_group and assignment_group.id in uses_assignment_groups:
@@ -283,8 +283,9 @@ def generate_course(instance_name):
             print(f"GCS41 - assignment_group {canvas_assignment_group.name} is not used")
 
     for perspective in config.perspectives:
-        for assignments_group in config.perspectives[perspective].assignment_groups:
-            assignment_group = config.find_assignment_group(assignments_group)
+        for assignment_group_id in config.perspectives[perspective].assignment_group_ids:
+            assignment_group = config.get_assignment_group(assignment_group_id)
+            print("GC70 -", assignment_group.name)
             for assignment_sequence in assignment_group.assignment_sequences:
                 for assignment in assignment_sequence.assignments:
                     print("GC71 -", assignment.name)
@@ -310,26 +311,26 @@ def generate_course(instance_name):
                                     learning_outcome.add_criterion_id(assignment_sequence.tag, criterium.id)
                                     assignment_sequence.add_learning_outcome(learning_outcome_id)
                                     assignment.add_learning_outcome(learning_outcome_id)
+                config.perspectives[perspective].assignment_sequences.append(assignment_sequence)
 
-
-    for assignments_group in config.level_moments.assignment_groups:
-        assignment_group = config.find_assignment_group(assignments_group)
+    for assignment_group_id in config.level_moments.assignment_group_ids:
+        assignment_group = config.get_assignment_group(assignment_group_id)
         for assignment_sequence in assignment_group.assignment_sequences:
             for assignment in assignment_sequence.assignments:
                 print("GC91 -", assignment.name)
                 if "@" in assignment.name:
                     assignment.learning_outcomes, assignment.name = get_and_remove_at_sign_words(assignment.name)
-                    print("GC92 -", assignment.name, assignment_sequence.learning_outcomes)
+                    # print("GC92 -", assignment.name, assignment_sequence.learning_outcomes)
                     for lu in assignment.learning_outcomes:
                         learning_outcome = config.find_learning_outcome(lu)
                         if learning_outcome is not None:
-                            print("GC93 -", assignment.name, "LU:", learning_outcome.id)
+                            # print("GC93 -", assignment.name, "LU:", learning_outcome.id)
                             assignment_sequence.learning_outcomes.append(learning_outcome.id)
                 for criterium in assignment.rubrics:
-                    print("GC94 -", criterium.description)
+                    # print("GC94 -", criterium.description)
                     if "@" in criterium.description:
                         criterium.learning_outcomes, criterium.description = get_and_remove_at_sign_words(criterium.description)
-                        print("GC95 -", criterium.learning_outcomes, criterium.description)
+                        # print("GC95 -", criterium.learning_outcomes, criterium.description)
                         for learning_outcome_id in criterium.learning_outcomes:
                             # print("GC91 -", learning_outcome_id)
                             #establish many-2-many relation
@@ -351,6 +352,13 @@ def generate_course(instance_name):
     for assignment_group in config.assignment_groups:
         assignment_group.assignment_sequences = sorted(assignment_group.assignment_sequences, key=lambda a: a.get_day())
         assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
+
+    for perspective_key in config.perspectives:
+        config.perspectives[perspective_key].assignment_sequences = sorted(config.perspectives[perspective_key].assignment_sequences, key=lambda a: a.get_day())
+        config.perspectives[perspective_key].bandwidth = get_bandwidth_sum(config, config.perspectives[perspective_key].assignment_group_ids)
+        config.perspectives[perspective_key].total_points = 0
+        for assignment_sequence in config.perspectives[perspective_key].assignment_sequences:
+            config.perspectives[perspective_key].total_points += assignment_sequence.points
     if config.attendance is not None:
         config.attendance.bandwidth = bandwidth_builder_attendance(config.attendance.lower_points, config.attendance.upper_points, config.attendance.total_points, config.days_in_semester)
 

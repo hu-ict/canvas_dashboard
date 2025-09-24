@@ -19,13 +19,10 @@ class WorkloadDay:
         pending = 0
         late = 0
         to_late = 0
-        for perspective in workload["perspectives"]:
-            for selector in workload["perspectives"][perspective]["pending"]:
-                pending += workload["perspectives"][perspective]["pending"][selector]
-            for selector in workload["perspectives"][perspective]["late"]:
-                late += workload["perspectives"][perspective]["late"][selector]
-            for selector in workload["perspectives"][perspective]["to_late"]:
-                to_late += workload["perspectives"][perspective]["to_late"][selector]
+        for workload_teacher in workload.workload_teachers:
+            pending += workload_teacher.w1_count
+            late += workload_teacher.w2_count
+            to_late += workload_teacher.w3_count
 
         workload_aspects["week"] = pending
         workload_aspects["over_week"] = late
