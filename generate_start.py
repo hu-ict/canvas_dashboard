@@ -39,7 +39,7 @@ if instance.is_instance_of("prop_courses"):
 else:
     attendance_path = None
     project_group_name = "Project Groups"
-    guild_group_name = "Gildemeesters"
+    guild_group_name = "Guild Groups"
 start = Start(canvas_course_id,
               project_group_name,
               guild_group_name,

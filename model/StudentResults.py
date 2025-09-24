@@ -29,7 +29,7 @@ class StudentResults:
         if self.perspectives is not None:
             for perspective in self.perspectives:
                 line += " p "+str(self.perspectives[perspective])
-        line += " a "+str(self.attendance_perspective)
+        line += " a "+str(self.student_attendance)
         return line
 
     def get_perspective(self, name):

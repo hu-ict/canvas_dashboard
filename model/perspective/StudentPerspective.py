@@ -23,7 +23,7 @@ class StudentPerspective:
         }
 
     def __str__(self):
-        line = f' StudentPerspective({self.name}, {self.assignment_groups})\n'
+        line = f' StudentPerspective({self.name}, {self.assignment_group_ids})\n'
         for submission_sequence in self.submission_sequences:
             line += " s " + str(submission_sequence) + "\n"
         return line

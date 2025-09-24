@@ -30,7 +30,7 @@ def build_bootstrap_group(a_instance, a_course, a_student_groups, a_results, a_t
     for group in a_student_groups:
         # print("BBS05 -", group.name, len(group.assessors))
         students_html_string = ""
-        if group_type == "Project" and group.principal_assessor > 0:
+        if group_type == "PROJECT" and group.principal_assessor > 0:
             assessors_string = a_course.find_teacher(group.principal_assessor).name
         else:
             assessors_string = ""
@@ -55,6 +55,8 @@ def build_bootstrap_group(a_instance, a_course, a_student_groups, a_results, a_t
                 role = a_course.get_role(l_student.role)
                 if role is not None:
                     students_html_string += build_student_button(a_instance, role, l_student, a_templates, level_series)
+                else:
+                    print("BB21 - role for student is NoneType", l_student)
         if len(coaches) > 0:
             group_html_string = a_templates['group'].substitute(
                 {'selector_type': 'coach', 'selector': coaches, 'student_group_name': group.name + ", " + assessors_string,
@@ -162,10 +164,10 @@ def build_bootstrap_students_tabs(a_instance, a_course, a_results, a_templates, 
     for tab in tabs:
         if tab == "Groepen":
             print("BB51 - Tab groepen")
-            tabs_html_string = build_bootstrap_group(a_instance, a_course, a_course.project_groups, a_results, a_templates, a_level_serie_collection, "Project")
+            tabs_html_string = build_bootstrap_group(a_instance, a_course, a_course.project_groups, a_results, a_templates, a_level_serie_collection, "PROJECT")
         elif tab == "Gilden":
             print("BB52 - Tab gilden")
-            tabs_html_string = build_bootstrap_group(a_instance, a_course, a_course.guild_groups, a_results, a_templates, a_level_serie_collection, "Guild")
+            tabs_html_string = build_bootstrap_group(a_instance, a_course, a_course.guild_groups, a_results, a_templates, a_level_serie_collection, "GUILD")
         elif tab == "Rollen":
             print("BB53 - Tab rollen")
             tabs_html_string = build_bootstrap_role(a_instance, a_course, a_results, a_templates, a_level_serie_collection)

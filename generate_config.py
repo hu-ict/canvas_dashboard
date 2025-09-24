@@ -115,7 +115,7 @@ def generate_config(instance_name):
     # retrieve assignments_groups and score
     canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignments', 'overrides'])
     for canvas_assignment_group in canvas_assignment_groups:
-        assignment_group = AssignmentGroup(canvas_assignment_group.id, "project", canvas_assignment_group.name, [], "POINTS",
+        assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name, "project", [], "POINTS",
                                            0, 0, 0, 0, 0)
         for canvas_assignment in canvas_assignment_group.assignments:
             if canvas_assignment['points_possible']:

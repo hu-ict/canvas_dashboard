@@ -9,9 +9,7 @@ def get_teachers(course):
         if teacher in teachers:
             pass
         else:
-            if len(teacher.project_groups) > 0:
-                teachers.add(teacher)
-            if len(teacher.guild_groups) > 0:
+            if len(teacher.responsibilities) > 0:
                 teachers.add(teacher)
     teacher_list = list(teachers)
     teacher_list = sorted(teacher_list, key=lambda t: t.initials)
