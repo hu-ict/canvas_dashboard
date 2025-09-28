@@ -12,9 +12,9 @@ def write_release_planning_index(course, templates, assignment_group_id, file_na
             'assignment_group_name': assignment_group.name,
             'assignment_group_id': assignment_group.id,
             'total_points': int(assignment_group.total_points),
-            'lower_points': "assignment_group.lower_points",
-            'upper_points': "assignment_group.upper_points",
-            'strategie': "assignment_group.strategy",
+            'lower_points': assignment_group.lower_points,
+            'upper_points': assignment_group.upper_points,
+            'strategie': assignment_group.strategy,
             'planning': release_planning_html_string,
             'flow': bandwith_html_string
         }
@@ -23,6 +23,39 @@ def write_release_planning_index(course, templates, assignment_group_id, file_na
     with open(file_name, mode='w', encoding="utf-8") as file_release_planning_index:
         file_release_planning_index.write(release_planning_index_html_string)
     return
+
+
+
+def write_release_planning_oud(a_start, a_templates, a_assignment_group, a_file_name):
+    list_html_string = ""
+    for assignment in a_assignment_group.assignments:
+        url = "https://canvas.hu.nl/courses/" + str(a_start.canvas_course_id) + "/assignments/" + str(assignment.id)
+        # print(assignment.name)
+        rubric_points = 0
+        rubric_count = 0
+        for criterion in assignment.rubrics:
+            rubric_points += criterion.points
+            rubric_count += 1
+        if rubric_count == 0:
+            rubrics_str = "Geen criteria"
+        else:
+            rubrics_str = str(int(rubric_points)) + " [" + str(rubric_count) + "]"
+        list_html_string += a_templates["assignment"].substitute({'assignment_name': assignment.name,
+                                                                  'assignment_unlock_date': get_date_time_loc(
+                                                                      assignment.unlock_date),
+                                                                  'assignment_lock_date': get_date_time_loc(
+                                                                      assignment.assignment_date),
+                                                                  'assignment_grading_type': assignment.grading_type,
+                                                                  'assignment_points': assignment.points,
+                                                                  'rubrics_points': rubrics_str,
+                                                                  'url': url})
+    file_html_string = a_templates["release_planning_list"].substitute(
+        {'total_points': int(a_assignment_group.total_points), 'lower_points': a_assignment_group.lower_points,
+         'upper_points': a_assignment_group.upper_points, 'strategie': a_assignment_group.strategy,
+         'assignments': list_html_string})
+
+    with open(a_file_name, mode='w', encoding="utf-8") as file_list:
+        file_list.write(file_html_string)
 
 
 def write_release_planning(a_course, a_templates, a_assignment_group_id):
@@ -92,18 +125,16 @@ def write_release_planning(a_course, a_templates, a_assignment_group_id):
     return release_planning_html_string
 
 
-def get_assignment_group_release_planning(a_instance, a_perspective, assignment_group, a_templates):
-    file_name_levels = ".//" + a_instance.name + "//general//level_serie_" + str(a_perspective.levels) + ".html"
-    file_name_release_planning = ".//" + a_instance.name + "//general//release_planning_" + str(assignment_group.id) + ".html"
+def get_assignment_group_release_planning(instance, assignment_group, templates):
+    file_name_levels = ".//" + instance.name + "//general//level_serie_" + str(assignment_group.levels) + ".html"
+    file_name_release_planning = ".//" + instance.name + "//general//release_planning_" + str(assignment_group.id) + ".html"
     # print("BBS31 -", file_name_group)
 
-    return a_templates["release_planning_perspective"].substitute(
+    return templates["release_planning_perspective"].substitute(
         {'url_levels': file_name_levels,
          'url_group': file_name_release_planning,
-         'perspective_name': a_perspective.title,
-         'levels': a_perspective.levels,
-         'assignment_group_name': assignment_group.name,
-         'role': assignment_group.role})
+         'levels': assignment_group.levels,
+         'assignment_group_name': assignment_group.name})
 
 
 def write_level_serie(a_course, a_templates, level_serie, a_file_name):
@@ -132,6 +163,7 @@ def write_level_serie(a_course, a_templates, level_serie, a_file_name):
 
 
 def build_bootstrap_release_planning_tab(a_instance, a_course, a_templates, level_serie_collection):
+    # genereer de bestanden voor in de IFrame
     html_string = ""
     for level_serie in level_serie_collection.level_series.values():
         file_name = a_instance.get_html_path() + "level_serie_" + str(level_serie.name) + ".html"
@@ -139,28 +171,31 @@ def build_bootstrap_release_planning_tab(a_instance, a_course, a_templates, leve
     for perspective in a_course.perspectives.values():
         for assignment_group_id in perspective.assignment_group_ids:
             file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group_id) + ".html"
-            process_bandwidth(a_course, perspective, level_serie_collection, file_name_bandwidth)
+            process_bandwidth(a_course, assignment_group_id, level_serie_collection, file_name_bandwidth)
     for perspective in a_course.perspectives.values():
         for assignment_group_id in perspective.assignment_group_ids:
             file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group_id) + ".html"
             file_name_release_planning = a_instance.get_html_path() + "release_planning_" + str(assignment_group_id) + ".html"
-            write_release_planning_index(a_course, a_templates, assignment_group_id, file_name_release_planning,
-                                     file_name_bandwidth)
+            write_release_planning_index(a_course, a_templates, assignment_group_id, file_name_release_planning, file_name_bandwidth)
 
-    perspectives_html_string = ""
+    assignment_group_html_string = ""
+    # voor elk perspectief een card
     for perspective in a_course.perspectives.values():
         for assignment_group_id in perspective.assignment_group_ids:
             assignment_group = a_course.get_assignment_group(assignment_group_id)
-            perspectives_html_string += get_assignment_group_release_planning(a_instance, perspective, assignment_group, a_templates)
+            assignment_group_html_string += get_assignment_group_release_planning(a_instance, assignment_group, a_templates)
+        html_string += a_templates["release_planning"].substitute({'perspective': perspective.name, 'assignment_groups': assignment_group_html_string})
+
+    # de peil en beoordelingen krijgen een eigen card
+    perspectives_html_string = ""
     if a_course.level_moments is not None:
         for assignment_group_id in a_course.level_moments.assignment_group_ids:
             assignment_group = a_course.get_assignment_group(assignment_group_id)
-            perspectives_html_string += get_assignment_group_release_planning(a_instance, a_course.level_moments, assignment_group, a_templates)
+            perspectives_html_string += get_assignment_group_release_planning(a_instance, assignment_group, a_templates)
     if a_course.grade_moments is not None:
         for assignment_group_id in a_course.grade_moments.assignment_group_ids:
             assignment_group = a_course.get_assignment_group(assignment_group_id)
-            perspectives_html_string += get_assignment_group_release_planning(a_instance, a_course.grade_moments, assignment_group, a_templates)
-    html_string += a_templates["release_planning"].substitute(
-        {'perspectives': perspectives_html_string})
+            perspectives_html_string += get_assignment_group_release_planning(a_instance, assignment_group, a_templates)
+    html_string += a_templates["release_planning"].substitute({'perspective': "peil en beoordelingen", 'assignment_groups': perspectives_html_string})
     return html_string
 

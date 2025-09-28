@@ -11,7 +11,7 @@ def build_learning_analytics(course, results, level_serie_collection):
     for assignment_group in course.assignment_groups:
         perspective = course.find_perspective_by_assignment_group(assignment_group.id)
         if perspective is not None:
-            grades = level_serie_collection.level_series[perspective.levels].grades
+            grades = level_serie_collection.level_series[assignment_group.levels].grades
             for assignment_sequence in assignment_group.assignment_sequences:
                 for assignment in assignment_sequence.assignments:
                     grades_dict = {}
@@ -19,7 +19,7 @@ def build_learning_analytics(course, results, level_serie_collection):
                         grades_dict[grade] = 0
                     learning_analytics[str(assignment.id)] = {"assignment": assignment.id,
                                                               "assignment_name": assignment.name,
-                                                              "level_serie": perspective.levels,
+                                                              "level_serie": assignment_group.levels,
                                                               "status": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0},
                                                               STR_GRADES: grades_dict}
 

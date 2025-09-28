@@ -59,59 +59,62 @@ def plot_student(instances, course, student, actual_date, actual_day,
 
     fig.update_layout(height=900, width=1200, showlegend=False)
     for perspective in student.perspectives.values():
-        row = subplots.positions[perspective.name]['row']
-        col = subplots.positions[perspective.name]['col']
-        # print("GP19 -", perspective, a_level_construction, a_grade_construction)
-        plot_perspective(row, col, fig, course, perspective,
-                         a_level_construction, a_grade_construction,
-                         actual_day, get_date_time_loc(actual_date),
-                         level_serie_collection)
+        if perspective.name in subplots.positions:
+            row = subplots.positions[perspective.name]['row']
+            col = subplots.positions[perspective.name]['col']
+            # print("GP19 -", perspective, a_level_construction, a_grade_construction)
+            plot_perspective(row, col, fig, course, perspective,
+                             a_level_construction, a_grade_construction,
+                             actual_day, get_date_time_loc(actual_date),
+                             level_serie_collection)
 
-    if course.attendance is not None:
-        row = subplots.positions["attendance"]['row']
-        col = subplots.positions["attendance"]['col']
-        plot_attendance_perspective(row, col, fig, course, student.student_attendance, actual_day,
-                                    get_date_time_loc(actual_date), level_serie_collection)
+    if "attendance" in subplots.positions:
+        if course.attendance is not None:
+            row = subplots.positions["attendance"]['row']
+            col = subplots.positions["attendance"]['col']
+            plot_attendance_perspective(row, col, fig, course, student.student_attendance, actual_day,
+                                        get_date_time_loc(actual_date), level_serie_collection)
 
-    if instances.is_instance_of('courses_2026'):
+    if "timeline" in subplots.positions:
         row = subplots.positions["timeline"]['row']
         col = subplots.positions["timeline"]['col']
         plot_timeline(row, col, fig, course, student, actual_day, get_date_time_loc(actual_date), level_serie_collection)
 
-    if instances.is_instance_of('courses_2026'):
-        for peil in course.level_moments.moments:
-            # print("GP21 - Peilmoment", peil, "overall", subplots.positions[peil]['row'], subplots.positions[peil]['col'])
-            # overall peilmoment
-            l_level_moment = student.get_level_moment_submission_by_query([peil])
-            row = subplots.positions[peil]['row']
-            col = subplots.positions[peil]['col']
-            if l_level_moment is None:
-                # nog niet ingevuld
-                l_assignment = course.get_first_level_moment_by_query([peil])
+    # if instances.is_instance_of('courses_2026'):
+        # for level_moment in course.level_moments.moments:
+        #     if level_moment in subplots.positions:
+        #         # print("GP21 - Peilmoment", peil, "overall", subplots.positions[peil]['row'], subplots.positions[peil]['col'])
+        #         # overall peilmoment
+        #         l_level_moment = student.get_level_moment_submission_by_query([level_moment])
+        #         row = subplots.positions[level_moment]['row']
+        #         col = subplots.positions[level_moment]['col']
+        #         if l_level_moment is None:
+        #             # nog niet ingevuld
+        #             l_assignment = course.get_first_level_moment_by_query([level_moment])
+        #
+        #             l_level_moment = Submission(0, 0, 0, 0,
+        #                                         l_assignment.name, l_assignment.get_date(), l_assignment.get_day(),
+        #                                         None, None,
+        #                                         "1", False,
+        #                                         None, None, None,
+        #                                         -1, None, 3, 0)
+        #         plot_overall_level_moment(row, col, fig, course, l_level_moment, level_serie_collection)
 
-                l_level_moment = Submission(0, 0, 0, 0,
-                                            l_assignment.name, l_assignment.get_date(), l_assignment.get_day(),
-                                            None, None,
-                                            "1", False,
-                                            None, None, None,
-                                            -1, None, 3, 0)
-            plot_overall_level_moment(row, col, fig, course, l_level_moment, level_serie_collection)
-
-        for grade_moment in course.grade_moments.moments:
-            # print("GP21 - Beordelingsmoment", grade_moment, "overall")
-            l_grade_moment = student.get_grade_moment_submission_by_query([grade_moment])
-            row = subplots.positions[grade_moment]['row']
-            col = subplots.positions[grade_moment]['col']
-            if l_grade_moment is None:
-                # nog niet ingevuld
-                l_assignment = course.get_first_grade_moment_by_query([grade_moment])
-                l_grade_moment = Submission(0, 0, 0, 0,
-                                            l_assignment.name, l_assignment.get_date(), l_assignment.get_day(),
-                                            None, None,
-                                            "1", False, None, None, None,
-                                            -1, None, 3, 0)
-
-            plot_overall_grade_moment(row, col, fig, course, l_grade_moment, level_serie_collection)
+        # for grade_moment in course.grade_moments.moments:
+        #     # print("GP21 - Beordelingsmoment", grade_moment, "overall")
+        #     l_grade_moment = student.get_grade_moment_submission_by_query([grade_moment])
+        #     row = subplots.positions[grade_moment]['row']
+        #     col = subplots.positions[grade_moment]['col']
+        #     if l_grade_moment is None:
+        #         # nog niet ingevuld
+        #         l_assignment = course.get_first_grade_moment_by_query([grade_moment])
+        #         l_grade_moment = Submission(0, 0, 0, 0,
+        #                                     l_assignment.name, l_assignment.get_date(), l_assignment.get_day(),
+        #                                     None, None,
+        #                                     "1", False, None, None, None,
+        #                                     -1, None, 3, 0)
+        #
+        #     plot_overall_grade_moment(row, col, fig, course, l_grade_moment, level_serie_collection)
     if instances.is_instance_of('inno_courses'):
         # Peil overall drie peilmomenten
         for peil in course.level_moments.moments:

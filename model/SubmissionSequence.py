@@ -108,6 +108,11 @@ class SubmissionSequence:
             self.submissions.append(a_submission)
         return
 
+    def get_assignment_group_id(self):
+        if len(self.submissions) > 0:
+            return self.submissions[0].assignment_group_id
+        else:
+            return None
 
     def to_json(self):
         return {

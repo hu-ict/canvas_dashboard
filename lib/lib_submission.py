@@ -110,8 +110,9 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_canvas_s
     submission_score = 0
     submission_value = 0
     submission_flow = 0
+    assignment_group = a_course.get_assignment_group(a_assignment.group_id)
     perspective = a_course.find_perspective_by_assignment_group(a_assignment.group_id)
-    level_series = a_dashboard.level_serie_collection.level_series[perspective.levels]
+    level_series = a_dashboard.level_serie_collection.level_series[assignment_group.levels]
     # print("SB01 -", perspective)
     # print("SB03 -", level_series.grades)
     if a_canvas_submission.grade:
@@ -466,20 +467,33 @@ def read_submissions(a_instance, a_canvas_course, a_course, a_results, a_total_r
                             student_perspective.put_submission(assignment_sequence, l_submission)
 
 
+def categorize_feedback(feedback_comment):
+    feedback_list = []
+    if '@' in feedback_comment:
+        feedback_list = get_and_remove_at_sign_words(feedback_comment)
+    else:
+        feedback_list.append({"lu": "AF", "comment": feedback_comment})
+    return feedback_list
+
+
 def get_feedback_from_submission(course, student, submission):
     # print("LSU81 -", submission.assignment_name)
     for comment in submission.comments:
         comment_day = date_to_day(course.start_date, comment.date)
-        feedback = Feedback(comment.author_id, comment.author_name, comment.date, comment_day, comment.comment,
-                            submission.assignment_name, submission.id, submission.grade)
-        if '@' in feedback.comment:
-            sign_words, feedback.comment = get_and_remove_at_sign_words(feedback.comment)
-            for sign_word in sign_words:
-                # print("LSU83 -", feedback.comment, sign_word)
-                if sign_word in student.learning_outcomes:
-                    student.learning_outcomes[sign_word].feedback_list.append(feedback)
-        else:
-            student.general_feedback_list.append(feedback)
+        feedback_list = categorize_feedback(comment.comment)
+        for feedback_dict in feedback_list:
+            feedback = Feedback(comment.author_id, comment.author_name, comment.date, comment_day, feedback_dict["comment"],
+                                submission.assignment_name, submission.id, submission.grade)
+            if 'LU' in feedback_dict["lu"]:
+                if feedback_dict["lu"] in student.learning_outcomes:
+                    student.learning_outcomes[feedback_dict["lu"]].feedback_list.append(feedback)
+                else:
+                    print("LSU82 - Leeruitkomst uit comment niet gevonden in lijst van leeruitkomsten", feedback_dict["lu"],
+                          student.learning_outcomes)
+
+            else:
+                student.general_feedback_list.append(feedback)
+
 
     if len(submission.rubrics) > 0:
         for criterion_score in submission.rubrics:
@@ -500,23 +514,29 @@ def get_feedback_from_submission(course, student, submission):
                 else:
                     rating_description = ""
                 submission_day = date_to_day(course.start_date, submission.graded_date)
-                feedback = Feedback("id", submission.grader_name, submission.graded_date, submission_day, criterion_score.comment,
-                                    submission.assignment_name + " (" + assignment_criterion.description + ")",
-                                    submission.id, rating_description)
-                if '@' in feedback.comment:
-                    sign_words, feedback.comment = get_and_remove_at_sign_words(feedback.comment)
-                    # print("LSU85 -", sign_words, feedback.comment)
-                    for sign_word in sign_words:
-                        # print("LSU86 -", text, sign_word)
-                        if sign_word in student.learning_outcomes:
-                            student.learning_outcomes[sign_word].feedback_list.append(feedback)
+                # print("LSU88 -", assignment_criterion.learning_outcomes, criterion_score.comment)
+                if len(assignment_criterion.learning_outcomes) == 1:
+                    # de assignment rubric is gekoppeld aan een leeruitkomst
+                    feedback = Feedback("id", submission.grader_name, submission.graded_date, submission_day,
+                                        criterion_score.comment,
+                                        submission.assignment_name + " (" + assignment_criterion.description + ")",
+                                        submission.id, rating_description)
+                    lu = assignment_criterion.learning_outcomes[0]
+                    # print("LSU89 -", assignment_criterion.learning_outcomes, len(student.learning_outcomes[lu].feedback_list), student.learning_outcomes[lu])
+                    student.learning_outcomes[lu].feedback_list.append(feedback)
+                    # print("LSU91 -", assignment_criterion.learning_outcomes, len(student.learning_outcomes[lu].feedback_list), student.learning_outcomes[lu])
                 else:
-                    # print("LSU88 -", assignment_criterion.learning_outcomes, criterion_score.comment)
-                    if len(assignment_criterion.learning_outcomes) == 1:
-                        lu = assignment_criterion.learning_outcomes[0]
-                        # print("LSU89 -", assignment_criterion.learning_outcomes, len(student.learning_outcomes[lu].feedback_list), student.learning_outcomes[lu])
-                        student.learning_outcomes[lu].feedback_list.append(feedback)
-                        # print("LSU91 -", assignment_criterion.learning_outcomes, len(student.learning_outcomes[lu].feedback_list), student.learning_outcomes[lu])
-                    else:
-                        student.general_feedback_list.append(feedback)
+                    feedback_list = categorize_feedback(criterion_score.comment)
+                    for feedback_dict in feedback_list:
+                        feedback = Feedback("id", submission.grader_name, submission.graded_date, submission_day,
+                                            feedback_dict["comment"],
+                                            submission.assignment_name + " (" + assignment_criterion.description + ")",
+                                            submission.id, rating_description)
+                        if 'LU' in feedback_dict["lu"]:
+                            if feedback_dict["lu"] in student.learning_outcomes:
+                                student.learning_outcomes[feedback_dict["lu"]].feedback_list.append(feedback)
+                            else:
+                                print("LSU91 - Leeruitkomst uit comment niet gevonden in lijst leeruitkomsten", feedback_dict["lu"], student.learning_outcomes)
+                        else:
+                            student.general_feedback_list.append(feedback)
 

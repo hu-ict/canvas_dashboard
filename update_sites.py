@@ -15,7 +15,7 @@ def main(instance_name):
     instance = instances.get_instance_by_name(instances.current_instance)
     print("PB02 - Instance:", instance.name)
 
-    if instances.current_instance != "TICT-VINNO1-22-FEB25":
+    if instances.current_instance not in ["TICT-VINNO1-22-FEB25", "TICT-V3SE6-25_SEP25"]:
         print("US04 - No student channels defined for this course")
         return
     course = read_course(instance.get_course_file_name())
@@ -37,7 +37,7 @@ def main(instance_name):
         student_channels = get_channels(msteams_api.gen_token, team_id)
         channel_count += len(student_channels)
         for channel in student_channels:
-            student = course.find_student_by_name(channel["display_name"])
+            student = course.find_student_by_email_part(channel["display_name"])
             if student is None:
                 print(f"US06 - Student not found in course: [{channel['display_name']}]")
             else:
@@ -48,12 +48,16 @@ def main(instance_name):
                 student.site = drive["drive_id"]
                 msteams_api.channels.append(Channel(student.id, student.name, drive["drive_id"]))
     print("US10 - Channels:", channel_count, "Students linked:", site_count)
-
+    sites = 0
+    errors = 0
     for student in course.students:
-        if student.site == "":
+        if len(student.site) == 0:
             print("US12 - No channel in teams, display_name:", student.name)
-        # else:
-        #     print("US13 - displayName:", student.name)
+            errors += 1
+        else:
+            # print("US13 - displayName:", student.name)
+            sites += 1
+    print("US15 - Sites", sites, "Errors", errors)
 
     with open("msteams_api.json", 'w') as f:
         dict_result = msteams_api.to_json()

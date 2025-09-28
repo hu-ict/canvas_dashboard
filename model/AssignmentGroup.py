@@ -3,8 +3,8 @@ from model.Bandwidth import Bandwidth
 
 
 class AssignmentGroup:
-    def __init__(self, id, name, groups, role, strategy, lower_c, upper_c, total_points, lower_points, upper_points):
-        self.id = id
+    def __init__(self, assignment_group_id, name, groups, role, strategy, lower_c, upper_c, total_points, lower_points, upper_points, levels):
+        self.id = assignment_group_id
         self.name = name
         self.groups = groups
         self.role = role
@@ -14,7 +14,8 @@ class AssignmentGroup:
         self.total_points = total_points
         self.lower_points = lower_points
         self.upper_points = upper_points
-        self.bandwidth = []
+        self.bandwidth = None
+        self.levels = levels
         self.assignment_sequences = []
 
     def to_json(self):
@@ -28,8 +29,14 @@ class AssignmentGroup:
             'upper_c': self.upper_c,
             'total_points': self.total_points,
             'lower_points': self.lower_points,
-            'upper_points': self.upper_points
+            'upper_points': self.upper_points,
+            'levels': self.levels
         }
+        if self.bandwidth:
+            json_string['bandwidth'] = self.bandwidth.to_json()
+        # if self.levels:
+        #     json_string['levels'] = self.levels.to_json()
+
         if len(self.assignment_sequences) > 0:
             json_string['assignment_sequences'] = list(map(lambda a: a.to_json(), self.assignment_sequences))
         return json_string
@@ -74,7 +81,9 @@ class AssignmentGroup:
                                                data_dict['groups'],
                                                data_dict['role'], data_dict['strategy'], data_dict['lower_c'],
                                                data_dict['upper_c'], data_dict['total_points'],
-                                               data_dict['lower_points'], data_dict['upper_points'])
+                                               data_dict['lower_points'], data_dict['upper_points'], data_dict['levels'])
+        if 'bandwidth' in data_dict.keys():
+            new_assignment_group.bandwidth = Bandwidth.from_dict(data_dict['bandwidth'])
         if 'assignment_sequences' in data_dict.keys():
             new_assignment_group.assignment_sequences = list(
                 map(lambda a: AssignmentSequence.from_dict(a), data_dict['assignment_sequences']))

@@ -184,6 +184,12 @@ class CourseConfig:
                 return student
         return None
 
+    def find_student_by_email_part(self, student_email_part):
+        for student in self.students:
+            if student.email.split("@")[0] == student_email_part:
+                return student
+        return None
+
     def find_student_by_email(self, student_email):
         for student in self.students:
             if student.email == student_email:

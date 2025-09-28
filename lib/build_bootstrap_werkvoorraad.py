@@ -2,19 +2,18 @@ from lib.file import read_plotly
 import win32com.client as client
 
 
-def build_bootstrap_canvas_werkvoorraad_tab(a_instance, a_templates, a_teachers, a_workload):
+def build_bootstrap_teacher_tab(a_instance, a_templates, a_workload):
     overzicht_html_string = ""
-
     list_html_string = ""
     for teacher in a_workload.workload_teachers:
         list_html_string += a_templates["selector"].substitute(
-                {'selector_file': ".//" + a_instance.name + "//general//late_" + teacher.initials + ".html", 'selector_name': teacher.name,  'selector': teacher.initials})
+                {'selector_file': ".//" + a_instance.name + "//general//teacher_" + teacher.initials + ".html", 'selector_name': teacher.name,  'selector': teacher.initials})
 
     overzicht_html_string += a_templates["overzicht"].substitute({'perspective': "Docent", 'buttons': list_html_string})
     return overzicht_html_string
 
 
-def build_bootstrap_canvas_werkvoorraad_index(a_instance, a_course, a_workload, a_actual_date, a_templates):
+def build_bootstrap_canvas_workload_general(a_instance, a_course, a_workload, a_actual_date, a_templates):
     html_string = ""
     file_name = a_instance.get_html_path() + "totals_werkvoorraad.html"
     html_string += a_templates["workload_index"].substitute(

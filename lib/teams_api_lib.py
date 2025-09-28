@@ -4,7 +4,11 @@ from lib.translation_table import translation_table
 import subprocess
 import io
 
-teams = ["8d309e88-cdae-4720-aed8-47384bc36820", "59a9f9c3-4a23-4f74-ad75-a269f0e70891", "f66f15ab-36cf-4af7-8e36-9f380e8f8a5c", "68ab52d4-8c10-4316-9a88-229854794074"]
+teams = ["1221c52c-8dde-4f0a-8dd2-fafe98df6c2d",
+         "6cc9038c-76d1-4c7d-a40a-87b04d2e6d2f",
+         "c9f90014-7843-4e2c-92c2-2727b5d20ede",
+         "8a2cfa62-5ec8-4266-b2bc-4f1fed73cf6c",
+         "02a1e0ea-46c9-460a-956a-5f9ad7302ee6"]
 # https://teams.microsoft.com/l/team/19%3AcxEwbQY-TpX23Y4slSrFCWgIutGGF2JDk829QxLhmFY1%40thread.tacv2/conversations?groupId=8d309e88-cdae-4720-aed8-47384bc36820&tenantId=98932909-9a5a-4d18-ace4-7236b5b5e11d
 # https://teams.microsoft.com/l/team/19%3A3l-_a4EUOq-9AwvkU6dAVddcELw_bL3xU0xW2-hKWmg1%40thread.tacv2/conversations?groupId=59a9f9c3-4a23-4f74-ad75-a269f0e70891&tenantId=98932909-9a5a-4d18-ace4-7236b5b5e11d
 # https://teams.microsoft.com/l/team/19%3AJ0cuUcTJg79b1IGafrNhQxKV8xJSgIgP9BoDhBUEZOM1%40thread.tacv2/conversations?groupId=f66f15ab-36cf-4af7-8e36-9f380e8f8a5c&tenantId=98932909-9a5a-4d18-ace4-7236b5b5e11d
@@ -282,7 +286,7 @@ def add_member_to_channel(a_token, a_team_id, a_channel_id, a_member_login):
     }
     l_data = {
         "@odata.type": "#microsoft.graph.aadUserConversationMember",
-        "roles": ["member"],
+        "roles": ["owner"],
         "user@odata.bind": f"https://graph.microsoft.com/v1.0/users('{a_member_login}')"
     }
     l_url = f"https://graph.microsoft.com/v1.0/teams/{a_team_id}/channels/{a_channel_id}/members"
@@ -316,6 +320,7 @@ def get_channels(a_token, a_team_id):
         print(f"TA24 - Error getting token: {response.json()}")
     return []
 
+
 def get_team(a_token, a_team_id):
     url = f"https://graph.microsoft.com/v1.0/teams/{a_team_id}"
     # print("TA36 -", url)
@@ -328,12 +333,12 @@ def get_team(a_token, a_team_id):
         result = response.json()
         return {"displayName": result['displayName'], "members": result['summary']['membersCount']}
     else:
-        print(f"TA38 - Error getting token: {response.json()}")
-    return None
+        return f"TA38 - Error getting token: {response.json()}"
+
 
 def get_drive(token, team_id, channel_id):
     url = f"https://graph.microsoft.com/v1.0/teams/{team_id}/channels/{channel_id}/filesFolder"
-    print("TA36 -", url)
+    # print("TA36 -", url)
     headers = {
         "Authorization": "Bearer " + token,
         "Content-Type": "application/json"

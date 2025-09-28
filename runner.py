@@ -43,9 +43,9 @@ if __name__ == "__main__":
         # main("TICT-VINNO1-22-FEB25", "results_create_event")
         # main("TICT-V1SE1-24-SEP2025", "course_create_event")
         # main("TICT-V3SE5-25_SEP25", "course_create_event")
-        # main("TICT-V3SE6-25_SEP25", "results_create_event")
+        main("TICT-V3SE6-25_SEP25", "results_create_event")
         # main("stage_test_sep25", "course_create_event")
-        main("inno_test", "course_create_event")
+        # main("inno_test", "course_create_event")
     total_seconds = (get_actual_date() - l_actual_date).seconds
     seconds = total_seconds % 60
     minutes = total_seconds // 60

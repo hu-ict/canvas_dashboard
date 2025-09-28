@@ -60,11 +60,11 @@ def generate_config(instance_name):
         config.roles.append(role)
         role = Role("TI", "TI - Engineer", "Technische Informatica", "border-warning")
         config.roles.append(role)
-        perspective = Perspective("team", "Team", "samen", False, True)
+        perspective = Perspective("team", "Team", "samen", False, True, 0)
         config.perspectives[perspective.name] = perspective
-        perspective = Perspective("gilde", "Gilde", "samen5", False, True)
+        perspective = Perspective("gilde", "Gilde", "samen5", False, True, 0)
         config.perspectives[perspective.name] = perspective
-        perspective = Perspective("kennis", "Kennis", "niveau", True, False)
+        perspective = Perspective("kennis", "Kennis", "niveau", True, False, 0)
         config.perspectives[perspective.name] = perspective
         config.attendance = None
         config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", ["Peilmoment 1", "Peilmoment 2"])
@@ -80,7 +80,7 @@ def generate_config(instance_name):
         config.roles.append(role)
         role = Role("TI", "Embedded engineer", "Technische Informatica", "border-primary")
         config.roles.append(role)
-        perspective = Perspective("portfolio", "Portfolio", "samen", False, True, 0)
+        perspective = Perspective("portfolio", "Portfolio", False, True, 0)
         config.perspectives[perspective.name] = perspective
         config.attendance = None
         config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", ["Peilmoment 1", "Peilmoment 2"])
@@ -88,11 +88,11 @@ def generate_config(instance_name):
     else:
         role = Role("role", "Student", "HBO-ICT", "border-dark")
         config.roles.append(role)
-        perspective = Perspective("kennis", "Kennis", "bin2", True, False)
+        perspective = Perspective("kennis", "Kennis", True, False, 0)
         config.perspectives[perspective.name] = perspective
-        perspective = Perspective("verbreding", "Oriëntatie", "bin2", True, False)
+        perspective = Perspective("verbreding", "Oriëntatie", True, False, 0)
         config.perspectives[perspective.name] = perspective
-        perspective = Perspective("skills", "Professional skills", "bin2", True, False)
+        perspective = Perspective("skills", "Professional skills", True, False, 0)
         config.perspectives[perspective.name] = perspective
         policy = Policy([1], "WEEKLY", 19, [9, 17, 18])
         config.attendance = Attendance("attendance", "Aanwezigheid", "attendance", True, False, "ATTENDANCE", 100, 75,
@@ -116,7 +116,7 @@ def generate_config(instance_name):
     canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignments', 'overrides'])
     for canvas_assignment_group in canvas_assignment_groups:
         assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name, "project", [], "POINTS",
-                                           0, 0, 0, 0, 0)
+                                           0, 0, 0, 0, 0, "bin2")
         for canvas_assignment in canvas_assignment_group.assignments:
             if canvas_assignment['points_possible']:
                 assignment_group.total_points += canvas_assignment['points_possible']

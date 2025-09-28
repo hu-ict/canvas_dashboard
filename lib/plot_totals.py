@@ -1,5 +1,7 @@
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
+
+from lib.build_plotly_bandwidth import process_bandwidth, process_bandwidth_overall
 from lib.lib_plotly import hover_style
 
 
@@ -185,3 +187,8 @@ def plot_werkvoorraad(a_instance, a_course, a_workload, a_workload_history):
     # fig.add_trace(data, 2, 3)
     file_name = a_instance.get_html_path() + "totals_werkvoorraad" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")
+
+
+def plot_overall_opbouw(a_instance, a_course, a_level_serie_collection):
+    file_name = a_instance.get_html_path() + "overall_opbouw" + ".html"
+    process_bandwidth_overall(a_course, a_level_serie_collection, file_name)

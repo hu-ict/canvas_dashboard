@@ -58,48 +58,6 @@ def get_hover_attendance(attendance, attendance_submission, grade):
     return l_hover
 
 
-def get_hover_level_moment1(a_peil_submissions, a_course, a_level_serie_collections):
-    hover = NO_DATA
-    if a_peil_submissions:
-        hover = "<b>" + a_peil_submissions.assignment_name + "</b> " + get_date_time_loc(a_peil_submissions.assignment_date) + "<br>"
-        if a_peil_submissions.graded:
-            hover += a_level_serie_collections.level_series[a_course.level_moments.levels].grades[str(int(a_peil_submissions.score))].label
-            hover += ", bepaald door " + str(a_peil_submissions.grader_name) + " op " + get_date_time_loc(a_peil_submissions.graded_date)
-            hover += get_hover_comments(a_peil_submissions.comments)
-            hover += get_hover_rubrics_comments(a_course, a_peil_submissions, a_level_serie_collections.level_series[a_course.level_moments.levels].grades)
-        else:
-            hover += a_level_serie_collections.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).label
-    return hover
-
-
-def get_hover_grade_moment1(a_grade_submissions, a_course, a_level_serie_collections):
-    hover = NO_DATA
-    if a_grade_submissions:
-        hover = "<b>" + a_grade_submissions.assignment_name + "</b> " + get_date_time_loc(a_grade_submissions.assignment_date) + "<br>"
-        if a_grade_submissions.graded:
-            hover += a_level_serie_collections.level_series[a_course.grade_moments.levels].grades[a_grade_submissions.grade].label
-            hover += ", bepaald door " + str(a_grade_submissions.grader_name) + " op " + get_date_time_loc(a_grade_submissions.graded_date)
-            hover += get_hover_comments(a_grade_submissions.comments)
-            hover += get_hover_rubrics_comments(a_course, a_grade_submissions, a_level_serie_collections.level_series[a_course.grade_moments.levels].grades)
-        else:
-            hover += a_level_serie_collections.level_series[a_course.grade_moments.levels].get_status(BEFORE_DEADLINE).label
-    return hover
-
-
-def get_hover_moment(a_course, a_submission, a_level_serie):
-    hover = NO_DATA
-    if a_submission is not None:
-        hover = "<b>" + a_submission.assignment_name + "</b> " + get_date_time_loc(a_submission.assignment_date) + "<br>"
-        if a_submission.graded:
-            hover += a_level_serie.grades[a_submission.grade].label
-            hover += ", bepaald door " + str(a_submission.grader_name) + " op " + get_date_time_loc(a_submission.graded_date)
-            hover += get_hover_comments(a_submission.comments)
-            hover += get_hover_rubrics_comments(a_course, a_submission, a_level_serie.grades)
-        else:
-            hover += a_level_serie.get_status(BEFORE_DEADLINE).label
-    return hover
-
-
 def get_hover_comments(comments):
     l_hover = ""
     if len(comments) > 0:
@@ -158,23 +116,39 @@ def get_hover_rubrics_comments(course, submission, grade):
 
 
 def get_hover_day_bar(l_label, a_actual_day, a_actual_date, a_show_points, a_score):
-    l_hover = f"<b>{l_label}</b>"
-    l_hover += f"<br>dag {a_actual_day} in onderwijsperiode [{a_actual_date}]"
+    # l_hover = f"<b>{l_label}</b>"
+    l_hover = f"Dag {a_actual_day} in onderwijsperiode [{a_actual_date}]"
     if a_show_points:
         l_hover += f"<br>{int(a_score)} {get_punten_str(int(a_score))}"
     return l_hover
 
 
 def get_hover_feedback(titel, feedback):
-    l_hover = ""
-    value = titel+"<br>"+feedback.author_name + get_date_time_loc(feedback.date) + " " + "<br><i>" + feedback.comment + "</i>"
-    wrapper = textwrap.TextWrapper(width=80)
-    word_list = wrapper.wrap(text=value)
+    l_hover = "<b>"+titel+" van "+feedback.author_name + " op " + get_date_time_loc(feedback.date) + "</b><br>Portfolio-item:"+feedback.assignment_name+"<i>"
+    wrapper = textwrap.TextWrapper(width=120)
+    word_list = wrapper.wrap(text=feedback.comment)
     line_nr = 0
     for line in word_list:
+        line_nr += 1
         if line_nr > 15:
             l_hover += "<br>Te veel tekst/feedback zie Canvas."
             return l_hover
         l_hover += "<br>" + line
-        line_nr += 1
+    l_hover += "</i>"
     return l_hover
+
+
+def get_hover_moment(a_course, a_submission, a_level_serie):
+    hover = NO_DATA
+    if a_submission is not None:
+        hover = "<b>" + a_submission.assignment_name + "</b> " + get_date_time_loc(a_submission.assignment_date) + "<br>"
+        if a_submission.graded:
+            hover += a_level_serie.grades[a_submission.grade].label
+            hover += ", bepaald door " + str(a_submission.grader_name) + " op " + get_date_time_loc(a_submission.graded_date)
+            hover += get_hover_comments(a_submission.comments)
+            hover += get_hover_rubrics_comments(a_course, a_submission, a_level_serie.grades)
+        else:
+            hover += a_level_serie.get_status(BEFORE_DEADLINE).label
+    return hover
+
+

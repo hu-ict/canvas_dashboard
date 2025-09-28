@@ -1,7 +1,7 @@
 import json
 from lib.file import read_start, read_course, read_msteams_api, read_course_instances
 from lib.teams_api_lib import get_team_channels, get_me_for_check, get_access_token, add_member_to_team, \
-    add_member_to_channel, create_channel, teams
+    add_member_to_channel, create_channel, teams, get_team
 
 # teams like ["b7cf78ae-8c6f-460d-a47a-d4bc2b8b2f18"]
 print("GCH01 - generate_channels.py")
@@ -22,19 +22,27 @@ if get_me_for_check(msteams_api.gen_token) is None:
         dict_result = msteams_api.to_json()
         json.dump(dict_result, f, indent=2)
 
+for team in teams:
+    print("Team:", get_team(msteams_api.gen_token, team))
 print(f"Aantal studenten {len(course.students)}, aantal teams {len(teams)}")
 student_count = 1
 if len(teams) > 0:
     for student in course.students:
         print("GCH10 -", student_count+1, student.name)
-        team_id = teams[student_count % len(teams)]
-        print(team_id, student.email)
-        channel_id = create_channel(msteams_api.gen_token, team_id, student.name)
-        if channel_id:
-            print(channel_id, student.email)
-            add_member_to_team(msteams_api.gen_token, team_id, student.email)
-            add_member_to_channel(msteams_api.gen_token, team_id, channel_id, student.email)
-        student_count += 1
+        if len(student.email) > 0:
+            team_id = teams[student_count % len(teams)]
+            print(team_id, student.email)
+            email_parts = student.email.split("@")
+            if len(email_parts) > 1:
+                channel_id = create_channel(msteams_api.gen_token, team_id, email_parts[0])
+                if channel_id:
+                    print(channel_id, student.email)
+                    add_member_to_team(msteams_api.gen_token, team_id, student.email)
+                    add_member_to_channel(msteams_api.gen_token, team_id, channel_id, student.email)
+                student_count += 1
+        else:
+            print("GHC11 -Student heeft geen email", student.name)
+
 
     # teams = {"TICT-ICT-V1A-24-TEST": {'id': "b7cf78ae-8c6f-460d-a47a-d4bc2b8b2f18"}}
     #

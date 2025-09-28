@@ -1,7 +1,7 @@
 from lib.build_bootstrap_learning_outcome import build_bootstrap_learning_outcome_tab
 from lib.build_bootstrap_structure import build_bootstrap_analytics_tab, build_learning_analytics, \
     build_bootstrap_release_planning_tab, build_bootstrap_analyse_tab
-from lib.build_bootstrap_werkvoorraad import build_bootstrap_canvas_werkvoorraad_tab
+from lib.build_bootstrap_werkvoorraad import build_bootstrap_teacher_tab
 from lib.lib_date import get_date_time_loc
 
 
@@ -105,63 +105,51 @@ def build_bootstrap_progress(a_instance, a_course, a_results, a_templates, level
     return progress_html_string
 
 
-def write_release_planning(a_start, a_templates, a_assignment_group, a_file_name):
-    list_html_string = ""
-    for assignment in a_assignment_group.assignments:
-        url = "https://canvas.hu.nl/courses/" + str(a_start.canvas_course_id) + "/assignments/" + str(assignment.id)
-        # print(assignment.name)
-        rubric_points = 0
-        rubric_count = 0
-        for criterion in assignment.rubrics:
-            rubric_points += criterion.points
-            rubric_count += 1
-        if rubric_count == 0:
-            rubrics_str = "Geen criteria"
-        else:
-            rubrics_str = str(int(rubric_points)) + " [" + str(rubric_count) + "]"
-        list_html_string += a_templates["assignment"].substitute({'assignment_name': assignment.name,
-                                                                  'assignment_unlock_date': get_date_time_loc(
-                                                                      assignment.unlock_date),
-                                                                  'assignment_lock_date': get_date_time_loc(
-                                                                      assignment.assignment_date),
-                                                                  'assignment_grading_type': assignment.grading_type,
-                                                                  'assignment_points': assignment.points,
-                                                                  'rubrics_points': rubrics_str,
-                                                                  'url': url})
-    file_html_string = a_templates["release_planning_list"].substitute(
-        {'total_points': int(a_assignment_group.total_points), 'lower_points': a_assignment_group.lower_points,
-         'upper_points': a_assignment_group.upper_points, 'strategie': a_assignment_group.strategy,
-         'assignments': list_html_string})
-
-    with open(a_file_name, mode='w', encoding="utf-8") as file_list:
-        file_list.write(file_html_string)
-
-
-def build_bootstrap_students_tabs(a_instance, a_course, a_results, a_templates, a_level_serie_collection, a_workload):
-    tabs = ["Groepen"]
+def get_menu_items(a_instance, a_course):
+    menu_items = ["Groepen"]
     if len(a_course.guild_groups) > 0:
-        tabs.append("Gilden")
+        menu_items.append("Gilden")
     if len(a_course.roles) > 1:
-        tabs.append("Rollen")
-    tabs.append("Voortgang")
-    tabs.append("Werkvoorraad")
-    tabs.append("Release Planning")
-    tabs.append("Leeruitkomsten")
-    tabs.append("Analytics")
+        menu_items.append("Rollen")
+    menu_items.append("Voortgang")
+    menu_items.append("Werkvoorraad")
+    menu_items.append("Release Planning")
+    menu_items.append("Leeruitkomsten")
+    menu_items.append("Analytics")
     if a_instance.is_instance_of("inno_courses") or a_instance.is_instance_of("courses_2026"):
-        tabs.append("Analyse")
+        menu_items.append("Analyse")
+    return menu_items
+
+
+def build_bootstrap_menu(a_instance, a_templates, a_menu_items):
     start_pages = {}
     start_pages["Groepen"] = "./" + a_instance.name + "/general/standard.html"
     start_pages["Gilden"] = "./" + a_instance.name + "/general/standard.html"
     start_pages["Rollen"] = "./" + a_instance.name + "/general/standard.html"
     start_pages["Voortgang"] = "./" + a_instance.name + "/general/totals_voortgang.html"
     start_pages["Werkvoorraad"] = "./" + a_instance.name + "/general/workload_index.html"
-    start_pages["Release Planning"] = "./" + a_instance.name + "/general/standard.html"
+    start_pages["Release Planning"] = "./" + a_instance.name + "/general/overall_opbouw.html"
     start_pages["Leeruitkomsten"] = "./" + a_instance.name + "/general/standard.html"
     start_pages["Analytics"] = "./" + a_instance.name + "/general/standard.html"
     start_pages["Analyse"] = "./" + a_instance.name + "/general/standard.html"
+    html_menu_string = ""
+    for tab in a_menu_items:
+        html_menu = ""
+        for tab1 in a_menu_items:
+            file_name = start_pages[tab1]
+            if tab == tab1:
+                html_menu += a_templates['index_tab'].substitute(
+                    {'tab': tab1, 'active': 'active', 'aria': 'page', 'selector_file': file_name})
+            else:
+                html_menu += a_templates['index_tab'].substitute(
+                    {'tab': tab1, 'active': '', 'aria': 'false', 'selector_file': file_name})
+        html_menu_string += a_templates['index_menu'].substitute({'tab': tab, 'menu': html_menu})
+    return html_menu_string
+
+
+def build_bootstrap_left_panel(a_instance, a_menu_items, a_course, a_results, a_templates, a_level_serie_collection, a_workload):
     html_tabs = ""
-    for tab in tabs:
+    for tab in a_menu_items:
         if tab == "Groepen":
             print("BB51 - Tab groepen")
             tabs_html_string = build_bootstrap_group(a_instance, a_course, a_course.project_groups, a_results, a_templates, a_level_serie_collection, "PROJECT")
@@ -175,15 +163,8 @@ def build_bootstrap_students_tabs(a_instance, a_course, a_results, a_templates, 
             print("BB54 - Tab voortgang")
             tabs_html_string = build_bootstrap_progress(a_instance, a_course, a_results, a_templates, a_level_serie_collection)
         elif tab == "Werkvoorraad":
-            print("BB55 - Tab werkvoorrad")
-            perspectives = []
-            for perspective in a_course.perspectives.values():
-                perspectives.append(perspective)
-            if a_course.level_moments is not None:
-                perspectives.append(a_course.level_moments)
-            if a_course.grade_moments is not None:
-                perspectives.append(a_course.grade_moments)
-            tabs_html_string = build_bootstrap_canvas_werkvoorraad_tab(a_instance, a_templates, a_course, a_workload)
+            print("BB55 - Tab werkvoorraad")
+            tabs_html_string = build_bootstrap_teacher_tab(a_instance, a_templates, a_workload)
         elif tab == "Release Planning":
             print("BB56 - Tab release planning")
             tabs_html_string = build_bootstrap_release_planning_tab(a_instance, a_course, a_templates,
@@ -202,14 +183,6 @@ def build_bootstrap_students_tabs(a_instance, a_course, a_results, a_templates, 
             tabs_html_string = build_bootstrap_analyse_tab(a_instance, a_course, a_results, a_templates,
                                                        a_level_serie_collection)
         html_tab = ""
-        for tab1 in tabs:
-            file_name = start_pages[tab1]
-            if tab == tab1:
-                html_tab += a_templates['index_tab'].substitute(
-                    {'tab': tab1, 'active': 'active', 'aria': 'page', 'selector_file': file_name})
-            else:
-                html_tab += a_templates['index_tab'].substitute(
-                    {'tab': tab1, 'active': '', 'aria': 'false', 'selector_file': file_name})
         html_tabs += a_templates['index_tabs'].substitute(
             {'tab': tab, 'tabs': html_tab, 'content': tabs_html_string})
     return html_tabs
@@ -221,8 +194,9 @@ def get_initials(item):
 
 def build_bootstrap_general(a_instance, a_course, a_results, a_templates, a_teachers, level_series, a_total_workload):
     l_semester_day = a_results.actual_day
-    tabs_html_string = build_bootstrap_students_tabs(a_instance, a_course, a_results, a_templates, level_series,
-                                                     a_total_workload)
+    menu_items = get_menu_items(a_instance, a_course)
+    menu_html_string = build_bootstrap_menu(a_instance, a_templates, menu_items)
+    left_panel_html_string = build_bootstrap_left_panel(a_instance, menu_items, a_course, a_results, a_templates, level_series, a_total_workload)
     teacher_html_string = ''
     for teacher in a_teachers:
         teacher_html_string += a_templates["coach"].substitute(
@@ -253,7 +227,8 @@ def build_bootstrap_general(a_instance, a_course, a_results, a_templates, a_teac
          'percentage': percentage,
          'roles_card': roles_card_html_string,
          'coaches_card': coaches_card_html_string,
-         'tabs_html_string': tabs_html_string})
+         'menu_html_string': menu_html_string,
+         'left_panel_html_string': left_panel_html_string})
 
     with open(a_instance.get_html_root_path() + 'index.html', mode='w', encoding="utf-8") as file_index:
         file_index.write(index_html_string)
