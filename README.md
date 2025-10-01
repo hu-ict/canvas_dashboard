@@ -37,7 +37,7 @@ Verder worden de attributen aangemaakt (gekopieerd uit `start.json`) en gegenere
 - Perspectiven
 - Rollen
 Dit bestand is ook weer een JSON-bestand met de naam `config_file_name` uit op basis van de `instance_name`.
-## Stap 3 handmatige aanpassingen
+## Stap 3 Configuratie handmatig aanpassen
 Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica.
 ### principal_assignment_group_id
 Dit attribuut welke docent de verantwoordelijke is van een `student_group` op basis van de `assignment_group`.
@@ -176,19 +176,7 @@ Bij de strategy `CONSTANT` is de waarde constant in de tijd. De constanten a en 
 
 Bij `POINTS` wordt de bandbreedte bepaald hoeveel punten er voor elk portfolio-item gehaald kan worden. Minder dan 55% in onder bandbreedte en boven 80% boven bandbreedte en dit cummulatief in de tijd. 
 
-## Stap 4b Verrijken groepen, rollen en docenten
-### Roles
-- Verwijder de niet relevante `roles`.
 
-Het id van de `assignment_groups` binnen de rollen vullen:
-```
-    {
-      "short": "AI",
-      "name": "AI - Engineer",
-      "btn_color": "btn-warning",
-      "assignment_groups": [62149]
-    },
-```
 ### sections
 Secties worden gebruikt voor de rol van een student of de klas- waarin de student zit.
 - Verwijder de niet relevante `secties`.
@@ -198,12 +186,21 @@ Secties worden gebruikt voor de rol van een student of de klas- waarin de studen
 Hier worden de `projects` en `assignment_groups` aan de `teachers` gekoppeld. 
 - `projects` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`. Als alternatief en makkelijker optie is om een uniek deel uit de naam van de project_group mee te geven. Bijvoorbeeld de klascode (PROP) `V1A`.
 - `assignment_groups` hebben ook een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`. Optioneel
+### project_groups
+Deze zijn al opgehaald uit Canvas. De volgende attributen moeten gevuld worden:
+nog aanvullen
+### guild_groups
+Deze zijn al opgehaald uit Canvas. De volgende attributen moeten gevuld worden:
+nog aanvullen
+### students
+Dit element wordt in `generate_student.py` verder ingevuld.
+## Stap 4 - upload config
+De configuratie is nu klaar, deze wordt in de `config-dot-json` Canvas pagina geplaatst. De configuratie wijzigd zeer weinig tijdens het lopen van de cursus.
 ## Stap 5 - Lees assignments
-Door het uitvoeren van het Python script `generate_course.py` wordt het json bestand `course_file_name` gemaakt. De assignments worden gelezen en aan het perspectief gekoppeld. De bandbreedte  (onder, op en boven niveau) wordt bepaald door de `strategy`. Stap 4a moet uitgevoerd zijn.
+Door het uitvoeren van het Python script `generate_course.py` wordt het json bestand `course_file_name` gemaakt. De assignments worden gelezen en aan het perspectief gekoppeld. De bandbreedte  (onder, op en boven niveau) wordt bepaald door de `strategy`.
 ## Stap 6 - Lees studenten
-Studenten worden uit Canvas gelezen. De project groepen en rollen worden gevuld. Docenten worden aan de juiste groepen gekoppeld. Start daarvoor het script: `generate_student.py`. Stap 4a, 4b en 5 moeten uitgevoerd zijn. Studenten die de cursus nog niet geaccepteerd hebben worden wél meegenomen in de studentenlijst, maar hebben nog geen login naam (email0 in Canvas.
-
-Wanneer de structuur van studenten en assigments niet wijzigd kunnen bij een snapshot stap 1 tm 6 overgeslagen worden.
+Studenten worden uit Canvas gelezen. De project groepen en rollen worden gevuld. Docenten worden aan de juiste groepen gekoppeld. Start daarvoor het script: `generate_student.py`. Stap 5, 4b moet uitgevoerd zijn. Studenten die de cursus nog niet geaccepteerd hebben worden wél meegenomen in de studentenlijst, maar hebben nog geen login naam (email) in Canvas.
+Wanneer de structuur en inhoud van studenten en assignments niet wijzigd kunnen bij een snapshot stap 5 en 6 overgeslagen worden.
 ## Stap 7 - Resultaten
 De volgende stap is de resultaten/submissions uitlezen uit Canvas. Er wordt intensief gebruik gemaakt van de Canvas-API. Hier zijn twee varianten beschikbaar:
 - `generate_results.py`
@@ -215,9 +212,10 @@ Als met attendance gewerkt wordt wordt het csv bestand ingelezen en gekoppeld aa
 - `late` 1 punt te laat (geen geldige reden)
 - `late` 2 punten te laat (geldige reden)
 - `present` 2 punten aanwezig
-
 ## Stap 8 - Dashboard
-Genereer de visuals:
+Genereer het docenten overzicht
+- `generate_dashboard.py`
+Genereer de overzichten van de studenten:
 - `generate_plotly.py`
 - `generate_dashboard.py`
 ## Stap 9 - Publiceren
@@ -225,7 +223,6 @@ Kopieer files naar de teams oneDrive voor docenten
 - `publish_dashboard.py`
 Kopieeer de JPG en HTML naar het private channel van de student
 - `publish_student_files.py`
-
 Bovenstaande stappen kunnen ook gemodelleerd worden met de 
 - `runner.py`
 # Werken met MSTeams kanalen
