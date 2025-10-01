@@ -20,9 +20,9 @@ Hier worden attributen in JSON formaat opgegeven:
   "target_path": "onedrive of ander target pad invullen",
   "attendance_report": null
 }
-- De `api_key` en 'target_path' worden aangepast.
 ```
-Als attendance gebruikt vul je de lokatie van de 'attendance_report.csv' in bijvoorbeeld:
+- De `api_key` en 'target_path' worden aangepast.
+- Als attendance gebruikt vul je de lokatie van de 'attendance_report.csv' in bijvoorbeeld:
 ```json
   "attendance_report": ".//courses//TICT-V1SE1-24_FEB2025//attendance_report.csv"
 ```
@@ -37,46 +37,125 @@ Verder worden de attributen aangemaakt (gekopieerd uit `start.json`) en gegenere
 - Perspectiven
 - Rollen
 Dit bestand is ook weer een JSON-bestand met de naam `config_file_name` uit op basis van de `instance_name`.
-### 
+## Stap 3 handmatige aanpassingen
 Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica.
+### principal_assignment_group_id
+Dit attribuut welke docent de verantwoordelijke is van een `student_group` op basis van de `assignment_group`.
+```json
+"principal_assignment_group_id": 0,
+```
 ### sections
-- Verwijder de niet relevante `section` elementen of voeg er toe.
+- Verwijder de niet relevante `section` elementen.
+### attendance
+```
+"attendance": {
+"name": "attendance",
+"title": "Aanwezigheid",
+"levels": "attendance",
+"show_points": true,
+"show_flow": false,
+"strategy": "ATTENDANCE",
+"total_points": 100,
+"lower_points": 75,
+"upper_points": 90,
+"policy": {
+  "starting_days": [
+    1
+  ],
+  "recurring": "WEEKLY",
+  "times": 20,
+  "exceptions": [
+    3,
+    12,
+    19,
+    20
+  ]
+},
+```
+### level_moments
+```
+  "level_moments": {
+    "name": "level_moments",
+    "title": "Peilmomenten",
+    "levels": "progress",
+    "moments": [
+      "Peilmoment 1",
+      "Peilmoment 2"
+    ],
+    "assignment_groups": []
+  },
+```
+### grade_moments
+```
+  "grade_moments": {
+    "name": "grade_moments",
+    "title": "Beoordelingsmomenten",
+    "levels": "grade",
+    "moments": [
+      "Beoordeling"
+    ],
+    "assignment_groups": []
+  },
+```
 ### perspectives
 - Verwijder de niet relevante `perspective` elementen of voeg er toe.
 ```
-    "portfolio": {
-      "name": "portfolio",
-      "title": "Portfolio",
-      "show_points": false,
-      "show_flow": true,
-      "total_points": 0,
-      "assignment_group_ids": [],
-      "assignment_sequences": [],
-      "bandwidth": {
-        "points": []
-      }
-    }
+"portfolio": {
+  "name": "portfolio",
+  "title": "Portfolio",
+  "show_points": false,
+  "show_flow": true,
+  "total_points": 0,
+  "assignment_group_ids": [],
+  "assignment_sequences": [],
+  "bandwidth": {
+    "points": []
+  }
+}
 ```
 - Bepaal of er punten getoond moeten worden met `show_points` in het dashboard en of de voortgang als `show_flow` wordt getoond.
 - Elke `assignment_group` onder in de json heeft een `id` vanuit Canvas meegekregen, deze worden in de lijst aan het element `assignment_group_ids`.
 - Het attribuut `total_points` en de elementen `assignment_sequences` en `bandwidth` worden later bepaald in het script `generate_course.py`.
+### learning_outcomes
+### roles
+- Verwijder de niet relevante `roles`.
+Het id van de `assignment_groups` binnen de rollen vullen idien relevant:
 ```
-### AssignmentGroups
-- Verwijder de niet relevante `assignment_group`.
-- controlleer de `total_points`
-- vul de `lower_points` en de `upper_points` voor de bandbreedte (onder niveau en boven niveau)
-  `teachers`, `roles` en `assignments` wordt later automatisch gevuld,
+{
+  "short": "AI",
+  "name": "AI - Engineer",
+  "btn_color": "btn-warning",
+  "assignment_groups": [62149]
+},
 ```
-"strategy": "EXP_POINTS",
-"upper_c": 4,
-"lower_c": -1,
-"total_points": 89,
-"lower_points": 44,
-"upper_points": 56,
+### teachers
+- Verwijder de niet relevante `teacher` elementen.
+### assignment_groups
+- Verwijder de niet relevante `assignment_group` elementen.
 ```
+{
+  "name": "Project",
+  "id": 92883,
+  "groups": "project",
+  "role": "Iedereen",
+  "strategy": "EXP_POINTS",
+  "lower_c": 1,
+  "upper_c": 7,
+  "total_points": 114.0,
+  "lower_points": 58,
+  "upper_points": 74,
+  "levels": "samen",
+  "assignment_sequences": [],
+  "bandwidth": []
+}
+```
+- Vul de `lower_points` en de `upper_points` voor de bandbreedte (onder niveau en boven niveau). Indien nodig ook `lower_c` en `up
+- Het elementen `total_points`, `bandwidth` en `assignment_sequences` wordt later automatisch gevuld door het scrip `generate_course.py`,
+
 Binnen een `assignment_group` hebben we `assignments`, deze kunnen gebudeld worden d.m.v. `assignment_sequence`. Dit wordt gebundeld op basis van een hashtag in de opdracht naam.
+### 
 - `strategy` kent meerdere opties: `NONE`, `EXP_POINTS`, `LIN_POINTS`, `POINTS`, `LINEAIR`, `EXPONENTIAL`, `CONSTANT`, `FIXED`, `ATTENDANCE`.
-### Strategy
+
 De strategiën `EXP_POINTS`, `LIN_POINTS`, `POINTS` en `CONSTANT` worden het meest gebruikt. De strategie `ATTENDANCE` lijkt veel op `CONSTANT`.
 
 Met de constanten `lower_points` en `upper_points` worden de einddoelen van de onderwijseenheid bepaald. Wanneer de student onder `lower_points` scoort heeft de student niet het verwachtte niveau en zal het perspectief niet halen. Wanneer de student boven `upper_points` scoort gaat deze het boven niveau het perspectief afronden. Daar tussen in wordt het op niveau. Deze einddoelen worden volgens een bepaalde strategie terug geinterpoleerd, daardoor ontstaat er een bandbreedte in de tijd.
@@ -110,11 +189,11 @@ Het id van de `assignment_groups` binnen de rollen vullen:
       "assignment_groups": [62149]
     },
 ```
-### Secties
+### sections
 Secties worden gebruikt voor de rol van een student of de klas- waarin de student zit.
 - Verwijder de niet relevante `secties`.
 - Verrijk een sectie met de `role`, dit is de short name van de `role` uit de `roles` lijst in deze json.
-### Teachers
+### teachers
 - Verwijder de niet relevante `teachers`.
 Hier worden de `projects` en `assignment_groups` aan de `teachers` gekoppeld. 
 - `projects` hebben een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `teacher`. Als alternatief en makkelijker optie is om een uniek deel uit de naam van de project_group mee te geven. Bijvoorbeeld de klascode (PROP) `V1A`.
