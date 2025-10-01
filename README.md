@@ -7,164 +7,59 @@ Er wordt gebruik gemaakt van verschillende stappen om tot het dashboard te komen
 ## Stap 1 - Genereren nieuwe instance (tenant)
 Om een nieuwe course omgeving te maken:
 - run het Python script `generate_start.py`
-Gebruik wordt gemaakt van het `course_instances.json`. Als dit bestand nog niet bestaat wordt deze gemaakt in de directory `.\courses`
-
-Er wordt gevraagd naar een naam van de `instance` bijvoorbeeld `inno-sep24`. De `category` moet opgegeven worden, bijvoorbeeld `inno_courses`. Geef ook het `canvas_course_id` op.
+Gebruik wordt gemaakt van het `course_instances.json`. Als dit bestand nog niet bestaat wordt deze gemaakt in de directory `.\courses`. Er wordt gevraagd naar een naam van de `instance` bijvoorbeeld `inno-sep24`. Deze naam wordt alleen lokaal grbuikt. De `category` moet opgegeven worden, bijvoorbeeld `inno_courses`. Geef ook het `canvas_course_id` op.
 Hier worden attributen in JSON formaat opgegeven:
 ```json 
 {
-  "api_key": "api-key",
-  "canvas_course_id": "44847",
-  "progress_levels": "progress",
-  "grade_levels": "grade",
-  "projects_groep_name": "Project Groups",
-  "slb_groep_name": "SLB Groep",
-  "start_date": "2024-09-02T00:00:00Z",
-  "end_date": "2025-01-31T23:59:59Z",
-  "target_path": "C://Users//berend.wilkens//OneDrive - Stichting Hogeschool Utrecht//General//dashboard//",
-  "target_slb_path": "C://Users//berend.wilkens//Stichting Hogeschool Utrecht//INNO - SLB - General//INNO dashboard - SLB//",
-  "attendance_report": ".//courses//sep24_inno//attendance_report.csv",
-  "level_moments": {
-      "name": "level_moments",
-      "title": "Peilmomenten",
-      "levels": "progress",
-      "moments": ["Sprint 4", "Sprint 7", "Beoordeling"],
-      "assignment_groups": [
-      ]
-  }
-  "perspectives": {
-    "team": {
-      "name": "team",
-      "levels": "samen",
-      "show_points": false
-    },
-    "gilde": {
-      "name": "gilde",
-      "levels": "samen5",
-      "show_points": false
-    },
-    "kennis": {
-      "name": "kennis",
-      "levels": "niveau",
-      "show_points": true
-    }
-  },
-  "roles": [
-    {
-      "short": "AI",
-      "name": "AI - Engineer",
-      "btn_color": "btn-warning",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "BIM",
-      "name": "Business Analist",
-      "btn_color": "btn-success",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "CSC-C",
-      "name": "Cloud",
-      "btn_color": "btn-light",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "CSC_S",
-      "name": "Security",
-      "btn_color": "btn-danger",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "SD_B",
-      "name": "Back-end developer",
-      "btn_color": "btn-dark",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "SD_F",
-      "name": "Front-end developer",
-      "btn_color": "btn-primary",
-      "assignment_groups": [],
-      "students": []
-    },
-    {
-      "short": "TI",
-      "name": "Embedded - Engineer",
-      "btn_color": "btn-info",
-      "assignment_groups": [],
-      "students": []
-    }
-  ]
+  "api_key": "canvas_api_key invullen",
+  "canvas_course_id": "50304",
+  "project_group_name": "Project Groups",
+  "guild_group_name": "Guild Groups",
+  "start_date": "2025-09-01T00:00:00Z",
+  "end_date": "2026-01-30T23:59:59Z",
+  "target_path": "onedrive of ander target pad invullen",
+  "attendance_report": null
 }
+- De `api_key` en 'target_path' worden aangepast.
 ```
-Als attendance gebruikt wordt kan het volgende stukje JSON toegevoegd worden:
+Als attendance gebruikt vul je de lokatie van de 'attendance_report.csv' in bijvoorbeeld:
 ```json
-  "attendance": {
-    "name": "attendance",
-    "title": "Aanwezigheid",
-    "show_points": true,
-    "show_flow": false,
-    "assignment_groups": [74430],
-    "levels": "attendance",
-    "policy": {
-      "starting_days": [1],
-      "recurring": "WEEKLY",
-      "times": 19,
-      "exception": [9, 17, 18]
-    }
-  },
+  "attendance_report": ".//courses//TICT-V1SE1-24_FEB2025//attendance_report.csv"
 ```
-  
-## Stap 2 - Aanpassen start.json
-Ontwerp de perspectieven en rollen door de `start.json` aan te passen.
-## Stap 3 - Genereren configuratie
+De start.json is nu klaar.
+## Stap 2 - Genereren configuratie
 Door het uitvoeren van het Python script `generate_config.py`. De Canvas API wordt aangeroepen om de structuur van Canvas uit te lezen.
 - Canvas secties (Sections)
 - Opdrachtgroepen (AssignmentGroups)
 - Projectgroepen (
 - Docenten (Users)
-
-Verder worden de attributen aangemaakt (gekopieerd uit `start.json`):
+Verder worden de attributen aangemaakt (gekopieerd uit `start.json`) en gegenereerd uit de (template) code op basis van de instance category:
 - Perspectiven
 - Rollen
-  
-Dit bestand is ook weer een JSON-bestand met de naam `config_file_name` uit `start.json`
-## Stap 4a - Verrijken config perspectieven
+Dit bestand is ook weer een JSON-bestand met de naam `config_file_name` uit op basis van de `instance_name`.
+### 
 Het `config_file_name` bestand moet verrijkt worden met extra gegevens en logica.
-### Perspectives
-- Verwijder de niet relevante `perspectives` of voeg er toe.
-- Bepaal welke `levels` gebruikt worden, dit is een koppeling met de niveaus in het `levels.json` bestand.
-- Bepaal of er punten getoond moeten worden met `show_points` in het dashboard.
-- `assignment_group` heeft een `id` vanuit Canvas meegekregen, deze worden in de lijst toegevoegd per `perspective`.
+### sections
+- Verwijder de niet relevante `section` elementen of voeg er toe.
+### perspectives
+- Verwijder de niet relevante `perspective` elementen of voeg er toe.
 ```
-"perspectives": {
-  "team": {
-  "name": "team",
-  "levels": "samen",
-  "show_points": false,
-  "show_flow: true,
-  "assignment_groups": [73974]
-},
-"gilde": {
-  "name": "gilde",
-  "levels": "samen5",
-  "show_points": false,
-  "show_flow: true,
-  "assignment_groups": [73983]
-},
-"kennis": {
-  "name": "kennis",
-  "levels": "niveau",
-  "show_points": true,
-  "show_flow: true,
-  "assignment_groups": [73113]
-}
-
+    "portfolio": {
+      "name": "portfolio",
+      "title": "Portfolio",
+      "show_points": false,
+      "show_flow": true,
+      "total_points": 0,
+      "assignment_group_ids": [],
+      "assignment_sequences": [],
+      "bandwidth": {
+        "points": []
+      }
+    }
+```
+- Bepaal of er punten getoond moeten worden met `show_points` in het dashboard en of de voortgang als `show_flow` wordt getoond.
+- Elke `assignment_group` onder in de json heeft een `id` vanuit Canvas meegekregen, deze worden in de lijst aan het element `assignment_group_ids`.
+- Het attribuut `total_points` en de elementen `assignment_sequences` en `bandwidth` worden later bepaald in het script `generate_course.py`.
 ```
 ### AssignmentGroups
 - Verwijder de niet relevante `assignment_group`.
