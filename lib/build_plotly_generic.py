@@ -14,7 +14,6 @@ def plot_bandbreedte_colored(a_row, a_col, a_fig, a_days, a_bandwidth, a_flow, a
         band_max = calc_dev(a_days, 0, 0, 0, 1)
         l_days = calc_dev(a_days, 0, 0, 1, 0)
     else:
-        band_min = calc_dev(a_days, 0, 0, 0, 0)
         band_upper = a_bandwidth.get_uppers()
         band_lower = a_bandwidth.get_lowers()
         band_max = calc_dev(a_days, 0, 0, 0, a_total_points)
@@ -49,7 +48,7 @@ def plot_bandbreedte_colored(a_row, a_col, a_fig, a_days, a_bandwidth, a_flow, a
     )
     if a_row == 0:
         pass
-        # mone graph
+        # mono graph
         a_fig.add_trace(boven_niveau)
         a_fig.add_trace(op_niveau)
         a_fig.add_trace(onder_niveau)

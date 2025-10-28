@@ -1,0 +1,61 @@
+from lib.file import read_start, read_course, read_course_instances
+from lib.lib_date import get_actual_date
+import sys
+
+import csv
+
+class UserDictAdapter:
+    def __init__(self, a_course_id, a_course_name, a_start_date, a_end_date, a_name, a_email, a_role):
+        self.canvas_course_id = a_course_id
+        self.course_name = a_course_name
+        self.start_date = a_start_date
+        self.end_date = a_end_date
+        self.name = a_name
+        self.email = a_email
+        self.role = a_role
+
+    def to_dict(self):
+        return {
+            "canvas_course_id": self.canvas_course_id,
+            "course_name": self.course_name,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "user_name": self.name,
+            "user_email": self.email,
+            "user_role": self.role
+        }
+
+
+def generate_results(instance_name):
+    print("GR01 - generate_user_data.py")
+    g_actual_date = get_actual_date()
+    instances = read_course_instances()
+    if len(instance_name) > 0:
+        instances.current_instance = instance_name
+    instance = instances.get_instance_by_name(instances.current_instance)
+    print("GR02 - Instance:", instance.name)
+    start = read_start(instance.get_start_file_name())
+    course = read_course(instance.get_course_file_name())
+    user_data = list()
+    for student in course.students:
+        user = UserDictAdapter(start.canvas_course_id, course.name, start.start_date, start.end_date, student.name, student.email, "STUDENT")
+        user_data.append(user)
+    for teachers in course.teachers:
+        user = UserDictAdapter(start.canvas_course_id, course.name, start.start_date, start.end_date, teachers.name, teachers.email, "TEACHER")
+        user_data.append(user)
+    with open("user_data.csv", mode="w", newline="", encoding="utf-8") as bestand:
+        veldnamen = ["canvas_course_id", "course_name", "start_date", "end_date", "user_name", "user_email", "user_role"]
+        csv_file = csv.DictWriter(bestand, fieldnames=veldnamen)
+        csv_file.writeheader()
+        for user in user_data:
+            csv_file.writerow(user.to_dict())
+
+    print("GR99 Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
+
+
+if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding='utf-8')
+    if len(sys.argv) > 1:
+        generate_results(sys.argv[1])
+    else:
+        generate_results("")

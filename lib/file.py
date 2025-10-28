@@ -67,7 +67,13 @@ def read_results(result_file_name):
         return result
 
 
-def read_progress(progress_file_name):
+def write_results(result_file_name, results):
+    with open(result_file_name, 'w', encoding='utf-8') as f:
+        dict_result = results.to_json()
+        json.dump(dict_result, f, indent=2, ensure_ascii=False)
+
+
+def read_progress_history(progress_file_name):
     print("F007 - read_progress", progress_file_name)
     if os.path.isfile(progress_file_name):
         with open(progress_file_name, mode='r', encoding="utf-8") as file_progress:
@@ -80,6 +86,12 @@ def read_progress(progress_file_name):
             dict_result = progress_history.to_json()
             json.dump(dict_result, file_progress, indent=2)
         return progress_history
+
+
+def write_progress_history(progress_file_name, progress_history):
+    with open(progress_file_name, 'w') as f:
+        dict_result = progress_history.to_json()
+        json.dump(dict_result, f, indent=2)
 
 
 def read_workload(workload_file_name):

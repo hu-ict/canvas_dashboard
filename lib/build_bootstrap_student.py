@@ -14,17 +14,18 @@ def get_comments_html(comments):
     return comments_html_string
 
 
-def get_feedback_list_html(feedback_list, templates):
+def get_feedback_list_html(course, student_id, feedback_list, templates):
     feedback_list_html_string = ""
     for feedback in feedback_list:
+        url = "https://canvas.hu.nl/courses/" + str(course.canvas_id) + "/gradebook/speed_grader?assignment_id=" + str(feedback.assignment_id) + "&student_id=" + str(student_id)
+
         feedback_list_html_string += templates['feedback'].substitute({
             "date": get_date_time_loc(feedback.date),
             "author_name": feedback.author_name,
-            "author_id": feedback.author_id,
             "comment": feedback.comment,
-            "url": "",
+            "url": url,
             "assignment_name": feedback.assignment_name,
-            "submission_id": feedback.submission_id,
+            "assignment_id": feedback.assignment_id,
             "grade": feedback.grade
         })
     return feedback_list_html_string
@@ -385,15 +386,14 @@ def build_bootstrap_feedback(course, student_results, templates, level_serie_col
         {
             'learning_outcome_short': "Algemene feedback",
             'learning_outcome_id': "AF",
-            'feedback_rows': get_feedback_list_html(student_results.general_feedback_list, templates)
+            'feedback_rows': get_feedback_list_html(course, student_results.id, student_results.general_feedback_list, templates)
         })
     for learning_outcome in student_results.learning_outcomes:
         student_feedback_html_string += templates['learning_outcome_feedback'].substitute(
             {
                 'learning_outcome_short': student_results.learning_outcomes[learning_outcome].short,
                 'learning_outcome_id': student_results.learning_outcomes[learning_outcome].id,
-                'feedback_rows': get_feedback_list_html(
-                    student_results.learning_outcomes[learning_outcome].feedback_list, templates)
+                'feedback_rows': get_feedback_list_html(course, student_results.id, student_results.learning_outcomes[learning_outcome].feedback_list, templates)
             })
 
     # for perspective in student_results.perspectives.values():
@@ -421,7 +421,6 @@ def build_bootstrap_student_index(instance, course_id, course, student_results, 
         project_group_name = project_group.name
     else:
         project_group_name = "leeg"
-
     guild_group_name = ""
     guild_group = course.find_guild_group(student.guild_id)
     if guild_group is not None:

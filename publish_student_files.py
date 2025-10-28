@@ -32,13 +32,13 @@ def main(instance_name):
             student_name = l_student.email.split("@")[0].lower()
             source_filename = student_name + "_progress.jpg"
 
-            upload_file_to_onedrive(msteams_api.gen_token, l_student.name, l_student.site, instance.get_student_path(),
+            upload_file_to_onedrive(msteams_api.gen_token, student_name, l_student.site, instance.get_student_path(),
                                     source_filename)
             # source_filename = l_student.name + "_progress.html"
             # upload_file_to_onedrive(msteams_api.my_token, l_student.name, l_student.site, instance.get_student_path(),
             #                         source_filename)
             source_filename = student_name + "_index.html"
-            upload_file_to_onedrive(msteams_api.gen_token, l_student.name, l_student.site, instance.get_student_path(),
+            upload_file_to_onedrive(msteams_api.gen_token, student_name, l_student.site, instance.get_student_path(),
                                     source_filename)
         else:
             print("PS04 MSTeams channel not defined (site)")

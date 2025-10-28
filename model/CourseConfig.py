@@ -128,6 +128,7 @@ class CourseConfig:
         for group in self.project_groups:
             if group_name in group.name:
                 return group
+        print("CCF21 - find_project_group_by_name", group_name)
         return None
 
     def find_guild_group_by_name(self, group_name):

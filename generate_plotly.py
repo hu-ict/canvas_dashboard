@@ -52,7 +52,7 @@ def grade_construct(a_course):
 def plot_student(instances, course, student, actual_date, actual_day,
                  a_level_construction, a_grade_construction,
                  subplots,
-                 level_serie_collection):
+                 level_serie_collection, feedback_colors):
     fig = make_subplots(rows=subplots.rows, cols=subplots.cols, subplot_titles=subplots.titles, specs=subplots.specs, vertical_spacing=0.10,
                         horizontal_spacing=0.08)
 
@@ -78,7 +78,7 @@ def plot_student(instances, course, student, actual_date, actual_day,
     if "timeline" in subplots.positions:
         row = subplots.positions["timeline"]['row']
         col = subplots.positions["timeline"]['col']
-        plot_timeline(row, col, fig, course, student, actual_day, get_date_time_loc(actual_date), level_serie_collection)
+        plot_timeline(row, col, fig, course, student, actual_day, get_date_time_loc(actual_date), level_serie_collection, feedback_colors)
 
     # if instances.is_instance_of('courses_2026'):
         # for level_moment in course.level_moments.moments:
@@ -193,7 +193,7 @@ def generate_plotly(instance_name):
         plot_student(instance, course, student, results.actual_date, results.actual_day,
                      l_level_construction, l_grade_construction,
                      dashboard.subplot,
-                     dashboard.level_serie_collection)
+                     dashboard.level_serie_collection, dashboard.feedback_colors)
 
     print("GPL99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 

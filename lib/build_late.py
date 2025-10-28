@@ -51,6 +51,7 @@ def build_bootstrap_teacher_index(a_instance, a_templates, a_course, a_result, a
         for responsibility in teacher.responsibilities:
             if responsibility.student_group_collection == "project_groups":
                 for student_group_name in responsibility.student_groups:
+                    # print("BL31 - student_group_name", student_group_name)
                     group_name = a_course.find_project_group_by_name(student_group_name).name
                     assignment_group = a_course.get_assignment_group(responsibility.assignment_group_id)
                     if group_name in groups["Projectgroepen"]:

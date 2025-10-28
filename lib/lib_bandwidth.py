@@ -223,7 +223,7 @@ def get_bandwidth_sum(course, assignment_group_ids):
         assignment_group = course.get_assignment_group(assignment_group_id)
         assignment_groups.append(assignment_group)
     bandwidth = Bandwidth()
-    for day in range(course.days_in_semester):
+    for day in range(course.days_in_semester+1):
         new_point = Point(day, 0, 0)
         for assignment_group in assignment_groups:
             point = assignment_group.bandwidth.points[day]

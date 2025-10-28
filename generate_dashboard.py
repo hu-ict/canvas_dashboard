@@ -12,7 +12,8 @@ from lib.build_bootstrap import build_bootstrap_general
 from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_actual_date, API_URL
 from lib.plot_totals import plot_werkvoorraad, plot_voortgang, plot_overall_opbouw
-from lib.file import read_course, read_results, read_progress, read_course_instances, read_workload, read_start, read_dashboard_from_canvas
+from lib.file import read_course, read_results, read_course_instances, read_workload, read_start, \
+    read_dashboard_from_canvas, read_progress_history
 from model.workload.WorkloadDay import WorkloadDay
 
 
@@ -74,7 +75,7 @@ def generate_dashboard(instance_name):
         dict_result = total_progress
         json.dump(dict_result, f, indent=2)
     print("GD10 - Generate voortgang")
-    plot_voortgang(instance, course, total_progress, read_progress(instance.get_progress_file_name()),
+    plot_voortgang(instance, course, total_progress, read_progress_history(instance.get_progress_file_name()),
                    dashboard.level_serie_collection.level_series['progress'], dashboard.level_serie_collection.level_series['grade'])
 
     print("GD99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")

@@ -3,14 +3,19 @@ from canvasapi import Canvas
 import json
 
 from generate_progress import proces_progress
-from lib.file import read_start, read_course, read_course_instances, read_progress, read_dashboard_from_canvas
+from lib.file import read_start, read_course, read_course_instances, read_dashboard_from_canvas, \
+    write_results, write_progress_history, read_progress_history
 from lib.lib_attendance import read_attendance
+from lib.lib_feedback import get_feedback_from_submission
 from lib.lib_submission import count_graded, add_missed_assignments, read_submissions, add_open_level_moments, \
-    add_open_grade_moments, get_feedback_from_submission
+    add_open_grade_moments
 from model.Result import *
 from lib.lib_date import get_actual_date, API_URL, date_to_day
 from model.StudentResults import StudentResults
 from model.learning_outcome.Feedback import Feedback
+
+
+import sys
 
 
 def generate_results(instance_name):
@@ -74,6 +79,7 @@ def generate_results(instance_name):
                                                          key=lambda s: s.assignment_day)
             perspective.submission_sequences = sorted(perspective.submission_sequences, key=lambda s: s.get_day())
 
+    # Feedback comments naar leeruitkomsten
     for student in results.students:
         # print("GRE81 -", student.name)
         for student_perspective in student.perspectives.values():
@@ -91,7 +97,7 @@ def generate_results(instance_name):
     # with open(instances.get_result_file_name(instances.current_instance), 'w') as f:
     #     dict_result = results.to_json(["perspectives"])
     #     json.dump(dict_result, f, indent=2)
-    progress_history = read_progress(instance.get_progress_file_name())
+    progress_history = read_progress_history(instance.get_progress_file_name())
     proces_progress(course, results, progress_history)
     # progress_history = generate_history(results)
 
@@ -100,22 +106,18 @@ def generate_results(instance_name):
         # print("GR41 -", student.name)
         student_name = student.email.split("@")[0].lower()
         file_name_json = instance.get_student_path() + student_name + ".json"
-        with open(file_name_json, 'w') as f:
+        with open(file_name_json, 'w', encoding='utf-8') as f:
             dict_result = student.to_json()
             json.dump(dict_result, f, indent=2)
 
-    with open(instance.get_result_file_name(), 'w') as f:
-        dict_result = results.to_json()
-        json.dump(dict_result, f, indent=2)
-
-    with open(instance.get_progress_file_name(), 'w') as f:
-        dict_result = progress_history.to_json()
-        json.dump(dict_result, f, indent=2)
+    write_results(instance.get_result_file_name(), results)
+    write_progress_history(instance.get_progress_file_name(), progress_history)
 
     print("GR99 Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding='utf-8')
     if len(sys.argv) > 1:
         generate_results(sys.argv[1])
     else:

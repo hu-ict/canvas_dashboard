@@ -11,6 +11,7 @@ from lib.lib_plotly import get_marker_size, hover_style
 from model.Submission import Submission
 from model.perspective.Status import BEFORE_DEADLINE
 
+
 def find_submissions(a_student, a_peil_construction):
     if a_peil_construction is None:
         return
@@ -396,16 +397,16 @@ def plot_perspective(a_row, a_col, a_fig, a_course, a_student_perspective, a_lev
                             a_level_serie_collection)
 
 
-def plot_timeline(a_row, a_col, a_fig, a_course, a_student, a_actual_day, a_actual_date, a_level_serie_collection):
+def plot_timeline(a_row, a_col, a_fig, a_course, a_student, a_actual_day, a_actual_date, a_level_serie_collection, a_feedback_colors):
     a_fig.update_yaxes(title_text="Leeruitkomsten",
                        # range=[0, len(a_student.learning_outcomes)+1],
                        row=a_row, col=a_col)
-    plot_timeline_gf(a_row, a_col, a_fig, a_course, a_student.general_feedback_list, a_level_serie_collection)
+    plot_timeline_gf(a_row, a_col, a_fig, a_course, a_student.general_feedback_list, a_feedback_colors)
     learning_outcomes_list = list(a_student.learning_outcomes.values())
     learning_outcomes_list = sorted(learning_outcomes_list, key=lambda x: x.id.lower(), reverse=True)
     for timeline_lu in learning_outcomes_list:
         # print("BPP11 -", timeline_lu)
-        plot_timeline_lu(a_row, a_col, a_fig, a_course, timeline_lu, a_level_serie_collection)
+        plot_timeline_lu(a_row, a_col, a_fig, a_course, timeline_lu, a_feedback_colors)
 
     assignment_group = a_course.get_assignment_group(a_course.level_moments.assignment_group_ids[0])
     moments = []
@@ -471,11 +472,12 @@ def plot_timeline_moments(a_row, a_col, a_fig, a_course, a_submission_list, a_le
         row=a_row, col=a_col
     )
 
-def plot_timeline_gf(a_row, a_col, a_fig, a_course, a_feedback_list, a_level_serie_collection):
+
+def plot_timeline_gf(a_row, a_col, a_fig, a_course, a_feedback_list, a_feedback_colors):
     x_feedback = [0]
     y_feedback = ["AF<br>Algemene feedback"]
     y_hover = ['<b>Start</b> '+get_date_time_loc(a_course.start_date)]
-    y_colors = [a_level_serie_collection.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).color]
+    y_colors = [a_feedback_colors["N"]["color"]]
     y_size = [get_marker_size(False)]
     cum_score = 0
     for feedback in a_feedback_list:
@@ -483,7 +485,7 @@ def plot_timeline_gf(a_row, a_col, a_fig, a_course, a_feedback_list, a_level_ser
         x_feedback.append(feedback.day)
         y_feedback.append("AF<br>Algemene feedback")
         y_hover.append(get_hover_feedback("Dialoog", feedback))
-        y_colors.append(a_level_serie_collection.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).color)
+        y_colors.append(a_feedback_colors["N"]["color"])
     a_fig.add_trace(
         go.Scatter(
             x=x_feedback,
@@ -506,18 +508,18 @@ def plot_timeline_gf(a_row, a_col, a_fig, a_course, a_feedback_list, a_level_ser
     )
 
 
-def plot_timeline_lu(a_row, a_col, a_fig, a_course, a_timeline_lu, a_level_serie_collection):
+def plot_timeline_lu(a_row, a_col, a_fig, a_course, a_timeline_lu, a_feedback_colors):
     x_feedback = [0]
     y_feedback = [a_timeline_lu.id+"<br>"+a_timeline_lu.short]
     y_hover = ['<b>Start</b> '+get_date_time_loc(a_course.start_date)]
-    y_colors = [a_level_serie_collection.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).color]
+    y_colors = [a_feedback_colors['N']["color"]]
     y_size = [get_marker_size(False)]
     for feedback in a_timeline_lu.feedback_list:
         y_size.append(get_marker_size(True))
         x_feedback.append(feedback.day)
         y_feedback.append(a_timeline_lu.id+"<br>"+a_timeline_lu.short)
         y_hover.append(get_hover_feedback("Observatie", feedback))
-        y_colors.append(a_level_serie_collection.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).color)
+        y_colors.append(a_feedback_colors[feedback.positive_neutral_negative]["color"])
     a_fig.add_trace(
         go.Scatter(
             x=x_feedback,

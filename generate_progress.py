@@ -1,9 +1,9 @@
 import sys
-from lib.lib_progress import get_overall_progress, get_attendance_progress, proces_progress
+from lib.lib_progress import get_overall_progress, proces_progress
 import json
-from lib.file import read_start, read_course, read_progress, read_results, read_course_instances
+from lib.file import read_course, read_results, read_course_instances, read_progress_history
 from lib.lib_date import get_actual_date
-from lib.lib_progress import get_progress, flow_to_progress
+from lib.lib_progress import flow_to_progress
 from model.ProgressDay import ProgressDay
 from model.ProgressHistory import ProgressHistory
 
@@ -38,7 +38,7 @@ def main(instance_name):
     print("GP02 - Instance:", instance.name)
     course = read_course(instance.get_course_file_name())
     results = read_results(instance.get_result_file_name())
-    progress_history = read_progress(instance.get_progress_file_name())
+    progress_history = read_progress_history(instance.get_progress_file_name())
 
     # progress_history = generate_history(results)
     proces_progress(course, results, progress_history)

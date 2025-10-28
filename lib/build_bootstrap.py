@@ -14,12 +14,16 @@ def build_student_button(instance, role, student, templates, level_serie_collect
         l_progress_color = level_serie_collection.level_series['progress'].grades[str(student.progress)].color
     else:
         l_progress_color = level_serie_collection.level_series['progress'].grades[str(-1)].color
+    bof_count = 0
+    for learning_outcome in student.learning_outcomes.values():
+        bof_count += len(learning_outcome.feedback_list)
     return templates['student'].substitute(
         {'btn_color': color,
          'progress_color': l_progress_color,
          'student_name': student.name,
          'student_number': student.number,
          'student_role': role.name,
+         'bof_count': bof_count,
          'frame_right': index_file_name
          })
 

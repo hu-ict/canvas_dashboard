@@ -6,6 +6,7 @@ from canvasapi import Canvas
 from lib.lib_bandwidth import bandwidth_builder, bandwidth_builder_attendance, get_bandwidth_sum
 from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
 from lib.file import read_start, read_course_instances, read_config_from_canvas
+from lib.lib_text import get_extracted_text
 from model.Assignment import Assignment
 from model.Criterion import Criterion
 from model.Rating import Rating
@@ -19,30 +20,6 @@ def get_tags(name):
         str = str[:-1]
     tags = str.split()
     return tags
-
-
-def get_and_remove_at_sign_words(text):
-    text_lu_result = []
-    text_parts = []
-    # print("GC31 -", text)
-    if text.count("@") > 1:
-        text_part_list = text.strip().split("@")
-        for text_part in text_part_list:
-            if len(text_part) > 0 and text_part[0] != "@":
-                text_parts.append("@" + text_part)
-    else:
-        text_parts.append(text)
-    # print("GC32 -", text_parts)
-    for text_part in text_parts:
-        # print("GC33 -", text_part)
-        # Vind alle woorden die beginnen met @
-        at_sign_words = [woord[1:] for woord in re.findall(r'@\w+', text_part)]
-        # Verwijder deze woorden inclusief eventuele spatie ervoor
-        aangepaste_tekst = re.sub(r'\s?@\w+', '', text_part)
-        # Extra spaties opruimen
-        aangepaste_tekst = re.sub(r'\s+', ' ', aangepaste_tekst).strip()
-        text_lu_result.append({"lu": at_sign_words[0], "comment": aangepaste_tekst})
-    return text_lu_result
 
 
 def get_dates(config, canvas_object):
@@ -304,7 +281,9 @@ def generate_course(instance_name):
                 for assignment in assignment_sequence.assignments:
                     print("GC71 -", assignment.name)
                     if "@" in assignment.name:
-                        assignment.learning_outcomes, assignment.name = get_and_remove_at_sign_words(assignment.name)
+                        feedback_list = get_extracted_text(assignment.name)
+                        assignment.learning_outcomes.append(feedback_list[0]["lu"])
+                        assignment.name = feedback_list[0]["text"]
                         print("GC72 -", assignment.name, assignment_sequence.learning_outcomes)
                         for lu in assignment.learning_outcomes:
                             learning_outcome = config.find_learning_outcome(lu)
@@ -315,7 +294,9 @@ def generate_course(instance_name):
                     for criterium in assignment.rubrics:
                         print("GC82 -", criterium.description)
                         if "@" in criterium.description:
-                            criterium.learning_outcomes, criterium.description = get_and_remove_at_sign_words(criterium.description)
+                            feedback_list = get_extracted_text(criterium.description)
+                            criterium.learning_outcomes.append(feedback_list[0]["lu"])
+                            criterium.description = feedback_list[0]["text"]
                             print("GC83 -", criterium.learning_outcomes, criterium.description)
                             for learning_outcome_id in criterium.learning_outcomes:
                                 # print("GC91 -", learning_outcome_id)
@@ -333,11 +314,11 @@ def generate_course(instance_name):
             for assignment in assignment_sequence.assignments:
                 print("GC91 -", assignment.name)
                 if "@" in assignment.name:
-                    text_lu_results = get_and_remove_at_sign_words(assignment.name)
+                    feedback_list = get_extracted_text(assignment.name)
                     assignment_name = ""
-                    for text_lu_result in text_lu_results:
-                        assignment.learning_outcomes.append(text_lu_result["lu"])
-                        assignment_name += " "+text_lu_result["comment"]
+                    for feedback in feedback_list:
+                        assignment.learning_outcomes.append(feedback["lu"])
+                        assignment_name += feedback["text"]
                     assignment.name = assignment_name
                     # print("GC92 -", assignment.name, assignment_sequence.learning_outcomes)
                     for lu in assignment.learning_outcomes:
