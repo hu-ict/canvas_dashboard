@@ -36,7 +36,7 @@ def get_hover_assignment(points, data_point):
 def get_hover_grade(course, submission, grade):
     l_hover = "<br>Ingeleverd " + get_date_time_loc(submission.submitted_date)
     l_label = grade.label
-    l_hover += "<br><b>" + l_label + "</b>, beoordeeld door " + str(submission.grader_name) + " op " + get_date_time_loc(submission.graded_date)
+    l_hover += "<br><b>" + l_label + "</b>, gewaardeerd door " + str(submission.grader_name) + " op " + get_date_time_loc(submission.graded_date)
     if course.find_perspective_by_assignment_group(submission.assignment_group_id).show_points:
         l_hover += ", score: " + str(submission.score)
     l_hover += "<br>"

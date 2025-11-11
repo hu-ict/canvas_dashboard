@@ -104,6 +104,35 @@ def get_attendance(attendance):
             attendance.attendance_moments.append(moment)
     return attendance
 
+def get_predefined_lu(course, assignment_sequence, assignment):
+    print("GC51 -", assignment.name)
+    if "@" in assignment.name:
+        feedback_list = get_extracted_text(assignment.name)
+        assignment.learning_outcomes.append(feedback_list[0]["lu"])
+        assignment.name = feedback_list[0]["text"]
+        print("GC52 -", assignment.name, assignment_sequence.learning_outcomes)
+        for lu in assignment.learning_outcomes:
+            learning_outcome = course.find_learning_outcome(lu)
+            if learning_outcome is not None:
+                print("GC53 -", assignment.name, "LU:", learning_outcome.id)
+                learning_outcome.add_assignment_tag_id(assignment_sequence.tag)
+                assignment_sequence.learning_outcomes.append(learning_outcome.id)
+    for criterium in assignment.rubrics:
+        print("GC55 -", criterium.description)
+        if "@" in criterium.description:
+            feedback_list = get_extracted_text(criterium.description)
+            criterium.learning_outcomes.append(feedback_list[0]["lu"])
+            criterium.description = feedback_list[0]["text"]
+            print("GC56 -", criterium.learning_outcomes, criterium.description)
+            for learning_outcome_id in criterium.learning_outcomes:
+                # print("GC91 -", learning_outcome_id)
+                # establish many-2-many relation
+                learning_outcome = course.find_learning_outcome(learning_outcome_id)
+                if learning_outcome is not None:
+                    learning_outcome.add_criterion_id(assignment_sequence.tag, criterium.id)
+                    assignment_sequence.add_learning_outcome(learning_outcome_id)
+                    assignment.add_learning_outcome(learning_outcome_id)
+
 
 def generate_course(instance_name):
     print("GCS01 - generate_course.py")
@@ -133,7 +162,7 @@ def generate_course(instance_name):
         assignment_group = config.get_assignment_group(canvas_assignment_group.id)
         # print("GC21 -", "assignment_group", canvas_assignment_group.id)
 
-        if assignment_group and assignment_group.id in uses_assignment_groups:
+        if assignment_group and (assignment_group.id in uses_assignment_groups):
             tags = []
             role = config.get_role_by_assignment_groep(assignment_group.id)
             if role is not None:
@@ -156,7 +185,7 @@ def generate_course(instance_name):
                         message = f"GCS64 - WARNING [{canvas_assignment.grading_type}] points_possible is not set for", canvas_assignment.name
                         print(message)
                 elif canvas_assignment.grading_type == "pass_fail":
-                        points_possible = canvas_assignment.points_possible
+                    points_possible = canvas_assignment.points_possible
                 elif canvas_assignment.grading_type == 'letter_grade':
                     if canvas_assignment.points_possible:
                         points_possible = canvas_assignment.points_possible
@@ -200,9 +229,9 @@ def generate_course(instance_name):
                             tag_sequence = t[1:]
                             break
 
-
                 if assignment.grading_type == "pass_fail":
                     if hasattr(canvas_assignment, "rubric"):
+                        # gebruik de punten uit de rubrics
                         assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
                         # print("GC31 - ",len(assignment.rubrics))
                         if assignment.points > 0 and assignment.points != rubrics_points:
@@ -216,6 +245,7 @@ def generate_course(instance_name):
                         print("GC34 - INFO No rubric", assignment.name, "grading_type", assignment.grading_type)
                         if assignment.points == 0:
                             assignment.points = 2
+
                 elif assignment.grading_type == "letter_grade":
                     if hasattr(canvas_assignment, "rubric"):
                         assignment.rubrics, rubrics_points = get_rubrics(canvas_assignment.rubric)
@@ -276,81 +306,19 @@ def generate_course(instance_name):
     for perspective in config.perspectives:
         for assignment_group_id in config.perspectives[perspective].assignment_group_ids:
             assignment_group = config.get_assignment_group(assignment_group_id)
-            print("GC70 -", assignment_group.name)
+            print("GCS71 -", assignment_group.name)
             for assignment_sequence in assignment_group.assignment_sequences:
                 for assignment in assignment_sequence.assignments:
-                    print("GC71 -", assignment.name)
-                    if "@" in assignment.name:
-                        feedback_list = get_extracted_text(assignment.name)
-                        assignment.learning_outcomes.append(feedback_list[0]["lu"])
-                        assignment.name = feedback_list[0]["text"]
-                        print("GC72 -", assignment.name, assignment_sequence.learning_outcomes)
-                        for lu in assignment.learning_outcomes:
-                            learning_outcome = config.find_learning_outcome(lu)
-                            if learning_outcome is not None:
-                                print("GC73 -", assignment.name, "LU:", learning_outcome.id)
-                                learning_outcome.add_assignment_tag_id(assignment_sequence.tag)
-                                assignment_sequence.learning_outcomes.append(learning_outcome.id)
-                    for criterium in assignment.rubrics:
-                        print("GC82 -", criterium.description)
-                        if "@" in criterium.description:
-                            feedback_list = get_extracted_text(criterium.description)
-                            criterium.learning_outcomes.append(feedback_list[0]["lu"])
-                            criterium.description = feedback_list[0]["text"]
-                            print("GC83 -", criterium.learning_outcomes, criterium.description)
-                            for learning_outcome_id in criterium.learning_outcomes:
-                                # print("GC91 -", learning_outcome_id)
-                                #establish many-2-many relation
-                                learning_outcome = config.find_learning_outcome(learning_outcome_id)
-                                if learning_outcome is not None:
-                                    learning_outcome.add_criterion_id(assignment_sequence.tag, criterium.id)
-                                    assignment_sequence.add_learning_outcome(learning_outcome_id)
-                                    assignment.add_learning_outcome(learning_outcome_id)
-                config.perspectives[perspective].assignment_sequences.append(assignment_sequence)
+                    get_predefined_lu(config, assignment_sequence, assignment)
+                # config.perspectives[perspective].assignment_sequences.append(assignment_sequence)
 
     for assignment_group_id in config.level_moments.assignment_group_ids:
         assignment_group = config.get_assignment_group(assignment_group_id)
+        print("GCS72 -", assignment_group.name)
         for assignment_sequence in assignment_group.assignment_sequences:
             for assignment in assignment_sequence.assignments:
-                print("GC91 -", assignment.name)
-                if "@" in assignment.name:
-                    feedback_list = get_extracted_text(assignment.name)
-                    assignment_name = ""
-                    for feedback in feedback_list:
-                        assignment.learning_outcomes.append(feedback["lu"])
-                        assignment_name += feedback["text"]
-                    assignment.name = assignment_name
-                    # print("GC92 -", assignment.name, assignment_sequence.learning_outcomes)
-                    for lu in assignment.learning_outcomes:
-                        learning_outcome = config.find_learning_outcome(lu)
-                        if learning_outcome is not None:
-                            # print("GC93 -", assignment.name, "LU:", learning_outcome.id)
-                            assignment_sequence.learning_outcomes.append(learning_outcome.id)
-                for criterium in assignment.rubrics:
-                    print("GC94 -", criterium.description)
-                    # if "@" in criterium.description:
-                    #     learning_outcomes = get_and_remove_at_sign_words(criterium.description)
-                    #     criterium.learning_outcomes, criterium.description
-                    #     # print("GC95 -", criterium.learning_outcomes, criterium.description)
-                    #     for learning_outcome_id in learning_outcomes:
-                    #         criterium.learning_outcomes.append()
-                    #         # print("GC91 -", learning_outcome_id)
-                    #         #establish many-2-many relation
-                    #         learning_outcome = config.find_learning_outcome(learning_outcome_id)
-                    #         if learning_outcome is not None:
-                    #             assignment_sequence.add_learning_outcome(learning_outcome_id)
-                    #             assignment.add_learning_outcome(learning_outcome_id)
-    # collect all LU from Assignment and copy them AssignmentSequence
-    # for assignment_group in config.assignment_groups:
-    #     for assignment_sequence in assignment_group.assignment_sequences:
-    #         for assignment in assignment_sequence.assignments:
-    #             for learning_outcome_id in assignment.learning_outcomes:
-    #                 #establish many-2-many relation
-    #                 learning_outcome = config.find_learning_outcome(learning_outcome_id)
-    #                 assignment_sequence.add_learning_outcome(learning_outcome_id)
-    #                 learning_outcome.add_assigment_sequence(assignment_sequence.tag)
-    #             assignment.name = assignment.name.split("(")[0].strip()
-    #         assignment_sequence.name = assignment_sequence.name.split("(")[0].strip()
+                get_predefined_lu(config, assignment_sequence, assignment)
+
     for assignment_group in config.assignment_groups:
         assignment_group.assignment_sequences = sorted(assignment_group.assignment_sequences, key=lambda a: a.get_day())
         assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)

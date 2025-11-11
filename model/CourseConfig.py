@@ -97,6 +97,28 @@ class CourseConfig:
 
         return dict_result
 
+    def get_assignment_group(self, group_id):
+        for group in self.assignment_groups:
+            if group.id == group_id:
+                return group
+        return None
+
+    def get_assignment_group_by_assignment(self, assignment_id):
+        for group in self.assignment_groups:
+            for assignment_sequence in group.assignment_sequences:
+                for assignment in assignment_sequence.assignments:
+                    # print("CCF11 -", group.name, assignment.id,  assignment_id)
+                    if assignment.id == assignment_id:
+                        return group
+        return None
+
+    def get_assignment_group_by_assignment_sequence_tag(self, tag):
+        for group in self.assignment_groups:
+            for assignment_sequence in group.assignment_sequences:
+                if assignment_sequence.tag == tag:
+                    return group
+        return None
+
     def find_project_group(self, group_id):
         for group in self.project_groups:
             if group.id == group_id:
@@ -145,12 +167,6 @@ class CourseConfig:
             if student.role == role_short:
                 students.append(student)
         return students
-
-    def get_assignment_group(self, group_id):
-        for group in self.assignment_groups:
-            if group.id == group_id:
-                return group
-        return None
 
     def find_assignment_group_by_name(self, group_name):
         for group in self.assignment_groups:

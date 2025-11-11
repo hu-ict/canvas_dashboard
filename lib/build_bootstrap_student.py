@@ -17,7 +17,8 @@ def get_comments_html(comments):
 def get_feedback_list_html(course, student_id, feedback_list, templates):
     feedback_list_html_string = ""
     for feedback in feedback_list:
-        url = "https://canvas.hu.nl/courses/" + str(course.canvas_id) + "/gradebook/speed_grader?assignment_id=" + str(feedback.assignment_id) + "&student_id=" + str(student_id)
+        url = "https://canvas.hu.nl/courses/" + str(course.canvas_id) + "/gradebook/speed_grader?assignment_id=" \
+              + str(feedback.assignment_id) + "&student_id=" + str(student_id)
 
         feedback_list_html_string += templates['feedback'].substitute({
             "date": get_date_time_loc(feedback.date),
@@ -25,7 +26,6 @@ def get_feedback_list_html(course, student_id, feedback_list, templates):
             "comment": feedback.comment,
             "url": url,
             "assignment_name": feedback.assignment_name,
-            "assignment_id": feedback.assignment_id,
             "grade": feedback.grade
         })
     return feedback_list_html_string
@@ -115,9 +115,9 @@ def build_moments(course_id, course, moment, level_serie, moment_submissions, te
              'url': url,
              'progress_label': progress_label,
              'progress_color': progress_color,
-             'submitted_date': "Leeg",
+             'submitted_date': "leeg",
              'grader_name': "leeg",
-             'graded_date': "Leeg",
+             'graded_date': "leeg",
              'comments': comments,
              'learning_outcomes_table': learning_outcomes_table,
              'reflection': ""
@@ -382,12 +382,7 @@ def build_bootstrap_portfolio(instance, course_id, course, student, student_resu
 
 
 def build_bootstrap_feedback(course, student_results, templates, level_serie_collection):
-    student_feedback_html_string = templates['learning_outcome_feedback'].substitute(
-        {
-            'learning_outcome_short': "Algemene feedback",
-            'learning_outcome_id': "AF",
-            'feedback_rows': get_feedback_list_html(course, student_results.id, student_results.general_feedback_list, templates)
-        })
+    student_feedback_html_string = ""
     for learning_outcome in student_results.learning_outcomes:
         student_feedback_html_string += templates['learning_outcome_feedback'].substitute(
             {
@@ -395,6 +390,12 @@ def build_bootstrap_feedback(course, student_results, templates, level_serie_col
                 'learning_outcome_id': student_results.learning_outcomes[learning_outcome].id,
                 'feedback_rows': get_feedback_list_html(course, student_results.id, student_results.learning_outcomes[learning_outcome].feedback_list, templates)
             })
+    student_feedback_html_string += templates['learning_outcome_feedback'].substitute(
+        {
+            'learning_outcome_short': "Algemene feedback",
+            'learning_outcome_id': "AF",
+            'feedback_rows': get_feedback_list_html(course, student_results.id, student_results.general_feedback_list, templates)
+        })
 
     # for perspective in student_results.perspectives.values():
     #     l_level_serie = level_serie_collection.level_series[course.perspectives[perspective.name].levels]

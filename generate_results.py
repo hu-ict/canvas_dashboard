@@ -1,4 +1,3 @@
-import sys
 from canvasapi import Canvas
 import json
 
@@ -12,9 +11,6 @@ from lib.lib_submission import count_graded, add_missed_assignments, read_submis
 from model.Result import *
 from lib.lib_date import get_actual_date, API_URL, date_to_day
 from model.StudentResults import StudentResults
-from model.learning_outcome.Feedback import Feedback
-
-
 import sys
 
 

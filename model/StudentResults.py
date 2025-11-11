@@ -45,6 +45,15 @@ class StudentResults:
                     return submission_sequence
         return None
 
+    def get_submission_by_assignment(self, assignment_id):
+        for submission in self.student_level_moments.submissions:
+            if submission.assignment_id == assignment_id:
+                return submission
+        for submission in self.student_grade_moments.submissions:
+            if submission.assignment_id == assignment_id:
+                return submission
+        return None
+
     def to_json(self):
         dict_result = {
             'name': self.name,

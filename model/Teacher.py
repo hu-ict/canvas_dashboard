@@ -8,7 +8,7 @@ class Teacher:
         self.initials = ''.join([x[0].upper() for x in name.split(' ')])
         self.email = email
         # self.project_groups = []
-        self.guild_groups = []
+        # self.guild_groups = []
         self.responsibilities = []
 
     def to_json(self):
@@ -17,7 +17,7 @@ class Teacher:
             'name': self.name,
             'email': self.email,
             # 'project_groups': self.project_groups,
-            'guild_groups': self.guild_groups,
+            # 'guild_groups': self.guild_groups,
             'responsibilities': list(map(lambda r: r.to_json(), self.responsibilities))
         }
 
@@ -34,8 +34,8 @@ class Teacher:
         #     new_teacher.project_groups = data_dict['project_groups']
         # else:
         #     new_teacher.project_groups = data_dict['teams']
-        if 'guild_groups' in data_dict:
-            new_teacher.guild_groups = data_dict['guild_groups']
+        # if 'guild_groups' in data_dict:
+        #     new_teacher.guild_groups = data_dict['guild_groups']
         if 'responsibilities' in data_dict:
             # print("TE41 - read responsibilities", new_teacher.name, data_dict['responsibilities'])
             new_teacher.responsibilities = list(map(lambda r: Responsibility.from_dict(r), data_dict['responsibilities']))
