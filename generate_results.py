@@ -72,7 +72,7 @@ def generate_results(instance_name):
         for perspective in student.perspectives.values():
             for submission_sequence in perspective.submission_sequences:
                 submission_sequence.submissions = sorted(submission_sequence.submissions,
-                                                         key=lambda s: s.assignment_day)
+                                                         key=lambda s: s.assignment.day)
             perspective.submission_sequences = sorted(perspective.submission_sequences, key=lambda s: s.get_day())
 
     # Feedback comments naar leeruitkomsten

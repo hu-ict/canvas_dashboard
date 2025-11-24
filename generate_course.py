@@ -1,16 +1,15 @@
 import json
 import sys
-import re
 
 from canvasapi import Canvas
 from lib.lib_bandwidth import bandwidth_builder, bandwidth_builder_attendance, get_bandwidth_sum
 from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
-from lib.file import read_start, read_course_instances, read_config_from_canvas
+from lib.file import read_start, read_course_instances, read_config_from_canvas, read_course
 from lib.lib_text import get_extracted_text
 from model.Assignment import Assignment
-from model.Criterion import Criterion
-from model.Rating import Rating
-from model.perspective.AttendanceMoment import AttendanceMoment
+from model.rubric.Criterion import Criterion
+from model.rubric.Rating import Rating
+from model.attendance.AttendanceMoment import AttendanceMoment
 
 
 def get_tags(name):
@@ -110,20 +109,20 @@ def get_predefined_lu(course, assignment_sequence, assignment):
         feedback_list = get_extracted_text(assignment.name)
         assignment.learning_outcomes.append(feedback_list[0]["lu"])
         assignment.name = feedback_list[0]["text"]
-        print("GC52 -", assignment.name, assignment_sequence.learning_outcomes)
+        # print("GC52 -", assignment.name, assignment_sequence.learning_outcomes)
         for lu in assignment.learning_outcomes:
             learning_outcome = course.find_learning_outcome(lu)
             if learning_outcome is not None:
-                print("GC53 -", assignment.name, "LU:", learning_outcome.id)
+                # print("GC53 -", assignment.name, "LU:", learning_outcome.id)
                 learning_outcome.add_assignment_tag_id(assignment_sequence.tag)
                 assignment_sequence.learning_outcomes.append(learning_outcome.id)
     for criterium in assignment.rubrics:
-        print("GC55 -", criterium.description)
+        # print("GC55 -", criterium.description)
         if "@" in criterium.description:
             feedback_list = get_extracted_text(criterium.description)
             criterium.learning_outcomes.append(feedback_list[0]["lu"])
             criterium.description = feedback_list[0]["text"]
-            print("GC56 -", criterium.learning_outcomes, criterium.description)
+            # print("GC56 -", criterium.learning_outcomes, criterium.description)
             for learning_outcome_id in criterium.learning_outcomes:
                 # print("GC91 -", learning_outcome_id)
                 # establish many-2-many relation
@@ -145,7 +144,10 @@ def generate_course(instance_name):
     start = read_start(instance.get_start_file_name())
     canvas = Canvas(API_URL, start.api_key)
     canvas_course = canvas.get_course(start.canvas_course_id)
-    config = read_config_from_canvas(canvas_course)
+    if start.config_target == "CANVAS":
+        config = read_config_from_canvas(canvas_course)
+    else:
+        config = read_course(instance.get_config_file_name())
     user = canvas.get_current_user()
     print("GCS03 -", user.name)
     if config.attendance is not None:
@@ -164,12 +166,6 @@ def generate_course(instance_name):
 
         if assignment_group and (assignment_group.id in uses_assignment_groups):
             tags = []
-            role = config.get_role_by_assignment_groep(assignment_group.id)
-            if role is not None:
-                assignment_group.role = role.name
-            else:
-                assignment_group.role = "Iedereen"
-
             print(f"GCS22 - assignment_group {assignment_group.name} is used with strategy {assignment_group.strategy}")
             for c_assignment in canvas_assignment_group.assignments:
                 message = ""

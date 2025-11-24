@@ -10,32 +10,31 @@ from model.StudentGroup import StudentGroup
 from model.StudentLink import StudentLink
 
 
-def get_groups(start, course, canvas_course):
+def get_groups(scope, canvas_course):
     group_list = []
-    if start.project_group_name == "SECTIONS":
+    if not scope or len(scope) == 0:
+        return group_list
+    if scope == "SECTIONS":
         print("GST21 - Werken met Canvas secties als groepen (meestal S1 propedeuse).")
-        for section in course.sections:
-            student_group = StudentGroup(section.id, section.name, 0)
-            course.project_groups.append(student_group)
+        course_sections = canvas_course.get_sections()
+        for course_section in course_sections:
+            student_group = StudentGroup(course_section.id, course_section.name, 0)
+            group_list.append(student_group)
+        return group_list
     else:
         canvas_group_categories = canvas_course.get_group_categories()
         for canvas_group_category in canvas_group_categories:
             # print("GCONF20 -", canvas_group_category, start1.project_group_name, start1.guild_group_name)
             # retrieve project_groups
-            if canvas_group_category.name == start.project_group_name:
+            if canvas_group_category.name == scope:
                 canvas_groups = canvas_group_category.get_groups()
                 for canvas_group in canvas_groups:
                     student_group = StudentGroup(canvas_group.id, canvas_group.name, 0)
-                    course.project_groups.append(student_group)
+                    group_list.append(student_group)
                     # print("GST23 - project_group", canvas_group)
-            elif canvas_group_category.name == start.guild_group_name:
-                canvas_groups = canvas_group_category.get_groups()
-                for canvas_group in canvas_groups:
-                    student_group = StudentGroup(canvas_group.id, canvas_group.name, 0)
-                    course.guild_groups.append(student_group)
-                    # print("GST24 - guild_group", canvas_group)
-            else:
-                print("GST25 - onbekende group_category", canvas_group_category.name)
+                return group_list
+    print("GST25 - onbekende group_category", canvas_group_category.name)
+    return group_list
 
 
 def get_students_in_groups(start, course, canvas_course):
@@ -95,9 +94,10 @@ def link_assessors_to_groups_and_students(course):
 
 
 def link_principal_assessor_to_groups_and_students(course):
+    assignment_group = course.get_assignment_group(course.grade_moments.assignment_group_ids[0])
     for student_group in course.project_groups:
         for assessor in student_group.assessors:
-            if assessor.assignment_group_id == course.principal_assignment_group_id:
+            if assessor.assignment_group_id == assignment_group.id:
                 student_group.principal_assessor = assessor.teacher_id
 
 
@@ -233,9 +233,8 @@ def generate_students(instance_name):
     print("GST009 - Aantal studenten", len(course.students))
     # for student in course.students:
     #     print("GST010 -", student)
-    course.project_groups = []
-    course.guild_groups = []
-    get_groups(start, course, canvas_course)
+    course.project_groups = get_groups(start.project_group_name, canvas_course)
+    course.guild_groups = get_groups(start.guild_group_name, canvas_course)
     get_section_students(start, course, canvas_course)
     get_students_in_groups(start, course, canvas_course)
     link_students_to_role(course)

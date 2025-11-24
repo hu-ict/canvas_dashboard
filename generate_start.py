@@ -46,6 +46,7 @@ start = Start(canvas_course_id,
               get_date_time_obj("2025-09-01T00:00:00Z"),
               get_date_time_obj("2026-01-30T23:59:59Z"),
               "onedrive",
+              "LOCAL",
               attendance_path,
               canvas_api_key)
 

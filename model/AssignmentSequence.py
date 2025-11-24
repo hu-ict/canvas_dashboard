@@ -15,19 +15,19 @@ class AssignmentSequence:
         return f'AssignmentSequence({self.name}, {self.tag}, {self.grading_type}, {self.points})'
 
     def get_day(self):
-        return self.assignments[0].assignment_day
+        return self.assignments[0].day
 
     def get_date(self):
-        return self.assignments[0].assignment_date
+        return self.assignments[0].date
 
     def get_date_day(self, submission_sequence, actual_day):
         if len(self.assignments) > 0:
             index = 0
             for assignment in self.assignments:
                 if submission_sequence is None:
-                    if actual_day < assignment.assignment_day:
+                    if actual_day < assignment.day:
                         # deadline nog niet verstreken
-                        return self.assignments[index].assignment_date, self.assignments[index].assignment_day
+                        return self.assignments[index].date, self.assignments[index].day
                     else:
                         # deadline verstreken
                         index += 1
@@ -35,9 +35,9 @@ class AssignmentSequence:
                     submission = submission_sequence.get_submission_by_assignment_id(assignment.id)
                     if submission is None:
                         # niets ingeleverd
-                        if actual_day < assignment.assignment_day:
+                        if actual_day < assignment.day:
                             # deadline nog niet verstreken
-                            return self.assignments[index].assignment_date, self.assignments[index].assignment_day
+                            return self.assignments[index].date, self.assignments[index].day
                         else:
                             # deadline verstreken
                             index += 1
@@ -47,7 +47,7 @@ class AssignmentSequence:
                             # beoordeeld
                             if submission.score == submission.points:
                                 # voldaan
-                                return self.assignments[index].assignment_date, self.assignments[index].assignment_day
+                                return self.assignments[index].date, self.assignments[index].day
                             else:
                                 # niet voldaan
                                 index += 1
@@ -56,16 +56,16 @@ class AssignmentSequence:
                             index += 1
                         else:
                             # nog niet beoordeeld
-                            return self.assignments[index].assignment_date, self.assignments[index].assignment_day
+                            return self.assignments[index].date, self.assignments[index].day
             if index >= len(self.assignments):
                 index = len(self.assignments) - 1
-                return self.assignments[index].assignment_date, self.assignments[index].assignment_day
+                return self.assignments[index].date, self.assignments[index].day
         return 0, 0
 
     def get_passed_assignments(self, actual_day):
         passed_assignments = []
         for assignment in self.assignments:
-            if assignment.assignment_day < actual_day:
+            if assignment.day < actual_day:
                 passed_assignments.append(assignment)
         return passed_assignments
 
@@ -74,9 +74,6 @@ class AssignmentSequence:
         last_in_completed = False
         for assignment in self.assignments:
             if assignment.assignment_day < actual_day:
-                if instance.is_instance_of("inno_courses") and (assignment.assignment_day > (course.days_in_semester - course.improvement_period)):
-                    #missed alleen in de reguliere tijd
-                    continue
                 # deadline is verstreken
                 if submission_sequence is None:
                     missed_assignments.append(assignment)
@@ -86,7 +83,7 @@ class AssignmentSequence:
                         missed_assignments.append(assignment)
                     else:
                         if submission.graded:
-                            if submission.score == submission.points:
+                            if submission.score == submission.assignment.points:
                                 # voldaan
                                 return missed_assignments
                             else:
@@ -100,7 +97,7 @@ class AssignmentSequence:
     def get_last_passed_assignment(self, actual_day):
         last_passed_assignment = None
         for assignment in self.assignments:
-            if assignment.assignment_day < actual_day:
+            if assignment.day < actual_day:
                 last_passed_assignment = assignment
         return last_passed_assignment
 

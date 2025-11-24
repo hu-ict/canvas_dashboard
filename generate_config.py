@@ -5,22 +5,19 @@ import json
 
 from generate_students import get_groups
 from lib.lib_bandwidth import IMPROVEMENT_PERIOD
-from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
-from lib.file import read_start, read_course_instances
-from model.Assignment import Assignment
+from lib.lib_date import API_URL, date_to_day, get_actual_date
+from lib.file import read_start, read_course_instances, read_dashboard_from_canvas
 from model.AssignmentGroup import AssignmentGroup
 from model.Bandwidth import Bandwidth
 from model.CourseConfig import CourseConfig
 from model.Role import Role
 from model.Section import Section
-from model.StudentGroup import StudentGroup
-from model.Teacher import Teacher
-from model.instance.CourseInstances import CourseInstances
-from model.perspective.Attendance import Attendance
-from model.perspective.GradeMoments import GradeMoments
-from model.perspective.LevelMoments import LevelMoments
+from model.teacher.Teacher import Teacher
+from model.attendance.Attendance import Attendance
+from model.moment.GradeMoments import GradeMoments
+from model.moment.LevelMoments import LevelMoments
 from model.perspective.Perspective import Perspective
-from model.perspective.Policy import Policy
+from model.attendance.Policy import Policy
 
 
 def generate_config(instance_name):
@@ -37,6 +34,7 @@ def generate_config(instance_name):
     user = canvas.get_current_user()
     print(user.name)
     canvas_course = canvas.get_course(start.canvas_course_id)
+    dashboard = read_dashboard_from_canvas(canvas_course)
 
     config = CourseConfig(start.canvas_course_id, canvas_course.name,
                           start.start_date,
@@ -44,47 +42,54 @@ def generate_config(instance_name):
                           date_to_day(start.start_date, start.end_date),
                           IMPROVEMENT_PERIOD,
                           0, 0)
+    if len(dashboard.roles) > 1:
+        config.roles = dashboard.roles
+    if len(dashboard.learning_outcomes) > 1:
+        config.learning_outcomes = dashboard.learning_outcomes
+    if len(dashboard.assignment_groups) > 0:
+        # retrieve assignments_groups and score
+        canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignments', 'overrides'])
+        for canvas_assignment_group in canvas_assignment_groups:
+            meta_assignment_group = dashboard.get_assignment_group_by_name(canvas_assignment_group.name)
+            if meta_assignment_group:
+                assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name,
+                                                   meta_assignment_group.groups, meta_assignment_group.strategy,
+                                                   meta_assignment_group.lower_c,
+                                                   meta_assignment_group.upper_c,
+                                                   meta_assignment_group.total_points,
+                                                   meta_assignment_group.lower_points,
+                                                   meta_assignment_group.upper_points,
+                                                   meta_assignment_group.levels, meta_assignment_group.marker)
+                for canvas_assignment in canvas_assignment_group.assignments:
+                    if canvas_assignment['points_possible']:
+                        assignment_group.total_points += canvas_assignment['points_possible']
+                print("GC05 - assignment_group", canvas_assignment_group, "points", meta_assignment_group.total_points, assignment_group.total_points,
+                      assignment_group.strategy)
+                config.assignment_groups.append(assignment_group)
 
-    if instance.is_instance_of("inno_courses"):
-        role = Role("AI", "AI - Engineer", "Artificial Intelligence", "border-warning")
-        config.roles.append(role)
-        role = Role("BIM", "Business Analist", "Business and IT Management", "border-success")
-        config.roles.append(role)
-        role = Role("CSC_C", "Cloud", "Cyber Security and Cloud", "border-light")
-        config.roles.append(role)
-        role = Role("CSC_S", "Security", "Cyber Security and Cloud", "border-danger")
-        config.roles.append(role)
-        role = Role("SD_B", "Back-end developer", "Software Development", "border-dark")
-        config.roles.append(role)
-        role = Role("SD_F", "Front-end developer", "Software Development", "border-primary")
-        config.roles.append(role)
-        role = Role("TI", "TI - Engineer", "Technische Informatica", "border-warning")
-        config.roles.append(role)
-        perspective = Perspective("team", "Team", "samen", False, True, 0)
-        config.perspectives[perspective.name] = perspective
-        perspective = Perspective("gilde", "Gilde", "samen5", False, True, 0)
-        config.perspectives[perspective.name] = perspective
-        perspective = Perspective("kennis", "Kennis", "niveau", True, False, 0)
-        config.perspectives[perspective.name] = perspective
+    for meta_perspective in dashboard.perspectives:
+        if meta_perspective.name == "level_moments":
+            config.level_moments = LevelMoments("level_moments", meta_perspective.title)
+            for assignment_group_name in meta_perspective.assignment_group_names:
+                assignment_group = config.find_assignment_group_by_name(assignment_group_name)
+                if assignment_group:
+                    config.level_moments.assignment_group_ids.append(assignment_group.id)
+        elif meta_perspective.name == "grade_moments":
+            config.grade_moments = GradeMoments("grade_moments", meta_perspective.title)
+            for assignment_group_name in meta_perspective.assignment_group_names:
+                assignment_group = config.find_assignment_group_by_name(assignment_group_name)
+                if assignment_group:
+                    config.grade_moments.assignment_group_ids.append(assignment_group.id)
+        else:
+            perspective = Perspective(meta_perspective.name, meta_perspective.title, meta_perspective.show_flow,
+                                      meta_perspective.show_points, 0)
+            for assignment_group_name in meta_perspective.assignment_group_names:
+                assignment_group = config.find_assignment_group_by_name(assignment_group_name)
+                if assignment_group:
+                    perspective.assignment_group_ids.append(assignment_group.id)
+            config.perspectives[perspective.name] = perspective
+    if instance.is_instance_of("courses_2026"):
         config.attendance = None
-        config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", ["Peilmoment 1", "Peilmoment 2"])
-        config.grade_moments = GradeMoments("grade_moments", "Beoordelingsmomenten", "grade", ["Beoordeling"])
-    elif instance.is_instance_of("courses_2026"):
-        role = Role("AI", "AI and data Engineer", "Artificial Intelligence", "border-warning")
-        config.roles.append(role)
-        role = Role("BIM", "Business Analist", "Business and IT Management", "border-success")
-        config.roles.append(role)
-        role = Role("CSC", "Cloud and Security Engineer", "Cyber Security and Cloud", "border-danger")
-        config.roles.append(role)
-        role = Role("SD", "Full stack developer", "Software Development", "border-dark")
-        config.roles.append(role)
-        role = Role("TI", "Embedded engineer", "Technische Informatica", "border-primary")
-        config.roles.append(role)
-        perspective = Perspective("portfolio", "Portfolio", False, True, 0)
-        config.perspectives[perspective.name] = perspective
-        config.attendance = None
-        config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress", ["Peilmoment 1", "Peilmoment 2"])
-        config.grade_moments = GradeMoments("grade_moments", "Beoordelingsmomenten", "grade", ["Beoordeling"])
     else:
         role = Role("role", "Student", "HBO-ICT", "border-dark")
         config.roles.append(role)
@@ -113,15 +118,15 @@ def generate_config(instance_name):
         print("GCONF08 - course_section", new_section)
 
     # retrieve assignments_groups and score
-    canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignments', 'overrides'])
-    for canvas_assignment_group in canvas_assignment_groups:
-        assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name, "project", [], "POINTS",
-                                           0, 0, 0, 0, 0, "bin2")
-        for canvas_assignment in canvas_assignment_group.assignments:
-            if canvas_assignment['points_possible']:
-                assignment_group.total_points += canvas_assignment['points_possible']
-        print("GC05 - assignment_group", canvas_assignment_group, "points", assignment_group.total_points, assignment_group.strategy)
-        config.assignment_groups.append(assignment_group)
+    # canvas_assignment_groups = canvas_course.get_assignment_groups(include=['assignments', 'overrides'])
+    # for canvas_assignment_group in canvas_assignment_groups:
+    #     assignment_group = AssignmentGroup(canvas_assignment_group.id, canvas_assignment_group.name, "project", "POINTS",
+    #                                        0, 0, 0, 0, 0, "level", "circle")
+    #     for canvas_assignment in canvas_assignment_group.assignments:
+    #         if canvas_assignment['points_possible']:
+    #             assignment_group.total_points += canvas_assignment['points_possible']
+    #     print("GC05 - assignment_group", canvas_assignment_group, "points", assignment_group.total_points, assignment_group.strategy)
+    #     config.assignment_groups.append(assignment_group)
 
     # retrieve Teachers
     canvas_users = canvas_course.get_users(enrollment_type=['teacher', 'ta'])
@@ -139,9 +144,10 @@ def generate_config(instance_name):
         print("GCONF18 -", teacher)
 
 
-    config.learning_outcomes = []
-
-    get_groups(start, config, canvas_course)
+    group_list = get_groups(start.project_group_name, canvas_course)
+    config.project_groups = group_list
+    group_list = get_groups(start.guild_group_name, canvas_course)
+    config.guild_groups = group_list
 
     print("GCONF98 - ConfigFileName:", instance.get_config_file_name())
     with open(instance.get_config_file_name(), 'w') as f:

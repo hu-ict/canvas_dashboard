@@ -98,8 +98,5 @@ class StudentPerspective:
     @staticmethod
     def copy_from(course, student, perspective):
         new = StudentPerspective(perspective.name, perspective.title, -1, 0, 0)
-        if len(perspective.assignment_group_ids) > 1:
-            new.assignment_group_ids.append(course.find_assignment_group_by_role(student.role))
-        else:
-            new.assignment_group_ids = perspective.assignment_group_ids
+        new.assignment_group_ids = perspective.assignment_group_ids
         return new

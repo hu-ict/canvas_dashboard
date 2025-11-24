@@ -29,19 +29,19 @@ def build_learning_analytics(course, results, level_serie_collection):
         for perspective in student.perspectives.values():
             for submission_sequence in perspective.submission_sequences:
                 for submission in submission_sequence.submissions:
-                    learning_analytics[str(submission.assignment_id)]["status"][str(submission.status)] += 1
+                    learning_analytics[str(submission.assignment.id)]["status"][str(submission.status)] += 1
                     if submission.grade is not None:
-                        learning_analytics[str(submission.assignment_id)][STR_GRADES][str(submission.grade)] += 1
+                        learning_analytics[str(submission.assignment.id)][STR_GRADES][str(submission.grade)] += 1
         for submission in student.student_level_moments.submissions:
-            learning_analytics[str(submission.assignment_id)]["status"][str(submission.status)] += 1
+            learning_analytics[str(submission.assignment.id)]["status"][str(submission.status)] += 1
             if submission.grade is not None:
-                # print("BLA02 -", submission.assignment_name, submission.assignment_id, submission.grade)
-                learning_analytics[str(submission.assignment_id)][STR_GRADES][str(submission.grade)] += 1
+                # print("BLA02 -", submission.assignment.name, submission.assignment.id, submission.grade)
+                learning_analytics[str(submission.assignment.id)][STR_GRADES][str(submission.grade)] += 1
         for submission in student.student_grade_moments.submissions:
-            learning_analytics[str(submission.assignment_id)]["status"][str(submission.status)] += 1
+            learning_analytics[str(submission.assignment.id)]["status"][str(submission.status)] += 1
             if submission.grade is not None:
-                # print("BLA03 -", submission.assignment_name, submission.assignment_id, submission.grade)
-                learning_analytics[str(submission.assignment_id)][STR_GRADES][str(submission.grade)] += 1
+                # print("BLA03 -", submission.assignment.name, submission.assignment.id, submission.grade)
+                learning_analytics[str(submission.assignment.id)][STR_GRADES][str(submission.grade)] += 1
     return learning_analytics
 
 
@@ -140,10 +140,10 @@ def build_bootstrap_analytics_tab(instance, a_course, learning_analytics, a_temp
         for assignment_sequence in assignment_group.assignment_sequences:
             for assignment in assignment_sequence.assignments:
                 assignment_list.append(assignment)
-        assignment_list = sorted(assignment_list, key=lambda a: a.assignment_day)
+        assignment_list = sorted(assignment_list, key=lambda a: a.day)
         for assignment in assignment_list:
             file_name = instance.name + "/general/analytics_" + str(assignment.id) + ".html"
-            if assignment.assignment_day < actual_day:
+            if assignment.day < actual_day:
                 background_color = "#ffb3b3"
             else:
                 background_color = "#c6ecd9"
@@ -152,11 +152,11 @@ def build_bootstrap_analytics_tab(instance, a_course, learning_analytics, a_temp
                  'assignment_name': assignment.name,
                  'background_color': background_color,
                  'assignment_lock_date': get_date_time_loc(
-                     assignment.assignment_date)})
+                     assignment.date)})
             process_analytics(learning_analytics, assignment, a_level_serie_collection,
                               instance.get_html_root_path() + file_name)
 
-        html_string += a_templates["analytics_card"].substitute({'assignment_group_id': str(assignment_group.id),
+        html_string += a_templates["analytics_card"].substitute({'assignment_group_id': str(assignment.group_id),
                                                                  'assignment_group_name': assignment_group.name,
                                                                  'assignments': assignment_html_string})
     return html_string
@@ -306,20 +306,20 @@ def process_analyse_grade_moment(course, results, grade_moment, level_serie_coll
 def build_bootstrap_analyse_tab(instance, a_course, a_results, a_templates, a_level_serie_collection):
     html_string = ""
     moments_html_string = ""
-    for level_moment in a_course.level_moments.moments:
-        file_name = instance.name + "/general/analyse1_" + str(level_moment) + ".html"
-        moments_html_string += a_templates["analyse_moment"].substitute(
-            {'url': file_name,
-             'assignment_name': level_moment})
-        process_analyse_level_moment(a_course, a_results, level_moment, a_level_serie_collection, a_templates,
-                                     instance.get_html_root_path() + file_name)
-    for grade_moment in a_course.grade_moments.moments:
-        file_name = instance.name + "/general/analyse_" + str(grade_moment) + ".html"
-        moments_html_string += a_templates["analyse_moment"].substitute(
-            {'url': file_name,
-             'assignment_name': grade_moment})
-        process_analyse_grade_moment(a_course, a_results, grade_moment, a_level_serie_collection, a_templates,
-                                     instance.get_html_root_path() + file_name)
+    # for level_moment in a_course.level_moments.moments:
+    #     file_name = instance.name + "/general/analyse1_" + str(level_moment) + ".html"
+    #     moments_html_string += a_templates["analyse_moment"].substitute(
+    #         {'url': file_name,
+    #          'assignment.name': level_moment})
+    #     process_analyse_level_moment(a_course, a_results, level_moment, a_level_serie_collection, a_templates,
+    #                                  instance.get_html_root_path() + file_name)
+    # for grade_moment in a_course.grade_moments.moments:
+    #     file_name = instance.name + "/general/analyse_" + str(grade_moment) + ".html"
+    #     moments_html_string += a_templates["analyse_moment"].substitute(
+    #         {'url': file_name,
+    #          'assignment.name': grade_moment})
+    #     process_analyse_grade_moment(a_course, a_results, grade_moment, a_level_serie_collection, a_templates,
+    #                                  instance.get_html_root_path() + file_name)
 
     html_string += a_templates["analyse_card"].substitute({'moments': moments_html_string})
     return html_string

@@ -37,7 +37,7 @@ def get_rubrics_comments(course, submission, grade):
     l_hover = "<br><b>Criteria:</b>"
     for criterion_score in submission.rubrics:
         # print("BP10 -", submission.assignment_id, criterion_score)
-        assignment = course.find_assignment(submission.assignment_id)
+        assignment = course.find_assignment(submission.assignment.id)
         # print("BP11 -", assignment)
         assignment_criterion = assignment.get_criterion(criterion_score.id)
         if assignment_criterion is None:
@@ -66,10 +66,10 @@ def get_rubrics_comments(course, submission, grade):
 
 
 def build_student_tabs(instance, course, student_tab_content, student_tabs):
-    for level_moment in course.level_moments.moments:
-        student_tabs[level_moment.replace(" ", "_").lower()] = level_moment
-    for grade_moment in course.grade_moments.moments:
-        student_tabs[grade_moment.replace(" ", "_").lower()] = grade_moment
+    for assignment in course.get_level_moments():
+        student_tabs[assignment.name.replace(" ", "_").lower()] = assignment.name
+    for assignment in course.get_grade_moments():
+        student_tabs[assignment.name.replace(" ", "_").lower()] = assignment.name
     tabs_html_string = ""
     tab_count = 0
     for tab in student_tabs:
@@ -90,6 +90,8 @@ def build_student_tabs(instance, course, student_tab_content, student_tabs):
         tabs_html_string += '</ul></div>'
         tab_count += 1
     tab_count = 0
+    # print("BBS31 -", student_tabs)
+    # print("BBS32 -", student_tab_content.keys())
     for tab in student_tabs:
         if tab_count == 0:
             tabs_html_string += '<div class="student_view ' + tab + '">\n'
@@ -101,9 +103,9 @@ def build_student_tabs(instance, course, student_tab_content, student_tabs):
     return tabs_html_string
 
 
-def build_moments(course_id, course, moment, level_serie, moment_submissions, templates):
+def build_moment(course_id, course, level_serie, assignment_name, submission, templates):
     # print("BLM02 - len(moment_submissions)", len(moment_submissions), "for level_moment", moment)
-    if len(moment_submissions) == 0:
+    if submission is None:
         # print("BLM03 - len(moment_submissions) == 0")
         progress_label = level_serie.get_status(BEFORE_DEADLINE).label
         progress_color = level_serie.get_status(BEFORE_DEADLINE).color
@@ -111,7 +113,7 @@ def build_moments(course_id, course, moment, level_serie, moment_submissions, te
         url = "https://canvas.hu.nl/courses/" + str(course_id)
         learning_outcomes_table = ""
         level_moment_html_string = templates['level_moment'].substitute(
-            {'level_moment_title': moment,
+            {'level_moment_title': assignment_name,
              'url': url,
              'progress_label': progress_label,
              'progress_color': progress_color,
@@ -125,67 +127,66 @@ def build_moments(course_id, course, moment, level_serie, moment_submissions, te
         )
     else:
         level_moment_html_string = ""
-        for moment_submission in moment_submissions:
-            # print("BLM04 -", moment_submission.assignment_name, moment_submission.graded, moment_submission.grade)
-            # print("BLM05 -", level_serie)
-            comments = get_comments_html(moment_submission.comments)
-            url = "https://canvas.hu.nl/courses/" + str(course_id) + "/gradebook/speed_grader?assignment_id=" + str(
-                moment_submission.assignment_id) + "&student_id=" + str(moment_submission.student_id)
-            if moment_submission.graded:
-                if moment_submission.grade is not None:
-                    progress_label = level_serie.grades[moment_submission.grade].label
-                    progress_color = level_serie.grades[moment_submission.grade].color
-                else:
-                    progress_label = level_serie.grades["0"].label
-                    progress_color = level_serie.grades["0"].color
-            else:
-                # Niet bepaald
-                progress_label = level_serie.get_status(NOT_YET_GRADED).label
-                progress_color = level_serie.get_status(NOT_YET_GRADED).color
-            assignment = course.find_assignment(moment_submission.assignment_id)
-            if "online_text_entry" in assignment.submission_types:
-                if moment_submission.body is None or moment_submission.body == "":
-                    moment_submission.body = "Geen reflectie ingeleverd."
-                reflection_html_string = templates['reflection'].substitute(
-                    {'submitted_date': get_date_time_loc(moment_submission.submitted_date),
-                     'body': moment_submission.body
-                     }
-                )
-            else:
-                reflection_html_string = ""
-            learning_outcome_list = ""
-            for rubric in assignment.rubrics:
-                criterium = moment_submission.get_criterium_score(rubric.id)
-                if criterium:
-                    l_score = str(int(criterium.score))
-                    l_comment = criterium.comment
-                else:
-                    l_score = "-1"
-                    l_comment = ""
 
-                l_label = level_serie.grades[l_score].label
-                l_color = level_serie.grades[l_score].color
-                learning_outcome_list += templates['learning_outcome_row'].substitute(
-                    {'learning_outcome': rubric.description,
-                     'color': l_color,
-                     'label': l_label,
-                     'argumentatie': l_comment})
-            learning_outcomes_table = templates['learning_outcomes_table'].substitute(
-                {'learning_outcome_list': learning_outcome_list})
-            level_moment_html_string += templates['level_moment'].substitute(
-                {'level_moment_title': moment_submission.assignment_name,
-                 'url': url,
-                 'progress_color': progress_color,
-                 'progress_label': progress_label,
-                 'submitted_date': get_date_time_loc(moment_submission.submitted_date),
-                 'grader_name': moment_submission.grader_name,
-                 'graded_date': get_date_time_loc(moment_submission.graded_date),
-                 'learning_outcomes_table': learning_outcomes_table,
-                 'comments': comments,
-                 'reflection': reflection_html_string
+        # print("BLM04 -", moment_submission.assignment_name, moment_submission.graded, moment_submission.grade)
+        # print("BLM05 -", level_serie)
+        comments = get_comments_html(submission.comments)
+        url = "https://canvas.hu.nl/courses/" + str(course_id) + "/gradebook/speed_grader?assignment_id=" + str(
+            submission.assignment.id) + "&student_id=" + str(submission.student_id)
+        if submission.graded:
+            if submission.grade is not None:
+                progress_label = level_serie.grades[submission.grade].label
+                progress_color = level_serie.grades[submission.grade].color
+            else:
+                progress_label = level_serie.grades["0"].label
+                progress_color = level_serie.grades["0"].color
+        else:
+            # Niet bepaald
+            progress_label = level_serie.get_status(NOT_YET_GRADED).label
+            progress_color = level_serie.get_status(NOT_YET_GRADED).color
+        assignment = course.find_assignment(submission.assignment.id)
+        if "online_text_entry" in assignment.submission_types:
+            if submission.body is None or submission.body == "":
+                submission.body = "Geen reflectie ingeleverd."
+            reflection_html_string = templates['reflection'].substitute(
+                {'submitted_date': get_date_time_loc(submission.submitted_date),
+                 'body': submission.body
                  }
             )
+        else:
+            reflection_html_string = ""
+        learning_outcome_list = ""
+        for rubric in assignment.rubrics:
+            criterium = submission.get_criterium_score(rubric.id)
+            if criterium:
+                l_score = str(int(criterium.score))
+                l_comment = criterium.comment
+            else:
+                l_score = "-1"
+                l_comment = ""
 
+            l_label = level_serie.grades[l_score].label
+            l_color = level_serie.grades[l_score].color
+            learning_outcome_list += templates['learning_outcome_row'].substitute(
+                {'learning_outcome': rubric.description,
+                 'color': l_color,
+                 'label': l_label,
+                 'argumentatie': l_comment})
+        learning_outcomes_table = templates['learning_outcomes_table'].substitute(
+            {'learning_outcome_list': learning_outcome_list})
+        level_moment_html_string += templates['level_moment'].substitute(
+            {'level_moment_title': submission.assignment.name,
+             'url': url,
+             'progress_color': progress_color,
+             'progress_label': progress_label,
+             'submitted_date': get_date_time_loc(submission.submitted_date),
+             'grader_name': submission.grader_name,
+             'graded_date': get_date_time_loc(submission.graded_date),
+             'learning_outcomes_table': learning_outcomes_table,
+             'comments': comments,
+             'reflection': reflection_html_string
+             }
+        )
         # print("BLM09 -", student_tabs_html_string)
     return level_moment_html_string
 
@@ -437,18 +438,18 @@ def build_bootstrap_student_index(instance, course_id, course, student_results, 
             guild_group_teacher_str += "<li>"+course.find_teacher(assessor.teacher_id).name+" voor "+course.get_assignment_group(assessor.assignment_group_id).name+"</li>"
 
     student_tab_content = {}
-    for moment in course.level_moments.moments:
-        level_moment_submissions = student_results.get_level_moment_submissions_by_query([moment])
+    for level_moment in course.get_level_moments():
+        submission = student_results.student_level_moments.get_submission_by_assignment(level_moment.id)
         # print("BBS31 -", moment, len(level_moment_submissions))
         level_serie = dashboard.level_serie_collection.level_series[course.level_moments.levels]
-        student_tab_content[moment.replace(" ", "_").lower()] = build_moments(course_id, course, moment, level_serie,
-                                                                              level_moment_submissions, templates)
-    for moment in course.grade_moments.moments:
-        grade_moment_submissions = student_results.get_grade_moment_submissions_by_query([moment])
+        student_tab_content[level_moment.name.replace(" ", "_").lower()] = build_moment(course_id, course, level_serie,
+                                                                              level_moment.name, submission, templates)
+    for grade_moment in course.get_grade_moments():
+        submission = student_results.student_grade_moments.get_submission_by_assignment(grade_moment.id)
         level_serie = dashboard.level_serie_collection.level_series[course.grade_moments.levels]
         # print("BBSI04 -", moment, len(grade_moment_submissions))
-        student_tab_content[moment.replace(" ", "_").lower()] = build_moments(course_id, course, moment, level_serie,
-                                                                              grade_moment_submissions, templates)
+        student_tab_content[grade_moment.name.replace(" ", "_").lower()] = build_moment(course_id, course, level_serie,
+                                                                              grade_moment.name, submission, templates)
 
     # print("BBSI02 -", student_tabs)
     if 'voortgang' in dashboard.student_tabs:

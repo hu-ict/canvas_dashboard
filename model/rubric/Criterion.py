@@ -1,4 +1,4 @@
-from model.Rating import Rating
+from model.rubric.Rating import Rating
 
 
 class Criterion:

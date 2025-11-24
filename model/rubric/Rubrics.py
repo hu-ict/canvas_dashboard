@@ -1,4 +1,4 @@
-from model.Criterion import Criterion
+from model.rubric.Criterion import Criterion
 
 
 class Rubrics:

@@ -12,10 +12,10 @@ def build_bootstrap_late_submission_item(a_templates, a_result, l_submission):
     else:
         messages = ""
     url = "https://canvas.hu.nl/courses/" + str(a_result.id) + "/gradebook/speed_grader?assignment_id=" + str(
-        l_submission['assignment_id']) + "&student_id=" + str(l_submission['student_id'])
+        l_submission['assignment']['id']) + "&student_id=" + str(l_submission['student_id'])
     submission_html_string = a_templates["submission"].substitute(
         {'submission_id': l_submission['id'], 'student_name': l_student_name,
-         'assignment_name': l_submission['assignment_name'],
+         'assignment_name': l_submission['assignment']['name'],
          'submission_date': get_date_time_loc(get_date_time_obj(l_submission['submitted_date'])), 'url': url,
          'messages': messages})
     return submission_html_string
@@ -61,12 +61,16 @@ def build_bootstrap_teacher_index(a_instance, a_templates, a_course, a_result, a
 
             elif responsibility.student_group_collection == "guild_groups":
                 for student_group_name in responsibility.student_groups:
-                    group_name = a_course.find_guild_group_by_name(student_group_name).name
-                    assignment_group = a_course.get_assignment_group(responsibility.assignment_group_id)
-                    if group_name in groups["Gildegroepen"]:
-                        groups["Gildegroepen"][group_name] += ", "+assignment_group.name
+                    group = a_course.find_guild_group_by_name(student_group_name)
+                    if group:
+                        group_name = a_course.find_guild_group_by_name(student_group_name).name
+                        assignment_group = a_course.get_assignment_group(responsibility.assignment_group_id)
+                        if group_name in groups["Gildegroepen"]:
+                            groups["Gildegroepen"][group_name] += ", "+assignment_group.name
+                        else:
+                            groups["Gildegroepen"][group_name] = "Opdrachtgroepen: "+assignment_group.name
                     else:
-                        groups["Gildegroepen"][group_name] = "Opdrachtgroepen: "+assignment_group.name
+                        print("BL41 -", "Group not found", student_group_name)
             teacher_html_string = "<ul>"
             for item in groups:
                 teacher_html_string += "<li>"+item

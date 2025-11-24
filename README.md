@@ -9,7 +9,7 @@ Om een nieuwe course omgeving te maken:
 - run het Python script `generate_start.py`
 Gebruik wordt gemaakt van het `course_instances.json`. Als dit bestand nog niet bestaat wordt deze gemaakt in de directory `.\courses`
 
-Er wordt gevraagd naar een naam van de `instance` bijvoorbeeld `inno-sep24`. De `category` moet opgegeven worden, bijvoorbeeld `inno_courses`. Geef ook het `canvas_course_id` op.
+Er wordt gevraagd naar een naam van de `instance` bijvoorbeeld `inno-sep24`. De `category` moet opgegeven worden, bijvoorbeeld `courses_2026`. Geef ook het `canvas_course_id` op.
 Hier worden attributen in JSON formaat opgegeven:
 ```json 
 {

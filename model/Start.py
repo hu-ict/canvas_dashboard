@@ -3,7 +3,7 @@ from lib.lib_date import get_date_time_obj, get_date_time_str
 
 class Start:
     def __init__(self, canvas_course_id, project_group_name, guild_group_name,
-                 start_date, end_date, target_path, attendance_report, api_key):
+                 start_date, end_date, target_path, config_target, attendance_report, api_key):
         self.canvas_course_id = canvas_course_id
         self.api_key = api_key
         self.project_group_name = project_group_name
@@ -11,6 +11,7 @@ class Start:
         self.start_date = start_date
         self.end_date = end_date
         self.target_path = target_path
+        self.config_target = config_target
         self.attendance_report = attendance_report
 
     def __str__(self):
@@ -25,6 +26,7 @@ class Start:
             'start_date': get_date_time_str(self.start_date),
             'end_date': get_date_time_str(self.end_date),
             'target_path': self.target_path,
+            'config_target': self.config_target,
             'attendance_report': self.attendance_report,
         }
         return dict_result
@@ -45,6 +47,7 @@ class Start:
                     get_date_time_obj(data_dict['start_date']),
                     get_date_time_obj(data_dict['end_date']),
                     data_dict['target_path'],
+                    data_dict['config_target'],
                     data_dict['attendance_report'],
                     data_dict['api_key'])
         return new

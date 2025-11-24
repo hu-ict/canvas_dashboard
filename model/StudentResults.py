@@ -1,8 +1,8 @@
 from model.learning_outcome.Feedback import Feedback
 from model.learning_outcome.StudentLearningOutcome import StudentLearningOutcome
-from model.perspective.StudentAttendance import StudentAttendance
-from model.perspective.StudentGradeMoments import StudentGradeMoments
-from model.perspective.StudentLevelMoments import StudentLevelMoments
+from model.attendance.StudentAttendance import StudentAttendance
+from model.moment.StudentGradeMoments import StudentGradeMoments
+from model.moment.StudentLevelMoments import StudentLevelMoments
 from model.perspective.StudentPerspective import StudentPerspective
 
 
@@ -47,10 +47,10 @@ class StudentResults:
 
     def get_submission_by_assignment(self, assignment_id):
         for submission in self.student_level_moments.submissions:
-            if submission.assignment_id == assignment_id:
+            if submission.assignment.id == assignment_id:
                 return submission
         for submission in self.student_grade_moments.submissions:
-            if submission.assignment_id == assignment_id:
+            if submission.assignment.id == assignment_id:
                 return submission
         return None
 
@@ -91,7 +91,7 @@ class StudentResults:
 
     def get_level_moment(self, assigment_id):
         for peilmoment in self.student_level_moments.submissions:
-            if peilmoment.assignment_id == assigment_id:
+            if peilmoment.assignment.id == assigment_id:
                 return peilmoment
         return None
 
@@ -99,7 +99,7 @@ class StudentResults:
         for submission in self.student_level_moments.submissions:
             condition = 0
             for selector in a_query:
-                if selector.lower() in submission.assignment_name.lower():
+                if selector.lower() in submission.assignment.name.lower():
                     condition += 1
             if condition == len(a_query):
                 return submission
@@ -110,7 +110,7 @@ class StudentResults:
         for submission in self.student_level_moments.submissions:
             condition = 0
             for selector in a_query:
-                if selector.lower() in submission.assignment_name.lower():
+                if selector.lower() in submission.assignment.name.lower():
                     condition += 1
             if condition == len(a_query):
                 submissions.append(submission)
@@ -118,7 +118,7 @@ class StudentResults:
 
     def get_grade_moment(self, assigment_id):
         for grade_moment in self.student_grade_moments.submissions:
-            if grade_moment.assignment_id == assigment_id:
+            if grade_moment.assignment.id == assigment_id:
                 return grade_moment
         return None
 
@@ -126,7 +126,7 @@ class StudentResults:
         for grade_moment in self.student_grade_moments.submissions:
             condition = 0
             for selector in a_query:
-                if selector.lower() in grade_moment.assignment_name.lower():
+                if selector.lower() in grade_moment.assignment.name.lower():
                     condition += 1
             if condition == len(a_query):
                 return grade_moment
@@ -138,7 +138,7 @@ class StudentResults:
             condition = 0
             # moet aan alle selectie criteria voldoen
             for selector in a_query:
-                if selector.lower() in grade_moment.assignment_name.lower():
+                if selector.lower() in grade_moment.assignment.name.lower():
                     condition += 1
             if condition == len(a_query):
                 grade_moments.append(grade_moment)
@@ -146,7 +146,7 @@ class StudentResults:
 
     # def get_judgement(self, perspective_name):
     #     for level_moment in self.student_level_moments.submissions:
-    #         if perspective_name in level_moment.assignment_name.lower() and "beoordeling" in level_moment.assignment_name.lower():
+    #         if perspective_name in level_moment.assignment.name.lower() and "beoordeling" in level_moment.assignment.name.lower():
     #             return int(level_moment.score)
     #     return None
 

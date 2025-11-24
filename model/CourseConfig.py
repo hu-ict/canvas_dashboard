@@ -5,11 +5,11 @@ from model.Role import Role
 from model.Section import Section
 from model.Student import Student
 from model.StudentGroup import StudentGroup
-from model.Teacher import Teacher
+from model.teacher.Teacher import Teacher
 from model.learning_outcome.LearningOutcome import LearningOutcome
-from model.perspective.Attendance import Attendance
-from model.perspective.GradeMoments import GradeMoments
-from model.perspective.LevelMoments import LevelMoments
+from model.attendance.Attendance import Attendance
+from model.moment.GradeMoments import GradeMoments
+from model.moment.LevelMoments import LevelMoments
 from model.perspective.Perspective import Perspective
 
 
@@ -233,6 +233,18 @@ class CourseConfig:
                 return teacher
         return None
 
+    def find_principal_assessor(self, teacher_id):
+        for teacher in self.teachers:
+            if teacher_id == teacher.id:
+                return teacher
+        return None
+
+    def find_teacher_by_name(self, teacher_name):
+        for teacher in self.teachers:
+            if teacher_name == teacher.name:
+                return teacher
+        return None
+
     def find_section(self, section_id):
         for section in self.sections:
             if section_id == section.id:
@@ -257,14 +269,6 @@ class CourseConfig:
         #     return self.attendance
         return None
 
-    def find_assignment_group_by_role(self, a_role):
-        # print("find_assignment_group_by_role", a_role)
-        for role in self.roles:
-            if role.short == a_role:
-                if len(role.assignment_groups) > 0:
-                    return role.assignment_groups[0]
-        return None
-
     def find_assignment_by_group(self, assigment_group_id, assignment_id):
         assignment_group = self.find_assignment_group(assigment_group_id)
         if not assignment_group:
@@ -274,46 +278,21 @@ class CourseConfig:
                 return assigment
         return None
 
-    def find_assignment_group_by_role_name(self, role_name):
-        for role in self.roles:
-            if role.name == role_name:
-                return self.find_assignment_group(role.assignment_group_id)
-        return None
-
-    def get_first_level_moment_by_query(self, a_query):
-        for assignment_group_id in self.level_moments.assignment_group_ids:
-            assignment_group = self.get_assignment_group(assignment_group_id)
-            for assignment in assignment_group.assignment_sequences:
-                condition = 0
-                for selector in a_query:
-                    if selector.lower() in assignment.name.lower():
-                        condition += 1
-                if condition == len(a_query):
-                    return assignment
-        return None
-
-    def get_first_grade_moment_by_query(self, a_query):
-        for assignment_group_id in self.grade_moments.assignment_group_ids:
-            assignment_group = self.get_assignment_group(assignment_group_id)
-            for assignment in assignment_group.assignment_sequences:
-                condition = 0
-                for selector in a_query:
-                    if selector.lower() in assignment.name.lower():
-                        condition += 1
-                if condition == len(a_query):
-                    return assignment
-        return None
-
-    def get_level_moments_by_query(self, a_query):
+    def get_level_moments(self):
         assignments = []
         for assignment_group_id in self.level_moments.assignment_group_ids:
-            assignment_group = self.find_assignment_group(assignment_group_id)
-            for assignment in assignment_group.assignment_sequences:
-                condition = 0
-                for selector in a_query:
-                    if selector.lower() in assignment.name.lower():
-                        condition += 1
-                if condition == len(a_query):
+            assignment_group = self.get_assignment_group(assignment_group_id)
+            for assignment_sequence in assignment_group.assignment_sequences:
+                for assignment in assignment_sequence.assignments:
+                    assignments.append(assignment)
+        return assignments
+
+    def get_grade_moments(self):
+        assignments = []
+        for assignment_group_id in self.grade_moments.assignment_group_ids:
+            assignment_group = self.get_assignment_group(assignment_group_id)
+            for assignment_sequence in assignment_group.assignment_sequences:
+                for assignment in assignment_sequence.assignments:
                     assignments.append(assignment)
         return assignments
 
@@ -327,12 +306,6 @@ class CourseConfig:
         for section in self.sections:
             if section.id == section_id:
                 return section.role
-        return None
-
-    def get_role_by_assignment_groep(self, assignment_group_id):
-        for role in self.roles:
-            if assignment_group_id in role.assignment_groups:
-                return role
         return None
 
     def find_teacher_by_group(self, group_id):

@@ -1,4 +1,4 @@
-from model.Responsibility import Responsibility
+from model.teacher.Responsibility import Responsibility
 
 
 class Teacher:
@@ -7,8 +7,6 @@ class Teacher:
         self.name = name
         self.initials = ''.join([x[0].upper() for x in name.split(' ')])
         self.email = email
-        # self.project_groups = []
-        # self.guild_groups = []
         self.responsibilities = []
 
     def to_json(self):
@@ -16,13 +14,24 @@ class Teacher:
             'id': self.id,
             'name': self.name,
             'email': self.email,
-            # 'project_groups': self.project_groups,
-            # 'guild_groups': self.guild_groups,
             'responsibilities': list(map(lambda r: r.to_json(), self.responsibilities))
         }
 
     def __str__(self):
-        return f'Teacher({self.id}, {self.name}, {self.initials}, {self.email}, {self.guild_groups})'
+        return f'Teacher({self.id}, {self.name}, {self.initials}, {self.email})'
+
+    def find_responsibility_by_assignment_group_id(self, assignment_group_id):
+        for responsibility in self.responsibilities:
+            if responsibility.assignment_group_id == assignment_group_id:
+                return responsibility
+        return None
+
+    def put_responsibility(self, a_responsibility):
+        l_responsibility = self.find_responsibility_by_assignment_group_id(a_responsibility.assignment_group_id)
+        if l_responsibility:
+            l_responsibility.student_groups += a_responsibility.student_groups
+        else:
+            self.responsibilities.append(a_responsibility)
 
     @staticmethod
     def from_dict(data_dict):
@@ -30,12 +39,6 @@ class Teacher:
             new_teacher = Teacher(data_dict['id'], data_dict['name'], data_dict["email"])
         else:
             new_teacher = Teacher(data_dict['id'], data_dict['name'], "")
-        # if 'project_groups' in data_dict:
-        #     new_teacher.project_groups = data_dict['project_groups']
-        # else:
-        #     new_teacher.project_groups = data_dict['teams']
-        # if 'guild_groups' in data_dict:
-        #     new_teacher.guild_groups = data_dict['guild_groups']
         if 'responsibilities' in data_dict:
             # print("TE41 - read responsibilities", new_teacher.name, data_dict['responsibilities'])
             new_teacher.responsibilities = list(map(lambda r: Responsibility.from_dict(r), data_dict['responsibilities']))

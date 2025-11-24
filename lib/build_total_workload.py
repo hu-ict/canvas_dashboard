@@ -43,12 +43,12 @@ def get_submitted_at(item):
 def check_for_late(a_course, a_submission, a_workload, a_actual_day):
     if a_submission.status == NOT_YET_GRADED or a_submission.status == NOT_CORRECT_GRADED:
         student = a_course.find_student(a_submission.student_id)
-        assessor = student.get_assessor_by_assignment_group(a_submission.assignment_group_id)
+        assessor = student.get_assessor_by_assignment_group(a_submission.assignment.group_id)
         if assessor is not None:
             # print("BTW82", student.name, assessor)
             workload_teacher = a_workload.get_workload_teacher(assessor.teacher_id)
             if a_submission.submitted_day is None:
-                late_days = a_actual_day - a_submission.assignment_day
+                late_days = a_actual_day - a_submission.assignment.day
             else:
                 late_days = a_actual_day - a_submission.submitted_day
             if late_days <= 7:
@@ -59,7 +59,7 @@ def check_for_late(a_course, a_submission, a_workload, a_actual_day):
                 workload_teacher.w3_count += 1
             workload_teacher.worklist.append(a_submission.to_json())
         else:
-            print("BTW85 - No assessor for assignment_group_id", a_submission.assignment_group_id, student.name)
+            print("BTW85 - No assessor for assignment.group_id", a_submission.assignment.group_id, student.name)
 
 
 def get_workload(a_course, a_results, a_workload):

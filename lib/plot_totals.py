@@ -72,16 +72,16 @@ def plot_peilingen(a_fig, a_row, a_col, student_totals, a_course, a_progress_lev
         y_hover = []
 
         x_labels.append('Actueel')
-        y_counts.append(student_totals['actual_progress']["overall"][int(level)])
+        y_counts.append(student_totals['actual_progress'][int(level)])
         y_hover.append("Actueel " + a_progress_levels.grades[str(level)].label + " " + str(
-            student_totals['actual_progress']["overall"][int(level)]))
+            student_totals['actual_progress'][int(level)]))
 
         if a_course.level_moments is not None:
-            for label in a_course.level_moments.moments:
+            for label in student_totals["level_moments"]:
                 # print("PT10 moment", label, level, student_totals[a_start.level_moments.name][label])
                 x_labels.append(label)
-                y_counts.append(student_totals["level_moments"][label]["overall"][int(level)])
-                y_hover.append(label+" "+a_progress_levels.grades[str(level)].label+" "+str(student_totals["level_moments"][label]["overall"][int(level)]))
+                y_counts.append(student_totals["level_moments"][label][int(level)])
+                y_hover.append(label+" "+a_progress_levels.grades[str(level)].label+" "+str(student_totals["level_moments"][label][int(level)]))
 
         a_fig.add_trace(go.Bar(x=x_labels, y=y_counts,
                                name=a_progress_levels.grades[level].label,
@@ -100,11 +100,11 @@ def plot_grades(a_fig, a_row, a_col, student_totals, a_course, a_grade_levels):
         x_labels = []
         y_hover = []
         if a_course.level_moments is not None:
-            for label in a_course.grade_moments.moments:
+            for label in student_totals["grade_moments"]:
                 # print("PTG10 moment", label, level)
                 x_labels.append(label)
-                y_counts.append(student_totals["grade_moments"][label]["overall"][int(level)])
-                y_hover.append(label+" "+a_grade_levels.grades[str(level)].label+" "+str(student_totals["grade_moments"][label]["overall"][int(level)]))
+                y_counts.append(student_totals["grade_moments"][label][int(level)])
+                y_hover.append(label+" "+a_grade_levels.grades[str(level)].label+" "+str(student_totals["grade_moments"][label][int(level)]))
 
         a_fig.add_trace(go.Bar(x=x_labels, y=y_counts,
                                name=a_grade_levels.grades[level].label,
@@ -143,7 +143,6 @@ def plot_voortgang(a_instance, a_course, student_totals, a_progress_history, a_p
         col += 1
         if col > 3:
             break
-    # if a_instances.is_instance_of("inno_courses"):
     plot_peilingen(fig, 1, 2, student_totals, a_course, a_progress_levels)
     plot_grades(fig, 1, 2, student_totals, a_course, a_grade_levels)
     file_name = a_instance.get_html_path() + "totals_voortgang" + ".html"

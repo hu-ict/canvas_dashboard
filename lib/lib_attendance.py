@@ -1,8 +1,7 @@
 import csv
 
 from lib.lib_date import get_date_time_obj_alt, date_to_day
-from model.Submission import Submission
-from model.perspective.AttendanceSubmission import AttendanceSubmission
+from model.attendance.AttendanceSubmission import AttendanceSubmission
 
 
 def read_attendance_from_file(start, course):

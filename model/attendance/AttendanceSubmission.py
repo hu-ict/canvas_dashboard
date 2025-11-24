@@ -1,6 +1,4 @@
 from lib.lib_date import get_date_time_obj, get_date_time_str
-from model.Comment import Comment
-from model.CriteriumScore import CriteriumScore
 
 
 class AttendanceSubmission:

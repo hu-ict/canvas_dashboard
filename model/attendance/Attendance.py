@@ -1,6 +1,6 @@
 from model.Bandwidth import Bandwidth
-from model.perspective.AttendanceMoment import AttendanceMoment
-from model.perspective.Policy import Policy
+from model.attendance.AttendanceMoment import AttendanceMoment
+from model.attendance.Policy import Policy
 
 
 class Attendance:

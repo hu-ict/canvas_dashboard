@@ -1,23 +1,19 @@
 from lib.lib_date import get_date_time_obj, get_date_time_str
 from model.Comment import Comment
-from model.CriteriumScore import CriteriumScore
+from model.SubmissionAssignment import SubmissionAssignment
+from model.rubric.CriteriumScore import CriteriumScore
 from model.perspective.Status import NOT_CORRECT_GRADED, NOT_YET_GRADED, GRADED, MISSED_ITEM, BEFORE_DEADLINE
 
 
 class Submission:
-    def __init__(self, submission_id, assignment_group_id, assignment_id, student_id,
-                 assignment_name, assignment_date, assignment_day,
+    def __init__(self, submission_id, submission_assignment, student_id,
                  submitted_date, submitted_day,
                  status, graded,
                  grade, grader_name, graded_date,
-                 score, value, points, flow):
+                 score, value, flow):
         self.id = submission_id
-        self.assignment_group_id = assignment_group_id
-        self.assignment_name = assignment_name
-        self.assignment_id = assignment_id
+        self.assignment = submission_assignment
         self.student_id = student_id
-        self.assignment_date = assignment_date
-        self.assignment_day = assignment_day
         self.submitted_date = submitted_date
         self.submitted_day = submitted_day
         self.status = status
@@ -27,7 +23,6 @@ class Submission:
         self.graded_date = graded_date
         self.score = score
         self.value = value
-        self.points = points
         self.flow = flow
         self.body = None
         self.messages = []
@@ -49,22 +44,17 @@ class Submission:
             l_value = int(self.value * 10) / 10
         return {
             'id': self.id,
-            'assignment_group_id': self.assignment_group_id,
-            'assignment_id': self.assignment_id,
             'student_id': self.student_id,
-            'assignment_name': self.assignment_name,
-            'assignment_date': get_date_time_str(self.assignment_date),
-            'assignment_day': self.assignment_day,
+            'status': self.status,
+            'assignment': self.assignment.to_json(),
             'submitted_date': get_date_time_str(self.submitted_date),
             'submitted_day': self.submitted_day,
-            'status': self.status,
             'graded': self.graded,
             'grade': self.grade,
             'grader_name': self.grader_name,
             "graded_date": get_date_time_str(self.graded_date),
             'score': l_score,
             'value': l_value,
-            'points': int(self.points),
             'flow': l_flow,
             'body': self.body,
             'messages': self.messages,
@@ -91,7 +81,7 @@ class Submission:
 
     def get_complete_status_css(self):
         if self.get_status() == GRADED:
-            if self.graded and self.score == self.points:
+            if self.graded and self.score == self.assignment.points:
                 return "status_complete"
             return "status_incomplete"
         else:
@@ -102,21 +92,18 @@ class Submission:
         return "status_unknown"
 
     def __str__(self):
-        return f'Submission({self.id}, {self.assignment_group_id}, {self.assignment_id}, {self.student_id}, ' \
-               f'{self.assignment_name}, {get_date_time_str(self.assignment_date)}, ' \
+        return f'Submission({self.id}, {self.student_id}, ' \
                f'{get_date_time_str(self.submitted_date)}, {self.graded}, {self.status}, ' \
-               f'{self.score}, {self.value}, {self.points}, Comments: {len(self.comments)})'
+               f'{self.score}, {self.value}, Comments: {len(self.comments)})'
 
     @staticmethod
     def from_dict(data_dict):
-        new_submission = Submission(data_dict['id'], data_dict['assignment_group_id'], data_dict['assignment_id'],
-                                    data_dict['student_id'], data_dict['assignment_name'],
-                                    get_date_time_obj(data_dict['assignment_date']), data_dict['assignment_day'],
+        new_submission = Submission(data_dict['id'], SubmissionAssignment.from_dict(data_dict['assignment']), data_dict['student_id'],
                                     get_date_time_obj(data_dict['submitted_date']), data_dict['submitted_day'],
                                     data_dict['status'],
                                     data_dict['graded'], data_dict['grade'], data_dict['grader_name'],
                                     get_date_time_obj(data_dict['graded_date']), data_dict['score'],
-                                    data_dict['value'], data_dict['points'], data_dict['flow'])
+                                    data_dict['value'], data_dict['flow'])
         new_submission.comments = list(map(lambda c: Comment.from_dict(c), data_dict['comments']))
         new_submission.rubrics = list(map(lambda c: CriteriumScore.from_dict(c), data_dict['rubrics']))
         # print("SU05 -", data_dict)

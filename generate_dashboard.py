@@ -39,7 +39,7 @@ def generate_dashboard(instance_name):
     canvas_course = canvas.get_course(course.canvas_id)
     dashboard = read_dashboard_from_canvas(canvas_course)
     print("GD02 - create_total_progress(instance, course)")
-    total_progress = create_total_progress(instance, course)
+    total_progress = create_total_progress(course)
     print("GD03 - create_total_workload(instance, course, team_coaches)")
     process_total_progress(instance, course, results, total_progress)
     teachers = get_teachers(course)

@@ -3,11 +3,10 @@ from model.Bandwidth import Bandwidth
 
 
 class AssignmentGroup:
-    def __init__(self, assignment_group_id, name, groups, role, strategy, lower_c, upper_c, total_points, lower_points, upper_points, levels, marker):
+    def __init__(self, assignment_group_id, name, groups, strategy, lower_c, upper_c, total_points, lower_points, upper_points, levels, marker):
         self.id = assignment_group_id
         self.name = name
         self.groups = groups
-        self.role = role
         self.strategy = strategy
         self.lower_c = lower_c
         self.upper_c = upper_c
@@ -24,7 +23,6 @@ class AssignmentGroup:
             'name': self.name,
             'id': self.id,
             'groups': self.groups,
-            'role': self.role,
             'strategy': self.strategy,
             'lower_c': self.lower_c,
             'upper_c': self.upper_c,
@@ -72,7 +70,7 @@ class AssignmentGroup:
         assignment_sequence.assignments.append(a_assignment)
 
     def __str__(self):
-        line = f'AssigmentGroup({self.id}, {self.name}, {self.role}, strategy={self.strategy}, points={self.total_points}, {self.lower_points}, {self.upper_points})\n'
+        line = f'AssigmentGroup({self.id}, {self.name}, strategy={self.strategy}, points={self.total_points}, {self.lower_points}, {self.upper_points})'
         for assignment_sequence in self.assignment_sequences:
             line += str(assignment_sequence)
         return line
@@ -81,7 +79,7 @@ class AssignmentGroup:
     def from_dict(data_dict):
         new_assignment_group = AssignmentGroup(data_dict['id'], data_dict['name'],
                                                data_dict['groups'],
-                                               data_dict['role'], data_dict['strategy'], data_dict['lower_c'],
+                                               data_dict['strategy'], data_dict['lower_c'],
                                                data_dict['upper_c'], data_dict['total_points'],
                                                data_dict['lower_points'], data_dict['upper_points'], data_dict['levels'], data_dict['marker'])
         if 'bandwidth' in data_dict.keys():

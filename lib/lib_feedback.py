@@ -13,19 +13,19 @@ def categorize_feedback(feedback_comment):
 
 
 def get_feedback_from_submission(course, student, submission):
-    # print("LSU81 -", submission.assignment_name)
-    feedback_date = submission.assignment_date
+    # print("LSU81 -", submission.assignment.name)
+    feedback_date = submission.assignment.date
     feedback_day = date_to_day(course.start_date, feedback_date)
     for comment in submission.comments:
         # algemene comments in een Canvas submission
         feedback_list = categorize_feedback(comment.comment)
-        # print("LSU80 - Student", student.email, "Submission", submission.assignment_name)
+        # print("LSU80 - Student", student.email, "Submission", submission.assignment.name)
         # print("LSU80 -", len(feedback_list), comment.comment)
         for feedback_dict in feedback_list:
             # print("LSU81 -", feedback_dict)
             feedback = Feedback(comment.author_id, comment.author_name, feedback_date, feedback_day,
                                 feedback_dict["text"], "N",
-                                submission.assignment_name, submission.assignment_id, submission.grade)
+                                submission.assignment.name, submission.assignment.id, submission.grade)
             if 'LU' in feedback_dict["lu"].upper():
                 if feedback_dict["lu"].upper() in student.learning_outcomes:
                     if feedback.comment[0] in "-+":
@@ -37,7 +37,7 @@ def get_feedback_from_submission(course, student, submission):
                     print("LSU82 - Leeruitkomst uit comment niet gevonden in lijst van leeruitkomsten",
                           feedback_dict["lu"].upper(),
                           student.name,
-                          submission.assignment_name,
+                          submission.assignment.name,
                           comment.author_name,
                           comment.comment,
                           )
@@ -48,8 +48,8 @@ def get_feedback_from_submission(course, student, submission):
 
     if len(submission.rubrics) > 0:
         for criterion_score in submission.rubrics:
-            # print("BP10 -", submission.assignment_id, criterion_score)
-            assignment = course.find_assignment(submission.assignment_id)
+            # print("BP10 -", submission.assignment.id, criterion_score)
+            assignment = course.find_assignment(submission.assignment.id)
             # print("BP11 -", assignment)
             assignment_criterion = assignment.get_criterion(criterion_score.id)
             if assignment_criterion is None:
@@ -69,8 +69,8 @@ def get_feedback_from_submission(course, student, submission):
                     # de assignment rubric is gekoppeld aan een leeruitkomst
                     feedback = Feedback("id", submission.grader_name, feedback_date, feedback_day,
                                         criterion_score.comment, "N",
-                                        submission.assignment_name + " (" + assignment_criterion.description + ")",
-                                        submission.assignment_id, rating_description)
+                                        submission.assignment.name + " (" + assignment_criterion.description + ")",
+                                        submission.assignment.id, rating_description)
                     lu = assignment_criterion.learning_outcomes[0]
                     # print("LSU89 -", assignment_criterion.learning_outcomes, len(student.learning_outcomes[lu].feedback_list), student.learning_outcomes[lu])
                     student.learning_outcomes[lu].feedback_list.append(feedback)
@@ -80,8 +80,8 @@ def get_feedback_from_submission(course, student, submission):
                     for feedback_dict in feedback_list:
                         feedback = Feedback("id", submission.grader_name, feedback_date, feedback_day,
                                             feedback_dict["text"], "N",
-                                            submission.assignment_name + " (" + assignment_criterion.description + ")",
-                                            submission.assignment_id, rating_description)
+                                            submission.assignment.name + " (" + assignment_criterion.description + ")",
+                                            submission.assignment.id, rating_description)
                         if 'LU' in feedback_dict["lu"].upper():
                             if feedback_dict["lu"].upper() in student.learning_outcomes:
                                 if feedback.comment[0] in "-+":
@@ -91,6 +91,6 @@ def get_feedback_from_submission(course, student, submission):
                                 feedback.comment = "Incorrecte @LUx annotatie. " + feedback.comment
                                 student.general_feedback_list.append(feedback)
                                 print("LSU91 - Leeruitkomst", feedback_dict["lu"].upper(), "niet gevonden", student.name,
-                                      submission.assignment_name, submission.grader_name, criterion_score.comment)
+                                      submission.assignment.name, submission.grader_name, criterion_score.comment)
                         else:
                             student.general_feedback_list.append(feedback)

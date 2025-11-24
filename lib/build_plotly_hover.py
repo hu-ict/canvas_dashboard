@@ -22,22 +22,22 @@ def get_hover_assignment(points, data_point):
     elif "Assignment" in str(type(data_point)):
         assignment = data_point
         if points:
-            return "<b>" + assignment.name + "</b><br>Deadline " + get_date_time_loc(assignment.assignment_date) + ", " + str(assignment.points) + get_punten_str(assignment.points)
+            return "<b>" + assignment.name + "</b><br>Deadline " + get_date_time_loc(assignment.date) + ", " + str(assignment.points) + get_punten_str(assignment.points)
         else:
-            return "<b>" + assignment.name + "</b><br>Deadline " + get_date_time_loc(assignment.assignment_date)
+            return "<b>" + assignment.name + "</b><br>Deadline " + get_date_time_loc(assignment.date)
     else:
         submission = data_point
         if points:
-            return "<b>" + submission.assignment_name + "</b><br>Deadline " + get_date_time_loc(submission.assignment_date) + ", " + str(submission.points) + get_punten_str(submission.points)
+            return "<b>" + submission.assignment.name + "</b><br>Deadline " + get_date_time_loc(submission.assignment.date) + ", " + str(submission.assignment.points) + get_punten_str(submission.assignment.points)
         else:
-            return "<b>" + submission.assignment_name + "</b><br>Deadline " + get_date_time_loc(submission.assignment_date)
+            return "<b>" + submission.assignment.name + "</b><br>Deadline " + get_date_time_loc(submission.assignment.date)
 
 
 def get_hover_grade(course, submission, grade):
     l_hover = "<br>Ingeleverd " + get_date_time_loc(submission.submitted_date)
     l_label = grade.label
     l_hover += "<br><b>" + l_label + "</b>, gewaardeerd door " + str(submission.grader_name) + " op " + get_date_time_loc(submission.graded_date)
-    if course.find_perspective_by_assignment_group(submission.assignment_group_id).show_points:
+    if course.find_perspective_by_assignment_group(submission.assignment.group_id).show_points:
         l_hover += ", score: " + str(submission.score)
     l_hover += "<br>"
     return l_hover
@@ -81,27 +81,27 @@ def get_hover_rubrics_comments(course, submission, grade):
         return ""
     l_hover = "<br><b>Criteria:</b>"
     for criterion_score in submission.rubrics:
-        # print("BP10 -", submission.assignment_id, criterion_score)
-        assignment = course.find_assignment(submission.assignment_id)
+        # print("BP10 -", submission.assignment.id, criterion_score)
+        assignment = course.find_assignment(submission.assignment.id)
         # print("BP11 -", assignment)
         assignment_criterion = assignment.get_criterion(criterion_score.id)
         if assignment_criterion is None:
             continue
-        # if submission.assignment_id ==  298261 and submission.student_id == 148369:
+        # if submission.assignment.id ==  298261 and submission.student_id == 148369:
         # print("BP11 -", assignment_criterion, criterion_score)
         if criterion_score.rating_id:
             if assignment_criterion.get_rating(criterion_score.rating_id) is not None:
                 l_hover += "<br>- " + assignment_criterion.description + " <b>" + assignment_criterion.get_rating(criterion_score.rating_id).description + "</b>"
-            # if submission.assignment_id == 298261 and submission.student_id == 148369:
+            # if submission.assignment.id == 298261 and submission.student_id == 148369:
             #     print("BP14 -", l_hover)
         else:
             if criterion_score.score == 0:
                 l_hover += "<br>- " + assignment_criterion.description + " <b>"+grade.label+"</b>"
-                # if submission.assignment_id == 298261 and submission.student_id == 148369:
+                # if submission.assignment.id == 298261 and submission.student_id == 148369:
                 #     print("BP15 -", l_hover)
             else:
                 l_hover += "<br>- " + assignment_criterion.description + " <b>"+str(criterion_score.score)+"</b>"
-                # if submission.assignment_id == 298261 and submission.student_id == 148369:
+                # if submission.assignment.id == 298261 and submission.student_id == 148369:
                 #     print("BP16 -", l_hover)
 
         if criterion_score.comment:
@@ -110,7 +110,7 @@ def get_hover_rubrics_comments(course, submission, grade):
             word_list = wrapper.wrap(text=value)
             for line in word_list:
                 l_hover += "<br>" + line
-        # if submission.assignment_id == 298261 and submission.student_id == 148369:
+        # if submission.assignment.id == 298261 and submission.student_id == 148369:
         #     print("BP20 -", l_hover)
     return l_hover
 
@@ -141,7 +141,7 @@ def get_hover_feedback(titel, feedback):
 def get_hover_moment(a_course, a_submission, a_level_serie):
     hover = NO_DATA
     if a_submission is not None:
-        hover = "<b>" + a_submission.assignment_name + "</b> " + get_date_time_loc(a_submission.assignment_date) + "<br>"
+        hover = "<b>" + a_submission.assignment.name + "</b> " + get_date_time_loc(a_submission.assignment.date) + "<br>"
         if a_submission.graded:
             hover += a_level_serie.grades[a_submission.grade].label
             hover += ", bepaald door " + str(a_submission.grader_name) + " op " + get_date_time_loc(a_submission.graded_date)

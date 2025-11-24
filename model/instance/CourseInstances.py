@@ -11,7 +11,7 @@ class CourseInstances:
         self.events = {}
 
     def new_environment(self):
-        self.course_categories['inno_courses'] = CourseCategory('inno_courses', [])
+        self.course_categories['courses_2026'] = CourseCategory('courses_2026', [])
         self.course_categories['prop_courses'] = CourseCategory('prop_courses', [])
         self.course_categories['other_courses'] = CourseCategory('other_courses', [])
         self.events['course_create_event'] = Event('course_create_event', 'TIME')
@@ -45,7 +45,6 @@ class CourseInstances:
         return line
 
     @staticmethod
-
     def get_category(self, instance_name):
         for category in self.course_categories.values():
             for instance in category.course_instances:

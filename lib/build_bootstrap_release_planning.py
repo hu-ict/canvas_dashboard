@@ -100,7 +100,7 @@ def write_release_planning(a_course, a_templates, a_assignment_group_id):
                                                                                      'assignment_unlock_date': get_date_time_loc(
                                                                                          assignment.unlock_date),
                                                                                      'assignment_lock_date': get_date_time_loc(
-                                                                                         assignment.assignment_date),
+                                                                                         assignment.date),
                                                                                      'assignment_grading_type': assignment.grading_type,
                                                                                      'assignment_points': assignment.points,
                                                                                      'rubrics_points': rubrics_str,

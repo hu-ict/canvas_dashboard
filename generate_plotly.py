@@ -1,71 +1,25 @@
 import sys
-
 from canvasapi import Canvas
 from plotly.subplots import make_subplots
-
 from lib.build_plotly_attendance import plot_attendance_perspective
-from lib.build_plotly_perspective import plot_perspective, find_submissions, plot_overall_level_moment, \
-    plot_overall_grade_moment, plot_timeline
+from lib.build_plotly_perspective import plot_perspective, plot_timeline
 from lib.lib_date import get_date_time_loc, get_actual_date, API_URL
 from lib.file import read_course, read_results, read_course_instances, read_start, read_dashboard_from_canvas
-from model.Submission import Submission
-
-
-def level_construct(a_course):
-    l_peilingen = {}
-    if a_course.level_moments is None or len(a_course.level_moments.assignment_group_ids) == 0:
-        return l_peilingen
-    for perspective in a_course.perspectives.values():
-        l_peilingen[perspective.name] = []
-    assignment_group = a_course.get_assignment_group(a_course.level_moments.assignment_group_ids[0])
-    for assignment_sequence in assignment_group.assignment_sequences:
-        for assignment in assignment_sequence.assignments:
-            # zoek de juiste Assignment
-            for peil_label in a_course.level_moments.moments:
-                if peil_label.lower() in assignment.name.lower():
-                    # zoek het juiste Perspective
-                    for perspective_name in l_peilingen:
-                        if perspective_name.lower() in assignment.name.lower():
-                            l_peilingen[perspective_name].append({'assignment': assignment, 'submission': None})
-    return l_peilingen
-
-
-def grade_construct(a_course):
-    l_grades = {}
-    if a_course.level_moments is None or len(a_course.grade_moments.assignment_group_ids) == 0:
-        return l_grades
-    for perspective in a_course.perspectives.values():
-        l_grades[perspective.name] = []
-    assignment_group = a_course.get_assignment_group(a_course.grade_moments.assignment_group_ids[0])
-    for assignment_sequence in assignment_group.assignment_sequences:
-        for assignment in assignment_sequence.assignments:
-            # zoek de juiste Assignment
-            for peil_label in a_course.grade_moments.moments:
-                if peil_label.lower() in assignment.name.lower():
-                    # zoek het juiste Perspective
-                    for perspective_name in l_grades:
-                        if perspective_name.lower() in assignment.name.lower():
-                            l_grades[perspective_name].append({'assignment': assignment, 'submission': None})
-    return l_grades
 
 
 def plot_student(instances, course, student, actual_date, actual_day,
-                 a_level_construction, a_grade_construction,
                  subplots,
                  level_serie_collection, feedback_colors):
     fig = make_subplots(rows=subplots.rows, cols=subplots.cols, subplot_titles=subplots.titles, specs=subplots.specs,
                         vertical_spacing=0.10,
                         horizontal_spacing=0.08)
     fig.update_layout(height=900, width=1200, showlegend=False)
-
-
     for perspective in student.perspectives.values():
         if perspective.name in subplots.positions:
             row = subplots.positions[perspective.name]['row']
             col = subplots.positions[perspective.name]['col']
             # print("GP19 -", perspective, a_level_construction, a_grade_construction)
             plot_perspective(row, col, fig, course, perspective,
-                             a_level_construction, a_grade_construction,
                              actual_day, get_date_time_loc(actual_date),
                              level_serie_collection)
 
@@ -113,17 +67,16 @@ def generate_plotly(instance_name):
 
     # Define bar properties
 
-    l_level_construction = level_construct(course)
-    l_grade_construction = grade_construct(course)
+    # l_level_construction = level_construct(course)
+    # l_grade_construction = grade_construct(course)
     count = 0
     for student in results.students:
-        l_level_construction = find_submissions(student, l_level_construction)
-        l_grade_construction = find_submissions(student, l_grade_construction)
+        # l_level_construction = find_submissions(student, l_level_construction)
+        # l_grade_construction = find_submissions(student, l_grade_construction)
         # print(l_peil_construction)
         print("GPL90 -", student.name)
 
         plot_student(instance, course, student, results.actual_date, results.actual_day,
-                     l_level_construction, l_grade_construction,
                      dashboard.subplot,
                      dashboard.level_serie_collection, dashboard.feedback_colors)
 

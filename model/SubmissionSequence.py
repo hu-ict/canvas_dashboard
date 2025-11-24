@@ -16,7 +16,7 @@ class SubmissionSequence:
 
     def get_day(self):
         if len(self.submissions) > 0:
-            return self.get_actual_submission().assignment_day
+            return self.get_actual_submission().assignment.day
         return None
 
     def get_score(self):
@@ -77,7 +77,7 @@ class SubmissionSequence:
 
     def get_submission_by_assignment_id(self, assignment_id):
         for submission in self.submissions:
-            if submission.assignment_id == assignment_id:
+            if submission.assignment.id == assignment_id:
                 return submission
         return None
 
@@ -97,7 +97,7 @@ class SubmissionSequence:
         # Vind de index van een submission
         index = -1
         for i in range(len(self.submissions)):
-            if self.submissions[i].assignment_id == a_submission.assignment_id:
+            if self.submissions[i].assignment.id == a_submission.assignment.id:
                 index = i
                 break
         if index >= 0:
@@ -110,7 +110,7 @@ class SubmissionSequence:
 
     def get_assignment_group_id(self):
         if len(self.submissions) > 0:
-            return self.submissions[0].assignment_group_id
+            return self.submissions[0].assignment.group_id
         else:
             return None
 

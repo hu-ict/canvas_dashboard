@@ -120,7 +120,7 @@ def get_menu_items(a_instance, a_course):
     menu_items.append("Release Planning")
     menu_items.append("Leeruitkomsten")
     menu_items.append("Analytics")
-    if a_instance.is_instance_of("inno_courses") or a_instance.is_instance_of("courses_2026"):
+    if a_instance.is_instance_of("courses_2026"):
         menu_items.append("Analyse")
     return menu_items
 

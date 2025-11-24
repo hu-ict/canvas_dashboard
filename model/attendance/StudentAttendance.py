@@ -1,4 +1,4 @@
-from model.perspective.AttendanceSubmission import AttendanceSubmission
+from model.attendance.AttendanceSubmission import AttendanceSubmission
 
 
 class StudentAttendance:
