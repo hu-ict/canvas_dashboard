@@ -1,8 +1,14 @@
-from lib.file import read_start, read_course, read_course_instances
+import json
+
+from lib.file import read_start, read_course, read_environment, read_secret_api_key
 from lib.lib_date import get_actual_date
 import sys
 
 import csv
+
+from model.environment.Environment import ENVIRONMENT_FILE_NAME
+from model.environment.SecretApiKey import SECRET_API_KEY_FILE_NAME
+
 
 class UserDictAdapter:
     def __init__(self, a_course_id, a_course_name, a_instance_name, a_start_date, a_end_date, a_name, a_email, a_role):
@@ -28,21 +34,27 @@ class UserDictAdapter:
         }
 
 
-def generate_user_data(instance_name):
+def generate_user_data(course_code, instance_name):
     print("GUD01 - generate_user_data.py")
     g_actual_date = get_actual_date()
-    instances = read_course_instances()
+    environment = read_environment(ENVIRONMENT_FILE_NAME)
+    if len(instance_name) > 0:
+        environment.current_instance = {"course_name": course_code, "course_instance_name": instance_name}
+        with open(ENVIRONMENT_FILE_NAME, 'w') as f:
+            dict_result = environment.to_json()
+            json.dump(dict_result, f, indent=2)
+    course_instance = environment.get_instance_of_course(environment.current_instance)
+    print("GUD02 - Instance:", course_instance.name)
+
     user_data = list()
-    for instance in instances.instances.values():
-        print("GUD02 - Instance:", instance.name)
-        start = read_start(instance.get_start_file_name())
-        course = read_course(instance.get_course_file_name())
-        for student in course.students:
-            user = UserDictAdapter(start.canvas_course_id, course.name, instance.name, start.start_date, start.end_date, student.name, student.email, "STUDENT")
-            user_data.append(user)
-        for teachers in course.teachers:
-            user = UserDictAdapter(start.canvas_course_id, course.name, instance.name, start.start_date, start.end_date, teachers.name, teachers.email, "TEACHER")
-            user_data.append(user)
+    course = read_course(course_instance.get_course_file_name())
+    for student in course.students:
+        user = UserDictAdapter(course_instance.canvas_course_id, course_instance.course_code, course_instance.name, course_instance.period["start_date"], course_instance.period["end_date"], student.name, student.email, "STUDENT")
+        user_data.append(user)
+    for teachers in course.teachers:
+        user = UserDictAdapter(course_instance.canvas_course_id, course_instance.course_code, course_instance.name, course_instance.period["start_date"], course_instance.period["end_date"], teachers.name, teachers.email, "TEACHER")
+        user_data.append(user)
+
     with open("courses/user_data.csv", mode="w", newline="", encoding="utf-8") as bestand:
         veldnamen = ["canvas_course_id", "course_name", "instance_name", "start_date", "end_date", "user_name", "user_email", "user_role"]
         csv_file = csv.DictWriter(bestand, fieldnames=veldnamen)
@@ -56,6 +68,6 @@ def generate_user_data(instance_name):
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding='utf-8')
     if len(sys.argv) > 1:
-        generate_user_data(sys.argv[1])
+        generate_user_data(sys.argv[1], sys.argv[2])
     else:
-        generate_user_data("")
+        generate_user_data("", "")

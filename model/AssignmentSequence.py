@@ -69,7 +69,7 @@ class AssignmentSequence:
                 passed_assignments.append(assignment)
         return passed_assignments
 
-    def get_missed_assignments(self, instance, course, submission_sequence, actual_day):
+    def get_missed_assignments(self, submission_sequence, actual_day):
         missed_assignments = []
         last_in_completed = False
         for assignment in self.assignments:

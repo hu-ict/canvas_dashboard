@@ -131,7 +131,7 @@ def build_bootstrap_progress(a_start, a_course, a_results, a_templates, a_labels
     return progress_html_string
 
 
-def build_bootstrap_analytics_tab(instance, a_course, learning_analytics, a_templates, a_level_serie_collection,
+def build_bootstrap_analytics_tab(course_instance, a_course, learning_analytics, a_templates, a_level_serie_collection,
                                   actual_day):
     html_string = ""
     for assignment_group in a_course.assignment_groups:
@@ -142,7 +142,8 @@ def build_bootstrap_analytics_tab(instance, a_course, learning_analytics, a_temp
                 assignment_list.append(assignment)
         assignment_list = sorted(assignment_list, key=lambda a: a.day)
         for assignment in assignment_list:
-            file_name = instance.name + "/general/analytics_" + str(assignment.id) + ".html"
+            file_name = ".//" + course_instance.name + "//general//analytics_" + str(assignment.id) + ".html"
+            file_name_2 = "analytics_" + str(assignment.id) + ".html"
             if assignment.day < actual_day:
                 background_color = "#ffb3b3"
             else:
@@ -154,7 +155,7 @@ def build_bootstrap_analytics_tab(instance, a_course, learning_analytics, a_temp
                  'assignment_lock_date': get_date_time_loc(
                      assignment.date)})
             process_analytics(learning_analytics, assignment, a_level_serie_collection,
-                              instance.get_html_root_path() + file_name)
+                              course_instance.get_html_general_path() + file_name_2)
 
         html_string += a_templates["analytics_card"].substitute({'assignment_group_id': str(assignment.group_id),
                                                                  'assignment_group_name': assignment_group.name,

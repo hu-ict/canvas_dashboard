@@ -1,9 +1,16 @@
 import json
 import os
-from lib.file import ENVIRONMENT_FILE_NAME, read_course_instances
+from lib.file import read_course_instances
 from lib.lib_date import get_date_time_obj
 from model.Start import Start
+from model.environment.Environment import ENVIRONMENT_FILE_NAME
 from model.instance.Instance import Instance
+
+period = {
+    "sep25": {"start_date": "2025-09-01T00:00:00Z", "end_date": "2026-01-30T23:59:59Z"},
+    "feb26": {"start_date": "2026-02-09T00:00:00Z", "end_date": "2026-07-10T23:59:59Z"},
+    "sep26": {"start_date": "2026-08-31T00:00:00Z", "end_date": "2027-01-29T23:59:59Z"},
+}
 
 instances = read_course_instances()
 new_instance = input("Create new instance by giving name: ")
@@ -43,8 +50,8 @@ else:
 start = Start(canvas_course_id,
               project_group_name,
               guild_group_name,
-              get_date_time_obj("2025-09-01T00:00:00Z"),
-              get_date_time_obj("2026-01-30T23:59:59Z"),
+              get_date_time_obj(period["sep25"]["start_date"]),
+              get_date_time_obj(period["sep25"]["end_date"]),
               "onedrive",
               "LOCAL",
               attendance_path,

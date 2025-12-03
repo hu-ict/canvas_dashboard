@@ -2,11 +2,11 @@ from model.instance.Event import Event
 from model.instance.Instance import Instance
 from model.instance.CourseCategory import CourseCategory
 
-
 class CourseInstances:
     def __init__(self, current_instance):
         self.current_instance = current_instance
         self.course_categories = {}
+        self.courses = {}
         self.instances = {}
         self.events = {}
 

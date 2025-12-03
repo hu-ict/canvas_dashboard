@@ -8,7 +8,7 @@ from lib.lib_date import get_actual_date
 
 def main(instance_name):
 
-    with open("names.json", mode='r', encoding="utf-8") as file_names:
+    with open("../names.json", mode='r', encoding="utf-8") as file_names:
         names = json.load(file_names)
         lookup = {}
         print(names)

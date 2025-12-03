@@ -109,33 +109,32 @@ def build_bootstrap_progress(a_instance, a_course, a_results, a_templates, level
     return progress_html_string
 
 
-def get_menu_items(a_instance, a_course):
+def get_menu_items(course):
     menu_items = ["Groepen"]
-    if len(a_course.guild_groups) > 0:
+    if len(course.guild_groups) > 0:
         menu_items.append("Gilden")
-    if len(a_course.roles) > 1:
+    if len(course.roles) > 1:
         menu_items.append("Rollen")
     menu_items.append("Voortgang")
     menu_items.append("Werkvoorraad")
     menu_items.append("Release Planning")
     menu_items.append("Leeruitkomsten")
     menu_items.append("Analytics")
-    if a_instance.is_instance_of("courses_2026"):
+    if course.course_code == "TICT-V3SE6-25":
         menu_items.append("Analyse")
     return menu_items
 
 
 def build_bootstrap_menu(a_instance, a_templates, a_menu_items):
-    start_pages = {}
-    start_pages["Groepen"] = "./" + a_instance.name + "/general/standard.html"
-    start_pages["Gilden"] = "./" + a_instance.name + "/general/standard.html"
-    start_pages["Rollen"] = "./" + a_instance.name + "/general/standard.html"
-    start_pages["Voortgang"] = "./" + a_instance.name + "/general/totals_voortgang.html"
-    start_pages["Werkvoorraad"] = "./" + a_instance.name + "/general/workload_index.html"
-    start_pages["Release Planning"] = "./" + a_instance.name + "/general/overall_opbouw.html"
-    start_pages["Leeruitkomsten"] = "./" + a_instance.name + "/general/standard.html"
-    start_pages["Analytics"] = "./" + a_instance.name + "/general/standard.html"
-    start_pages["Analyse"] = "./" + a_instance.name + "/general/standard.html"
+    start_pages = {"Groepen": "./" + a_instance.name + "/general/standard.html",
+                   "Gilden": "./" + a_instance.name + "/general/standard.html",
+                   "Rollen": "./" + a_instance.name + "/general/standard.html",
+                   "Voortgang": "./" + a_instance.name + "/general/totals_voortgang.html",
+                   "Werkvoorraad": "./" + a_instance.name + "/general/workload_index.html",
+                   "Release Planning": "./" + a_instance.name + "/general/overall_opbouw.html",
+                   "Leeruitkomsten": "./" + a_instance.name + "/general/standard.html",
+                   "Analytics": "./" + a_instance.name + "/general/standard.html",
+                   "Analyse": "./" + a_instance.name + "/general/standard.html"}
     html_menu_string = ""
     for tab in a_menu_items:
         html_menu = ""
@@ -198,7 +197,7 @@ def get_initials(item):
 
 def build_bootstrap_general(a_instance, a_course, a_results, a_templates, a_teachers, level_series, a_total_workload):
     l_semester_day = a_results.actual_day
-    menu_items = get_menu_items(a_instance, a_course)
+    menu_items = get_menu_items(a_course)
     menu_html_string = build_bootstrap_menu(a_instance, a_templates, menu_items)
     left_panel_html_string = build_bootstrap_left_panel(a_instance, menu_items, a_course, a_results, a_templates, level_series, a_total_workload)
     teacher_html_string = ''
@@ -234,9 +233,9 @@ def build_bootstrap_general(a_instance, a_course, a_results, a_templates, a_teac
          'menu_html_string': menu_html_string,
          'left_panel_html_string': left_panel_html_string})
 
-    with open(a_instance.get_html_root_path() + 'index.html', mode='w', encoding="utf-8") as file_index:
+    with open(a_instance.get_html_index_path() + 'index.html', mode='w', encoding="utf-8") as file_index:
         file_index.write(index_html_string)
 
     standard_html_string = a_templates['standard'].substitute({})
-    with open(a_instance.get_html_path() + 'standard.html', mode='w', encoding="utf-8") as file_index:
+    with open(a_instance.get_html_general_path() + 'standard.html', mode='w', encoding="utf-8") as file_index:
         file_index.write(standard_html_string)

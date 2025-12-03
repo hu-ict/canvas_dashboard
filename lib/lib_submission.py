@@ -1,9 +1,4 @@
-from lib.lib_date import get_date_time_obj, date_to_day, get_actual_date, get_date_time_str
-from model.Comment import Comment
 from model.SubmissionAssignment import SubmissionAssignment
-from model.rubric.CriteriumScore import CriteriumScore
-from model.Submission import Submission
-from model.perspective.Status import MISSED_ITEM, NOT_CORRECT_GRADED, NOT_YET_GRADED, GRADED
 
 NO_SUBMISSION = "Niets ingeleverd voor de deadline"
 NO_SUBMISSION_GRADE = "Moet nog beoordeeld worden"
@@ -120,7 +115,7 @@ def get_rubric_score(rubrics_submission, student):
     return criterium_scores, round(total_rubric_score, 2), error
 
 
-def submission_builder(a_instance, a_course, a_student, a_assignment, a_submission_assignment, a_canvas_submission, a_dashboard):
+def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submission_assignment, a_canvas_submission, a_dashboard):
     grader_name = None
     grader_date = None
     submission_grade = None
@@ -187,7 +182,7 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_submissi
     # maak een submission en voeg de commentaren toe
     # print("LS31 -", f"submission_builder [{graded}] [{a_canvas_submission.submitted_at}] grade {a_canvas_submission.grade} grader_id {a_canvas_submission.grader_id} comments {len(canvas_comments)} score {a_canvas_submission.score} grading_type {a_assignment.grading_type} and student {a_student.name}.")
     if has_assignment_rubric and has_submission_rubrics and a_assignment.grading_type == "pass_fail":
-        if a_instance.is_instance_of("prop_courses") and perspective.name != "grade_moments" and perspective.name != "level_moments":
+        if a_course_code in ["TICT-V1SE1-24"] and perspective.name != "grade_moments" and perspective.name != "level_moments":
             if a_canvas_submission.grade == 'complete':
                 submission_score = round(a_assignment.points, 2)
             elif a_canvas_submission.grade == 'incomplete':
@@ -216,7 +211,7 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_submissi
             submission_score = round(0, 2)
 
     if has_assignment_rubric and not has_submission_rubrics and a_assignment.grading_type == "pass_fail":
-        if a_instance.is_instance_of("prop_courses") and perspective.name != "grade_moments" and perspective.name != "level_moments":
+        if a_course_code in ["TICT-V1SE1-24"] and perspective.name != "grade_moments" and perspective.name != "level_moments":
             if a_assignment.group_id == a_course.level_moments.assignment_groups[0]:
                 submission_score = round(a_assignment.points, 2)
             if a_assignment.group_id == a_course.grade_moments.assignment_groups[0]:
@@ -331,11 +326,10 @@ def submission_builder(a_instance, a_course, a_student, a_assignment, a_submissi
     return l_submission
 
 
-def add_missed_assignments(instance, course, actual_day, student_perspective):
+def add_missed_assignments(course, actual_day, student_perspective):
     for assignment_sequence in course.perspectives[student_perspective.name].assignment_sequences:
         submission_sequence = student_perspective.get_submission_sequence_by_tag(assignment_sequence.tag)
-        missed_assignments = assignment_sequence.get_missed_assignments(instance, course, submission_sequence,
-                                                                        actual_day)
+        missed_assignments = assignment_sequence.get_missed_assignments(submission_sequence, actual_day)
         # print("ASA07 - Missed assignments", len(missed_assignments))
         for assignment in missed_assignments:
             l_submission = Submission(0, assignment.group_id, assignment.id, 0, assignment.name,
@@ -406,7 +400,7 @@ def add_open_grade_moments(course, actual_day, student_id, student_grade_moments
               student_grade_moments.assignment_groups)
 
 
-def read_submissions(a_instance, a_canvas_course, a_course, a_results, a_total_refresh, dashboard):
+def read_submissions(a_course_code, a_canvas_course, a_course, a_results, a_total_refresh, dashboard):
     for assignment_group in a_course.assignment_groups:
         perspective = a_course.find_perspective_by_assignment_group(assignment_group.id)
         if perspective is None:
@@ -446,7 +440,7 @@ def read_submissions(a_instance, a_canvas_course, a_course, a_results, a_total_r
                     if student is None:
                         # print("RS20 Could not find student", canvas_submission.user_id)
                         continue
-                    l_submission = submission_builder(a_instance, a_course, student, assignment, submission_assignment, canvas_submission,
+                    l_submission = submission_builder(a_course_code, a_course, student, assignment, submission_assignment, canvas_submission,
                                                       dashboard)
                     # voeg een submission toe aan een van de perspectieven
                     if l_submission is None:

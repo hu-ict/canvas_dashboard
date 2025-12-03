@@ -166,7 +166,7 @@ def build_bootstrap_release_planning_tab(a_instance, a_course, a_templates, leve
     # genereer de bestanden voor in de IFrame
     html_string = ""
     for level_serie in level_serie_collection.level_series.values():
-        file_name = a_instance.get_html_path() + "level_serie_" + str(level_serie.name) + ".html"
+        file_name = a_instance.get_html_general_path() + "level_serie_" + str(level_serie.name) + ".html"
         write_level_serie(a_course, a_templates, level_serie, file_name)
     for perspective in a_course.perspectives.values():
         for assignment_group_id in perspective.assignment_group_ids:
@@ -175,7 +175,7 @@ def build_bootstrap_release_planning_tab(a_instance, a_course, a_templates, leve
     for perspective in a_course.perspectives.values():
         for assignment_group_id in perspective.assignment_group_ids:
             file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group_id) + ".html"
-            file_name_release_planning = a_instance.get_html_path() + "release_planning_" + str(assignment_group_id) + ".html"
+            file_name_release_planning = a_instance.get_html_general_path() + "release_planning_" + str(assignment_group_id) + ".html"
             write_release_planning_index(a_course, a_templates, assignment_group_id, file_name_release_planning, file_name_bandwidth)
 
     assignment_group_html_string = ""

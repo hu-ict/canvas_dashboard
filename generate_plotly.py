@@ -1,13 +1,17 @@
+import json
 import sys
 from canvasapi import Canvas
 from plotly.subplots import make_subplots
 from lib.build_plotly_attendance import plot_attendance_perspective
 from lib.build_plotly_perspective import plot_perspective, plot_timeline
 from lib.lib_date import get_date_time_loc, get_actual_date, API_URL
-from lib.file import read_course, read_results, read_course_instances, read_start, read_dashboard_from_canvas
+from lib.file import read_course, read_results, read_dashboard_from_canvas, read_environment, read_secret_api_key, \
+    read_dashboard
+from model.environment.Environment import ENVIRONMENT_FILE_NAME
+from model.environment.SecretApiKey import SECRET_API_KEY_FILE_NAME
 
 
-def plot_student(instances, course, student, actual_date, actual_day,
+def plot_student(course_instance, course, student, actual_date, actual_day,
                  subplots,
                  level_serie_collection, feedback_colors):
     fig = make_subplots(rows=subplots.rows, cols=subplots.cols, subplot_titles=subplots.titles, specs=subplots.specs,
@@ -37,31 +41,30 @@ def plot_student(instances, course, student, actual_date, actual_day,
                       level_serie_collection, feedback_colors)
 
     student_name = student.email.split("@")[0].lower()
-    file_name_html = instances.get_temp_path() + student_name + "_progress.html"
+    file_name_html = course_instance.get_temp_path() + student_name + "_progress.html"
     fig.write_html(file_name_html, include_plotlyjs="cdn")
-    if not instances.is_instance_of('prop_courses'):
-        file_name_jpg = instances.get_student_path() + student_name + "_progress.jpg"
+    if course_instance.course_code not in ["TICT-V1SE1-24"]:
+        file_name_jpg = course_instance.get_html_student_path() + student_name + "_progress.jpg"
         fig.write_image(file_name_jpg)
 
 
-def generate_plotly(instance_name):
+def generate_plotly(course_code, instance_name):
     print("GPL01 - generate_plotly.py")
     g_actual_date = get_actual_date()
-    instances = read_course_instances()
+    environment = read_environment(ENVIRONMENT_FILE_NAME)
+    secret_api_key = read_secret_api_key(SECRET_API_KEY_FILE_NAME)
     if len(instance_name) > 0:
-        instances.current_instance = instance_name
-    instance = instances.get_instance_by_name(instances.current_instance)
-    print("GPL02 - Instance:", instance.name)
-    course = read_course(instance.get_course_file_name())
-    results = read_results(instance.get_result_file_name())
+        environment.current_instance = {"course_name": course_code, "course_instance_name": instance_name}
+        with open(ENVIRONMENT_FILE_NAME, 'w') as f:
+            dict_result = environment.to_json()
+            json.dump(dict_result, f, indent=2)
+    course_instance = environment.get_instance_of_course(environment.current_instance)
+    print("Instance:", course_instance.name)
+
+    course = read_course(course_instance.get_course_file_name())
+    results = read_results(course_instance.get_result_file_name())
     # level_serie_collection = read_levels("levels.json")
-    start = read_start(instance.get_start_file_name())
-    canvas = Canvas(API_URL, start.api_key)
-    user = canvas.get_current_user()
-    print("GRL03 - Username", user.name)
-    canvas_course = canvas.get_course(course.canvas_id)
-    # level_serie_collection = read_levels_from_canvas(canvas_course)
-    dashboard = read_dashboard_from_canvas(canvas_course)
+    dashboard = read_dashboard(course_instance.get_dashboard_file())
     if results.actual_day > course.days_in_semester:
         results.actual_day = course.days_in_semester
 
@@ -76,7 +79,7 @@ def generate_plotly(instance_name):
         # print(l_peil_construction)
         print("GPL90 -", student.name)
 
-        plot_student(instance, course, student, results.actual_date, results.actual_day,
+        plot_student(course_instance, course, student, results.actual_date, results.actual_day,
                      dashboard.subplot,
                      dashboard.level_serie_collection, dashboard.feedback_colors)
 
@@ -85,6 +88,6 @@ def generate_plotly(instance_name):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        generate_plotly(sys.argv[1])
+        generate_plotly(sys.argv[1], sys.argv[1])
     else:
-        generate_plotly("")
+        generate_plotly("", "")

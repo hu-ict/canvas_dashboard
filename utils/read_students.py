@@ -3,6 +3,8 @@ from canvasapi import Canvas
 import json
 from datetime import timezone, datetime
 
+from canvasapi.course import Course
+
 from lib.file import read_course_config, read_course_config_start
 from lib.lib_date import actual_date, roles, API_URL
 from model.Student import Student

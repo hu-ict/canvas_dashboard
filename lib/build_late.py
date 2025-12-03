@@ -86,6 +86,6 @@ def build_bootstrap_teacher_index(a_instance, a_templates, a_course, a_result, a
         teacher_index_html = a_templates["teacher_index"].substitute({'teacher_id': teacher.initials, 'teacher_name': teacher.name, 'workload': workload_html_string, 'teacher': teacher_html_string})
 
         file_name = "teacher_"+teacher.initials+".html"
-        with open(a_instance.get_html_path()+file_name, mode='w', encoding="utf-8") as file_late_list:
+        with open(a_instance.get_html_general_path()+file_name, mode='w', encoding="utf-8") as file_late_list:
             file_late_list.write(teacher_index_html)
 

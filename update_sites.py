@@ -1,24 +1,29 @@
 import json
 import sys
 
-from lib.file import read_course, read_msteams_api, read_course_instances
+from lib.file import read_course, read_msteams_api, read_course_instances, read_environment
 from lib.lib_date import get_actual_date
 from lib.teams_api_lib import teams, get_channels, get_drive, get_me_for_check, get_access_token
 from model.TeamsApi import Channel
+from model.environment.Environment import ENVIRONMENT_FILE_NAME
 
 
-def main(instance_name):
+def update_sites(course_code, instance_name):
+    print("GCS01 - generate_results.py")
     g_actual_date = get_actual_date()
-    instances = read_course_instances()
+    environment = read_environment(ENVIRONMENT_FILE_NAME)
     if len(instance_name) > 0:
-        instances.current_instance = instance_name
-    instance = instances.get_instance_by_name(instances.current_instance)
-    print("PB02 - Instance:", instance.name)
+        environment.current_instance = {"course_name": course_code, "course_instance_name": instance_name}
+        with open(ENVIRONMENT_FILE_NAME, 'w') as f:
+            dict_result = environment.to_json()
+            json.dump(dict_result, f, indent=2)
+    course_instance = environment.get_instance_of_course(environment.current_instance)
+    print("Instance:", course_instance.name)
 
-    if instances.current_instance not in ["TICT-VINNO1-22-FEB25", "TICT-V3SE6-25_SEP25"]:
+    if course_instance.course_code not in ["TICT-VINNO1-22", "TICT-V3SE6-25"]:
         print("US04 - No student channels defined for this course")
         return
-    course = read_course(instance.get_course_file_name())
+    course = read_course(course_instance.get_course_file_name())
     msteams_api = read_msteams_api("msteams_api.json")
     if get_me_for_check(msteams_api.gen_token) is None:
         token = get_access_token(msteams_api.tenant_id, msteams_api.client_id)
@@ -63,7 +68,7 @@ def main(instance_name):
         dict_result = msteams_api.to_json()
         json.dump(dict_result, f, indent=2)
 
-    with open(instance.get_course_file_name(), 'w') as f:
+    with open(course_instance.get_course_file_name(), 'w') as f:
         dict_result = course.to_json()
         json.dump(dict_result, f, indent=2)
 
@@ -72,6 +77,6 @@ def main(instance_name):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        main(sys.argv[1])
+        update_sites(sys.argv[1], sys.argv[2])
     else:
-        main("")
+        update_sites("", "")

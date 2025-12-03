@@ -1,38 +1,54 @@
 import json
 import sys
-from lib.file import read_course_instances, ENVIRONMENT_FILE_NAME
+
+from lib.file import read_environment, read_workflow
 from lib.lib_date import get_actual_date
-from model.observer.observer_pattern import ConcreteEvent, ConcreteObserver
+from model.environment.Environment import ENVIRONMENT_FILE_NAME
+from model.environment.Workflow import WORKFLOW_FILE_NAME
+from generate_course import generate_course
+from generate_dashboard import generate_dashboard
+from generate_plotly import generate_plotly
+from generate_portfolio import generate_portfolio
+from generate_results import generate_results
+from generate_students import generate_students
+from publish_dashboard import publish_dashboard
 
 
-def main(instance_name, a_event):
-    print("Only instance:", instance_name)
-    course_instances = read_course_instances()
+def main(course_code, instance_name, event):
+    environment = read_environment(ENVIRONMENT_FILE_NAME)
     if len(instance_name) > 0:
-        course_instances.current_instance = instance_name
-    with open(ENVIRONMENT_FILE_NAME, 'w') as f:
-        dict_result = course_instances.to_json()
-        json.dump(dict_result, f, indent=2)
-    # print(course_instances.current_instance)
-    observers = []
-    events = {}
-    for event in course_instances.events.keys():
-        events[event] = ConcreteEvent(event)
-    for instance in course_instances.instances.values():
-        for trigger in events.keys():
-            if len(instance_name) > 0:
-                if instance_name == instance.name:
-                    observer = ConcreteObserver(instance.name, instance.listen[trigger])
-                    observers.append(observer)
-                    events[trigger].attach(observer)
-            else:
-                observer = ConcreteObserver(instance.name, instance.listen[trigger])
-                observers.append(observer)
-                events[trigger].attach(observer)
+        environment.current_instance = {"course_name": course_code, "course_instance_name": instance_name}
+        with open(ENVIRONMENT_FILE_NAME, 'w') as f:
+            dict_result = environment.to_json()
+            json.dump(dict_result, f, indent=2)
+    course_instance = environment.get_instance_of_course(environment.current_instance)
+    if course_instance is None:
+        print("RUN31 - ERROR course_instance not found in environment.json", instance_name)
+        return
+    print("Instance:", course_instance.name)
+    workflow = read_workflow(WORKFLOW_FILE_NAME)
+    action = workflow.get_action_by_name(event)
+    for python_script in action.run:
+        print("OP05 - Event", action.name, "course_code", course_code, "course_instance", instance_name +":>", python_script)
+        if python_script == "generate_course.py":
+            generate_course(course_code, instance_name)
+        elif python_script == "generate_students.py":
+            generate_students(course_code, instance_name)
+        elif python_script == "generate_results.py":
+            generate_results(course_code, instance_name)
+        elif python_script == "generate_dashboard.py":
+            generate_dashboard(course_code, instance_name)
+        elif python_script == "generate_plotly.py":
+            generate_plotly(course_code, instance_name)
+        elif python_script == "generate_portfolio.py":
+            generate_portfolio(course_code, instance_name)
+        elif python_script == "publish_dashboard.py":
+            publish_dashboard(course_code, instance_name)
+        else:
+            print("OP51 - Script wordt niet herkend.", python_script)
 
-    # for event in course_instances.events.keys():
-    print("RU11 -", a_event)
-    events[a_event].notify()
+    print("RUN11 -", event)
+
 
 
 if __name__ == "__main__":
@@ -42,8 +58,8 @@ if __name__ == "__main__":
     else:
         # main("TICT-V1SE1-24-SEP2025", "course_create_event")
         # main("TICT-V3SE5-25_SEP25", "course_create_event")
-        # main("TICT-V3SE6-25_SEP25", "course_create_event")
-        main("TICT-V3SE6-25_SEP25_TEST", "course_create_event")
+        main("TICT-V3SE6-25", "TICT-V3SE6-25_sep25", "results_create_event")
+        # main("TICT-V3SE6-25_SEP25_TEST", "course_create_event")
     total_seconds = (get_actual_date() - l_actual_date).seconds
     seconds = total_seconds % 60
     minutes = total_seconds // 60

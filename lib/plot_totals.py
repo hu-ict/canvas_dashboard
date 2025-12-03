@@ -145,7 +145,7 @@ def plot_voortgang(a_instance, a_course, student_totals, a_progress_history, a_p
             break
     plot_peilingen(fig, 1, 2, student_totals, a_course, a_progress_levels)
     plot_grades(fig, 1, 2, student_totals, a_course, a_grade_levels)
-    file_name = a_instance.get_html_path() + "totals_voortgang" + ".html"
+    file_name = a_instance.get_html_general_path() + "totals_voortgang" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")
 
 
@@ -184,10 +184,10 @@ def plot_werkvoorraad(a_instance, a_course, a_workload, a_workload_history):
     # plot_workload_history(fig, 2, 3, a_workload_history)
     # data = go.Histogram(x=np.array(student_totals['late']['count']))
     # fig.add_trace(data, 2, 3)
-    file_name = a_instance.get_html_path() + "totals_werkvoorraad" + ".html"
+    file_name = a_instance.get_html_general_path() + "totals_werkvoorraad" + ".html"
     fig.write_html(file_name, include_plotlyjs="cdn")
 
 
 def plot_overall_opbouw(a_instance, a_course, a_level_serie_collection):
-    file_name = a_instance.get_html_path() + "overall_opbouw" + ".html"
+    file_name = a_instance.get_html_general_path() + "overall_opbouw" + ".html"
     process_bandwidth_overall(a_course, a_level_serie_collection, file_name)

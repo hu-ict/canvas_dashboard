@@ -209,7 +209,7 @@ def build_moment(course_id, course, level_serie, assignment_name, submission, te
 #     return cell_status
 
 
-def build_bootstrap_portfolio(instance, course_id, course, student, student_results, actual_date, actual_day, templates,
+def build_bootstrap_portfolio(course_instance, course_id, course, student, student_results, actual_date, actual_day, templates,
                               level_serie_collection):
     portfolio_items_html_string = ""
     portfolio_items = []
@@ -345,7 +345,7 @@ def build_bootstrap_portfolio(instance, course_id, course, student, student_resu
     #         for assignment_sequence in assignment_groep.assignment_sequences:
     #             portfolio_items_model_html_string += templates['portfolio_item_modal'].substitute({"portfolio_item_id": assignment_sequence.tag, "portfolio_item": portfolio_item["portfolio_item"], "content": "Content"})
     attendance_html = ""
-    if instance.is_instance_of("prop_courses"):
+    if course_instance.course_code in ["TICT-V1S1-24"]:
         attendance_dict = {}
         attendance_dict['attendance_essential_count'] = str(int(student_results.student_attendance.essential_count))
         attendance_dict['attendance_count'] = str(int(student_results.student_attendance.count))
@@ -415,7 +415,7 @@ def build_bootstrap_feedback(course, student_results, templates, level_serie_col
     return student_feedback_html_string
 
 
-def build_bootstrap_student_index(instance, course_id, course, student_results, actual_date, actual_day, templates,
+def build_bootstrap_student_index(course_instance, course_id, course, student_results, actual_date, actual_day, templates,
                                   dashboard):
     student = course.find_student(student_results.id)
     project_group = course.find_project_group(student.project_id)
@@ -455,10 +455,10 @@ def build_bootstrap_student_index(instance, course_id, course, student_results, 
     if 'voortgang' in dashboard.student_tabs:
         # Importeren plotly html in index html file
         student_name = student.email.split("@")[0].lower()
-        file_name_html = instance.get_temp_path() + student_name + "_progress.html"
+        file_name_html = course_instance.get_temp_path() + student_name + "_progress.html"
         student_tab_content['voortgang'] = '<h2 class="mt-2">Voortgang</h2>' + read_plotly(file_name_html)
     if 'portfolio' in dashboard.student_tabs:
-        student_tab_content['portfolio'] = build_bootstrap_portfolio(instance, course_id, course, student,
+        student_tab_content['portfolio'] = build_bootstrap_portfolio(course_instance, course_id, course, student,
                                                                      student_results, actual_date, actual_day,
                                                                      templates, dashboard.level_serie_collection)
     if 'feedback' in dashboard.student_tabs:
@@ -466,7 +466,7 @@ def build_bootstrap_student_index(instance, course_id, course, student_results, 
                                                                    dashboard.level_serie_collection)
 
     # print("BSI10 - ", student_tabs.keys())
-    student_tabs_html_string = build_student_tabs(instance, course, student_tab_content,
+    student_tabs_html_string = build_student_tabs(course_instance, course, student_tab_content,
                                                   dashboard.student_tabs)
     student_index_html_string = templates['student_index'].substitute(
         {
@@ -483,7 +483,7 @@ def build_bootstrap_student_index(instance, course_id, course, student_results, 
         }
     )
     student_name = student.email.split("@")[0].lower()
-    file_name_html = instance.get_student_path() + student_name + "_index.html"
+    file_name_html = course_instance.get_html_student_path() + student_name + "_index.html"
     # print("BB21 - Write portfolio for", student.name)
     with open(file_name_html, mode='w', encoding="utf-8") as file_portfolio:
         file_portfolio.write(student_index_html_string)

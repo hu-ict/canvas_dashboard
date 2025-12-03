@@ -5,26 +5,41 @@ from model.Result import Result
 from model.CourseConfig import CourseConfig
 from model.Start import Start
 from model.TeamsApi import TeamsApi
+from model.environment.Environment import Environment
+from model.environment.SecretApiKey import SecretApiKey
+from model.environment.Workflow import Workflow
 from model.workload.WorkloadHistory import WorkloadHistory
 from model.dashboard.Dashboard import Dashboard
 from model.dashboard.Subplot import Subplot
 from model.instance.CourseInstances import CourseInstances
 from model.dashboard.LevelSerieCollection import LevelSerieCollection
 
-ENVIRONMENT_FILE_NAME = ".//courses//course_instances.json"
+
+def read_environment(environment_file_name):
+    print("F031 - read_environment", environment_file_name)
+    if os.path.isfile(environment_file_name):
+        with open(environment_file_name, mode='r', encoding="utf-8") as environment_file:
+            data = json.load(environment_file)
+            environment = Environment.from_dict(data)
+            return environment
 
 
-def read_course_instances():
-    print("F001 - read_course_instances", ENVIRONMENT_FILE_NAME)
-    if os.path.isfile(ENVIRONMENT_FILE_NAME):
-        with open(ENVIRONMENT_FILE_NAME, mode='r', encoding="utf-8") as file_course_instances:
-            data = json.load(file_course_instances)
-            course_instances = CourseInstances.from_dict(data)
-            return course_instances
-    else:
-        course_instances = CourseInstances("")
-        course_instances.new_environment()
-        return course_instances
+def read_workflow(workflow_file_name):
+    print("F032 - read_workflow", workflow_file_name)
+    if os.path.isfile(workflow_file_name):
+        with open(workflow_file_name, mode='r', encoding="utf-8") as workflow_file:
+            data = json.load(workflow_file)
+            environment = Workflow.from_dict(data)
+            return environment
+
+
+def read_secret_api_key(file_name):
+    print("F033 - read_secret_api_key", file_name)
+    if os.path.isfile(file_name):
+        with open(file_name, mode='r', encoding="utf-8") as secret_api_key_file:
+            data = json.load(secret_api_key_file)
+            secret_api_key = SecretApiKey.from_dict(data)
+            return secret_api_key
 
 
 def read_start(start_file_name):
@@ -116,11 +131,13 @@ def read_msteams_api(msteams_api_file_name):
         result = TeamsApi.from_dict(data)
         return result
 
+
 def read_file_list(file_list_file_name):
     print("F010 - read read_file_list", file_list_file_name)
     with open(file_list_file_name, mode='r', encoding="utf-8") as file_list_file:
         result = json.load(file_list_file)
         return result
+
 
 def remove_html_tags(text):
     """Remove html tags from a string"""
@@ -154,13 +171,23 @@ def read_subplots_from_canvas1(canvas_course):
     subplot = Subplot.from_dict(data)
     return subplot
 
+
 def read_dashboard_from_canvas(canvas_course):
-    print("F023 - read dashboard_file from Canvas", "dashboard-dot-json")
+    print("F023 - Read dashboard_file from Canvas dashboard-dot-json")
     page = canvas_course.get_page("dashboard-dot-json")
     dashboard_file = remove_html_tags(page.body)
     data = json.loads(dashboard_file)
     dashboard = Dashboard.from_dict(data)
     return dashboard
+
+
+def read_dashboard(dashboard_file_name):
+    print("F023 - Read dashboard_file from os: dashboard.json")
+    with open(dashboard_file_name, mode='r', encoding="utf-8") as file_dashboard:
+        data = json.load(file_dashboard)
+        dashboard = Dashboard.from_dict(data)
+        return dashboard
+
 
 def read_plotly(plotly_file_name):
     with open(plotly_file_name, mode='r', encoding="utf-8") as file_result:

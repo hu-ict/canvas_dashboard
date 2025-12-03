@@ -4,10 +4,10 @@ from lib.lib_date import get_date_time_obj_alt, date_to_day
 from model.attendance.AttendanceSubmission import AttendanceSubmission
 
 
-def read_attendance_from_file(start, course):
-    print("read_attendance", start.attendance_report)
+def read_attendance_from_file(attendance_report, course):
+    print("read_attendance", attendance_report)
     attendances = []
-    with open(start.attendance_report, mode='r', encoding="utf-8") as attendance_file:
+    with open(attendance_report, mode='r', encoding="utf-8") as attendance_file:
         DictReader_obj = csv.DictReader(attendance_file, delimiter=",")
         for item in DictReader_obj:
             if item["Attendance"] == "present":

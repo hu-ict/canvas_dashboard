@@ -7,8 +7,8 @@ from lib.lib_date import get_actual_date
 from model.environment.Environment import ENVIRONMENT_FILE_NAME
 
 
-def publish_dashboard(course_code, instance_name):
-    print("PDB01 - publish_dashboard.py")
+def publish_results(course_code, instance_name):
+    print("PRS01 - publish_results.py")
     g_actual_date = get_actual_date()
     environment = read_environment(ENVIRONMENT_FILE_NAME)
     if len(instance_name) > 0:
@@ -19,25 +19,25 @@ def publish_dashboard(course_code, instance_name):
     course_instance = environment.get_instance_of_course(environment.current_instance)
     print("Instance:", course_instance.name)
 
-    print("PDB91 - Copy files to OneDrive docenten")
+    print("PRS11 - Copy files to another environment")
     file_names = []
-    file_names.append("index.html")
+    file_names.append("dashboard_"+course_instance.name+".json")
+    file_names.append("course_"+course_instance.name+".json")
+    file_names.append("results_"+course_instance.name+".json")
+    file_names.append("progress_"+course_instance.name+".json")
+    file_names.append("workload_"+course_instance.name+".json")
+
     for file_name in file_names:
         shutil.copyfile(course_instance.get_html_index_path() + file_name, course_instance.target_path + file_name)
         # print(file_name)
-    print("PDB92 - Target", course_instance.target_path + course_instance.name + "//students")
-    shutil.copytree(course_instance.get_html_student_path(), course_instance.target_path + course_instance.name + "//students", copy_function=shutil.copy2,
+    print("PDB93 - Target", course_instance.get_project_path + course_instance.name + "//general")
+    shutil.copytree(course_instance.get_project_path(), course_instance.target_path + course_instance.name + "//general", copy_function=shutil.copy2,
                     ignore_dangling_symlinks=False,
                     dirs_exist_ok=True)
-    print("PDB93 - Target", course_instance.target_path + course_instance.name + "//general")
-    shutil.copytree(course_instance.get_html_general_path(), course_instance.target_path + course_instance.name + "//general", copy_function=shutil.copy2,
-                    ignore_dangling_symlinks=False,
-                    dirs_exist_ok=True)
-    print("PDB99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
-
+    print("PRS99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        publish_dashboard(sys.argv[1], sys.argv[2])
+        publish_results(sys.argv[1], sys.argv[2])
     else:
-        publish_dashboard("", "")
+        publish_results("", "")

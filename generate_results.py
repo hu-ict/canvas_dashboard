@@ -1,9 +1,11 @@
 from canvasapi import Canvas
 import json
 
-from generate_progress import proces_progress
-from lib.file import read_start, read_course, read_course_instances, read_dashboard_from_canvas, \
-    write_results, write_progress_history, read_progress_history
+from model.environment.Environment import ENVIRONMENT_FILE_NAME
+from model.environment.SecretApiKey import SECRET_API_KEY_FILE_NAME
+from utils.generate_progress import proces_progress
+from lib.file import read_course, read_dashboard_from_canvas, write_results, write_progress_history, \
+    read_progress_history, read_environment, read_secret_api_key, read_dashboard
 from lib.lib_attendance import read_attendance
 from lib.lib_feedback import get_feedback_from_submission
 from lib.lib_submission import count_graded, add_missed_assignments, read_submissions, add_open_level_moments, \
@@ -14,23 +16,26 @@ from model.StudentResults import StudentResults
 import sys
 
 
-def generate_results(instance_name):
-    print("GR01 - generate_results.py")
+def generate_results(course_code, instance_name):
+    print("GCS01 - generate_results.py")
     g_actual_date = get_actual_date()
-    instances = read_course_instances()
+    environment = read_environment(ENVIRONMENT_FILE_NAME)
+    secret_api_key = read_secret_api_key(SECRET_API_KEY_FILE_NAME)
     if len(instance_name) > 0:
-        instances.current_instance = instance_name
-    instance = instances.get_instance_by_name(instances.current_instance)
-    print("GR02 - Instance:", instance.name)
-    start = read_start(instance.get_start_file_name())
-    course = read_course(instance.get_course_file_name())
+        environment.current_instance = {"course_name": course_code, "course_instance_name": instance_name}
+        with open(ENVIRONMENT_FILE_NAME, 'w') as f:
+            dict_result = environment.to_json()
+            json.dump(dict_result, f, indent=2)
+    course_instance = environment.get_instance_of_course(environment.current_instance)
+    print("Instance:", course_instance.name)
 
+    course = read_course(course_instance.get_course_file_name())
     # Initialize a new Canvas object
-    canvas = Canvas(API_URL, start.api_key)
+    canvas = Canvas(API_URL, secret_api_key.canvas_api_key)
     user = canvas.get_current_user()
     print("GR03 - Username", user.name)
     canvas_course = canvas.get_course(course.canvas_id)
-    dashboard = read_dashboard_from_canvas(canvas_course)
+    dashboard = read_dashboard(canvas_course)
     if g_actual_date > course.end_date:
         results = Result(course.canvas_id, course.name, course.end_date,
                          date_to_day(course.start_date, course.end_date), 0, 0)
@@ -52,14 +57,14 @@ def generate_results(instance_name):
     # for student in results.students:
     #     print("GR07 -", student.name, student.number)
     if course.attendance is not None:
-        read_attendance(start, course, results)
+        read_attendance(course_instance.attendance_report, course, results)
     else:
         print("GR10 - No attendance")
-    read_submissions(instance, canvas_course, course, results, True, dashboard)
+    read_submissions(course_instance.course_code, canvas_course, course, results, True, dashboard)
     for student in results.students:
         for student_perspective in student.perspectives.values():
             # Perspective aanvullen met missed Assignments waar nodig (niets ingeleverd)
-            add_missed_assignments(instance, course, results.actual_day, student_perspective)
+            add_missed_assignments(course, results.actual_day, student_perspective)
         add_open_level_moments(course, results.actual_day, student.id, student.student_level_moments)
         add_open_grade_moments(course, results.actual_day, student.id, student.student_grade_moments)
     # for student in results.students:
@@ -93,7 +98,7 @@ def generate_results(instance_name):
     # with open(instances.get_result_file_name(instances.current_instance), 'w') as f:
     #     dict_result = results.to_json(["perspectives"])
     #     json.dump(dict_result, f, indent=2)
-    progress_history = read_progress_history(instance.get_progress_file_name())
+    progress_history = read_progress_history(course_instance.get_progress_file_name())
     proces_progress(course, results, progress_history)
     # progress_history = generate_history(results)
 
@@ -101,13 +106,13 @@ def generate_results(instance_name):
         # print(l_peil_construction)
         # print("GR41 -", student.name)
         student_name = student.email.split("@")[0].lower()
-        file_name_json = instance.get_student_path() + student_name + ".json"
+        file_name_json = course_instance.get_html_student_path() + student_name + ".json"
         with open(file_name_json, 'w', encoding='utf-8') as f:
             dict_result = student.to_json()
             json.dump(dict_result, f, indent=2)
 
-    write_results(instance.get_result_file_name(), results)
-    write_progress_history(instance.get_progress_file_name(), progress_history)
+    write_results(course_instance.get_result_file_name(), results)
+    write_progress_history(course_instance.get_progress_file_name(), progress_history)
 
     print("GR99 Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
@@ -115,6 +120,6 @@ def generate_results(instance_name):
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding='utf-8')
     if len(sys.argv) > 1:
-        generate_results(sys.argv[1])
+        generate_results(sys.argv[1], sys.argv[2])
     else:
-        generate_results("")
+        generate_results("", "")

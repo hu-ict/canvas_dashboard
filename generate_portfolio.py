@@ -1,41 +1,45 @@
+import json
 import sys
 from canvasapi import Canvas
 
 from lib.build_bootstrap_student import build_bootstrap_student_index
 from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_actual_date, API_URL
-from lib.file import read_course, read_results, read_course_instances, read_start, read_dashboard_from_canvas
+from lib.file import read_course, read_results, read_dashboard_from_canvas, read_environment, read_secret_api_key, \
+    read_dashboard
+from model.environment.Environment import ENVIRONMENT_FILE_NAME
+from model.environment.SecretApiKey import SECRET_API_KEY_FILE_NAME
 
 
-def generate_portfolio(instance_name):
-    print("GPF01 - generate_portfolio.py")
+def generate_portfolio(course_code, instance_name):
+    print("GPL01 - generate_portfolio.py")
     g_actual_date = get_actual_date()
-    instances = read_course_instances()
+    environment = read_environment(ENVIRONMENT_FILE_NAME)
+    secret_api_key = read_secret_api_key(SECRET_API_KEY_FILE_NAME)
     if len(instance_name) > 0:
-        instances.current_instance = instance_name
-    instance = instances.get_instance_by_name(instances.current_instance)
-    print("GPF02 - Instance:", instance.name)
-    course = read_course(instance.get_course_file_name())
-    results = read_results(instance.get_result_file_name())
-    templates = load_templates(instance.get_template_path())
-    start = read_start(instance.get_start_file_name())
-    canvas = Canvas(API_URL, start.api_key)
-    user = canvas.get_current_user()
-    print("GRF03 - Username", user.name)
-    canvas_course = canvas.get_course(course.canvas_id)
-    dashboard = read_dashboard_from_canvas(canvas_course)
+        environment.current_instance = {"course_name": course_code, "course_instance_name": instance_name}
+        with open(ENVIRONMENT_FILE_NAME, 'w') as f:
+            dict_result = environment.to_json()
+            json.dump(dict_result, f, indent=2)
+    course_instance = environment.get_instance_of_course(environment.current_instance)
+    print("Instance:", course_instance.name)
 
+    course = read_course(course_instance.get_course_file_name())
+    results = read_results(course_instance.get_result_file_name())
+    dashboard = read_dashboard(course_instance.get_dashboard_file())
+
+    templates = load_templates("templates//")
     for student in results.students:
         # print(l_peil_construction)
         print("GPF11 -", student.name)
-        build_bootstrap_student_index(instance, results.id, course, student, results.actual_date, results.actual_day, templates, dashboard)
+        build_bootstrap_student_index(course_instance, results.id, course, student, results.actual_date, results.actual_day, templates, dashboard)
     print("GPF99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         # generate_plotly(sys.argv[1])
-        generate_portfolio(sys.argv[1])
+        generate_portfolio(sys.argv[1], sys.argv[2])
     else:
         # generate_plotly("")
-        generate_portfolio("")
+        generate_portfolio("", "")

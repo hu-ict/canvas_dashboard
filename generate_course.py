@@ -2,11 +2,18 @@ import json
 import sys
 
 from canvasapi import Canvas
+
 from lib.lib_bandwidth import bandwidth_builder, bandwidth_builder_attendance, get_bandwidth_sum
 from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
-from lib.file import read_start, read_course_instances, read_config_from_canvas, read_course
+from lib.file import read_config_from_canvas, read_course, read_environment, read_secret_api_key, \
+    read_dashboard_from_canvas
+from lib.lib_student import get_groups, get_section_students, get_students_in_groups, link_students_to_role, \
+    link_assessors_to_groups_and_students, link_principal_assessor_to_groups_and_students
 from lib.lib_text import get_extracted_text
 from model.Assignment import Assignment
+from model.Student import Student
+from model.environment.Environment import ENVIRONMENT_FILE_NAME
+from model.environment.SecretApiKey import SECRET_API_KEY_FILE_NAME
 from model.rubric.Criterion import Criterion
 from model.rubric.Rating import Rating
 from model.attendance.AttendanceMoment import AttendanceMoment
@@ -132,22 +139,31 @@ def get_predefined_lu(course, assignment_sequence, assignment):
                     assignment_sequence.add_learning_outcome(learning_outcome_id)
                     assignment.add_learning_outcome(learning_outcome_id)
 
-
-def generate_course(instance_name):
+def generate_course(course_code, instance_name):
     print("GCS01 - generate_course.py")
     g_actual_date = get_actual_date()
-    instances = read_course_instances()
+    environment = read_environment(ENVIRONMENT_FILE_NAME)
+    secret_api_key = read_secret_api_key(SECRET_API_KEY_FILE_NAME)
     if len(instance_name) > 0:
-        instances.current_instance = instance_name
-    instance = instances.get_instance_by_name(instances.current_instance)
-    print("GCS02 -", "Instance:", instance.name)
-    start = read_start(instance.get_start_file_name())
-    canvas = Canvas(API_URL, start.api_key)
-    canvas_course = canvas.get_course(start.canvas_course_id)
-    if start.config_target == "CANVAS":
+        environment.current_instance = {"course_name": course_code, "course_instance_name": instance_name}
+        with open(ENVIRONMENT_FILE_NAME, 'w') as f:
+            dict_result = environment.to_json()
+            json.dump(dict_result, f, indent=2)
+    course_instance = environment.get_instance_of_course(environment.current_instance)
+    print("Instance:", course_instance.name)
+
+    canvas = Canvas(API_URL, secret_api_key.canvas_api_key)
+    canvas_course = canvas.get_course(course_instance.canvas_course_id)
+
+    dashboard = read_dashboard_from_canvas(canvas_course)
+    with open(course_instance.get_dashboard_file_name(), 'w') as f:
+        dict_result = dashboard.to_json()
+        json.dump(dict_result, f, indent=2)
+
+    if course_instance.stage == "PROD":
         config = read_config_from_canvas(canvas_course)
     else:
-        config = read_course(instance.get_config_file_name())
+        config = read_course(course_instance.get_config_file_name())
     user = canvas.get_current_user()
     print("GCS03 -", user.name)
     if config.attendance is not None:
@@ -328,7 +344,65 @@ def generate_course(instance_name):
     if config.attendance is not None:
         config.attendance.bandwidth = bandwidth_builder_attendance(config.attendance.lower_points, config.attendance.upper_points, config.attendance.total_points, config.days_in_semester)
 
-    with open(instance.get_course_file_name(), 'w') as f:
+    # Ophalen Students
+    print("GS005 - Retrieve students")
+    config.students = []
+    canvas_users = canvas_course.get_users(enrollment_type=['student'], include=["enrollments"])
+    for canvas_user in canvas_users:
+        if hasattr(canvas_user, 'login_id'):
+            print("GST007 - Create student", canvas_user.login_id, canvas_user.name, canvas_user.sis_user_id)
+            student = Student(canvas_user.id, 0, 0, canvas_user.name, canvas_user.sis_user_id, canvas_user.sortable_name, "", canvas_user.login_id, "", 0)
+            config.students.append(student)
+        else:
+            if hasattr(canvas_user, 'sis_user_id'):
+                print("GST008 - Create student without login_id", canvas_user.name, canvas_user.sis_user_id)
+                student = Student(canvas_user.id, 0, 0, canvas_user.name, canvas_user.sis_user_id, canvas_user.sortable_name, "", "", "", 0)
+                # print("GS17 ", student)
+                config.students.append(student)
+    print("GST009 - Aantal studenten", len(config.students))
+    # for student in course.students:
+    #     print("GST010 -", student)
+    config.project_groups = get_groups(dashboard.project_group_name, canvas_course)
+    config.guild_groups = get_groups(dashboard.guild_group_name, canvas_course)
+    get_section_students(dashboard.project_group_name, config, canvas_course)
+    get_students_in_groups(dashboard, config, canvas_course)
+    link_students_to_role(config)
+    link_assessors_to_groups_and_students(config)
+    link_principal_assessor_to_groups_and_students(config)
+
+    print("GST011 - Opschonen studenten zonder Role, totaal", len(config.students))
+    without_role = 0
+    course_students = config.students.copy()
+    for student in course_students:
+        # print("GST23 -", student.name, "["+student.role+"]")
+        if len(student.role) == 0:
+            print("GST012 - Verwijder student uit lijst, heeft geen role", student.name)
+            config.remove_student(student.id)
+            without_role += 1
+    print("GST013 - Opschonen studenten zonder ProjectGroup")
+    course_students = config.students.copy()
+    without_project = 0
+    for student in course_students:
+        # print("GST014 -", student.name, "["+student.role+"]")
+        if student.project_id == 0:
+            print("GST015 - Verwijder student uit lijst, heeft geen project", student.name)
+            config.remove_student(student.id)
+            without_project += 1
+
+    config.student_count = len(config.students)
+
+    for student_group in config.project_groups:
+        student_group.students = sorted(student_group.students, key=lambda s: s.sortable_name)
+    for student_group in config.guild_groups:
+        student_group.students = sorted(student_group.students, key=lambda s: s.sortable_name)
+    for role in config.roles:
+        role.students = sorted(role.students, key=lambda s: s.sortable_name)
+
+    print("GST016 - Aantal Canvas studenten", len(config.students))
+    # for student in course.students:
+    #     print("GST017 -", student)
+
+    with open(course_instance.get_course_file_name(), 'w') as f:
         dict_result = config.to_json()
         json.dump(dict_result, f, indent=2)
 
@@ -337,6 +411,6 @@ def generate_course(instance_name):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        generate_course(sys.argv[1])
+        generate_course(sys.argv[1], sys.argv[2])
     else:
-        generate_course("")
+        generate_course("", "")

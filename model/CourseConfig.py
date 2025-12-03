@@ -1,5 +1,5 @@
 from lib.lib_bandwidth import IMPROVEMENT_PERIOD
-from lib.lib_date import get_date_time_obj, get_date_time_str
+from lib.lib_date import get_date_time_obj, get_date_time_str, date_to_day
 from model.AssignmentGroup import AssignmentGroup
 from model.Role import Role
 from model.Section import Section
@@ -14,11 +14,12 @@ from model.perspective.Perspective import Perspective
 
 
 class CourseConfig:
-    def __init__(self, canvas_id, name, start_date, end_date, days_in_semester, improvement_period, student_count, principal_assignment_group_id):
+    def __init__(self, course_code, canvas_id, name, start_date, end_date, improvement_period, student_count, principal_assignment_group_id):
+        self.course_code = course_code
         self.canvas_id = canvas_id
         self.name = name
         self.student_count = student_count
-        self.days_in_semester = days_in_semester
+        self.days_in_semester = date_to_day(start_date, end_date)
         self.improvement_period = improvement_period
         self.start_date = start_date
         self.end_date = end_date
@@ -38,32 +39,18 @@ class CourseConfig:
         self.students = []
 
     def __str__(self):
-        line = f'CourseConfig({self.canvas_id}, {self.name}, {self.principal_assignment_group_id})\n'
-        for section in self.sections:
-            line += str(section)
-        for teacher in self.teachers:
-            line += str(teacher)
-        for role in self.roles:
-            line += str(role)
-        line += str(self.perspectives)
-        for assignment_group in self.assignment_groups:
-            line += str(assignment_group)
-        for project_groups in self.project_groups:
-            line += str(project_groups)
-        for guild_groups in self.guild_groups:
-            line += str(guild_groups)
-        for student in self.students:
-            line += str(student)
+        line = f'CourseConfig({self.course_code}, {self.canvas_id}, {self.name}, {self.principal_assignment_group_id})'
         return line
 
     def to_json(self):
+        # print("CC05 -", self.course_code, self)
         dict_result = {
+            'course_code': self.course_code,
             'canvas_id': self.canvas_id,
             'name': self.name,
             'student_count': self.student_count,
             'start_date': get_date_time_str(self.start_date),
             'end_date': get_date_time_str(self.end_date),
-            'days_in_semester': self.days_in_semester,
             'improvement_period': self.improvement_period,
             'principal_assignment_group_id': self.principal_assignment_group_id,
             'sections': list(map(lambda s: s.to_json(), self.sections))
@@ -323,11 +310,11 @@ class CourseConfig:
     @staticmethod
     def from_dict(data_dict):
         new = CourseConfig(
+            data_dict['course_code'],
             data_dict['canvas_id'],
             data_dict['name'],
             get_date_time_obj(data_dict['start_date']),
             get_date_time_obj(data_dict['end_date']),
-            data_dict['days_in_semester'],
             IMPROVEMENT_PERIOD,
             data_dict['student_count'],
             data_dict['principal_assignment_group_id'])

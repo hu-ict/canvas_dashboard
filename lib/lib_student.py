@@ -3,11 +3,13 @@ import sys
 
 from canvasapi import Canvas
 from lib.lib_date import API_URL, get_actual_date
-from lib.file import read_start, read_course_instances, read_course
+from lib.file import read_course, read_environment, read_secret_api_key, read_dashboard_from_canvas
 from model.Assessor import Assessor
 from model.Student import Student
 from model.StudentGroup import StudentGroup
 from model.StudentLink import StudentLink
+from model.environment.Environment import ENVIRONMENT_FILE_NAME
+from model.environment.SecretApiKey import SECRET_API_KEY_FILE_NAME
 
 
 def get_groups(scope, canvas_course):
@@ -37,18 +39,18 @@ def get_groups(scope, canvas_course):
     return group_list
 
 
-def get_students_in_groups(start, course, canvas_course):
-    if start.project_group_name == "SECTIONS":
+def get_students_in_groups(dashboard, course, canvas_course):
+    if dashboard.project_group_name == "SECTIONS":
         print("GST31 - Werken met Canvas secties als groepen (meestal S1 propedeuse).")
     else:
         canvas_group_categories = canvas_course.get_group_categories()
         for canvas_group_category in canvas_group_categories:
             print("GST32 -", canvas_group_category)
             # Link students to project_groups
-            if canvas_group_category.name == start.project_group_name:
+            if canvas_group_category.name == dashboard.project_group_name:
                 print("GST33 - Link students to project_groups", canvas_group_category.name)
                 link_students_to_project_groups(course, canvas_group_category.get_groups())
-            if canvas_group_category.name == start.guild_group_name:
+            if canvas_group_category.name == dashboard.guild_group_name:
                 print("GST34 - Link students to guild_groups", canvas_group_category.name)
                 link_students_to_guild_groups(course, canvas_group_category.get_groups())
 
@@ -81,12 +83,13 @@ def link_assessors_to_groups_and_students(course):
                         print("GST45 - geen student_group voor", student_group_id)
 
             if responsibility.student_group_collection == "guild_groups":
-                for student_group_id in responsibility.student_groups:
+                for student_group_name in responsibility.student_groups:
                     # zoeken naar project_group en nummer of naam
-                    student_group = course.find_guild_group(student_group_id)
+                    print("GST81 -", student_group_name)
+                    student_group = course.find_guild_group(student_group_name)
                     if student_group is None:
                         # zoeken op naam
-                        student_group = course.find_guild_group_by_name(student_group_id)
+                        student_group = course.find_guild_group_by_name(student_group_name)
                     if student_group is not None:
                         add_assessors_to_groups_and_students(course, student_group, teacher, responsibility)
                     else:
@@ -101,7 +104,7 @@ def link_principal_assessor_to_groups_and_students(course):
                 student_group.principal_assessor = assessor.teacher_id
 
 
-def get_section_students(start, course, canvas_course):
+def get_section_students(project_group_name, course, canvas_course):
     # Ophalen Secties en Roles
     print("GST61 -", "Ophalen students and secties uit Canvas deze koppelen aan Role ")
     canvas_sections = canvas_course.get_sections(include=['students'])
@@ -115,7 +118,7 @@ def get_section_students(start, course, canvas_course):
                     student_id = section_student["id"]
                     student = course.find_student(student_id)
                     if student is not None:
-                        if start.project_group_name == "SECTIONS":
+                        if project_group_name == "SECTIONS":
                             project_group = course.find_project_group_by_name(section.name)
                             # print("GST63 -", section.name, project_group)
                             if project_group:
@@ -194,94 +197,3 @@ def link_students_to_guild_groups(course, canvas_groups):
                 else:
                     print("GST96 - Student in Canvas guild group not found", canvas_user.id, canvas_user.name)
 
-
-def generate_students(instance_name):
-    print("GS001 - generate_students.py")
-    g_actual_date = get_actual_date()
-    instances = read_course_instances()
-    if len(instance_name) > 0:
-        instances.current_instance = instance_name
-    instance = instances.get_instance_by_name(instances.current_instance)
-    print("GST002 - Instance:", instance.name)
-    start = read_start(instance.get_start_file_name())
-    course = read_course(instance.get_course_file_name())
-    # print("GS02 -", "Config", course)
-    # Initialize a new Canvas object
-    print(API_URL, start.api_key)
-    canvas = Canvas(API_URL, start.api_key)
-    current_user = canvas.get_current_user()
-    print("GST003 -", current_user.name)
-    # cleanup students in list roles and project_groups
-    for role in course.roles:
-        role.students = []
-    canvas_course = canvas.get_course(course.canvas_id)
-    # Ophalen Students
-    print("GS005 - Retrieve students")
-    course.students = []
-    canvas_users = canvas_course.get_users(enrollment_type=['student'], include=["enrollments"])
-    for canvas_user in canvas_users:
-        if hasattr(canvas_user, 'login_id'):
-            print("GST007 - Create student", canvas_user.login_id, canvas_user.name, canvas_user.sis_user_id)
-            student = Student(canvas_user.id, 0, 0, canvas_user.name, canvas_user.sis_user_id, canvas_user.sortable_name, "", canvas_user.login_id, "", 0)
-            course.students.append(student)
-        else:
-            if hasattr(canvas_user, 'sis_user_id'):
-                print("GST008 - Create student without login_id", canvas_user.name, canvas_user.sis_user_id)
-                student = Student(canvas_user.id, 0, 0, canvas_user.name, canvas_user.sis_user_id, canvas_user.sortable_name, "", "", "", 0)
-                # print("GS17 ", student)
-                course.students.append(student)
-    print("GST009 - Aantal studenten", len(course.students))
-    # for student in course.students:
-    #     print("GST010 -", student)
-    course.project_groups = get_groups(start.project_group_name, canvas_course)
-    course.guild_groups = get_groups(start.guild_group_name, canvas_course)
-    get_section_students(start, course, canvas_course)
-    get_students_in_groups(start, course, canvas_course)
-    link_students_to_role(course)
-    link_assessors_to_groups_and_students(course)
-    link_principal_assessor_to_groups_and_students(course)
-
-    print("GST011 - Opschonen studenten zonder Role, totaal", len(course.students))
-    without_role = 0
-    course_students = course.students.copy()
-    for student in course_students:
-        # print("GST23 -", student.name, "["+student.role+"]")
-        if len(student.role) == 0:
-            print("GST012 - Verwijder student uit lijst, heeft geen role", student.name)
-            course.remove_student(student.id)
-            without_role += 1
-    print("GST013 - Opschonen studenten zonder ProjectGroup")
-    course_students = course.students.copy()
-    without_project = 0
-    for student in course_students:
-        # print("GST014 -", student.name, "["+student.role+"]")
-        if student.project_id == 0:
-            print("GST015 - Verwijder student uit lijst, heeft geen project", student.name)
-            course.remove_student(student.id)
-            without_project += 1
-
-    course.student_count = len(course.students)
-
-    for student_group in course.project_groups:
-        student_group.students = sorted(student_group.students, key=lambda s: s.sortable_name)
-    for student_group in course.guild_groups:
-        student_group.students = sorted(student_group.students, key=lambda s: s.sortable_name)
-    for role in course.roles:
-        role.students = sorted(role.students, key=lambda s: s.sortable_name)
-
-    print("GST016 - Aantal Canvas studenten", len(course.students))
-    # for student in course.students:
-    #     print("GST017 -", student)
-
-    with open(instance.get_course_file_name(), 'w') as f:
-        dict_result = course.to_json()
-        json.dump(dict_result, f, indent=2)
-
-    print("GST99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
-
-
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        generate_students(sys.argv[1])
-    else:
-        generate_students("")

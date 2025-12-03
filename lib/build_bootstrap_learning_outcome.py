@@ -5,19 +5,13 @@ def build_bootstrap_learning_outcome_tab(instance, course, templates, a_level_se
     html_string = ""
     learning_outcomes_html_string = ""
     for learning_outcome in course.learning_outcomes:
-        # assignment_html_string = ""
-        # assignment_list = []
-        # for assignment_sequence in assignment_group.assignment_sequences:
-        #     for assignment in assignment_sequence.assignments:
-        #         assignment_list.append(assignment)
-        # assignment_list = sorted(assignment_list, key=lambda a: a.assignment_day)
-        # for assignment in assignment_list:
         file_name = ".//" + instance.name + "//general//learning_outcome_" + str(learning_outcome.id).lower() + ".html"
+        file_name_2 = "learning_outcome_" + str(learning_outcome.id).lower() + ".html"
         # print("BBL51 -", file_name)
         learning_outcomes_html_string += templates["learning_outcome"].substitute(
                 {'url': file_name,
                  'learning_outcome_short': learning_outcome.short})
-        write_learning_outcome_index(course, templates, learning_outcome, instance.get_html_root_path()+file_name)
+        write_learning_outcome_index(course, templates, learning_outcome, instance.get_html_general_path()+file_name_2)
 
     html_string += templates["learning_outcome_card"].substitute({'learning_outcomes': learning_outcomes_html_string})
     return html_string

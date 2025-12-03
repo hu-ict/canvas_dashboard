@@ -26,12 +26,12 @@ class Teacher:
                 return responsibility
         return None
 
-    def put_responsibility(self, a_responsibility):
-        l_responsibility = self.find_responsibility_by_assignment_group_id(a_responsibility.assignment_group_id)
+    def put_responsibility(self, canvas_group, group_name, assignment_group_id):
+        l_responsibility = self.find_responsibility_by_assignment_group_id(assignment_group_id)
         if l_responsibility:
-            l_responsibility.student_groups += a_responsibility.student_groups
+            l_responsibility.student_groups.append(group_name)
         else:
-            self.responsibilities.append(a_responsibility)
+            self.responsibilities.append(Responsibility(canvas_group, group_name, assignment_group_id))
 
     @staticmethod
     def from_dict(data_dict):

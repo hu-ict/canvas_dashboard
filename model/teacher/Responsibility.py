@@ -7,8 +7,8 @@ class Responsibility:
     def to_json(self):
         return {
             'student_group_collection': self.student_group_collection,
-            'student_groups': self.student_groups,
             'assignment_group_id': self.assignment_group_id,
+            'student_groups': self.student_groups
         }
 
     def __str__(self):

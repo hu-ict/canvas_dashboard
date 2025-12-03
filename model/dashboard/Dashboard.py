@@ -7,10 +7,12 @@ from model.dashboard.MetaPerspective import MetaPerspective
 
 
 class Dashboard:
-    def __init__(self, dashboard_tabs, student_tabs, subplot, feedback_colors, level_serie_collection):
+    def __init__(self, dashboard_tabs, student_tabs, subplot, project_group_name, guild_group_name, feedback_colors, level_serie_collection):
         self.dashboard_tabs = dashboard_tabs
         self.student_tabs = student_tabs
         self.subplot = subplot
+        self.project_group_name = project_group_name
+        self.guild_group_name = guild_group_name
         self.feedback_colors = feedback_colors
         self.level_serie_collection = level_serie_collection
         self.roles = []
@@ -26,13 +28,15 @@ class Dashboard:
 
     def to_json(self):
         dict_result = {"dashboard_tabs": self.dashboard_tabs, "student_tabs": self.student_tabs,
-                       "subplot": self.subplot.to_json(), "feedback_colors": self.feedback_colors,
+                       "subplot": self.subplot.to_json(), "project_group_name": self.project_group_name, "guild_group_name": self.guild_group_name, "feedback_colors": self.feedback_colors,
                        "level_serie_collection": self.level_serie_collection.to_json()}
         return dict_result
 
     @staticmethod
     def from_dict(data_dict):
-        new = Dashboard(data_dict["dashboard_tabs"], data_dict["student_tabs"], Subplot.from_dict(data_dict["subplot"]), data_dict["feedback_colors"], LevelSerieCollection.from_dict(data_dict["level_serie_collection"]))
+        new = Dashboard(data_dict["dashboard_tabs"], data_dict["student_tabs"], Subplot.from_dict(data_dict["subplot"]),
+                        data_dict["project_group_name"], data_dict["guild_group_name"], data_dict["feedback_colors"],
+                        LevelSerieCollection.from_dict(data_dict["level_serie_collection"]))
         if "perspectives" in data_dict:
             new.perspectives = list(map(lambda p: MetaPerspective.from_dict(p), data_dict['perspectives']))
         if "assignment_groups" in data_dict:
