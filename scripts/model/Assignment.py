@@ -1,0 +1,73 @@
+from scripts.lib.lib_date import get_date_time_obj, get_date_time_str
+from scripts.model.rubric.Criterion import Criterion
+
+
+class Assignment:
+    def __init__(self, assignment_id, name, group_id, course_section_id, grading_type, grading_standard_id, points,
+                 submission_types, date, unlock_date, day, unlock_day):
+        self.id = assignment_id
+        self.name = name
+        self.group_id = group_id
+        self.section_id = course_section_id
+        self.grading_type = grading_type
+        self.grading_standard_id = grading_standard_id
+        self.points = points
+        self.submission_types = submission_types
+        self.date = date
+        self.unlock_date = unlock_date
+        self.unlock_day = unlock_day
+        self.day = day
+        self.messages = []
+        self.rubrics = []
+        self.learning_outcomes = []
+        self.sections = []
+
+    def add_learning_outcome(self, learning_outcome_id):
+        if learning_outcome_id not in self.learning_outcomes:
+            self.learning_outcomes.append(learning_outcome_id)
+
+    def __str__(self):
+        return f'Assignment({self.id}, {self.name}, {self.group_id}, {self.section_id}, {self.grading_type}, ' \
+               f'{self.grading_standard_id}, {self.points}, {self.submission_types}, ' \
+               f'{get_date_time_str(self.date)}, {self.day})'
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'group_id': self.group_id,
+            'section_id': self.section_id,
+            'grading_type': self.grading_type,
+            'grading_standard_id': self.grading_standard_id,
+            'submission_types': self.submission_types,
+            'unlock_date': get_date_time_str(self.unlock_date),
+            'unlock_day': self.unlock_day,
+            'date': get_date_time_str(self.date),
+            'day': self.day,
+            'points': int(self.points),
+            'messages': self.messages,
+            'rubrics': list(map(lambda r: r.to_json(), self.rubrics)),
+            'learning_outcomes': self.learning_outcomes,
+            'sections': self.sections
+        }
+
+    def get_criterion(self, criterion_id):
+        for criterion in self.rubrics:
+            if criterion.id == criterion_id:
+                return criterion
+        return None
+
+    @staticmethod
+    def from_dict(data_dict):
+        new = Assignment(data_dict['id'], data_dict['name'], data_dict['group_id'], data_dict['section_id'],
+                         data_dict['grading_type'], data_dict['grading_standard_id'], data_dict['points'],
+                         data_dict['submission_types'],
+                         get_date_time_obj(data_dict['date']),
+                         get_date_time_obj(data_dict['unlock_date']),
+                         data_dict['day'], data_dict['unlock_day'])
+
+        new.rubrics = list(map(lambda c: Criterion.from_dict(c), data_dict['rubrics']))
+        new.learning_outcomes = data_dict['learning_outcomes']
+        new.sections = data_dict['sections']
+        new.messages = data_dict['messages']
+        return new
