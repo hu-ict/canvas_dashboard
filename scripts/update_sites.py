@@ -2,14 +2,15 @@ import json
 import sys
 
 from scripts.lib.file import read_course, read_msteams_api, read_environment
-from scripts.lib.file_const import ENVIRONMENT_FILE_NAME
+from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, MSTEAMS_API_KEY_FILE_NAME
 from scripts.lib.lib_date import get_actual_date
-from scripts.lib.teams_api_lib import teams, get_channels, get_drive, get_me_for_check, get_access_token
+from scripts.lib.teams_api_lib import teams, get_channels, get_drive, get_me_for_check, get_access_token, \
+    get_channels_from_json
 from scripts.model.TeamsApi import Channel
 
 
 def update_sites(course_code, instance_name):
-    print("GCS01 - generate_results.py")
+    print("US01 - update_sites.py", instance_name)
     g_actual_date = get_actual_date()
     environment = read_environment(ENVIRONMENT_FILE_NAME)
     if len(instance_name) > 0:
@@ -17,41 +18,56 @@ def update_sites(course_code, instance_name):
         with open(ENVIRONMENT_FILE_NAME, 'w') as f:
             dict_result = environment.to_json()
             json.dump(dict_result, f, indent=2)
+    print("US03 - update_sites.py", ENVIRONMENT_FILE_NAME)
     course_instance = environment.get_instance_of_course(environment.current_instance)
     print("Instance:", course_instance.name)
 
-    if course_instance.course_code not in ["TICT-VINNO1-22", "TICT-V3SE6-25"]:
+    if course_instance.course_code not in ["TICT-V3SE6-25"]:
         print("US04 - No student channels defined for this course")
         return
     course = read_course(course_instance.get_course_file_name())
-    msteams_api = read_msteams_api("../../msteams_api.json")
-    if get_me_for_check(msteams_api.gen_token) is None:
-        token = get_access_token(msteams_api.tenant_id, msteams_api.client_id)
-        print(token)
-        msteams_api.gen_token = token
-        with open("../../msteams_api.json", 'w') as f:
-            dict_result = msteams_api.to_json()
-            json.dump(dict_result, f, indent=2)
+    msteams_api = read_msteams_api(MSTEAMS_API_KEY_FILE_NAME)
+    print(msteams_api.my_token)
+    # if get_me_for_check(msteams_api.my_token) is None:
+    #     token = get_access_token(msteams_api.tenant_id, msteams_api.client_id)
+    #     print(token)
+    #     msteams_api.gen_token = token
+    #     with open(MSTEAMS_API_KEY_FILE_NAME, 'w') as f:
+    #         dict_result = msteams_api.to_json()
+    #         json.dump(dict_result, f, indent=2)
 
     # student_sites = get_sites(msteams_api.my_token, "Sep24")
     channel_count = 0
     site_count = 0
-    for team_id in teams:
+    team_index = 0
+    team_files = ["team_1.json", "team_2.json", "team_3.json", "team_4.json", "team_5.json"]
+    for team_file in team_files:
+        team_id = teams[team_index]
         # team = get_team(msteams_api.my_token, team_id)
         # print("US05 -", team)
-        student_channels = get_channels(msteams_api.gen_token, team_id)
+        # student_channels = get_channels(msteams_api.my_token, team_id)
+        student_channels = get_channels_from_json(team_file)
         channel_count += len(student_channels)
         for channel in student_channels:
+            print(channel)
             student = course.find_student_by_email_part(channel["display_name"])
             if student is None:
                 print(f"US06 - Student not found in course: [{channel['display_name']}]")
             else:
                 print("US07 - Student", student.name)
-                drive = get_drive(msteams_api.gen_token, team_id, channel["id"])
+                drive = get_drive(msteams_api.my_token, team_id, channel["id"])
                 # print("US81 - Drive", drive)
                 site_count += 1
                 student.site = drive["drive_id"]
                 msteams_api.channels.append(Channel(student.id, student.name, drive["drive_id"]))
+            with open(MSTEAMS_API_KEY_FILE_NAME, 'w') as f:
+                dict_result = msteams_api.to_json()
+                json.dump(dict_result, f, indent=2)
+
+            with open(course_instance.get_course_file_name(), 'w') as f:
+                dict_result = course.to_json()
+                json.dump(dict_result, f, indent=2)
+        team_index += 1
     print("US10 - Channels:", channel_count, "Students linked:", site_count)
     sites = 0
     errors = 0
@@ -64,7 +80,7 @@ def update_sites(course_code, instance_name):
             sites += 1
     print("US15 - Sites", sites, "Errors", errors)
 
-    with open("../../msteams_api.json", 'w') as f:
+    with open(MSTEAMS_API_KEY_FILE_NAME, 'w') as f:
         dict_result = msteams_api.to_json()
         json.dump(dict_result, f, indent=2)
 

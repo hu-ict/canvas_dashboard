@@ -5,13 +5,13 @@ from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, SECRET_API_KEY_FILE_NA
 from scripts.lib.lib_progress import proces_progress
 from scripts.lib.file import read_course, write_results, write_progress_history, \
     read_progress_history, read_environment, read_secret_api_key, read_dashboard
-from lib.lib_attendance import read_attendance
-from lib.lib_feedback import get_feedback_from_submission
-from lib.lib_submission import count_graded, add_missed_assignments, read_submissions, add_open_level_moments, \
+from scripts.lib.lib_attendance import read_attendance
+from scripts.lib.lib_feedback import get_feedback_from_submission
+from scripts.lib.lib_submission import count_graded, add_missed_assignments, read_submissions, add_open_level_moments, \
     add_open_grade_moments
-from model.Result import *
-from lib.lib_date import get_actual_date, API_URL, date_to_day
-from model.StudentResults import StudentResults
+from scripts.model.Result import *
+from scripts.lib.lib_date import get_actual_date, API_URL, date_to_day
+from scripts.model.StudentResults import StudentResults
 import sys
 
 
@@ -85,13 +85,16 @@ def generate_results(course_code, instance_name):
         for student_perspective in student.perspectives.values():
             for submission_sequence in student_perspective.submission_sequences:
                 for submission in submission_sequence.submissions:
-                    get_feedback_from_submission(course, student, submission)
+                    if submission.posted:
+                        get_feedback_from_submission(course, student, submission)
         if student.student_level_moments is not None:
             for submission in student.student_level_moments.submissions:
-                get_feedback_from_submission(course, student, submission)
+                if submission.posted:
+                    get_feedback_from_submission(course, student, submission)
         if student.student_grade_moments is not None:
             for submission in student.student_grade_moments.submissions:
-                get_feedback_from_submission(course, student, submission)
+                if submission.posted:
+                    get_feedback_from_submission(course, student, submission)
 
     results.submission_count, results.not_graded_count = count_graded(results)
     # with open(instances.get_result_file_name(instances.current_instance), 'w') as f:

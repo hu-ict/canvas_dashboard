@@ -14,8 +14,9 @@ import re
 from pathlib import Path
 
 from scripts.lib.file import read_environment
-from model.environment.Course import Course
-from model.environment.Environment import ENVIRONMENT_FILE_NAME
+from scripts.lib.file_const import ENVIRONMENT_FILE_NAME
+from scripts.model.environment.Course import Course
+
 
 # ----------------------------
 # Logging setup

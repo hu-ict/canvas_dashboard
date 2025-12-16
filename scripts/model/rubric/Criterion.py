@@ -13,7 +13,7 @@ class Criterion:
         for rating in self.ratings:
             if rating.id == rating_id:
                 return rating
-        print("CR01", rating_id)
+        print("CR01 - Niet bepaald", rating_id)
         return None
 
     def add_learning_outcome(self, learning_outcome_id):

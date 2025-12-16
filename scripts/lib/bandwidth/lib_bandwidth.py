@@ -141,9 +141,6 @@ def bandwidth_builder(assignment_group, days_in_semester):
             else:
                 y = y2
             band_upper.append(y)
-        with open("series_"+str(assignment_group.id)+".json", 'w') as f:
-            dict_result = serie
-            json.dump(dict_result, f, indent=2)
     elif assignment_group.strategy == "CONSTANT":
         # propedeuse perspectieven
         c = assignment_group.lower_points

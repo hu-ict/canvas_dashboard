@@ -1,8 +1,8 @@
-from lib.build_plotly_hover import get_hover_assignment, \
+from scripts.lib.build_plotly_hover import get_hover_assignment, \
     get_hover_grade, get_hover_status
 from scripts.lib.file import read_plotly
-from lib.lib_date import get_date_time_loc
-from model.perspective.Status import NOT_YET_GRADED, BEFORE_DEADLINE, GRADED, MISSED_ITEM
+from scripts.lib.lib_date import get_date_time_loc
+from scripts.model.perspective.Status import NOT_YET_GRADED, BEFORE_DEADLINE, GRADED, MISSED_ITEM
 
 
 def get_comments_html(comments):
@@ -14,13 +14,14 @@ def get_comments_html(comments):
     return comments_html_string
 
 
-def get_feedback_list_html(course, student_id, feedback_list, templates):
+def get_feedback_list_html(course, student_id, feedback_list, templates, feedback_colors):
     feedback_list_html_string = ""
     for feedback in feedback_list:
         url = "https://canvas.hu.nl/courses/" + str(course.canvas_id) + "/gradebook/speed_grader?assignment_id=" \
               + str(feedback.assignment_id) + "&student_id=" + str(student_id)
-
+        background_color = feedback_colors[feedback.positive_neutral_negative]["color"]
         feedback_list_html_string += templates['feedback'].substitute({
+            "feedback_color": background_color,
             "date": get_date_time_loc(feedback.date),
             "author_name": feedback.author_name,
             "comment": feedback.comment,
@@ -382,20 +383,20 @@ def build_bootstrap_portfolio(course_instance, course_id, course, student, stude
     return portfolio_html_string
 
 
-def build_bootstrap_feedback(course, student_results, templates, level_serie_collection):
+def build_bootstrap_feedback(course, student_results, templates, feedback_colors):
     student_feedback_html_string = ""
     for learning_outcome in student_results.learning_outcomes:
         student_feedback_html_string += templates['learning_outcome_feedback'].substitute(
             {
                 'learning_outcome_short': student_results.learning_outcomes[learning_outcome].short,
                 'learning_outcome_id': student_results.learning_outcomes[learning_outcome].id,
-                'feedback_rows': get_feedback_list_html(course, student_results.id, student_results.learning_outcomes[learning_outcome].feedback_list, templates)
+                'feedback_rows': get_feedback_list_html(course, student_results.id, student_results.learning_outcomes[learning_outcome].feedback_list, templates, feedback_colors)
             })
     student_feedback_html_string += templates['learning_outcome_feedback'].substitute(
         {
             'learning_outcome_short': "Algemene feedback",
             'learning_outcome_id': "AF",
-            'feedback_rows': get_feedback_list_html(course, student_results.id, student_results.general_feedback_list, templates)
+            'feedback_rows': get_feedback_list_html(course, student_results.id, student_results.general_feedback_list, templates, feedback_colors)
         })
 
     # for perspective in student_results.perspectives.values():
@@ -463,7 +464,7 @@ def build_bootstrap_student_index(course_instance, course_id, course, student_re
                                                                      templates, dashboard.level_serie_collection)
     if 'feedback' in dashboard.student_tabs:
         student_tab_content['feedback'] = build_bootstrap_feedback(course, student_results, templates,
-                                                                   dashboard.level_serie_collection)
+                                                                   dashboard.feedback_colors)
 
     # print("BSI10 - ", student_tabs.keys())
     student_tabs_html_string = build_student_tabs(course_instance, course, student_tab_content,

@@ -1,6 +1,6 @@
 import json
 import requests
-from lib.translation_table import translation_table
+from scripts.lib.translation_table import translation_table
 import subprocess
 import io
 
@@ -47,9 +47,11 @@ def get_me_for_check(a_token):
         "Authorization": f"Bearer {a_token}",
         "Content-type": "application/json; charset=ISO-8859-1"
     }
+    # print(headers)
     url = f"https://graph.microsoft.com/v1.0/me"
     print(url)
     response = requests.get(url, headers=headers)
+    print(response.status_code)
     if response.status_code == 200:
         l_result = response.json()
         print(l_result['displayName'])
@@ -313,12 +315,25 @@ def get_channels(a_token, a_team_id):
         for value in values:
             # print("TA27 -", value)
             channel = {"display_name": value["displayName"], "id": value["id"]}
-            # print("TA22 -", channel)
+            print("TA22 -", channel)
             channels.append(channel)
         return channels
     else:
         print(f"TA24 - Error getting token: {response.json()}")
     return []
+
+
+def get_channels_from_json(json_file_name):
+    channels = []
+    with open(json_file_name, mode='r', encoding="utf-8") as file_result:
+        data = json.load(file_result)
+        values = data['value']
+        for value in values:
+            # print("TA27 -", value)
+            channel = {"display_name": value["displayName"], "id": value["id"]}
+            # print("TA22 -", channel)
+            channels.append(channel)
+    return channels
 
 
 def get_team(a_token, a_team_id):
@@ -338,7 +353,7 @@ def get_team(a_token, a_team_id):
 
 def get_drive(token, team_id, channel_id):
     url = f"https://graph.microsoft.com/v1.0/teams/{team_id}/channels/{channel_id}/filesFolder"
-    # print("TA36 -", url)
+    print("TA36 -", url)
     headers = {
         "Authorization": "Bearer " + token,
         "Content-Type": "application/json"
@@ -346,7 +361,9 @@ def get_drive(token, team_id, channel_id):
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
         result = response.json()
-        return {"display_name": result['name'], "drive_id": result['parentReference']['driveId']}
+        result_dict = {"display_name": result['name'], "drive_id": result['parentReference']['driveId']}
+        print(result_dict)
+        return result_dict
     else:
         print(f"TA38 - Error getting token: {response.json()}")
     return {"display_name": "", "drive_id": ""}

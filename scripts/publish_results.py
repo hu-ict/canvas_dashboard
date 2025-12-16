@@ -4,7 +4,7 @@ import sys
 
 from scripts.lib.file import read_environment
 from lib.lib_date import get_actual_date
-from model.environment.Environment import ENVIRONMENT_FILE_NAME
+from scripts.lib.file_const import ENVIRONMENT_FILE_NAME
 
 
 def publish_results(course_code, instance_name):

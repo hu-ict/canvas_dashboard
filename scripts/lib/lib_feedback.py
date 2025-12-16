@@ -1,6 +1,6 @@
-from lib.lib_date import date_to_day
-from lib.lib_text import get_extracted_text
-from model.learning_outcome.Feedback import Feedback
+from scripts.lib.lib_date import date_to_day
+from scripts.lib.lib_text import get_extracted_text
+from scripts.model.learning_outcome.Feedback import Feedback
 
 
 def categorize_feedback(feedback_comment):
@@ -14,10 +14,10 @@ def categorize_feedback(feedback_comment):
 
 def get_feedback_from_submission(course, student, submission):
     # print("LSU81 -", submission.assignment.name)
-    feedback_date = submission.assignment.date
-    feedback_day = date_to_day(course.start_date, feedback_date)
     for comment in submission.comments:
         # algemene comments in een Canvas submission
+        feedback_date = comment.date
+        feedback_day = date_to_day(course.start_date, feedback_date)
         feedback_list = categorize_feedback(comment.comment)
         # print("LSU80 - Student", student.email, "Submission", submission.assignment.name)
         # print("LSU80 -", len(feedback_list), comment.comment)
@@ -48,6 +48,9 @@ def get_feedback_from_submission(course, student, submission):
 
     if len(submission.rubrics) > 0:
         for criterion_score in submission.rubrics:
+            feedback_date = submission.graded_date
+            feedback_day = date_to_day(course.start_date, feedback_date)
+
             # print("BP10 -", submission.assignment.id, criterion_score)
             assignment = course.find_assignment(submission.assignment.id)
             # print("BP11 -", assignment)

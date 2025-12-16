@@ -1,6 +1,6 @@
 from plotly.subplots import make_subplots
-from lib.build_plotly_generic import plot_bandbreedte_colored
-from lib.build_plotly_perspective import plot_assignments
+from scripts.lib.build_plotly_generic import plot_bandbreedte_colored
+from scripts.lib.build_plotly_perspective import plot_assignments
 
 
 def process_bandwidth(a_course, a_assignment_group_id, a_level_serie_collection, a_file_name):

@@ -6,7 +6,7 @@ from scripts.lib.lib_date import get_actual_date
 from scripts.env_2.generate_course import generate_course
 from scripts.env_3.generate_dashboard import generate_dashboard
 from scripts.env_3.generate_plotly import generate_plotly
-from scripts.env_3.generate_portfolio import generate_portfolio
+from scripts.generate_portfolio import generate_portfolio
 from scripts.env_2.generate_results import generate_results
 from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, WORKFLOW_FILE_NAME
 from scripts.publish_dashboard import publish_dashboard
@@ -53,8 +53,9 @@ if __name__ == "__main__":
     else:
         # main("TICT-V1SE1-24-SEP2025", "course_create_event")
         # main("TICT-V3SE5-25_SEP25", "course_create_event")
+        # main("TICT-V3SE5-25", "TICT-V3SE5-25_sep25", "course_create_event")
+        # main("TICT-V3SE6-25", "TICT-V3SE6-25_sep25", "env-3_dashboard_create_event")
         main("TICT-V3SE6-25", "TICT-V3SE6-25_sep25", "results_create_event")
-        # main("TICT-V3SE6-25", "TICT-V3SE6-25_sep25_test", "course_create_event")
     total_seconds = (get_actual_date() - l_actual_date).seconds
     seconds = total_seconds % 60
     minutes = total_seconds // 60

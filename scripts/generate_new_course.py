@@ -2,8 +2,8 @@ import json
 import os
 
 from scripts.lib.file import read_environment
-from model.environment.Course import Course
-from model.environment.Environment import ENVIRONMENT_FILE_NAME
+from scripts.lib.file_const import ENVIRONMENT_FILE_NAME
+from scripts.model.environment.Course import Course
 
 environment = read_environment(ENVIRONMENT_FILE_NAME)
 course_code = input("Give the course_code for the new course: ")

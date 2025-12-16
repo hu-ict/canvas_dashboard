@@ -3,19 +3,21 @@ import sys
 
 from canvasapi import Canvas
 
+from scripts.lib.bandwidth.lib_bandwidth_improved import bandwidth_builder, get_bandwidth_sum, \
+    bandwidth_builder_attendance
 from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, SECRET_API_KEY_FILE_NAME
-from scripts.lib.lib_bandwidth import bandwidth_builder, bandwidth_builder_attendance, get_bandwidth_sum
-from lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
+# from scripts.lib.bandwidth.lib_bandwidth import bandwidth_builder, bandwidth_builder_attendance, get_bandwidth_sum
+from scripts.lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
 from scripts.lib.file import read_config_from_canvas, read_course, read_environment, read_secret_api_key, \
     read_dashboard_from_canvas
-from lib.lib_student import get_groups, get_section_students, get_students_in_groups, link_students_to_role, \
+from scripts.lib.lib_student import get_groups, get_section_students, get_students_in_groups, link_students_to_role, \
     link_assessors_to_groups_and_students, link_principal_assessor_to_groups_and_students
-from lib.lib_text import get_extracted_text
-from model.Assignment import Assignment
-from model.Student import Student
-from model.rubric.Criterion import Criterion
-from model.rubric.Rating import Rating
-from model.attendance.AttendanceMoment import AttendanceMoment
+from scripts.lib.lib_text import get_extracted_text
+from scripts.model.Assignment import Assignment
+from scripts.model.Student import Student
+from scripts.model.rubric.Criterion import Criterion
+from scripts.model.rubric.Rating import Rating
+from scripts.model.attendance.AttendanceMoment import AttendanceMoment
 
 
 def get_tags(name):

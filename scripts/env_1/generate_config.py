@@ -4,7 +4,7 @@ from canvasapi import Canvas
 import json
 
 from generate_students import get_groups
-from scripts.lib.lib_bandwidth import IMPROVEMENT_PERIOD
+from scripts.lib.bandwidth.lib_bandwidth import IMPROVEMENT_PERIOD
 from lib.lib_date import API_URL, get_actual_date, get_date_time_obj
 from scripts.lib.file import read_dashboard_from_canvas, read_environment, \
     read_secret_api_key

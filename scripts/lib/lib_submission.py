@@ -9,7 +9,8 @@ NO_SUBMISSION = "Niets ingeleverd voor de deadline"
 NO_SUBMISSION_GRADE = "Moet nog beoordeeld worden"
 NO_DATA = "Geen data"
 ROBOT = "Automatisch door systeem"
-
+LEVEL_MOMENTS = "level_moments"
+GRADE_MOMENTS = "grade_moments"
 
 def remove_html_tags(text):
     """Remove html tags from a string"""
@@ -139,6 +140,10 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
             graded = True
         else:
             graded = False
+    if a_canvas_submission.posted_at:
+        posted = True
+    else:
+        posted = False
     canvas_comments = a_canvas_submission.submission_comments
     if a_assignment.grading_type not in ["pass_fail", "points", "letter_grade"]:
         print("LSU04 - unknown grading_type", a_assignment.grading_type)
@@ -151,7 +156,7 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
         l_submission = Submission(a_canvas_submission.id, a_submission_assignment, a_student.id,
                                   None,
                                   None,
-                                  NOT_YET_GRADED, graded, submission_grade,
+                                  NOT_YET_GRADED, graded, posted, submission_grade,
                                   grader_name, grader_date, submission_score,
                                   submission_value, submission_flow)
         for canvas_comment in canvas_comments:
@@ -172,7 +177,7 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
         if hasattr(a_canvas_submission, "rubric_assessment") and len(a_canvas_submission.rubric_assessment.items()) > 0:
             canvas_submission_rubrics = a_canvas_submission.rubric_assessment.items()
             rubrics_scores, rubric_score, error = get_rubric_score(canvas_submission_rubrics, a_student)
-            if perspective.name == "grade_moments" or perspective.name == "level_moments":
+            if perspective.name == GRADE_MOMENTS or perspective.name == LEVEL_MOMENTS:
                 rubric_score = get_rubric_level_score(canvas_submission_rubrics)
             if error:
                 has_submission_rubrics = False
@@ -187,7 +192,7 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
     # maak een submission en voeg de commentaren toe
     # print("LS31 -", f"submission_builder [{graded}] [{a_canvas_submission.submitted_at}] grade {a_canvas_submission.grade} grader_id {a_canvas_submission.grader_id} comments {len(canvas_comments)} score {a_canvas_submission.score} grading_type {a_assignment.grading_type} and student {a_student.name}.")
     if has_assignment_rubric and has_submission_rubrics and a_assignment.grading_type == "pass_fail":
-        if a_course_code in ["TICT-V1SE1-24"] and perspective.name != "grade_moments" and perspective.name != "level_moments":
+        if a_course_code in ["TICT-V1SE1-24"] and perspective.name != GRADE_MOMENTS and perspective.name != LEVEL_MOMENTS:
             if a_canvas_submission.grade == 'complete':
                 submission_score = round(a_assignment.points, 2)
             elif a_canvas_submission.grade == 'incomplete':
@@ -216,7 +221,7 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
             submission_score = round(0, 2)
 
     if has_assignment_rubric and not has_submission_rubrics and a_assignment.grading_type == "pass_fail":
-        if a_course_code in ["TICT-V1SE1-24"] and perspective.name != "grade_moments" and perspective.name != "level_moments":
+        if a_course_code in ["TICT-V1SE1-24"] and perspective.name != GRADE_MOMENTS and perspective.name != LEVEL_MOMENTS:
             if a_assignment.group_id == a_course.level_moments.assignment_groups[0]:
                 submission_score = round(a_assignment.points, 2)
             if a_assignment.group_id == a_course.grade_moments.assignment_groups[0]:
@@ -291,7 +296,7 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
         grader_name = "onbekend"
 
     if graded:
-        if perspective.name == "grade_moments" or perspective.name == "level_moments":
+        if perspective.name == GRADE_MOMENTS or perspective.name == LEVEL_MOMENTS:
             submission_grade = str(submission_score)
         else:
             if a_assignment.points == 0:
@@ -309,11 +314,12 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
     l_submission = Submission(a_canvas_submission.id, a_submission_assignment, a_student.id,
                               None,
                               None,
-                              status, graded, submission_grade, grader_name, grader_date, submission_score,
+                              status, graded, posted, submission_grade, grader_name, grader_date, submission_score,
                               submission_value, 0)
     for canvas_comment in canvas_comments:
         # print("LS51 -", a_student.name, canvas_comment['comment'])
-        comment_text = remove_html_tags(canvas_comment['comment']).strip()
+        # comment_text = remove_html_tags(canvas_comment['comment']).strip()
+        comment_text = canvas_comment['comment']
         if len(comment_text) > 0:
             l_submission.comments.append(Comment(canvas_comment['author_id'], canvas_comment['author_name'],
                                                  get_date_time_obj(canvas_comment['created_at']), comment_text))
@@ -343,7 +349,7 @@ def add_missed_assignments(course, actual_day, student_perspective):
                                       assignment.day,
                                       None,
                                       None,
-                                      MISSED_ITEM, False, None, 0, 0, 0, 0, assignment.points, 0)
+                                      MISSED_ITEM, False, False, None, 0, 0, 0, 0, assignment.points, 0)
             l_submission.comments.append(Comment(1, ROBOT, assignment.date, NO_SUBMISSION))
             student_perspective.put_submission(assignment_sequence, l_submission)
 
@@ -366,7 +372,7 @@ def add_open_level_moments(course, actual_day, student_id, student_level_moments
                         l_submission = Submission(0, submission_assignment, student_id,
                                                   None,
                                                   None,
-                                                  NOT_YET_GRADED, False, None, 0, 0, 0, 0, 0)
+                                                  NOT_YET_GRADED, False, False, None, 0, 0, 0, 0, 0)
                         l_submission.comments.append(Comment(1, ROBOT, assignment.date, NO_SUBMISSION_GRADE))
                         student_level_moments.submissions.append(l_submission)
     elif len(student_level_moments.assignment_groups) > 1:
@@ -441,7 +447,7 @@ def read_submissions(a_course_code, a_canvas_course, a_course, a_results, a_tota
                 canvas_submissions = canvas_assignment.get_submissions(
                     include=['submission_comments', 'rubric_assessment'])
                 for canvas_submission in canvas_submissions:
-                    # print("LS14 - canvas_submission", canvas_submission.id, canvas_submission.user_id)
+                    # print("LS14 - canvas_submission.posted_at", canvas_submission.posted_at)
                     student = a_results.find_student(canvas_submission.user_id)
                     if student is None:
                         # print("RS20 Could not find student", canvas_submission.user_id)
@@ -452,7 +458,7 @@ def read_submissions(a_course_code, a_canvas_course, a_course, a_results, a_tota
                     if l_submission is None:
                         # print(f"RS25 - Error creating submission {assignment.name} for student {student.name}")
                         continue
-                    if perspective.name == "level_moments":
+                    if perspective.name == LEVEL_MOMENTS:
                         if "online_text_entry" in assignment.submission_types:
                             l_submission.body = canvas_submission.body
                         if a_total_refresh:
@@ -460,7 +466,7 @@ def read_submissions(a_course_code, a_canvas_course, a_course, a_results, a_tota
                         else:
                             student.student_level_moments.put_submission(l_submission)
                         # print("LS18 - PERSPECTIVE level_moments")
-                    elif perspective.name == "grade_moments":
+                    elif perspective.name == GRADE_MOMENTS:
                         if "online_text_entry" in assignment.submission_types:
                             l_submission.body = canvas_submission.body
                         if a_total_refresh:

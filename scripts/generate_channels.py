@@ -12,13 +12,13 @@ if len(instance_name) > 0:
     instances.current_instance = instance_name
 instance = instances.get_instance_by_name(instances.current_instance)
 course = read_course(instance.get_course_file_name())
-msteams_api = read_msteams_api("../msteams_api.json")
+msteams_api = read_msteams_api("../courses/msteams_api.json")
 
 if get_me_for_check(msteams_api.gen_token) is None:
     token = get_access_token(msteams_api.tenant_id, msteams_api.client_id)
     print(token)
     msteams_api.gen_token = token
-    with open("../msteams_api.json", 'w') as f:
+    with open("../courses/msteams_api.json", 'w') as f:
         dict_result = msteams_api.to_json()
         json.dump(dict_result, f, indent=2)
 

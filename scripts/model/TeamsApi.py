@@ -1,18 +1,18 @@
 class Channel:
     def __init__(self, a_student_id, a_name, a_channel):
-        self.id = a_student_id
+        self.student_id = a_student_id
         self.name = a_name
         self.channel = a_channel
 
     def to_json(self):
         return {
-            'id': self.id,
+            'id': self.student_id,
             'name': self.name,
             'channel': self.channel
         }
 
     def __str__(self):
-        return f'Channel({self.id}, {self.name}, {self.channel})'
+        return f'Channel({self.student_id}, {self.name}, {self.channel})'
 
     @staticmethod
     def from_dict(data_dict):
@@ -36,6 +36,12 @@ class TeamsApi:
 
     def __str__(self):
         return f'TeamsApi({self.tenant_id}, {self.tenant_name}, {self.client_id}, {self.gen_token}, {self.my_token}'
+
+    def get_channel_by_student(self, student_id):
+        for channel in self.channels:
+            if int(channel.student_id) == int(student_id):
+                return channel
+        return None
 
     @staticmethod
     def from_dict(data_dict):

@@ -8,7 +8,7 @@ from scripts.model.perspective.Status import NOT_CORRECT_GRADED, NOT_YET_GRADED,
 class Submission:
     def __init__(self, submission_id, submission_assignment, student_id,
                  submitted_date, submitted_day,
-                 status, graded,
+                 status, graded, posted,
                  grade, grader_name, graded_date,
                  score, value, flow):
         self.id = submission_id
@@ -18,6 +18,7 @@ class Submission:
         self.submitted_day = submitted_day
         self.status = status
         self.graded = graded
+        self.posted = posted
         self.grade = grade
         self.grader_name = grader_name
         self.graded_date = graded_date
@@ -50,6 +51,7 @@ class Submission:
             'submitted_date': get_date_time_str(self.submitted_date),
             'submitted_day': self.submitted_day,
             'graded': self.graded,
+            'posted': self.posted,
             'grade': self.grade,
             'grader_name': self.grader_name,
             "graded_date": get_date_time_str(self.graded_date),
@@ -100,8 +102,8 @@ class Submission:
     def from_dict(data_dict):
         new_submission = Submission(data_dict['id'], SubmissionAssignment.from_dict(data_dict['assignment']), data_dict['student_id'],
                                     get_date_time_obj(data_dict['submitted_date']), data_dict['submitted_day'],
-                                    data_dict['status'],
-                                    data_dict['graded'], data_dict['grade'], data_dict['grader_name'],
+                                    data_dict['status'], data_dict['graded'], data_dict['posted'],
+                                    data_dict['grade'], data_dict['grader_name'],
                                     get_date_time_obj(data_dict['graded_date']), data_dict['score'],
                                     data_dict['value'], data_dict['flow'])
         new_submission.comments = list(map(lambda c: Comment.from_dict(c), data_dict['comments']))

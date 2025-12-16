@@ -1,5 +1,5 @@
 import plotly.graph_objs as go
-from scripts.lib.lib_bandwidth import calc_dev
+from scripts.lib.bandwidth.lib_bandwidth import calc_dev
 
 
 def plot_bandbreedte_colored(a_row, a_col, a_fig, a_days, a_bandwidth, a_flow, a_total_points):

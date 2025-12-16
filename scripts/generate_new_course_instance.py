@@ -1,8 +1,8 @@
 import json
 import os
 from scripts.lib.file import read_environment
-from model.environment.CourseInstance import CourseInstance
-from model.environment.Environment import ENVIRONMENT_FILE_NAME
+from scripts.model.environment.CourseInstance import CourseInstance
+from scripts.lib.file_const import ENVIRONMENT_FILE_NAME
 
 periods = {
     "sep25": {"start_date": "2025-09-01T00:00:00Z", "end_date": "2026-01-30T23:59:59Z"},

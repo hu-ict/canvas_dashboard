@@ -107,7 +107,7 @@ if __name__ == "__main__":
     print("GPL02 - Instance:", instance.name)
     course = read_course(instance.get_course_file_name())
 
-    msteams_api = read_msteams_api("../msteams_api.json")
+    msteams_api = read_msteams_api("../courses/msteams_api.json")
     team_ids = ["b7cf78ae-8c6f-460d-a47a-d4bc2b8b2f18", "2d570ef0-7a51-489e-a2e3-681440e67d08",
                   "82e424d3-5baa-4ba2-b2f8-85b3659a150e", "a282ec15-7540-4c3b-bb3c-26b2f38377c7"]
     team = "a282ec15-7540-4c3b-bb3c-26b2f38377c7"
@@ -116,7 +116,7 @@ if __name__ == "__main__":
         token = get_access_token()
         print(token)
         msteams_api.token = token
-        with open("../msteams_api.json", 'w') as f:
+        with open("../courses/msteams_api.json", 'w') as f:
             dict_result = msteams_api.to_json()
             json.dump(dict_result, f, indent=2)
     # team_members = get_team_members(msteams_api.token, team)

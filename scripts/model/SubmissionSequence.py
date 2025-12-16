@@ -75,6 +75,12 @@ class SubmissionSequence:
                 return True
         return False
 
+    def is_posted(self):
+        for submission in self.submissions:
+            if submission.posted:
+                return True
+        return False
+
     def get_submission_by_assignment_id(self, assignment_id):
         for submission in self.submissions:
             if submission.assignment.id == assignment_id:

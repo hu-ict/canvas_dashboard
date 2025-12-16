@@ -6,7 +6,7 @@ from typing import List
 from scripts.env_2.generate_course import generate_course
 from scripts.env_3.generate_dashboard import generate_dashboard
 from scripts.env_3.generate_plotly import generate_plotly
-from scripts.env_3.generate_portfolio import generate_portfolio
+from scripts.generate_portfolio import generate_portfolio
 from scripts.env_2.generate_results import generate_results
 from generate_students import generate_students
 from scripts.publish_dashboard import publish_dashboard

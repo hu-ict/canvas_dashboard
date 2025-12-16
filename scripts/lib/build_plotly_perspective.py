@@ -240,7 +240,7 @@ def plot_submissions(a_row, a_col, a_fig, a_course, a_student_perspective, a_lev
         y_size.append(get_marker_size(submission_sequence.is_graded()))
         x_submission.append(submission_sequence.get_day())
 
-        if submission_sequence.is_graded():
+        if submission_sequence.is_graded() and submission_sequence.is_posted():
             cum_score += submission_sequence.get_score()
             if submission_sequence.points == 0:
                 # lelijke hack
@@ -248,24 +248,25 @@ def plot_submissions(a_row, a_col, a_fig, a_course, a_student_perspective, a_lev
             grade = l_level_serie.grades[submission_sequence.get_grade()]
             y_colors.append(grade.color)
         else:
-            status = l_level_serie.status[submission_sequence.get_status()]
-            y_colors.append(status.color)
+            color = a_level_serie_collection.level_series[assignment_group_levels].get_status(BEFORE_DEADLINE).color
+            y_colors.append(color)
         y_marker_symbols.append(
             a_course.get_assignment_group_by_assignment_sequence_tag(submission_sequence.tag).marker)
         submission_nr = 0
         l_hover = ""
         for submission in submission_sequence.submissions:
             l_hover += get_hover_assignment(l_perspective.show_points, submission)
-            if submission.graded:
+            if submission.graded and submission.posted:
                 grade = l_level_serie.grades[submission.grade]
                 l_hover += get_hover_grade(a_course, submission, grade)
             else:
                 status = l_level_serie.status[submission.status]
                 l_hover += get_hover_status(submission, status)
-            l_hover += get_hover_comments(submission.comments)
-            if submission.graded:
-                grade = l_level_serie.grades[submission.grade]
-                l_hover += get_hover_rubrics_comments(a_course, submission, grade)
+            if submission.posted:
+                l_hover += get_hover_comments(submission.comments)
+                if submission.graded:
+                    grade = l_level_serie.grades[submission.grade]
+                    l_hover += get_hover_rubrics_comments(a_course, submission, grade)
             if submission_nr < len(submission_sequence.submissions) - 1:
                 l_hover += "<br><br>"
         if len(l_hover) > 4000:
@@ -431,7 +432,7 @@ def plot_timeline(a_row, a_col, a_fig, a_course, a_student, a_actual_day, a_actu
             submission_assignment = SubmissionAssignment(assignment.id, assignment.name, assignment.group_id, assignment.points, assignment.date, assignment.day)
             submission = Submission(0, submission_assignment, 0,
                                     assignment.date, assignment.day,
-                                    BEFORE_DEADLINE, False,
+                                    BEFORE_DEADLINE, False, False,
                                     "-1", None, None,
                                     0, 0, 0)
         moments.append(submission)
@@ -441,7 +442,7 @@ def plot_timeline(a_row, a_col, a_fig, a_course, a_student, a_actual_day, a_actu
                                                      assignment.points, assignment.date, assignment.day)
         submission = Submission(0, submission_assignment, 0,
                                 assignment.date, assignment.day,
-                                BEFORE_DEADLINE, False,
+                                BEFORE_DEADLINE, False, False,
                                 "-1", None, None,
                                 0, 0, 0)
         moments.append(submission)
@@ -467,8 +468,11 @@ def plot_timeline_moments(a_row, a_col, a_fig, a_course, a_submission_list, a_le
         y_feedback.append("BP<br>Peil/Beslissing")
         # print("BPP61 -", submission.assignment.name, submission.graded, submission.grade)
         y_hover.append(get_hover_moment(a_course, submission, level_serie))
-        if submission.graded:
-            y_colors.append(level_serie.grades[submission.grade].color)
+        if submission.posted:
+            if submission.graded:
+                y_colors.append(level_serie.grades[submission.grade].color)
+            else:
+                y_colors.append(level_serie.get_status(BEFORE_DEADLINE).color)
         else:
             y_colors.append(level_serie.get_status(BEFORE_DEADLINE).color)
         y_marker_symbols.append(a_course.get_assignment_group_by_assignment(submission.assignment.id).marker)

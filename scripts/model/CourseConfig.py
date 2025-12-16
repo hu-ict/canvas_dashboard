@@ -1,4 +1,4 @@
-from scripts.lib.lib_bandwidth import IMPROVEMENT_PERIOD
+from scripts.lib.bandwidth.lib_bandwidth import IMPROVEMENT_PERIOD
 from scripts.lib.lib_date import get_date_time_obj, get_date_time_str, date_to_day
 from scripts.model.AssignmentGroup import AssignmentGroup
 from scripts.model.Role import Role

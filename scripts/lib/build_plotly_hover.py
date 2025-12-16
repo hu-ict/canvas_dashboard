@@ -1,7 +1,7 @@
 import textwrap
 from scripts.lib.lib_date import get_date_time_loc
 from scripts.lib.lib_submission import NO_DATA
-from scripts.model.perspective.Status import NOT_YET_GRADED, BEFORE_DEADLINE
+from scripts.model.perspective.Status import BEFORE_DEADLINE
 
 
 def get_punten_str(points):
@@ -142,7 +142,7 @@ def get_hover_moment(a_course, a_submission, a_level_serie):
     hover = NO_DATA
     if a_submission is not None:
         hover = "<b>" + a_submission.assignment.name + "</b> " + get_date_time_loc(a_submission.assignment.date) + "<br>"
-        if a_submission.graded:
+        if a_submission.graded and a_submission.posted:
             hover += a_level_serie.grades[a_submission.grade].label
             hover += ", bepaald door " + str(a_submission.grader_name) + " op " + get_date_time_loc(a_submission.graded_date)
             hover += get_hover_comments(a_submission.comments)
