@@ -5,7 +5,7 @@ from scripts.lib.file import read_course, read_msteams_api, read_environment
 from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, MSTEAMS_API_KEY_FILE_NAME
 from scripts.lib.lib_date import get_actual_date
 from scripts.lib.teams_api_lib import teams, get_channels, get_drive, get_me_for_check, get_access_token, \
-    get_channels_from_json
+    get_channels_from_json, get_team
 from scripts.model.TeamsApi import Channel
 
 
@@ -27,26 +27,29 @@ def update_sites(course_code, instance_name):
         return
     course = read_course(course_instance.get_course_file_name())
     msteams_api = read_msteams_api(MSTEAMS_API_KEY_FILE_NAME)
-    print(msteams_api.my_token)
-    # if get_me_for_check(msteams_api.my_token) is None:
-    #     token = get_access_token(msteams_api.tenant_id, msteams_api.client_id)
-    #     print(token)
-    #     msteams_api.gen_token = token
-    #     with open(MSTEAMS_API_KEY_FILE_NAME, 'w') as f:
-    #         dict_result = msteams_api.to_json()
-    #         json.dump(dict_result, f, indent=2)
+    token = msteams_api.gen_token
+    print(token)
+    if get_me_for_check(token) is None:
+        token = get_access_token(msteams_api.tenant_id, msteams_api.client_id)
+        print(token)
+        msteams_api.gen_token = token
+        print(msteams_api.gen_token)
+        with open(MSTEAMS_API_KEY_FILE_NAME, 'w') as f:
+            dict_result = msteams_api.to_json()
+            json.dump(dict_result, f, indent=2)
 
     # student_sites = get_sites(msteams_api.my_token, "Sep24")
     channel_count = 0
     site_count = 0
     team_index = 0
     team_files = ["team_1.json", "team_2.json", "team_3.json", "team_4.json", "team_5.json"]
-    for team_file in team_files:
-        team_id = teams[team_index]
-        # team = get_team(msteams_api.my_token, team_id)
-        # print("US05 -", team)
-        # student_channels = get_channels(msteams_api.my_token, team_id)
-        student_channels = get_channels_from_json(team_file)
+    msteams_api.channels = []  # opschonen van de lijst
+    for team in teams:
+        team_id = team #teams[team_index]
+        team = get_team(token, team_id)
+        print("US05 -", team)
+        student_channels = get_channels(token, team_id)
+        # student_channels = get_channels_from_json(team_file)
         channel_count += len(student_channels)
         for channel in student_channels:
             print(channel)
@@ -55,7 +58,7 @@ def update_sites(course_code, instance_name):
                 print(f"US06 - Student not found in course: [{channel['display_name']}]")
             else:
                 print("US07 - Student", student.name)
-                drive = get_drive(msteams_api.my_token, team_id, channel["id"])
+                drive = get_drive(token, team_id, channel["id"])
                 # print("US81 - Drive", drive)
                 site_count += 1
                 student.site = drive["drive_id"]

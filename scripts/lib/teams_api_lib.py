@@ -15,7 +15,7 @@ teams = ["1221c52c-8dde-4f0a-8dd2-fafe98df6c2d",
 # https://teams.microsoft.com/l/team/19%3AOUGszdnbXVRK76ZqNgLxZkTRa80goO2f3ozej08peGA1%40thread.tacv2/conversations?groupId=68ab52d4-8c10-4316-9a88-229854794074&tenantId=98932909-9a5a-4d18-ace4-7236b5b5e11d
 
 def get_access_token(a_tenant_id, a_client_id):
-    print("get_access_token", a_tenant_id, a_client_id)
+    print("TA31 - get_access_token", a_tenant_id, a_client_id)
     redirect_uri = "https://localhost"
 
     captured_output = io.StringIO()
@@ -37,27 +37,27 @@ def get_access_token(a_tenant_id, a_client_id):
     # print(resulting_object)
     obj = json.loads(resulting_object)
 
-    print("Accesstoken: ", obj["AccessToken"])
+    print("TA35 - Accesstoken: ", obj["AccessToken"])
     return obj["AccessToken"]
 
 
 def get_me_for_check(a_token):
-    print(f"Sending Request to ask for me")
+    print(f"TA21 - Sending Request to ask for me")
     headers = {
         "Authorization": f"Bearer {a_token}",
         "Content-type": "application/json; charset=ISO-8859-1"
     }
     # print(headers)
     url = f"https://graph.microsoft.com/v1.0/me"
-    print(url)
+    print("TA22 - Request:", url)
     response = requests.get(url, headers=headers)
     print(response.status_code)
     if response.status_code == 200:
         l_result = response.json()
-        print(l_result['displayName'])
+        print("TA23 - Response:", l_result['displayName'])
         return(l_result['displayName'])
     else:
-        print(f"Response {url}: {response.json()}")
+        print(f"TA25 - Response error {url}: {response.json()}")
         return None
 
 
@@ -230,7 +230,7 @@ def upload_file_to_onedrive(a_token, a_name, a_drive_id, a_file_path, a_file_nam
     # drive_id = "b!JlWXSwZ06kqtE18zUw4nyLLiywuLAR9AiyKsmQ1pD5H1RQraPukJRoocfQ2Oj64W"
     # l_url = f"https://graph.microsoft.com/v1.0/sites/{a_channel}/drive/items/root:/{a_name}/{l_remote_file_name}%20progress.jpeg:/content"
     url = f"https://graph.microsoft.com/v1.0/drives/{a_drive_id}/items/root:/{a_name.replace(' ', '%20')}/{l_remote_file_name.replace(' ', '%20')}:/content"
-    print(url)
+    # print(url)
     response = requests.put(url, headers=l_headers, data=data)
     if response.status_code not in [200, 201]:
         print(f"Error {response.status_code} response: {response.json()}")
@@ -353,7 +353,7 @@ def get_team(a_token, a_team_id):
 
 def get_drive(token, team_id, channel_id):
     url = f"https://graph.microsoft.com/v1.0/teams/{team_id}/channels/{channel_id}/filesFolder"
-    print("TA36 -", url)
+    # print("TA36 -", url)
     headers = {
         "Authorization": "Bearer " + token,
         "Content-Type": "application/json"
@@ -362,10 +362,10 @@ def get_drive(token, team_id, channel_id):
     if response.status_code == 200:
         result = response.json()
         result_dict = {"display_name": result['name'], "drive_id": result['parentReference']['driveId']}
-        print(result_dict)
+        # print(result_dict)
         return result_dict
     else:
-        print(f"TA38 - Error getting token: {response.json()}")
+        print(f"TA38 - Error getting drive: {response.json()}")
     return {"display_name": "", "drive_id": ""}
 
 

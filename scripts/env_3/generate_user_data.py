@@ -33,10 +33,9 @@ class UserDictAdapter:
 
 
 def generate_user_data(course_code, instance_name):
-    print("GUD01 - generate_user_data.py")
+    print("GUD01 - generate_portfolio.py")
     g_actual_date = get_actual_date()
     environment = read_environment(ENVIRONMENT_FILE_NAME)
-    print("GUD03 -", environment)
     if len(instance_name) > 0:
         environment.current_instance = {"course_name": course_code, "course_instance_name": instance_name}
         with open(ENVIRONMENT_FILE_NAME, 'w') as f:

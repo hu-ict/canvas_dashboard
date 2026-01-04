@@ -1,9 +1,9 @@
 from scripts.lib.build_bootstrap_release_planning import build_bootstrap_release_planning_tab
-from lib.build_plotly_analyse import process_analytics
-from lib.lib_bootstrap import load_templates
-from lib.lib_date import get_date_time_loc
-from lib.lib_progress import get_overall_progress
-from model.dashboard.LevelSerie import STR_GRADES
+from scripts.lib.build_plotly_analyse import process_analytics
+from scripts.lib.lib_bootstrap import load_templates
+from scripts.lib.lib_date import get_date_time_loc
+from scripts.lib.lib_progress import get_overall_progress
+from scripts.model.dashboard.LevelSerie import STR_GRADES
 
 
 def build_learning_analytics(course, results, level_serie_collection):

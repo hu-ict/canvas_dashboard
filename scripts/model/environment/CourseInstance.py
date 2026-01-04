@@ -1,4 +1,4 @@
-from scripts.lib.file_const import DIR_DIV, ENVIRONMENT_PATH
+from scripts.lib.file_const import DIR_DIV
 
 
 class CourseInstance:
@@ -9,6 +9,7 @@ class CourseInstance:
         self.target_path = target_path
         self.period = period
         self.stage = stage
+        self.execution_source_path = "../courses/"
 
     def to_json(self):
         dict_result = {
@@ -26,7 +27,7 @@ class CourseInstance:
         return line
 
     def get_project_path(self):
-        return ENVIRONMENT_PATH + self.course_code + DIR_DIV + self.name + DIR_DIV
+        return self.execution_source_path + self.course_code + DIR_DIV + self.name + DIR_DIV
 
     def get_temp_path(self):
         return self.get_project_path() + "temp" + DIR_DIV
@@ -68,7 +69,7 @@ class CourseInstance:
         return self.get_project_path() + "trm_"+self.name+".xlsx"
 
     def get_user_data_file_name(self):
-        return ENVIRONMENT_PATH + "user_data.csv"
+        return self.execution_source_path + "user_data.csv"
 
     def from_dict(data_dict):
         # print(data_dict)

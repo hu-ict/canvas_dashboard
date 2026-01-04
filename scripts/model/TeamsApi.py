@@ -31,8 +31,8 @@ class TeamsApi:
 
     def to_json(self):
         return {'tenant_id': self.tenant_id, 'tenant_name': self.tenant_name, 'client_id': self.client_id,
-                       'gen_token': self.gen_token, 'my_token': self.my_token,
-                       'channels': list(map(lambda c: c.to_json(), self.channels))}
+                'gen_token': self.gen_token, 'my_token': self.my_token,
+                'channels': list(map(lambda c: c.to_json(), self.channels))}
 
     def __str__(self):
         return f'TeamsApi({self.tenant_id}, {self.tenant_name}, {self.client_id}, {self.gen_token}, {self.my_token}'

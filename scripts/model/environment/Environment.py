@@ -29,6 +29,12 @@ class Environment:
                 return course
         return None
 
+    def get_execution_by_name(self, execution_name):
+        for execution in self.executions:
+            if execution.name == execution_name:
+                return execution
+        return None
+
     def is_instance_of_course(self, course_instance_name, course_name):
         for course in self.courses:
             if course.name == course_name:

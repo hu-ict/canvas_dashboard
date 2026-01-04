@@ -4,10 +4,6 @@ import sys
 from scripts.lib.file import read_course, read_msteams_api, read_environment
 from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, MSTEAMS_API_KEY_FILE_NAME
 from scripts.lib.lib_date import get_actual_date
-from scripts.lib.teams_api_lib import teams, get_channels, get_drive, get_me_for_check, get_access_token, \
-    get_channels_from_json
-from scripts.model.TeamsApi import Channel
-
 
 def update_sites_from_json(course_code, instance_name):
     print("USJ01 - update_sites_from_json.py", instance_name)

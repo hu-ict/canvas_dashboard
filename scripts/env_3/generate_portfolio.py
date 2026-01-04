@@ -1,9 +1,9 @@
 import json
 import sys
 
-from lib.build_bootstrap_student import build_bootstrap_student_index
-from lib.lib_bootstrap import load_templates
-from lib.lib_date import get_actual_date
+from scripts.lib.build_bootstrap_student import build_bootstrap_student_index
+from scripts.lib.lib_bootstrap import load_templates
+from scripts.lib.lib_date import get_actual_date
 from scripts.lib.file import read_course, read_results, read_environment, read_dashboard
 from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, DIR_DIV
 
