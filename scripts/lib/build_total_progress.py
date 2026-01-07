@@ -44,7 +44,8 @@ def process_total_progress(a_instance, a_course, a_results, a_total_progress):
                     a_total_progress["level_moments"][level_label][-1] += 1
                 else:
                     # print("BTP12 -", submission.score, a_total_progress["level_moments"][level_label]['overall'])
-                    a_total_progress["level_moments"][level_label][int(submission.score)] += 1
+                    if submission.grade:
+                        a_total_progress["level_moments"][level_label][int(submission.grade)] += 1
         if a_course.grade_moments is not None:
             for grade_label in a_total_progress["grade_moments"]:
                 submission = student_results.get_grade_moment_submission_by_query([grade_label])

@@ -2,7 +2,7 @@ from scripts.lib.lib_date import get_date_time_obj, get_date_time_str
 
 
 class Feedback:
-    def __init__(self, author_id, author_name, date, day, comment, positive_neutral_negative, assignment_name, assignment_id, grade):
+    def __init__(self, author_id, author_name, date, day, comment, positive_neutral_negative, assignment_name, assignment_id, grade, grade_label):
         self.author_id = author_id
         self.author_name = author_name
         self.date = date
@@ -12,6 +12,7 @@ class Feedback:
         self.assignment_name = assignment_name
         self.assignment_id = assignment_id
         self.grade = grade
+        self.grade_label = grade_label
 
     def to_json(self):
         return {
@@ -23,12 +24,13 @@ class Feedback:
             'positive_neutral_negative': self.positive_neutral_negative,
             'assignment_name': self.assignment_name,
             'assignment_id': self.assignment_id,
-            'grade': self.grade
+            'grade': self.grade,
+            'grade_label': self.grade_label
         }
 
     def __str__(self):
-        return f'Feedback({self.author_id}, {self.author_name}, {self.date}, {self.comment}, {self.positive_neutral_negative}, {self.assignment_name}, {self.assignment_id}, {self.grade}'
+        return f'Feedback({self.author_id}, {self.author_name}, {self.date}, {self.comment}, {self.positive_neutral_negative}, {self.assignment_name}, {self.assignment_id}, {self.grade}, , {self.grade_label}'
 
     @staticmethod
     def from_dict(data_dict):
-        return Feedback(data_dict['author_id'], data_dict['author_name'], get_date_time_obj(data_dict['date']), data_dict['day'], data_dict['comment'], data_dict['positive_neutral_negative'], data_dict['assignment_name'], data_dict['assignment_id'], data_dict['grade'])
+        return Feedback(data_dict['author_id'], data_dict['author_name'], get_date_time_obj(data_dict['date']), data_dict['day'], data_dict['comment'], data_dict['positive_neutral_negative'], data_dict['assignment_name'], data_dict['assignment_id'], data_dict['grade'], data_dict['grade_label'])

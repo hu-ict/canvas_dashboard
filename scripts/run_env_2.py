@@ -13,7 +13,9 @@ def main():
     environment = read_environment(ENVIRONMENT_FILE_NAME)
     event = "env-2_results_create_event"
     execution = environment.get_execution_by_name("env_2")
+    # loopt alle courses af in de environment.json
     for course in environment.courses:
+        # loopt alle course_instances af in de environment.json
         for course_instance in course.course_instances:
             if get_date_time_obj(course_instance.period["end_date"]) > l_actual_date:
                 print("R2E04 - Instance:", course_instance.name, event)

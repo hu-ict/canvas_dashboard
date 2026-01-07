@@ -1,16 +1,16 @@
 import json
 import sys
 
-from scripts.env_3.generate_user_data import generate_user_data
-from scripts.lib.file import read_environment, read_workflow
-from scripts.lib.lib_date import get_actual_date
-from scripts.env_2.generate_course import generate_course
-from scripts.env_3.generate_dashboard import generate_dashboard
-from scripts.env_3.generate_plotly import generate_plotly
-from scripts.env_3.generate_portfolio import generate_portfolio
-from scripts.env_2.generate_results import generate_results
-from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, WORKFLOW_FILE_NAME
-from scripts.publish_dashboard import publish_dashboard
+from env_3.generate_user_data import generate_user_data
+from lib.file import read_environment, read_workflow
+from lib.lib_date import get_actual_date
+from env_2.generate_course import generate_course
+from env_3.generate_dashboard import generate_dashboard
+from env_3.generate_plotly import generate_plotly
+from env_3.generate_portfolio import generate_portfolio
+from env_2.generate_results import generate_results
+from lib.file_const import ENVIRONMENT_FILE_NAME, WORKFLOW_FILE_NAME
+from publish_dashboard import publish_dashboard
 
 
 def main(course_code, instance_name, event):
@@ -50,6 +50,7 @@ def main(course_code, instance_name, event):
 
 
 if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding="utf-8")
     l_actual_date = get_actual_date()
     if len(sys.argv) > 2:
         main(sys.argv[1], sys.argv[2])
@@ -58,7 +59,7 @@ if __name__ == "__main__":
         # main("TICT-V3SE5-25_SEP25", "course_create_event")
         # main("TICT-V3SE5-25", "TICT-V3SE5-25_sep25", "results_create_event")
         # main("TICT-V3SE6-25", "TICT-V3SE6-25_sep25", "env-3_dashboard_create_event")
-        main("TICT-V3SE6-25", "TICT-V3SE6-25_sep25", "results_create_event")
+        main("TICT-V3SE6-25", "TICT-V3SE6-25_sep25", "course_create_event")
     total_seconds = (get_actual_date() - l_actual_date).seconds
     seconds = total_seconds % 60
     minutes = total_seconds // 60

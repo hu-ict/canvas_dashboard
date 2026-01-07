@@ -401,7 +401,7 @@ def add_open_grade_moments(course, actual_day, student_id, student_grade_moments
                         l_submission = Submission(0, submission_assignment, student_id,
                                                   None,
                                                   None,
-                                                  NOT_YET_GRADED, False, None, 0, 0, 0, 0, 0)
+                                                  NOT_YET_GRADED, False, False, None, 0, 0, 0, 0, 0)
                         l_submission.comments.append(Comment(1, ROBOT, assignment.date, NO_SUBMISSION_GRADE))
                         student_grade_moments.submissions.append(l_submission)
     elif len(student_grade_moments.assignment_groups) > 1:

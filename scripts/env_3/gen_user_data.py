@@ -26,8 +26,8 @@ from pathlib import Path
 from typing import Iterable, List
 
 from scripts.lib.file import read_course, read_environment
-from lib.lib_date import get_actual_date
-from model.environment.Environment import ENVIRONMENT_FILE_NAME
+from scripts.lib.file_const import ENVIRONMENT_FILE_NAME
+from scripts.lib.lib_date import get_actual_date
 
 
 # ----------------------------
