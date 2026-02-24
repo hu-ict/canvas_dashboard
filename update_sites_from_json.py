@@ -6,23 +6,21 @@ from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, MSTEAMS_API_KEY_FILE_N
 from scripts.lib.lib_date import get_actual_date
 
 def update_sites_from_json(course_code, instance_name):
+    sys.stdout.reconfigure(encoding="utf-8")
     print("USJ01 - update_sites_from_json.py", instance_name)
     g_actual_date = get_actual_date()
+    print("PSF01 - publish_student_files.py")
+    g_actual_date = get_actual_date()
+    print("PSF02 -", ENVIRONMENT_FILE_NAME, course_code)
     environment = read_environment(ENVIRONMENT_FILE_NAME)
-    if len(instance_name) > 0:
-        environment.current_instance = {"course_name": course_code, "course_instance_name": instance_name}
-        with open(ENVIRONMENT_FILE_NAME, 'w') as f:
-            dict_result = environment.to_json()
-            json.dump(dict_result, f, indent=2)
-    print("USJ03 - update_sites.py", ENVIRONMENT_FILE_NAME)
+    execution = environment.get_execution_by_name("env_3")
     course_instance = environment.get_instance_of_course(environment.current_instance)
-    print("Instance:", course_instance.name)
-
-    if course_instance.course_code not in ["TICT-V3SE6-25"]:
-        print("US04 - No student channels defined for this course")
-        return
+    course_instance.execution_source_path = execution.source_path
+    print("PSF03 -", environment)
+    print("PSF04 - Instance:", course_instance.name)
     course = read_course(course_instance.get_course_file_name())
     msteams_api = read_msteams_api(MSTEAMS_API_KEY_FILE_NAME)
+
     print("USJ06 -", len(msteams_api.channels))
     for student in course.students:
         print("USJ11 -", student.name, student.id)

@@ -1,8 +1,12 @@
 import json
 import os
+import shutil
+from pathlib import Path
+
 from scripts.lib.file import read_environment
-from scripts.model.environment.CourseInstance import CourseInstance
 from scripts.lib.file_const import ENVIRONMENT_FILE_NAME
+from scripts.model.environment.CourseInstance import CourseInstance
+
 
 periods = {
     "sep25": {"start_date": "2025-09-01T00:00:00Z", "end_date": "2026-01-30T23:59:59Z"},
@@ -37,12 +41,12 @@ target_path = input("Target path, i.e. onedrive file path: ")
 # if guild_group_name == "g":
 #     guild_group_name = "Guild Groups"
 attendance_file = input("Canvas attendance_report.csv (attendance_report.csv): ")
-for periode in periods:
-    print(periode)
-period = input("Choose the education period for the course_instance: ")
-while period not in periods:
-    print("period doesn't exists", period)
-    cperiod = input("Choose the education period for the course_instance: ")
+for period in periods:
+    print(period)
+period_input = input("Choose the education period for the course_instance: ")
+while period_input not in periods:
+    print("period doesn't exists", period_input)
+    period_input = input("Choose the education period for the course_instance: ")
 print("GNC09 - Creating course_instance", course_instance_name)
 
 course_instance = CourseInstance(course_instance_name, course_code, canvas_course_id, target_path, periods[period], "DEV")
@@ -58,6 +62,14 @@ environment.current_instance = {"course_name": course_code, "course_instance_nam
 with open(ENVIRONMENT_FILE_NAME, 'w') as f:
     dict_result = environment.to_json()
     json.dump(dict_result, f, indent=2)
-print("CourseInstane is created", course_instance_name)
+
+current_instance = environment.get_instance_of_course(environment.current_instance)
+
+src = Path(current_instance.get_course_path()+"dashboard.json")
+dst = Path(current_instance.get_dashboard_file_name())
+shutil.copy2(src, dst)
+
+
+print("CourseInstance is created", course_instance_name)
 print("Environment is updated", environment.name)
 

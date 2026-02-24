@@ -1,9 +1,10 @@
-from model.Assessor import Assessor
-from model.StudentGroup import StudentGroup
-from model.StudentLink import StudentLink
+from scripts.model.Assessor import Assessor
+from scripts.model.StudentGroup import StudentGroup
+from scripts.model.StudentLink import StudentLink
 
 
 def get_groups(scope, canvas_course):
+    print("LST11 -", scope, canvas_course.name)
     group_list = []
     if not scope or len(scope) == 0:
         return group_list
@@ -114,7 +115,7 @@ def get_section_students(project_group_name, course, canvas_course):
                             # print("GST63 -", section.name, project_group)
                             if project_group:
                                 student.project_id = project_group.id
-                                for teacher_id in project_group.teachers:
+                                for teacher_id in project_group.assessors:
                                     student.project_teachers.append(teacher_id)
                                 student_link = StudentLink.from_student(student)
                                 # print("GS64 -", student_link)

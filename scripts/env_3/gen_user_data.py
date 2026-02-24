@@ -25,9 +25,9 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Iterable, List
 
-from scripts.lib.file import read_course, read_environment
-from scripts.lib.file_const import ENVIRONMENT_FILE_NAME
-from scripts.lib.lib_date import get_actual_date
+from lib.file import read_course, read_environment
+from lib.file_const import ENVIRONMENT_FILE_NAME
+from lib.lib_date import get_actual_date
 
 
 # ----------------------------

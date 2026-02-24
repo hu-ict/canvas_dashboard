@@ -2,7 +2,7 @@ import json
 from scripts.lib.file import read_course, read_environment
 from scripts.lib.file_const import ENVIRONMENT_FILE_NAME
 from scripts.lib.lib_date import get_actual_date
-import sys
+
 import csv
 
 
@@ -32,17 +32,9 @@ class UserDictAdapter:
         }
 
 
-def generate_user_data(course_code, instance_name):
+def generate_user_data(course_instance):
     print("GUD01 - generate_portfolio.py")
     g_actual_date = get_actual_date()
-    environment = read_environment(ENVIRONMENT_FILE_NAME)
-    if len(instance_name) > 0:
-        environment.current_instance = {"course_name": course_code, "course_instance_name": instance_name}
-        with open(ENVIRONMENT_FILE_NAME, 'w') as f:
-            dict_result = environment.to_json()
-            json.dump(dict_result, f, indent=2)
-    course_instance = environment.get_instance_of_course(environment.current_instance)
-    print("GUD05 - Instance:", course_instance.name)
 
     user_data = list()
     course = read_course(course_instance.get_course_file_name())
@@ -63,9 +55,3 @@ def generate_user_data(course_code, instance_name):
     print("GUD99 Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 
 
-if __name__ == "__main__":
-    sys.stdout.reconfigure(encoding='utf-8')
-    if len(sys.argv) > 1:
-        generate_user_data(sys.argv[1], sys.argv[2])
-    else:
-        generate_user_data("", "")

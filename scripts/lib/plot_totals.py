@@ -1,7 +1,7 @@
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
-from lib.build_plotly_bandwidth import process_bandwidth_overall
+from scripts.lib.build_plotly_bandwidth import process_bandwidth_overall
 from scripts.lib.lib_plotly import hover_style
 
 

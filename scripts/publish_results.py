@@ -2,9 +2,9 @@ import json
 import shutil
 import sys
 
-from scripts.lib.file import read_environment
+from lib.file import read_environment
 from lib.lib_date import get_actual_date
-from scripts.lib.file_const import ENVIRONMENT_FILE_NAME
+from lib.file_const import ENVIRONMENT_FILE_NAME
 
 
 def publish_results(course_code, instance_name):

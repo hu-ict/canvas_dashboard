@@ -7,7 +7,7 @@ import sys
 # Placeholder imports for original functionality
 from canvasapi import Canvas
 from lib.lib_date import API_URL, get_date_time_obj, get_actual_date
-from scripts.lib.file import read_environment, read_secret_api_key, read_dashboard_from_canvas, read_config_from_canvas, read_course
+from lib.file import read_environment, read_secret_api_key, read_dashboard_from_canvas, read_config_from_canvas, read_course
 from model.rubric.Criterion import Criterion
 from model.rubric.Rating import Rating
 from model.attendance.AttendanceMoment import AttendanceMoment

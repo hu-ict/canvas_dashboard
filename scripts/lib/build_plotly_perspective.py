@@ -320,58 +320,6 @@ def remove_assignment_sequence(a_assignment_sequences, a_submission_sequence):
     return a_assignment_sequences
 
 
-def plot_overall_level_moment(a_row, a_col, a_fig, a_course, a_level_moment, a_levels):
-    if a_level_moment.graded:
-        label = a_levels.level_series[a_course.level_moments.levels].grades[a_level_moment.grade].label
-        color = a_levels.level_series[a_course.level_moments.levels].grades[a_level_moment.grade].color
-    else:
-        label = a_levels.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).label
-        color = a_levels.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).color
-
-    if a_level_moment.grade is None:
-        y_niveau = [0.2]
-    else:
-        y_niveau = [int(a_level_moment.grade)]
-    x_labels = ["Peilmoment"]  # [a_level_moment.assignment.name]
-    y_hover = get_hover_moment(a_course, a_level_moment, a_levels.level_series[a_course.level_moments.levels])
-    # print("BPP11 - plot_overall_level_moment", a_level_moment.assignment.name)
-    a_fig.add_trace(go.Bar(x=x_labels, y=y_niveau,
-                           name="Hoi",
-                           hoverinfo="text",
-                           hovertext=y_hover,
-                           hoverlabel=hover_style,
-                           text=label,
-                           marker=dict(color=color)), row=a_row, col=a_col)
-    a_fig.update_yaxes(title_text="Niveau", range=[0, 3.5], dtick=1, row=a_row, col=a_col)
-
-
-def plot_overall_grade_moment(a_row, a_col, a_fig, a_course, a_grade_moment, a_levels):
-    if a_grade_moment.graded:
-        # print("BPP41 -", a_grade_moment.assignment.name, a_course.grade_moments.name)
-        # print("BPP42 -", a_levels.level_series[a_course.grade_moments.levels])
-        label = a_levels.level_series[a_course.grade_moments.levels].grades[a_grade_moment.grade].label
-        color = a_levels.level_series[a_course.grade_moments.levels].grades[a_grade_moment.grade].color
-    else:
-        label = a_levels.level_series[a_course.grade_moments.levels].get_status(BEFORE_DEADLINE).label
-        color = a_levels.level_series[a_course.grade_moments.levels].get_status(BEFORE_DEADLINE).color
-
-    if a_grade_moment.grade is None:
-        y_niveau = [0.2]
-    else:
-        y_niveau = [int(a_grade_moment.grade)]
-    x_labels = ["Beoordelingsmoment"]  # [a_grade_moment.assignment.name]
-    y_hover = get_hover_moment(a_course, a_grade_moment, a_levels.level_series[a_course.grade_moments.levels])
-
-    a_fig.add_trace(go.Bar(x=x_labels, y=y_niveau,
-                           name="Hoi",
-                           hoverinfo="text",
-                           hovertext=y_hover,
-                           hoverlabel=hover_style,
-                           text=label,
-                           marker=dict(color=color)), row=a_row, col=a_col)
-    a_fig.update_yaxes(title_text="Niveau", range=[0, 3.5], dtick=1, row=a_row, col=a_col)
-
-
 def plot_perspective(a_row, a_col, a_fig, a_course, a_student_perspective,
                      a_actual_day, a_actual_date, a_level_serie_collection):
     perspective = a_course.perspectives[a_student_perspective.name]
@@ -410,6 +358,20 @@ def plot_perspective(a_row, a_col, a_fig, a_course, a_student_perspective,
                             perspective.assignment_sequences, a_student_perspective, a_actual_day,
                             a_level_serie_collection)
 
+def get_moments(assignment_group, student):
+    moments = []
+    for assignment_sequence in assignment_group.assignment_sequences:
+        assignment = assignment_sequence.assignments[0]
+        moment = student.get_moment_by_assignment(assignment.id)
+        if moment is None:
+            submission_assignment = SubmissionAssignment(assignment.id, assignment.name, assignment.group_id, assignment.points, assignment.date, assignment.day)
+            moment = Submission(0, submission_assignment, 0,
+                                    assignment.date, assignment.day,
+                                    BEFORE_DEADLINE, False, False,
+                                    "-1", None, None,
+                                    0, 0, 0)
+        moments.append(moment)
+    return moments
 
 def plot_timeline(a_row, a_col, a_fig, a_course, a_student, a_actual_day, a_actual_date, a_level_serie_collection,
                   a_feedback_colors):
@@ -424,28 +386,10 @@ def plot_timeline(a_row, a_col, a_fig, a_course, a_student, a_actual_day, a_actu
         plot_timeline_lu(a_row, a_col, a_fig, a_course, timeline_lu, a_feedback_colors)
 
     assignment_group = a_course.get_assignment_group(a_course.level_moments.assignment_group_ids[0])
-    moments = []
-    for assignment_sequence in assignment_group.assignment_sequences:
-        assignment = assignment_sequence.assignments[0]
-        submission = a_student.get_submission_by_assignment(assignment.id)
-        if submission is None:
-            submission_assignment = SubmissionAssignment(assignment.id, assignment.name, assignment.group_id, assignment.points, assignment.date, assignment.day)
-            submission = Submission(0, submission_assignment, 0,
-                                    assignment.date, assignment.day,
-                                    BEFORE_DEADLINE, False, False,
-                                    "-1", None, None,
-                                    0, 0, 0)
-        moments.append(submission)
-
-    for assignment in a_course.get_grade_moments():
-        submission_assignment = SubmissionAssignment(assignment.id, assignment.name, assignment.group_id,
-                                                     assignment.points, assignment.date, assignment.day)
-        submission = Submission(0, submission_assignment, 0,
-                                assignment.date, assignment.day,
-                                BEFORE_DEADLINE, False, False,
-                                "-1", None, None,
-                                0, 0, 0)
-        moments.append(submission)
+    moments = get_moments(assignment_group, a_student)
+    assignment_group = a_course.get_assignment_group(a_course.grade_moments.assignment_group_ids[0])
+    moments.extend(get_moments(assignment_group, a_student))
+    # print("BPP71 - Moments", moments)
     plot_timeline_moments(a_row, a_col, a_fig, a_course, moments, a_level_serie_collection)
 
     plot_day_bar_lu(a_row, a_col, a_fig, a_actual_day, a_actual_date,
@@ -468,11 +412,8 @@ def plot_timeline_moments(a_row, a_col, a_fig, a_course, a_submission_list, a_le
         y_feedback.append("BP<br>Peil/Beslissing")
         # print("BPP61 -", submission.assignment.name, submission.graded, submission.grade)
         y_hover.append(get_hover_moment(a_course, submission, level_serie))
-        if submission.posted:
-            if submission.graded:
-                y_colors.append(level_serie.grades[submission.grade].color)
-            else:
-                y_colors.append(level_serie.get_status(BEFORE_DEADLINE).color)
+        if submission.graded:
+            y_colors.append(level_serie.grades[submission.grade].color)
         else:
             y_colors.append(level_serie.get_status(BEFORE_DEADLINE).color)
         y_marker_symbols.append(a_course.get_assignment_group_by_assignment(submission.assignment.id).marker)

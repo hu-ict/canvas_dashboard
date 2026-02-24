@@ -2,7 +2,7 @@ import csv
 import sys
 
 
-from scripts.lib.file import read_start, read_course, read_results
+from lib.file import read_start, read_course, read_results
 from lib.lib_date import get_actual_date
 
 

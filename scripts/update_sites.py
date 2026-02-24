@@ -1,11 +1,11 @@
 import json
 import sys
 
-from scripts.lib.file import read_course, read_msteams_api, read_environment
-from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, MSTEAMS_API_KEY_FILE_NAME
-from scripts.lib.lib_date import get_actual_date
-from scripts.lib.teams_api_lib import teams, get_channels, get_drive, get_me_for_check, get_access_token, \
-    get_channels_from_json, get_team
+from lib.file import read_course, read_msteams_api, read_environment
+from lib.file_const import ENVIRONMENT_FILE_NAME, MSTEAMS_API_KEY_FILE_NAME
+from lib.lib_date import get_actual_date
+from lib.teams_api_lib import teams, get_channels, get_drive, get_me_for_check, get_access_token, \
+    get_team
 from scripts.model.TeamsApi import Channel
 
 

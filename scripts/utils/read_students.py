@@ -1,11 +1,10 @@
 # Haalt de studenten en de projecten op. Maakt een JSON waarin de url's naar de daily wordt opgeslagen.
 from canvasapi import Canvas
 import json
-from datetime import timezone, datetime
 
 from canvasapi.course import Course
 
-from scripts.lib.file import read_course_config, read_course_config_start
+from lib.file import read_course_config, read_course_config_start
 from lib.lib_date import actual_date, roles, API_URL
 from model.Student import Student
 

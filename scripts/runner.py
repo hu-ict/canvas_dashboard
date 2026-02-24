@@ -30,19 +30,19 @@ def main(course_code, instance_name, event):
     for python_script in action.run:
         print("OP05 - Event", action.name, "course_code", course_code, "course_instance", instance_name +":>", python_script)
         if python_script == "generate_course.py":
-            generate_course(course_code, instance_name)
+            generate_course(instance_name)
         elif python_script == "generate_results.py":
-            generate_results(course_code, instance_name)
+            generate_results(instance_name)
         elif python_script == "generate_dashboard.py":
-            generate_dashboard(course_code, instance_name)
+            generate_dashboard(instance_name)
         elif python_script == "generate_plotly.py":
-            generate_plotly(course_code, instance_name)
+            generate_plotly(instance_name)
         elif python_script == "generate_portfolio.py":
-            generate_portfolio(course_code, instance_name)
+            generate_portfolio(instance_name)
         elif python_script == "publish_dashboard.py":
-            publish_dashboard(course_code, instance_name)
+            publish_dashboard(instance_name)
         elif python_script == "generate_user_data.py":
-            generate_user_data(course_code, course_instance.name)
+            generate_user_data(course_instance.name)
         else:
             print("OP51 - Script wordt niet herkend.", python_script)
 

@@ -30,14 +30,21 @@ class Dashboard:
         dict_result = {"dashboard_tabs": self.dashboard_tabs, "student_tabs": self.student_tabs,
                        "subplot": self.subplot.to_json(), "project_group_name": self.project_group_name, "guild_group_name": self.guild_group_name, "feedback_colors": self.feedback_colors,
                        "level_serie_collection": self.level_serie_collection.to_json()}
+        if len(self.assignment_groups) > 0:
+            dict_result["assignment_groups"] = list(map(lambda a: a.to_json(), self.assignment_groups))
+        dict_result["learning_outcomes"] = self.learning_outcomes
+        dict_result["perspectives"] = self.perspectives
+
         return dict_result
 
     @staticmethod
     def from_dict(data_dict):
+        # print("DAS04 -", data_dict)
         new = Dashboard(data_dict["dashboard_tabs"], data_dict["student_tabs"], Subplot.from_dict(data_dict["subplot"]),
                         data_dict["project_group_name"], data_dict["guild_group_name"], data_dict["feedback_colors"],
                         LevelSerieCollection.from_dict(data_dict["level_serie_collection"]))
         if "perspectives" in data_dict:
+            # print("DAS05 -", len(data_dict["perspectives"]))
             new.perspectives = list(map(lambda p: MetaPerspective.from_dict(p), data_dict['perspectives']))
         if "assignment_groups" in data_dict:
             new.assignment_groups = list(map(lambda a: MetaAssignmentGroup.from_dict(a), data_dict['assignment_groups']))

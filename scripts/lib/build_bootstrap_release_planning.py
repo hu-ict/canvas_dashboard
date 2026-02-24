@@ -1,6 +1,6 @@
-from lib.build_plotly_bandwidth import process_bandwidth
+from scripts.lib.build_plotly_bandwidth import process_bandwidth
 from scripts.lib.file import read_plotly
-from lib.lib_date import get_date_time_loc
+from scripts.lib.lib_date import get_date_time_loc
 
 
 def write_release_planning_index(course, templates, assignment_group_id, file_name, file_name_bandwidth):

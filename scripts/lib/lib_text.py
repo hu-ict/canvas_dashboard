@@ -24,5 +24,16 @@ def get_extracted_text(text):
         aangepaste_tekst = re.sub(r'\s?@\w+', '', text_part)
         # Extra spaties opruimen
         aangepaste_tekst = re.sub(r'\s+', ' ', aangepaste_tekst).strip()
-        text_lu_result.append({"lu": at_sign_words[0], "text": aangepaste_tekst})
+        if len(aangepaste_tekst) > 0:
+            if aangepaste_tekst[0] == "-":
+                positive_neutral_negative = "-"
+                aangepaste_tekst = aangepaste_tekst[1:].strip()
+            elif aangepaste_tekst[0] == "+":
+                positive_neutral_negative = "+"
+                aangepaste_tekst = aangepaste_tekst[1:].strip()
+            else:
+                positive_neutral_negative = "N"
+        else:
+            positive_neutral_negative = "N"
+        text_lu_result.append({"lu": at_sign_words[0], "positive_neutral_negative": positive_neutral_negative, "text": aangepaste_tekst})
     return text_lu_result

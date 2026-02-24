@@ -1,5 +1,6 @@
 from scripts.lib.file_const import DIR_DIV
 
+execution_source_path = "./courses/"
 
 class CourseInstance:
     def __init__(self, name, course_code, canvas_course_id, target_path, period, stage):
@@ -9,7 +10,6 @@ class CourseInstance:
         self.target_path = target_path
         self.period = period
         self.stage = stage
-        self.execution_source_path = "../courses/"
 
     def to_json(self):
         dict_result = {
@@ -26,8 +26,11 @@ class CourseInstance:
         line = f' CourseInstance({self.course_code} {self.name} {self.canvas_course_id}, {self.stage})'
         return line
 
+    def get_course_path(self):
+        return execution_source_path + self.course_code + DIR_DIV
+
     def get_project_path(self):
-        return self.execution_source_path + self.course_code + DIR_DIV + self.name + DIR_DIV
+        return execution_source_path + self.course_code + DIR_DIV + self.name + DIR_DIV
 
     def get_temp_path(self):
         return self.get_project_path() + "temp" + DIR_DIV
@@ -69,7 +72,13 @@ class CourseInstance:
         return self.get_project_path() + "trm_"+self.name+".xlsx"
 
     def get_user_data_file_name(self):
-        return self.execution_source_path + "user_data.csv"
+        return execution_source_path + "user_data.csv"
+
+    def get_osiris_data_file_name(self):
+        return self.get_project_path() + "osiris_data_"+self.name+".csv"
+
+    def get_feedback_file_name(self, leaning_outcome):
+        return self.get_project_path() + "feedback_"+self.name+"_"+leaning_outcome+".csv"
 
     def from_dict(data_dict):
         # print(data_dict)

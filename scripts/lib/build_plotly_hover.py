@@ -33,16 +33,6 @@ def get_hover_assignment(points, data_point):
             return "<b>" + submission.assignment.name + "</b><br>Deadline " + get_date_time_loc(submission.assignment.date)
 
 
-def get_hover_grade(course, submission, grade):
-    l_hover = "<br>Ingeleverd " + get_date_time_loc(submission.submitted_date)
-    l_label = grade.label
-    l_hover += "<br><b>" + l_label + "</b>, gewaardeerd door " + str(submission.grader_name) + " op " + get_date_time_loc(submission.graded_date)
-    if course.find_perspective_by_assignment_group(submission.assignment.group_id).show_points:
-        l_hover += ", score: " + str(submission.score)
-    l_hover += "<br>"
-    return l_hover
-
-
 def get_hover_status(submission, status):
     l_hover = "<br>Ingeleverd " + get_date_time_loc(submission.submitted_date)
     l_hover += "<br><b>" + status.label + "</b>"
@@ -142,7 +132,7 @@ def get_hover_moment(a_course, a_submission, a_level_serie):
     hover = NO_DATA
     if a_submission is not None:
         hover = "<b>" + a_submission.assignment.name + "</b> " + get_date_time_loc(a_submission.assignment.date) + "<br>"
-        if a_submission.graded and a_submission.posted:
+        if a_submission.graded: #and a_submission.posted:
             hover += a_level_serie.grades[a_submission.grade].label
             hover += ", bepaald door " + str(a_submission.grader_name) + " op " + get_date_time_loc(a_submission.graded_date)
             hover += get_hover_comments(a_submission.comments)
@@ -152,3 +142,11 @@ def get_hover_moment(a_course, a_submission, a_level_serie):
     return hover
 
 
+def get_hover_grade(course, submission, grade):
+    l_hover = "<br>Ingeleverd " + get_date_time_loc(submission.submitted_date)
+    l_label = grade.label
+    l_hover += "<br><b>" + l_label + "</b>, gewaardeerd door " + str(submission.grader_name) + " op " + get_date_time_loc(submission.graded_date)
+    if course.find_perspective_by_assignment_group(submission.assignment.group_id).show_points:
+        l_hover += ", score: " + str(submission.score)
+    l_hover += "<br>"
+    return l_hover

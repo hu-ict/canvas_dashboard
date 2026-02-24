@@ -3,7 +3,7 @@ import sys
 
 from canvasapi import Canvas
 from lib.lib_date import API_URL, get_date_time_obj, get_actual_date, date_to_day
-from scripts.lib.file import read_start, read_course, read_course_instance
+from lib.file import read_start, read_course, read_course_instance
 from model.Assignment import Assignment
 
 

@@ -1,7 +1,7 @@
 import sys
 from lib.lib_progress import get_overall_progress, proces_progress
 import json
-from scripts.lib.file import read_course, read_results, read_progress_history
+from lib.file import read_course, read_results, read_progress_history
 from lib.lib_date import get_actual_date
 from lib.lib_progress import flow_to_progress
 from model.ProgressDay import ProgressDay

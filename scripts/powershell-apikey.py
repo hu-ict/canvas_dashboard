@@ -1,9 +1,7 @@
-import subprocess
-import io
 import json
 import requests
 
-from scripts.lib.file import read_msteams_api, read_course, read_start, read_course_instances
+from lib.file import read_msteams_api, read_course, read_course_instances
 from lib.lib_date import get_actual_date
 from lib.teams_api_lib import get_me_for_check, get_access_token, get_sites
 

@@ -32,12 +32,6 @@ class StudentResults:
         line += " a "+str(self.student_attendance)
         return line
 
-    def get_perspective(self, name):
-        for perspective in self.perspectives:
-            if perspective.name == name:
-                return perspective
-        return None
-
     def get_submission_sequence_by_name(self, name):
         for student_perspective in self.perspectives.values():
             for submission_sequence in student_perspective.submission_sequences:
@@ -45,7 +39,7 @@ class StudentResults:
                     return submission_sequence
         return None
 
-    def get_submission_by_assignment(self, assignment_id):
+    def get_moment_by_assignment(self, assignment_id):
         for submission in self.student_level_moments.submissions:
             if submission.assignment.id == assignment_id:
                 return submission
@@ -105,16 +99,16 @@ class StudentResults:
                 return submission
         return None
 
-    def get_level_moment_submissions_by_query(self, a_query):
-        submissions = []
-        for submission in self.student_level_moments.submissions:
-            condition = 0
-            for selector in a_query:
-                if selector.lower() in submission.assignment.name.lower():
-                    condition += 1
-            if condition == len(a_query):
-                submissions.append(submission)
-        return submissions
+    # def get_level_moment_submissions_by_query(self, a_query):
+    #     submissions = []
+    #     for submission in self.student_level_moments.submissions:
+    #         condition = 0
+    #         for selector in a_query:
+    #             if selector.lower() in submission.assignment.name.lower():
+    #                 condition += 1
+    #         if condition == len(a_query):
+    #             submissions.append(submission)
+    #     return submissions
 
     def get_grade_moment(self, assigment_id):
         for grade_moment in self.student_grade_moments.submissions:
@@ -132,17 +126,23 @@ class StudentResults:
                 return grade_moment
         return None
 
-    def get_grade_moment_submissions_by_query(self, a_query):
-        grade_moments = []
-        for grade_moment in self.student_grade_moments.submissions:
-            condition = 0
-            # moet aan alle selectie criteria voldoen
-            for selector in a_query:
-                if selector.lower() in grade_moment.assignment.name.lower():
-                    condition += 1
-            if condition == len(a_query):
-                grade_moments.append(grade_moment)
-        return grade_moments
+    # def get_grade_moment_grade(self, assigment_id):
+    #     for grade_moment in self.student_grade_moments.submissions:
+    #         if grade_moment.assignment.id == assigment_id:
+    #             return grade_moment.grade
+    #     return -1
+
+    # def get_grade_moment_submissions_by_query(self, a_query):
+    #     grade_moments = []
+    #     for grade_moment in self.student_grade_moments.submissions:
+    #         condition = 0
+    #         # moet aan alle selectie criteria voldoen
+    #         for selector in a_query:
+    #             if selector.lower() in grade_moment.assignment.name.lower():
+    #                 condition += 1
+    #         if condition == len(a_query):
+    #             grade_moments.append(grade_moment)
+    #     return grade_moments
 
     # def get_judgement(self, perspective_name):
     #     for level_moment in self.student_level_moments.submissions:

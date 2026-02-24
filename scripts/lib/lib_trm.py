@@ -4,8 +4,9 @@ from openpyxl.styles import Alignment
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.worksheet.datavalidation import DataValidation
 
-columns = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+from scripts.lib.file import read_dashboard
 
+columns = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 def create_picklist(list_items):
     options = []
@@ -38,7 +39,7 @@ def get_data_frame(assignment_group_names, student_groups):
 
 
 def create_tab(ws, data_frame, teachers):
-    # print("GTRM11 -", teachers)
+    # print("LIBT30 -", teachers)
     for r in dataframe_to_rows(data_frame, index=False, header=True):
         ws.append(r)
     for cell in ws[1]:
@@ -50,6 +51,7 @@ def create_tab(ws, data_frame, teachers):
     ws.add_data_validation(picklist)
     column = columns[len(data_frame.columns)-1]
     row = len(data_frame)+1
+    print("LIBT31 -", column, row)
     picklist.add(f"B2:{column}{row}")  # assignment1
     for column in columns[1:len(data_frame.columns)]:
         ws.column_dimensions[column].width = 15  # Kolom breder
@@ -69,18 +71,62 @@ def generate_trm(course_instance, config):
 
     # Maak workbook en sheet
     wb = Workbook()
-    # wb.create_sheet(title="Projects", index=0)  # Vooraan
+    # wb.create_sheet(title="Projects", index=0) # Vooraan
     ws = wb["Sheet"]
-    ws.title = "Projects"
+    ws.title = "projects"
     df_projects = get_data_frame(assignment_group_names, config.project_groups)
-
     create_tab(ws, df_projects, teachers)
 
-    wb.create_sheet(title="Guilds", index=1)  # Vooraan
-    ws = wb["Guilds"]
-    df_guilds = get_data_frame(assignment_group_names, config.guild_groups)
-    create_tab(ws, df_guilds, teachers)
+    dashboard = read_dashboard(course_instance.get_dashboard_file_name())
+    if len(dashboard.guild_group_name) > 0:
+        wb.create_sheet(title="guilds", index=1)  # Vooraan
+        ws = wb["guilds"]
+        df_guilds = get_data_frame(assignment_group_names, config.guild_groups)
+        create_tab(ws, df_guilds, teachers)
+
+    wb.create_sheet(title="learning_outcomes", index=2)
+    ws = wb["learning_outcomes"]
+    ws["A1"] = "Id"
+    ws["B1"] = "Short"
+    ws["C1"] = "Description"
+    ws["A2"] = "LU1"
+    ws["A3"] = "LU2"
+    ws["A4"] = "LU3"
+    ws["A5"] = "LU4"
+    ws["A6"] = "LU5"
+
+    wb.create_sheet(title="perspectives", index=3)
+    ws = wb["perspectives"]
+    ws["A1"] = "name"
+    ws["A2"] = "level_moments"
+    ws["A3"] = "grade_moments"
+    ws["B1"] = "title"
+    ws["B2"] = "Peilmomenten"
+    ws["B3"] = "Beoordelingsmomenten"
+    ws["C1"] = "assignment_group_names"
+
+    wb.create_sheet(title="roles", index=4)
+    ws = wb["roles"]
+    ws["A1"] = "short"
+    ws["A2"] = "AI"
+    ws["A3"] = "BIM"
+    ws["A4"] = "CSC"
+    ws["A5"] = "SD"
+    ws["A6"] = "TI"
+    ws["B1"] = "name"
+    ws["B2"] = "Artificial Intelligence"
+    ws["B3"] = "Business and IT Management"
+    ws["B4"] = "Cyber Security and Cloud"
+    ws["B5"] = "Software Development"
+    ws["B6"] = "Technische Informatica"
+    ws["C1"] = "btn_color"
+    ws["C2"] = "border-warning"
+    ws["C3"] = "border-success"
+    ws["C4"] = "border-danger"
+    ws["C5"] = "border-dark"
+    ws["C6"] = "border-primary"
 
     # Sla het bestand op
     wb.save(course_instance.get_trm_file_name())
     print(f"LTRM11 - Excel-bestand '{course_instance.get_trm_file_name()}' is succesvol aangemaakt!")
+

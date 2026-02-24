@@ -1,7 +1,6 @@
-import csv
 import sys
 import json
-from scripts.lib.file import read_start, read_results, read_course_instances, read_course
+from lib.file import read_start, read_results, read_course_instances, read_course
 from lib.lib_attendance import read_attendance
 from lib.lib_date import get_actual_date
 from lib.lib_progress import get_attendance_progress

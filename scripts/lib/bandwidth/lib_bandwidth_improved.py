@@ -48,20 +48,24 @@ def bandwidth_builder(assignment_group, days_in_semester: int, logger: Optional[
     """
     strategy_name = getattr(assignment_group, "strategy", "NONE")
     if strategy_name == "NONE":
+        print("LBI26 - ", strategy_name)
         return None
 
     # Guard checks (preserved behavior)
     if assignment_group.total_points == 0:
+        print("LBI27 - None")
         if logger:
             logger(f"GCS81 - ERROR Couldn't calculate bandwidth for assignment_group {assignment_group.name} total_points is zero")
         return None
     if assignment_group.lower_points == 0:
         if logger:
             logger(f"GCS82 - ERROR Couldn't calculate bandwidth for assignment_group {assignment_group.name} lower_points is zero")
+        print("LBI28 - None")
         return None
     if assignment_group.upper_points == 0:
         if logger:
             logger(f"GCS83 - ERROR Couldn't calculate bandwidth for assignment_group {assignment_group.name} upper_points is zero")
+        print("LBI29 - None")
         return None
 
     # Delegate to strategy
@@ -89,7 +93,7 @@ def get_bandwidth_sum(course, assignment_group_ids: Iterable[int]) -> Bandwidth:
     assignment_groups = [course.get_assignment_group(ag_id) for ag_id in assignment_group_ids]
 
     for ag in assignment_groups:
-        print("LBI31 - bandwidth.points", len(ag.bandwidth.points), ag.name)
+        print("LBI31 - bandwidth.points", ag.name)
     bandwidth = Bandwidth()
     for day in range(course.days_in_semester + 1):
         new_point = Point(day, 0, 0)

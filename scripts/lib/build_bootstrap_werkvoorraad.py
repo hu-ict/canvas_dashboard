@@ -1,5 +1,4 @@
 from scripts.lib.file import read_plotly
-import win32com.client as client
 
 
 def build_bootstrap_teacher_tab(a_instance, a_templates, a_workload):
@@ -46,18 +45,18 @@ def build_problems(a_course, a_workload, a_templates):
     return html_string
 
 
-def workload_email(recipients, recipients_cc, html_message):
-    html_body = "Beste INNO-docenten<br><br>Hierbij de gevraagde uitdraai en reminder:<br><br>"
-    html_body += html_message
-    html_body += "<br>Ga naar het INNO-dashboard en navigeer naar werkvoorraad en klik links op je initialen. Je krijgt nu een actueel overzicht van openstaande opleveringen.<br><br>Groet Berend"
-    outlook = client.Dispatch('Outlook.Application')
-    message = outlook.CreateItem(0)
-    message.To = recipients
-    message.CC = recipients_cc
-#    message.Attachments.Add(file) # You can attach a file with this
-    message.Subject = 'INNO - Werkvoorraad reminder'
-    message.HTMLBody = html_body
-    message.Display()
+# def workload_email(recipients, recipients_cc, html_message):
+#     html_body = "Beste INNO-docenten<br><br>Hierbij de gevraagde uitdraai en reminder:<br><br>"
+#     html_body += html_message
+#     html_body += "<br>Ga naar het INNO-dashboard en navigeer naar werkvoorraad en klik links op je initialen. Je krijgt nu een actueel overzicht van openstaande opleveringen.<br><br>Groet Berend"
+#     outlook = client.Dispatch('Outlook.Application')
+#     message = outlook.CreateItem(0)
+#     message.To = recipients
+#     message.CC = recipients_cc
+# #    message.Attachments.Add(file) # You can attach a file with this
+#     message.Subject = 'INNO - Werkvoorraad reminder'
+#     message.HTMLBody = html_body
+#     message.Display()
 
 
 def build_late_email(a_total_workload):

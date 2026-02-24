@@ -2,23 +2,22 @@ import json
 import sys
 
 from scripts.lib.file import read_course, read_msteams_api, read_environment
-from lib.lib_date import get_actual_date
-from lib.teams_api_lib import upload_file_to_onedrive, get_me_for_check, get_access_token
+from scripts.lib.lib_date import get_actual_date
+from scripts.lib.teams_api_lib import upload_file_to_onedrive, get_me_for_check, get_access_token
 from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, MSTEAMS_API_KEY_FILE_NAME
 
 
 def publish_student_files(course_code, instance_name):
+    sys.stdout.reconfigure(encoding="utf-8")
     print("PSF01 - publish_student_files.py")
     g_actual_date = get_actual_date()
+    print("PSF02 -", ENVIRONMENT_FILE_NAME, course_code)
     environment = read_environment(ENVIRONMENT_FILE_NAME)
-    if len(instance_name) > 0:
-        environment.current_instance = {"course_name": course_code, "course_instance_name": instance_name}
-        with open(ENVIRONMENT_FILE_NAME, 'w') as f:
-            dict_result = environment.to_json()
-            json.dump(dict_result, f, indent=2)
+    execution = environment.get_execution_by_name("env_3")
     course_instance = environment.get_instance_of_course(environment.current_instance)
-    print("Instance:", course_instance.name)
-
+    course_instance.execution_source_path = execution.source_path
+    print("PSF03 -", environment)
+    print("PSF04 - Instance:", course_instance.name)
     course = read_course(course_instance.get_course_file_name())
     msteams_api = read_msteams_api(MSTEAMS_API_KEY_FILE_NAME)
     if get_me_for_check(msteams_api.my_token) is None:
@@ -31,7 +30,7 @@ def publish_student_files(course_code, instance_name):
 
     for l_student in course.students:
         if len(l_student.site) > 0:
-            print('PSF02 Upload files for Student:', l_student.name)
+            print('PSF11 Upload files for Student:', l_student.name)
             student_name = l_student.email.split("@")[0].lower()
             source_filename = student_name + "_progress.jpg"
             upload_file_to_onedrive(msteams_api.my_token, student_name, l_student.site, course_instance.get_html_student_path(),
@@ -40,7 +39,7 @@ def publish_student_files(course_code, instance_name):
             upload_file_to_onedrive(msteams_api.my_token, student_name, l_student.site, course_instance.get_html_student_path(),
                                     source_filename)
         else:
-            print("PSF04 MSTeams channel not defined (site)")
+            print("PSF12 MSTeams channel not defined (site)")
 
 
     print("PSF99 Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")

@@ -103,7 +103,12 @@ def proces_progress(course, results, progress_history):
             # print("GP08 -", perspective.name, perspective.progress)
             perspectives.append(perspective.progress)
         # print("LP21 - proces_progress", perspectives)
-        progress = get_overall_progress(perspectives)
+        if False:
+            progress = student.get_grade_moment_grade()
+            if not progress:
+                progress = -1
+        else:
+            progress = get_overall_progress(perspectives)
         # print("LP22 - student.progress =", progress, student.name)
         student.progress = progress
         progress_day.progress[str(progress)] += 1

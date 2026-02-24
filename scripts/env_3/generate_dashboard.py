@@ -1,8 +1,6 @@
 import json
 import os
 import sys
-
-
 from scripts.lib.build_bootstrap_werkvoorraad import build_bootstrap_canvas_workload_general
 from scripts.lib.build_late import build_bootstrap_teacher_index
 from scripts.lib.build_total_progress import create_total_progress, process_total_progress
@@ -13,20 +11,11 @@ from scripts.lib.lib_date import get_actual_date
 from scripts.lib.plot_totals import plot_werkvoorraad, plot_voortgang, plot_overall_opbouw
 from scripts.lib.file import read_course, read_results, read_workload, read_progress_history, read_environment, read_dashboard
 from scripts.model.workload.WorkloadDay import WorkloadDay
-from scripts.lib.file_const import ENVIRONMENT_FILE_NAME
 
 
-def generate_dashboard(course_code, instance_name):
-    print("GCF01 - generate_dashboard.py")
+def generate_dashboard(course_instance):
+    print("GPL01 - generate_dashboard.py")
     g_actual_date = get_actual_date()
-    environment = read_environment(ENVIRONMENT_FILE_NAME)
-    if len(instance_name) > 0:
-        environment.current_instance = {"course_name": course_code, "course_instance_name": instance_name}
-        with open(ENVIRONMENT_FILE_NAME, 'w') as f:
-            dict_result = environment.to_json()
-            json.dump(dict_result, f, indent=2)
-    course_instance = environment.get_instance_of_course(environment.current_instance)
-    print("Instance:", course_instance.name)
 
     #conversie: temp directory is nodig in nieuwe versie, maakt aan als deze nog niet bestaat
     os.makedirs(os.path.dirname(course_instance.get_temp_path()), exist_ok=True)
@@ -34,7 +23,7 @@ def generate_dashboard(course_code, instance_name):
     print("GD02 - Instance:", course_instance.name)
     course = read_course(course_instance.get_course_file_name())
     results = read_results(course_instance.get_result_file_name())
-    templates = load_templates("templates//")
+    templates = load_templates("scripts//templates//")
     dashboard = read_dashboard(course_instance.get_dashboard_file_name())
     print("GD02 - create_total_progress(instance, course)")
     total_progress = create_total_progress(course)
@@ -69,18 +58,11 @@ def generate_dashboard(course_code, instance_name):
     print("GD07 - build_bootstrap_teacher_index(instances, templates, course, results, workload)")
     build_bootstrap_teacher_index(course_instance, templates, course, results, workload)
 
-    with open("../../total_progress.json", 'w') as f:
+    with open("total_progress.json", 'w') as f:
         dict_result = total_progress
         json.dump(dict_result, f, indent=2)
     print("GD10 - Generate voortgang")
     plot_voortgang(course_instance, course, total_progress, read_progress_history(course_instance.get_progress_file_name()),
                    dashboard.level_serie_collection.level_series['progress'], dashboard.level_serie_collection.level_series['grade'])
 
-    print("GD99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
-
-
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        generate_dashboard(sys.argv[1], sys.argv[2])
-    else:
-        generate_dashboard("", "")
+    print("GPL99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")

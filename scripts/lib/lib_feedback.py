@@ -8,7 +8,7 @@ def categorize_feedback(feedback_comment):
     if '@' in feedback_comment:
         feedback_list = get_extracted_text(feedback_comment)
     else:
-        feedback_list.append({"lu": "AF", "text": feedback_comment})
+        feedback_list.append({"lu": "AF", "positive_neutral_negative": "N", "text": feedback_comment})
     return feedback_list
 
 
@@ -25,14 +25,10 @@ def get_feedback_from_submission(course, student, submission):
         for feedback_dict in feedback_list:
             # print("LSU81 -", feedback_dict)
             feedback = Feedback(comment.author_id, comment.author_name, feedback_date, feedback_day,
-                                feedback_dict["text"], "N",
+                                feedback_dict["text"], feedback_dict["positive_neutral_negative"],
                                 submission.assignment.name, submission.assignment.id, submission.grade, submission.grade)
             if 'LU' in feedback_dict["lu"].upper():
                 if feedback_dict["lu"].upper() in student.learning_outcomes:
-                    if feedback.comment[0] in "-+":
-                        feedback.positive_neutral_negative = feedback.comment[0]
-                    else:
-                        feedback.positive_neutral_negative = "N"
                     student.learning_outcomes[feedback_dict["lu"].upper()].feedback_list.append(feedback)
                 else:
                     print("LSU82 - Leeruitkomst uit comment niet gevonden in lijst van leeruitkomsten",
@@ -86,13 +82,11 @@ def get_feedback_from_submission(course, student, submission):
                     feedback_list = categorize_feedback(criterion_score.comment)
                     for feedback_dict in feedback_list:
                         feedback = Feedback("id", submission.grader_name, feedback_date, feedback_day,
-                                            feedback_dict["text"], "N",
+                                            feedback_dict["text"], feedback_dict["positive_neutral_negative"],
                                             submission.assignment.name + " (" + assignment_criterion.description + ")",
                                             submission.assignment.id, criterion_score_score, rating_description)
                         if 'LU' in feedback_dict["lu"].upper():
                             if feedback_dict["lu"].upper() in student.learning_outcomes:
-                                if feedback.comment[0] in "-+":
-                                    feedback.positive_neutral_negative = feedback.comment[0]
                                 student.learning_outcomes[feedback_dict["lu"].upper()].feedback_list.append(feedback)
                             else:
                                 feedback.comment = "Incorrecte @LUx annotatie. " + feedback.comment

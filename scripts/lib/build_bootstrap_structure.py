@@ -1,9 +1,11 @@
 from scripts.lib.build_bootstrap_release_planning import build_bootstrap_release_planning_tab
+from scripts.lib.build_bootstrap_student import get_comments_html
 from scripts.lib.build_plotly_analyse import process_analytics
 from scripts.lib.lib_bootstrap import load_templates
 from scripts.lib.lib_date import get_date_time_loc
 from scripts.lib.lib_progress import get_overall_progress
 from scripts.model.dashboard.LevelSerie import STR_GRADES
+from scripts.model.perspective.Status import NOT_YET_GRADED
 
 
 def build_learning_analytics(course, results, level_serie_collection):
@@ -234,71 +236,35 @@ def process_analyse_level_moment(course, results, level_moment, level_serie_coll
         file_index.write(moment_html_string)
 
 
-def process_analyse_grade_moment(course, results, grade_moment, level_serie_collection, a_templates, a_file_name):
+def process_analyse_moment(course, results, grade_moment, level_serie_collection, a_templates, a_file_name):
     student_html_string = ""
     for student in results.students:
-        grade_perspectives = []
-        perspectives_html = ""
-        for perspective in student.perspectives.values():
-            level_moment_submission = student.get_grade_moment_submission_by_query([grade_moment, perspective.name])
-            # print("BBS32 -", grade_moment, perspective.name)
-            if level_moment_submission is None:
-                grade_determined = 0
+        student_moment = student.get_grade_moment(grade_moment.id)
+        level_serie = level_serie_collection.level_series["grade"]
+        moment_grade_comments = get_comments_html(student_moment.comments)
+        url = "https://canvas.hu.nl/courses/" + str(course.canvas_id) + "/gradebook/speed_grader?assignment_id=" + str(
+            student_moment.assignment.id) + "&student_id=" + str(student_moment.student_id)
+        if student_moment.graded:
+            if student_moment.grade is not None:
+                moment_label = level_serie.grades[student_moment.grade].label
+                moment_color = level_serie.grades[student_moment.grade].color
             else:
-                grade = level_moment_submission.grade
-                if grade is not None:
-                    grade_determined = int(grade)
-                else:
-                    grade_determined = 0
-            grade_perspectives.append(grade_determined)
-            level_determined_label = level_serie_collection.level_series[course.grade_moments.levels].grades[
-                str(grade_determined)].label
-            level_determined_color = level_serie_collection.level_series[course.grade_moments.levels].grades[
-                str(grade_determined)].color
-            perspectives_html += '<td style="background-color: '+level_determined_color+';">'+level_determined_label+"</td>"
-        # print("BBS21 -", course.level_moments.levels, perspective.progress)
-        level_flow_calculated_label = level_serie_collection.level_series[course.grade_moments.levels].grades[
-            str(perspective.progress)].label.upper()
-        overall_level_calculated = get_overall_progress(grade_perspectives)
-        level_moment_submission = student.get_grade_moment_submission_by_query(["student", grade_moment])
-        if level_moment_submission is not None:
-            overall_level_determined = level_moment_submission.grade
-            if overall_level_determined is None:
-                overall_level_determined = 0
+                moment_label = level_serie.grades["0"].label
+                moment_color = level_serie.grades["0"].color
         else:
-            overall_level_determined = 0
-        overall_level_determined_label = level_serie_collection.level_series[course.grade_moments.levels].grades[
-            str(overall_level_determined)].label
-        overall_level_determined_color = level_serie_collection.level_series[course.grade_moments.levels].grades[
-            str(overall_level_determined)].color
-        # print("PA11 -", course.level_moments.levels, overall_level_calculated, level_perspectives)
-        overall_level_calculated_label = level_serie_collection.level_series[course.grade_moments.levels].grades[
-            str(overall_level_calculated)].label
-        overall_level_calculated_color = level_serie_collection.level_series[course.grade_moments.levels].grades[
-            str(overall_level_calculated)].color
-        # file_name = instance.name + "/general/analyse_" + str(level_moment) + ".html"
-        if int(overall_level_determined) != int(overall_level_calculated):
-            message = f"FOUT {student.name} OVERALL, bepaalde beoordeling {overall_level_determined_label} inconsistent met regels voor berekende beoordeling {overall_level_calculated_label}"
-        else:
-            message = ""
+            # Niet bepaald
+            moment_label = level_serie.get_status(NOT_YET_GRADED).label
+            moment_color = level_serie.get_status(NOT_YET_GRADED).color
 
         student_html_string += a_templates["moment"].substitute(
-            {'url': "hoi",
+            {'url': url,
              'student_name': student.name,
-             'perspectives': perspectives_html,
-             'overall_calculated_label': overall_level_determined_label,
-             'overall_determined_label': overall_level_calculated_label,
-             'overall_calculated_color': overall_level_determined_color,
-             'overall_determined_color': overall_level_calculated_color,
-             'message': message})
-
-    perspectives_html = ""
-    for perspective in course.perspectives:
-        perspectives_html += "<th>" + perspective + "</th>"
+             'moment_color': moment_color,
+             'moment_grade': moment_label,
+             'moment_comment': moment_grade_comments})
 
     moment_html_string = a_templates["moments_list"].substitute(
             {'url': "hoi",
-             'perspectives': perspectives_html,
              'moments': student_html_string})
     with open(a_file_name, mode='w', encoding="utf-8") as file_index:
         print("BS89 - Schrijf momenten HTML:", a_file_name)
@@ -308,20 +274,23 @@ def process_analyse_grade_moment(course, results, grade_moment, level_serie_coll
 def build_bootstrap_analyse_tab(instance, a_course, a_results, a_templates, a_level_serie_collection):
     html_string = ""
     moments_html_string = ""
-    # for level_moment in a_course.level_moments.moments:
-    #     file_name = instance.name + "/general/analyse1_" + str(level_moment) + ".html"
-    #     moments_html_string += a_templates["analyse_moment"].substitute(
-    #         {'url': file_name,
-    #          'assignment.name': level_moment})
-    #     process_analyse_level_moment(a_course, a_results, level_moment, a_level_serie_collection, a_templates,
-    #                                  instance.get_html_root_path() + file_name)
-    # for grade_moment in a_course.grade_moments.moments:
-    #     file_name = instance.name + "/general/analyse_" + str(grade_moment) + ".html"
-    #     moments_html_string += a_templates["analyse_moment"].substitute(
-    #         {'url': file_name,
-    #          'assignment.name': grade_moment})
-    #     process_analyse_grade_moment(a_course, a_results, grade_moment, a_level_serie_collection, a_templates,
-    #                                  instance.get_html_root_path() + file_name)
+    for level_moment in a_course.get_level_moments():
+
+        file_name = instance.name + "/general/analyse1_" + str(level_moment.id) + ".html"
+        moments_html_string += a_templates["analyse_moment"].substitute(
+            {'url': file_name,
+             'assignment_name': level_moment.name,
+             'end_date': level_moment.date})
+        # process_analyse_level_moment(a_course, a_results, level_moment, a_level_serie_collection, a_templates,
+        #                              instance.get_html_index_path() + file_name)
+    for grade_moment in a_course.get_grade_moments():
+        file_name = instance.name + "/general/analyse_" + str(grade_moment.id) + ".html"
+        moments_html_string += a_templates["analyse_moment"].substitute(
+            {'url': file_name,
+             'assignment_name': grade_moment.name,
+             'end_date': get_date_time_loc(grade_moment.date)})
+        process_analyse_moment(a_course, a_results, grade_moment, a_level_serie_collection, a_templates,
+                                     instance.get_html_index_path() + file_name)
 
     html_string += a_templates["analyse_card"].substitute({'moments': moments_html_string})
     return html_string

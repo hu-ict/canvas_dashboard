@@ -32,7 +32,7 @@ def add_total(totals, total):
 def process_total_progress(a_instance, a_course, a_results, a_total_progress):
     for student_results in a_results.students:
         peil = student_results.progress
-        # print(a_student.name, peil)
+        # print(student_results.name, peil)
         a_total_progress['actual_progress'][peil] += 1
         for l_perspective in student_results.perspectives.values():
             a_total_progress['actual_progress'][l_perspective.name][int(l_perspective.progress)] += 1

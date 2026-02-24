@@ -1,7 +1,5 @@
 from plotly.subplots import make_subplots
 import plotly.graph_objs as go
-from lib.build_plotly_generic import plot_bandbreedte_colored
-from lib.translation_table import translation_table
 
 
 def process_analytics(learning_analytics, assignment, level_serie_collection, filename):

@@ -1,10 +1,10 @@
 from canvasapi import Canvas
 import json
 
-from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, SECRET_API_KEY_FILE_NAME
+from scripts.lib.file_const import SECRET_API_KEY_FILE_NAME
 from scripts.lib.lib_progress import proces_progress
 from scripts.lib.file import read_course, write_results, write_progress_history, \
-    read_progress_history, read_environment, read_secret_api_key, read_dashboard
+    read_progress_history, read_secret_api_key, read_dashboard, read_dashboard_from_canvas
 from scripts.lib.lib_attendance import read_attendance
 from scripts.lib.lib_feedback import get_feedback_from_submission
 from scripts.lib.lib_submission import count_graded, add_missed_assignments, read_submissions, add_open_level_moments, \
@@ -15,26 +15,20 @@ from scripts.model.StudentResults import StudentResults
 import sys
 
 
-def generate_results(course_code, instance_name):
+def generate_results(course_instance):
     print("GCS01 - generate_results.py")
     g_actual_date = get_actual_date()
-    environment = read_environment(ENVIRONMENT_FILE_NAME)
     secret_api_key = read_secret_api_key(SECRET_API_KEY_FILE_NAME)
-    if len(instance_name) > 0:
-        environment.current_instance = {"course_name": course_code, "course_instance_name": instance_name}
-        with open(ENVIRONMENT_FILE_NAME, 'w') as f:
-            dict_result = environment.to_json()
-            json.dump(dict_result, f, indent=2)
-    course_instance = environment.get_instance_of_course(environment.current_instance)
-    print("Instance:", course_instance.name)
-
     course = read_course(course_instance.get_course_file_name())
     # Initialize a new Canvas object
     canvas = Canvas(API_URL, secret_api_key.canvas_api_key)
     user = canvas.get_current_user()
     print("GR03 - Username", user.name)
     canvas_course = canvas.get_course(course.canvas_id)
-    dashboard = read_dashboard(course_instance.get_dashboard_file_name())
+    if course_instance.stage == "PROD":
+        dashboard = read_dashboard_from_canvas(canvas_course)
+    else:
+        dashboard = read_dashboard(course_instance.get_dashboard_file_name())
     if g_actual_date > course.end_date:
         results = Result(course.canvas_id, course.name, course.end_date,
                          date_to_day(course.start_date, course.end_date), 0, 0)
@@ -93,8 +87,8 @@ def generate_results(course_code, instance_name):
                     get_feedback_from_submission(course, student, submission)
         if student.student_grade_moments is not None:
             for submission in student.student_grade_moments.submissions:
-                if submission.posted:
-                    get_feedback_from_submission(course, student, submission)
+                # if submission.posted:
+                get_feedback_from_submission(course, student, submission)
 
     results.submission_count, results.not_graded_count = count_graded(results)
     # with open(instances.get_result_file_name(instances.current_instance), 'w') as f:
@@ -124,4 +118,4 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         generate_results(sys.argv[1], sys.argv[2])
     else:
-        generate_results("", "")
+        generate_results("")

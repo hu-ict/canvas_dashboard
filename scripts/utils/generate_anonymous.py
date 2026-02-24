@@ -3,7 +3,7 @@ import sys
 
 import random
 
-from scripts.lib.file import read_course_instances, read_course, read_results
+from lib.file import read_course_instances, read_course, read_results
 from lib.lib_date import get_actual_date
 
 def main(instance_name):

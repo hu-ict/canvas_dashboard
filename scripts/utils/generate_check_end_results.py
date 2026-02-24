@@ -2,7 +2,7 @@ import sys
 
 from canvasapi import Canvas
 
-from scripts.lib.file import read_start, read_course, read_results, read_course_instances, \
+from lib.file import read_start, read_course, read_results, read_course_instances, \
     read_dashboard_from_canvas
 from lib.lib_date import get_actual_date, API_URL
 from lib.lib_progress import get_overall_progress

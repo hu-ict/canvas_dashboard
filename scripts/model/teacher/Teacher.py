@@ -31,7 +31,7 @@ class Teacher:
         if l_responsibility:
             l_responsibility.student_groups.append(group_name)
         else:
-            self.responsibilities.append(Responsibility(canvas_group, group_name, assignment_group_id))
+            self.responsibilities.append(Responsibility(canvas_group, [group_name], assignment_group_id))
 
     @staticmethod
     def from_dict(data_dict):

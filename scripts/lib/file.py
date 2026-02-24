@@ -1,5 +1,7 @@
 import json
 import os
+from pathlib import Path
+
 from scripts.model.ProgressHistory import ProgressHistory
 from scripts.model.Result import Result
 from scripts.model.CourseConfig import CourseConfig
@@ -14,13 +16,17 @@ from scripts.model.dashboard.Subplot import Subplot
 from scripts.model.dashboard.LevelSerieCollection import LevelSerieCollection
 
 
-def read_environment(environment_file_name):
-    print("F031 - read_environment", environment_file_name)
-    if os.path.isfile(environment_file_name):
-        with open(environment_file_name, mode='r', encoding="utf-8") as environment_file:
+def read_environment(file_name):
+    print("F031 - read_environment", file_name)
+    print("F032 - current path", os.getcwd())
+    if os.path.isfile(file_name):
+        with open(file_name, mode='r', encoding="utf-8") as environment_file:
             data = json.load(environment_file)
             environment = Environment.from_dict(data)
             return environment
+    else:
+        print("F034 - read_environment file not found", file_name)
+    return None
 
 
 def read_workflow(workflow_file_name):
@@ -30,6 +36,7 @@ def read_workflow(workflow_file_name):
             data = json.load(workflow_file)
             environment = Workflow.from_dict(data)
             return environment
+    return None
 
 
 def read_secret_api_key(file_name):
@@ -39,7 +46,9 @@ def read_secret_api_key(file_name):
             data = json.load(secret_api_key_file)
             secret_api_key = SecretApiKey.from_dict(data)
             return secret_api_key
-
+    else:
+        print("F034 - read_secret_api_key file not found", file_name)
+    return None
 
 def read_start(start_file_name):
     print("F002 - read_start", start_file_name)
@@ -57,15 +66,8 @@ def read_levels(levels_file_name):
         return level_serie_colection
 
 
-def read_config(config_file_name):
-    print("F004 - read_config", config_file_name)
-    with open(config_file_name, mode='r', encoding="utf-8") as course_config_file:
-        data = json.load(course_config_file)
-        config = CourseConfig.from_dict(data)
-        return config
-
-
 def read_course(course_file_name):
+    print("F004 - current path", os.getcwd())
     print("F005 - read_course", course_file_name)
     with open(course_file_name, mode='r', encoding="utf-8") as file_course:
         data = json.load(file_course)
@@ -106,6 +108,12 @@ def write_progress_history(progress_file_name, progress_history):
     with open(progress_file_name, 'w') as f:
         dict_result = progress_history.to_json()
         json.dump(dict_result, f, indent=2)
+
+
+def write_course(file_name, course):    # Write JSON file with UTF-8 encoding
+    with open(file_name, "w", encoding="utf-8") as file:
+        dict_result = course.to_json()
+        json.dump(dict_result, file, ensure_ascii=False, indent=2)
 
 
 def read_workload(workload_file_name):
@@ -150,7 +158,8 @@ def read_config_from_canvas(canvas_course):
     page = canvas_course.get_page("config-dot-json")
     config_file = remove_html_tags(page.body)
     data = json.loads(config_file)
-    return CourseConfig.from_dict(data)
+    course_config = CourseConfig.from_dict(data)
+    return course_config
 
 
 def read_levels_from_canvas1(canvas_course):
@@ -172,7 +181,8 @@ def read_subplots_from_canvas1(canvas_course):
 
 
 def read_dashboard_from_canvas(canvas_course):
-    print("F023 - Read dashboard_file from Canvas dashboard-dot-json")
+    print("F023 - Read dashboard_file from Canvas dashboard-dot-json", canvas_course.name)
+    page = canvas_course.get_page("dashboard-dot-json")
     page = canvas_course.get_page("dashboard-dot-json")
     dashboard_file = remove_html_tags(page.body)
     data = json.loads(dashboard_file)
@@ -181,7 +191,7 @@ def read_dashboard_from_canvas(canvas_course):
 
 
 def read_dashboard(dashboard_file_name):
-    print("F023 - Read dashboard_file from os: dashboard.json")
+    print("F024 - Read dashboard_file from os:", dashboard_file_name)
     with open(dashboard_file_name, mode='r', encoding="utf-8") as file_dashboard:
         data = json.load(file_dashboard)
         dashboard = Dashboard.from_dict(data)

@@ -1,6 +1,6 @@
 import json
-from scripts.lib.file import read_start, read_course, read_msteams_api, read_course_instances
-from lib.teams_api_lib import get_team_channels, get_me_for_check, get_access_token, add_member_to_team, \
+from lib.file import read_course, read_msteams_api, read_course_instances
+from lib.teams_api_lib import get_me_for_check, get_access_token, add_member_to_team, \
     add_member_to_channel, create_channel, teams, get_team
 
 # teams like ["b7cf78ae-8c6f-460d-a47a-d4bc2b8b2f18"]

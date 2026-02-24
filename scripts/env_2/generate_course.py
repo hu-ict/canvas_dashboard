@@ -5,11 +5,10 @@ from canvasapi import Canvas
 
 from scripts.lib.bandwidth.lib_bandwidth_improved import bandwidth_builder, get_bandwidth_sum, \
     bandwidth_builder_attendance
-from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, SECRET_API_KEY_FILE_NAME
-# from scripts.lib.bandwidth.lib_bandwidth import bandwidth_builder, bandwidth_builder_attendance, get_bandwidth_sum
+from scripts.lib.file_const import SECRET_API_KEY_FILE_NAME
 from scripts.lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
-from scripts.lib.file import read_config_from_canvas, read_course, read_environment, read_secret_api_key, \
-    read_dashboard_from_canvas
+from scripts.lib.file import read_config_from_canvas, read_course, read_secret_api_key, \
+    read_dashboard_from_canvas, write_course, read_dashboard
 from scripts.lib.lib_student import get_groups, get_section_students, get_students_in_groups, link_students_to_role, \
     link_assessors_to_groups_and_students, link_principal_assessor_to_groups_and_students
 from scripts.lib.lib_text import get_extracted_text
@@ -141,31 +140,24 @@ def get_predefined_lu(course, assignment_sequence, assignment):
                     assignment.add_learning_outcome(learning_outcome_id)
 
 
-def generate_course(course_code, instance_name):
+def generate_course(course_instance):
     print("GCS01 - generate_course.py")
     g_actual_date = get_actual_date()
-    environment = read_environment(ENVIRONMENT_FILE_NAME)
     secret_api_key = read_secret_api_key(SECRET_API_KEY_FILE_NAME)
-    if len(instance_name) > 0:
-        environment.current_instance = {"course_name": course_code, "course_instance_name": instance_name}
-        with open(ENVIRONMENT_FILE_NAME, 'w') as f:
-            dict_result = environment.to_json()
-            json.dump(dict_result, f, indent=2)
-    course_instance = environment.get_instance_of_course(environment.current_instance)
-    print("Instance:", course_instance.name)
-
     canvas = Canvas(API_URL, secret_api_key.canvas_api_key)
     canvas_course = canvas.get_course(course_instance.canvas_course_id)
 
-    dashboard = read_dashboard_from_canvas(canvas_course)
-    with open(course_instance.get_dashboard_file_name(), 'w') as f:
-        dict_result = dashboard.to_json()
-        json.dump(dict_result, f, indent=2)
-
     if course_instance.stage == "PROD":
         config = read_config_from_canvas(canvas_course)
+        dashboard = read_dashboard_from_canvas(canvas_course)
     else:
         config = read_course(course_instance.get_config_file_name())
+        dashboard = read_dashboard(course_instance.get_dashboard_file_name())
+
+    # with open(course_instance.get_config_file_name(), "w", encoding="utf-8") as file:
+    #     dict_result = config.to_json()
+    #     json.dump(dict_result, file, ensure_ascii=False, indent=2)
+
     user = canvas.get_current_user()
     print("GCS03 -", user.name)
     if config.attendance is not None:
@@ -196,8 +188,7 @@ def generate_course(course_code, instance_name):
                     if canvas_assignment.points_possible:
                         points_possible = canvas_assignment.points_possible
                     else:
-                        message = f"GCS64 - WARNING [{canvas_assignment.grading_type}] points_possible is not set for", canvas_assignment.name
-                        print(message)
+                        print(f"GCS64 - WARNING [{canvas_assignment.grading_type}] points_possible is not set for", canvas_assignment.name)
                 elif canvas_assignment.grading_type == "pass_fail":
                     points_possible = canvas_assignment.points_possible
                 elif canvas_assignment.grading_type == 'letter_grade':
@@ -320,21 +311,32 @@ def generate_course(course_code, instance_name):
     for perspective in config.perspectives:
         for assignment_group_id in config.perspectives[perspective].assignment_group_ids:
             assignment_group = config.get_assignment_group(assignment_group_id)
-            print("GCS71 -", assignment_group.name)
-            for assignment_sequence in assignment_group.assignment_sequences:
-                for assignment in assignment_sequence.assignments:
-                    get_predefined_lu(config, assignment_sequence, assignment)
-                # config.perspectives[perspective].assignment_sequences.append(assignment_sequence)
+            if assignment_group:
+                print("GCS71 -", assignment_group.name)
+                for assignment_sequence in assignment_group.assignment_sequences:
+                    for assignment in assignment_sequence.assignments:
+                        get_predefined_lu(config, assignment_sequence, assignment)
+                    # config.perspectives[perspective].assignment_sequences.append(assignment_sequence)
+            else:
+                print("GCS72 - ERROR", assignment_group_id, "not found in config perspective", perspective)
 
     for assignment_group_id in config.level_moments.assignment_group_ids:
         assignment_group = config.get_assignment_group(assignment_group_id)
-        print("GCS72 -", assignment_group.name)
+        print("GCS73 -", assignment_group.name)
+        for assignment_sequence in assignment_group.assignment_sequences:
+            for assignment in assignment_sequence.assignments:
+                get_predefined_lu(config, assignment_sequence, assignment)
+
+    for assignment_group_id in config.grade_moments.assignment_group_ids:
+        assignment_group = config.get_assignment_group(assignment_group_id)
+        print("GCS73 -", assignment_group.name)
         for assignment_sequence in assignment_group.assignment_sequences:
             for assignment in assignment_sequence.assignments:
                 get_predefined_lu(config, assignment_sequence, assignment)
 
     for assignment_group in config.assignment_groups:
         assignment_group.assignment_sequences = sorted(assignment_group.assignment_sequences, key=lambda a: a.get_day())
+        print("GS101 -", assignment_group.name, assignment_group.strategy)
         assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
 
     for perspective_key in config.perspectives:
@@ -404,9 +406,7 @@ def generate_course(course_code, instance_name):
     # for student in course.students:
     #     print("GST017 -", student)
 
-    with open(course_instance.get_course_file_name(), 'w') as f:
-        dict_result = config.to_json()
-        json.dump(dict_result, f, indent=2)
+    write_course(course_instance.get_course_file_name(), config)
 
     print("GCS99 - Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 

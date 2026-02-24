@@ -2,7 +2,7 @@ import sys
 from canvasapi import Canvas
 from lib.lib_bootstrap import load_templates
 from lib.lib_date import get_actual_date, API_URL
-from scripts.lib.file import read_course, read_results, read_course_instances, read_levels, read_levels_from_canvas, read_start
+from lib.file import read_course, read_results, read_course_instances, read_levels_from_canvas, read_start
 
 
 def generate_learning_analytics(instance_name):

@@ -3,25 +3,24 @@ import sys
 from canvasapi import Canvas
 import json
 
-from generate_students import get_groups
+
 from scripts.lib.bandwidth.lib_bandwidth import IMPROVEMENT_PERIOD
-from lib.lib_date import API_URL, get_actual_date, get_date_time_obj
-from scripts.lib.file import read_dashboard_from_canvas, read_environment, \
-    read_secret_api_key
-from lib.lib_trm import generate_trm
-from model.AssignmentGroup import AssignmentGroup
-from model.Bandwidth import Bandwidth
-from model.CourseConfig import CourseConfig
-from model.Role import Role
-from model.Section import Section
-from model.environment.Environment import ENVIRONMENT_FILE_NAME
-from scripts.model.environment.SecretApiKey import SECRET_API_KEY_FILE_NAME
-from model.teacher.Teacher import Teacher
-from model.attendance.Attendance import Attendance
-from model.moment.GradeMoments import GradeMoments
-from model.moment.LevelMoments import LevelMoments
-from model.perspective.Perspective import Perspective
-from model.attendance.Policy import Policy
+from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, SECRET_API_KEY_FILE_NAME
+from scripts.lib.lib_date import API_URL, get_actual_date, get_date_time_obj
+from scripts.lib.file import read_dashboard_from_canvas, read_environment, read_secret_api_key, read_dashboard
+from scripts.lib.lib_student import get_groups
+from scripts.lib.lib_trm import generate_trm
+from scripts.model.AssignmentGroup import AssignmentGroup
+from scripts.model.Bandwidth import Bandwidth
+from scripts.model.CourseConfig import CourseConfig
+from scripts.model.Role import Role
+from scripts.model.Section import Section
+from scripts.model.teacher.Teacher import Teacher
+from scripts.model.attendance.Attendance import Attendance
+from scripts.model.moment.GradeMoments import GradeMoments
+from scripts.model.moment.LevelMoments import LevelMoments
+from scripts.model.perspective.Perspective import Perspective
+from scripts.model.attendance.Policy import Policy
 
 
 def generate_config(course_code, instance_name):
@@ -29,25 +28,23 @@ def generate_config(course_code, instance_name):
     g_actual_date = get_actual_date()
     environment = read_environment(ENVIRONMENT_FILE_NAME)
     secret_api_key = read_secret_api_key(SECRET_API_KEY_FILE_NAME)
-    if len(instance_name) > 0:
-        environment.current_instance = {"course_name": course_code, "course_instance_name": instance_name}
-        with open(ENVIRONMENT_FILE_NAME, 'w') as f:
-            dict_result = environment.to_json()
-            json.dump(dict_result, f, indent=2)
-    course_instance = environment.get_instance_of_course(environment.current_instance)
-    print("Instance:", course_instance.name)
+    current_instance = environment.get_instance_of_course(environment.current_instance)
+    print("Instance:", current_instance.name)
 
 
     # Initialize a new Canvas object
     canvas = Canvas(API_URL, secret_api_key.canvas_api_key)
     user = canvas.get_current_user()
     print(user.name)
-    canvas_course = canvas.get_course(course_instance.canvas_course_id)
-    dashboard = read_dashboard_from_canvas(canvas_course)
-    print("GCF04 - course_instance.course_code", course_instance.course_code)
-    config = CourseConfig(course_instance.course_code, course_instance.canvas_course_id, canvas_course.name,
-                          get_date_time_obj(course_instance.period["start_date"]),
-                          get_date_time_obj(course_instance.period["end_date"]),
+    canvas_course = canvas.get_course(current_instance.canvas_course_id)
+    if current_instance.stage == "DEV":
+        dashboard = read_dashboard(current_instance.get_dashboard_file_name())
+    else:
+        dashboard = read_dashboard_from_canvas(canvas_course)
+    print("GCF04 - course_instance.course_code", current_instance.course_code)
+    config = CourseConfig(current_instance.course_code, current_instance.canvas_course_id, canvas_course.name,
+                          get_date_time_obj(current_instance.period["start_date"]),
+                          get_date_time_obj(current_instance.period["end_date"]),
                           IMPROVEMENT_PERIOD,
                           0, 0)
     if len(dashboard.roles) > 1:
@@ -96,7 +93,7 @@ def generate_config(course_code, instance_name):
                 if assignment_group:
                     perspective.assignment_group_ids.append(assignment_group.id)
             config.perspectives[perspective.name] = perspective
-    if course_instance.course_code in ["TICT-V1SE1-24"]:
+    if current_instance.course_code in ["TICT-V1SE1-24"]:
         role = Role("role", "Student", "HBO-ICT", "border-dark")
         config.roles.append(role)
         perspective = Perspective("kennis", "Kennis", True, False, 0)
@@ -108,15 +105,13 @@ def generate_config(course_code, instance_name):
         policy = Policy([1], "WEEKLY", 19, [9, 17, 18])
         config.attendance = Attendance("attendance", "Aanwezigheid", "attendance", True, False, "ATTENDANCE", 100, 75,
                                       90, Bandwidth(), policy)
-        config.level_moments = LevelMoments("level_moments", "Peilmomenten", "progress",
-                                            ["Peilmoment 1", "Peilmoment 2"])
-        config.grade_moments = GradeMoments("grade_moments", "Beoordelingsmomenten", "grade",
-                                        ["Semester-beslissing", "Semester-eindbeslissing"])
+        config.level_moments = LevelMoments("level_moments", "Peilmomenten")
+        config.grade_moments = GradeMoments("grade_moments", "Beoordelingsmomenten")
 
     # ophalen secties
     course_sections = canvas_course.get_sections()
     for course_section in course_sections:
-        if course_instance.course_code in ["TICT-V3SE5-25", "TICT-V3SE6-25"]:
+        if current_instance.course_code in ["TICT-V3SE5-25", "TICT-V3SE6-25"]:
             new_section = Section(course_section.id, course_section.name, course_section.name)
         else:
             new_section = Section(course_section.id, course_section.name, "role")
@@ -138,30 +133,31 @@ def generate_config(course_code, instance_name):
         config.teachers.append(teacher)
         print("GCONF18 -", teacher)
 
-
-    group_list = get_groups(course_instance.project_group_name, canvas_course)
+    group_list = get_groups(dashboard.project_group_name, canvas_course)
     config.project_groups = group_list
-    group_list = get_groups(course_instance.guild_group_name, canvas_course)
-    config.guild_groups = group_list
+    if len(dashboard.guild_group_name) > 0:
+        group_list = get_groups(dashboard.guild_group_name, canvas_course)
+        config.guild_groups = group_list
 
     # opschonen van teachers zonder "responsibilities"
     for section in config.sections[:]:  # kopie met slicing
         yes_no = input(f"Section behouden {section.name} [enter or n]")
-        if yes_no == 'n':
+        if 'n' in yes_no.lower():
             print(f"GCONF31 - Verwijder section {section.name}")
             config.sections.remove(section)
     # opschonen van assignment_groups zonder revelantie
+    print("GCONF32 - config.assignment_groups", len(config.assignment_groups))
     for assignment_group in config.assignment_groups[:]:  # kopie met slicing
         yes_no = input(f"assignment_group behouden {assignment_group.name} [enter or n]")
         if yes_no == 'n':
             print(f"GCONF32 - Verwijder assignment_group {assignment_group.name}")
             config.assignment_groups.remove(assignment_group)
 
-    generate_trm(course_instance, config)
+    generate_trm(current_instance, config)
 
 
-    print("GCONF98 - ConfigFileName:", course_instance.get_config_file_name())
-    with open(course_instance.get_config_file_name(), 'w') as f:
+    print("GCONF98 - ConfigFileName:", current_instance.get_config_file_name())
+    with open(current_instance.get_config_file_name(), 'w') as f:
         dict_result = config.to_json()
         json.dump(dict_result, f, indent=2)
 
