@@ -8,43 +8,32 @@ def get_groups(scope, canvas_course):
     group_list = []
     if not scope or len(scope) == 0:
         return group_list
-    if scope == "SECTIONS":
-        print("GST21 - Werken met Canvas secties als groepen (meestal S1 propedeuse).")
-        course_sections = canvas_course.get_sections()
-        for course_section in course_sections:
-            student_group = StudentGroup(course_section.id, course_section.name, 0)
-            group_list.append(student_group)
-        return group_list
-    else:
-        canvas_group_categories = canvas_course.get_group_categories()
-        for canvas_group_category in canvas_group_categories:
-            # print("GCONF20 -", canvas_group_category, start1.project_group_name, start1.guild_group_name)
-            # retrieve project_groups
-            if canvas_group_category.name == scope:
-                canvas_groups = canvas_group_category.get_groups()
-                for canvas_group in canvas_groups:
-                    student_group = StudentGroup(canvas_group.id, canvas_group.name, 0)
-                    group_list.append(student_group)
-                    # print("GST23 - project_group", canvas_group)
-                return group_list
+    canvas_group_categories = canvas_course.get_group_categories()
+    for canvas_group_category in canvas_group_categories:
+        # print("GCONF20 -", canvas_group_category, start1.project_group_name, start1.guild_group_name)
+        # retrieve project_groups
+        if canvas_group_category.name == scope:
+            canvas_groups = canvas_group_category.get_groups()
+            for canvas_group in canvas_groups:
+                student_group = StudentGroup(canvas_group.id, canvas_group.name, 0)
+                group_list.append(student_group)
+                # print("GST23 - project_group", canvas_group)
+            return group_list
     print("GST25 - onbekende group_category", canvas_group_category.name)
     return group_list
 
 
-def get_students_in_groups(dashboard, course, canvas_course):
-    if dashboard.project_group_name == "SECTIONS":
-        print("GST31 - Werken met Canvas secties als groepen (meestal S1 propedeuse).")
-    else:
-        canvas_group_categories = canvas_course.get_group_categories()
-        for canvas_group_category in canvas_group_categories:
-            print("GST32 -", canvas_group_category)
-            # Link students to project_groups
-            if canvas_group_category.name == dashboard.project_group_name:
-                print("GST33 - Link students to project_groups", canvas_group_category.name)
-                link_students_to_project_groups(course, canvas_group_category.get_groups())
-            if canvas_group_category.name == dashboard.guild_group_name:
-                print("GST34 - Link students to guild_groups", canvas_group_category.name)
-                link_students_to_guild_groups(course, canvas_group_category.get_groups())
+def get_students_in_groups(group_category_name, course, canvas_course):
+    canvas_group_categories = canvas_course.get_group_categories()
+    for canvas_group_category in canvas_group_categories:
+        print("GST32 -", canvas_group_category)
+        # Link students to project_groups
+        if canvas_group_category.name == group_category_name:
+            print("GST33 - Link students to project_groups", canvas_group_category.name)
+            link_students_to_project_groups(course, canvas_group_category.get_groups())
+        if canvas_group_category.name == group_category_name:
+            print("GST34 - Link students to guild_groups", canvas_group_category.name)
+            link_students_to_guild_groups(course, canvas_group_category.get_groups())
 
 
 def add_assessors_to_groups_and_students(course, student_group, teacher, responsibility):
@@ -89,10 +78,13 @@ def link_assessors_to_groups_and_students(course):
 
 
 def link_principal_assessor_to_groups_and_students(course):
-    assignment_group = course.get_assignment_group(course.grade_moments.assignment_group_ids[0])
     for student_group in course.project_groups:
         for assessor in student_group.assessors:
-            if assessor.assignment_group_id == assignment_group.id:
+            if assessor.assignment_group_id == course.project_principal_assignment_group_id:
+                student_group.principal_assessor = assessor.teacher_id
+    for student_group in course.guild_groups:
+        for assessor in student_group.assessors:
+            if assessor.assignment_group_id == course.guild_principal_assignment_group_id:
                 student_group.principal_assessor = assessor.teacher_id
 
 

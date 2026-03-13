@@ -114,7 +114,7 @@ def get_hover_day_bar(l_label, a_actual_day, a_actual_date, a_show_points, a_sco
 
 
 def get_hover_feedback(titel, feedback):
-    l_hover = "<b>"+titel+" van "+feedback.author_name + " op " + get_date_time_loc(feedback.date) + "</b><br>Portfolio-item:"+feedback.assignment_name+"<i>"
+    l_hover = "<b>"+titel+" van "+str(feedback.author_name) + " op " + get_date_time_loc(feedback.date) + "</b><br>Portfolio-item:"+feedback.assignment_name+"<i>"
     wrapper = textwrap.TextWrapper(width=120)
     word_list = wrapper.wrap(text=feedback.comment)
     line_nr = 0

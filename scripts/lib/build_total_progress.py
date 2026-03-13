@@ -1,6 +1,5 @@
 from scripts.model.perspective.Status import NOT_YET_GRADED
 
-
 def create_total_progress(course):
     peilen = {}
     grades = {}

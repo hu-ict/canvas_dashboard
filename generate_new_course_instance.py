@@ -49,7 +49,7 @@ while period_input not in periods:
     period_input = input("Choose the education period for the course_instance: ")
 print("GNC09 - Creating course_instance", course_instance_name)
 
-course_instance = CourseInstance(course_instance_name, course_code, canvas_course_id, target_path, periods[period], "DEV")
+course_instance = CourseInstance(course_instance_name, course_code, canvas_course_id, target_path, periods[period_input], "DEV")
 course.course_instances.append(course_instance)
 
 os.makedirs(os.path.dirname(course_instance.get_project_path()), exist_ok=True)

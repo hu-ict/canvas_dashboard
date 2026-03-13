@@ -160,11 +160,14 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
                                   grader_name, grader_date, submission_score,
                                   submission_value, submission_flow)
         for canvas_comment in canvas_comments:
+            l_comment_text = canvas_comment['comment']
+            if len(l_comment_text) == 0:
+                l_comment_text = "Geen commentaar"
             l_submission.comments.append(
                 Comment(canvas_comment['author_id'],
                         canvas_comment['author_name'],
                         get_date_time_obj(canvas_comment['created_at']),
-                        canvas_comment['comment']))
+                        l_comment_text))
         l_submission.submitted_date, l_submission.submitted_day = get_submission_date(a_course.start_date, a_canvas_submission,
                                                                                       a_assignment)
         return l_submission
@@ -222,9 +225,9 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
 
     if has_assignment_rubric and not has_submission_rubrics and a_assignment.grading_type == "pass_fail":
         if a_course_code in ["TICT-V1SE1-24"] and perspective.name != GRADE_MOMENTS and perspective.name != LEVEL_MOMENTS:
-            if a_assignment.group_id == a_course.level_moments.assignment_groups[0]:
+            if a_assignment.group_id == a_course.level_moments.assignment_group_ids[0]:
                 submission_score = round(a_assignment.points, 2)
-            if a_assignment.group_id == a_course.grade_moments.assignment_groups[0]:
+            if a_assignment.group_id == a_course.grade_moments.assignment_group_ids[0]:
                 submission_score = round(a_assignment.points, 2)
             elif a_canvas_submission.grade == 'complete':
                 submission_score = round(a_assignment.points, 2)
@@ -420,25 +423,30 @@ def read_submissions(a_course_code, a_canvas_course, a_course, a_results, a_tota
             continue
         for assignment_sequence in assignment_group.assignment_sequences:
             for assignment in assignment_sequence.assignments:
-                submission_assignment = SubmissionAssignment(assignment.id, assignment.name, assignment.group_id, assignment.points, assignment.date, assignment.day)
-                print("LSU10 - Processing Assignment {0:6} - {1} - {2} {4} points, grading: [{3}]".format(assignment.id,
-                                                                                                         assignment_group.name,
-                                                                                                         assignment.name,
-                                                                                                         assignment.grading_type,
-                                                                                                         assignment.points))
                 if not a_total_refresh and ((a_results.actual_date - assignment.date).days > 10):
                     # deadline langer dan twee weken geleden. Alle feedback is gegeven.
                     continue
-
-                if assignment.unlock_date is not None:
-                    if assignment.unlock_date > a_results.actual_date:
-                        # volgende assignment
-                        continue
 
                 # TODO
                 # if (assignment.day - a_results.actual_day) <= 10:
                 #     # deadline ligt nog 10 dagen ná actual_date
                 #     continue
+
+                if assignment.unlock_date is not None:
+                    if assignment.unlock_date > a_results.actual_date:
+                        print("LSU11 - overslaan", assignment.name, assignment.unlock_date, ">", a_results.actual_date)
+                        continue
+                    else:
+                        print("LSU12 - processing", assignment.name, assignment.unlock_date, ">", a_results.actual_date)
+                else:
+                    print("LSU13 - processing", assignment.name, assignment.unlock_date, ">", a_results.actual_date)
+                submission_assignment = SubmissionAssignment(assignment.id, assignment.name, assignment.group_id, assignment.points, assignment.date, assignment.day)
+                # print("LSU10 - Processing Assignment {0:6} - {1} - {2} {4} points, grading: [{3}]".format(assignment.id,
+                #                                                                                          assignment_group.name,
+                #                                                                                          assignment.name,
+                #                                                                                          assignment.grading_type,
+                #                                                                                          assignment.points))
+
                 canvas_assignment = a_canvas_course.get_assignment(assignment.id, include=['submissions'])
                 # print("LS12 -", canvas_assignment)
                 if canvas_assignment is None:

@@ -1,5 +1,7 @@
 from scripts.lib.file import read_plotly
 
+WORKLOAD_PLOTLY_HTML = "workload_plotly.html"
+WORKLOAD_INDEX_HTML = "workload_index.html"
 
 def build_bootstrap_teacher_tab(a_instance, a_templates, a_workload):
     overzicht_html_string = ""
@@ -16,13 +18,13 @@ def build_bootstrap_teacher_tab(a_instance, a_templates, a_workload):
 
 def build_bootstrap_canvas_workload_general(a_instance, a_course, a_workload, a_actual_date, a_templates):
     html_string = ""
-    file_name = a_instance.get_html_general_path() + "totals_werkvoorraad.html"
+    file_name = a_instance.get_html_general_path() + WORKLOAD_PLOTLY_HTML
     html_string += a_templates["workload_index"].substitute(
         {'semester': a_course.name,
          'actual_date': a_actual_date,
          'workload_plot': read_plotly(file_name),
          'workload_late': build_problems(a_course, a_workload, a_templates)})
-    file_name_html = a_instance.get_html_general_path() + "workload_index.html"
+    file_name_html = a_instance.get_html_general_path() + WORKLOAD_INDEX_HTML
     # print("BB21 - Write portfolio for", student.name)
     with open(file_name_html, mode='w', encoding="utf-8") as file:
         file.write(html_string)

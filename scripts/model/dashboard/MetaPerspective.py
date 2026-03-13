@@ -22,7 +22,7 @@ class MetaPerspective:
 
     @staticmethod
     def from_dict(data_dict):
-        print("Perspective.from_dict", data_dict)
+        # print("MPT11 - MetaPerspective.from_dict", data_dict)
         new = MetaPerspective(data_dict['name'], data_dict['title'], data_dict['show_flow'], data_dict['show_points'],
                           data_dict['assignment_group_names'])
         return new

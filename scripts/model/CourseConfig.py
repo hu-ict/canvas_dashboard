@@ -14,7 +14,8 @@ from scripts.model.perspective.Perspective import Perspective
 
 
 class CourseConfig:
-    def __init__(self, course_code, canvas_id, name, start_date, end_date, improvement_period, student_count, principal_assignment_group_id):
+    def __init__(self, course_code, canvas_id, name, start_date, end_date, improvement_period, student_count,
+                 project_principal_assignment_group_id, guild_principal_assignment_group_id):
         self.course_code = course_code
         self.canvas_id = canvas_id
         self.name = name
@@ -23,7 +24,8 @@ class CourseConfig:
         self.improvement_period = improvement_period
         self.start_date = start_date
         self.end_date = end_date
-        self.principal_assignment_group_id = principal_assignment_group_id
+        self.project_principal_assignment_group_id = project_principal_assignment_group_id
+        self.guild_principal_assignment_group_id = guild_principal_assignment_group_id
         self.sections = []
         self.level_moments = None
         self.attendance = None
@@ -39,7 +41,7 @@ class CourseConfig:
         self.students = []
 
     def __str__(self):
-        line = f'CourseConfig({self.course_code}, {self.canvas_id}, {self.name}, {self.principal_assignment_group_id})'
+        line = f'CourseConfig({self.course_code}, {self.canvas_id}, {self.name}, {self.project_principal_assignment_group_id})'
         return line
 
     def to_json(self):
@@ -52,7 +54,8 @@ class CourseConfig:
             'start_date': get_date_time_str(self.start_date),
             'end_date': get_date_time_str(self.end_date),
             'improvement_period': self.improvement_period,
-            'principal_assignment_group_id': self.principal_assignment_group_id,
+            'project_principal_assignment_group_id': self.project_principal_assignment_group_id,
+            'guild_principal_assignment_group_id': self.guild_principal_assignment_group_id,
             'sections': list(map(lambda s: s.to_json(), self.sections))
         }
         # print("CC10 -", self.attendance)
@@ -134,10 +137,11 @@ class CourseConfig:
     def find_project_group_by_name(self, group_name):
         if (type(group_name)) is int:
             return None
+        # print("CCF21 - find_project_group_by_name", group_name, self.project_groups)
         for group in self.project_groups:
             if group_name in group.name:
                 return group
-        print("CCF21 - find_project_group_by_name", group_name)
+        print("CCF23 - not found find_project_group_by_name", group_name)
         return None
 
     def find_guild_group_by_name(self, group_name):
@@ -317,7 +321,8 @@ class CourseConfig:
             get_date_time_obj(data_dict['end_date']),
             IMPROVEMENT_PERIOD,
             data_dict['student_count'],
-            data_dict['principal_assignment_group_id'])
+            data_dict['project_principal_assignment_group_id'],
+            data_dict['guild_principal_assignment_group_id'])
         new.perspectives = {}
         if 'improvement_period' in data_dict.keys() and data_dict['improvement_period'] is not None:
             new.improvement_period = data_dict['improvement_period']

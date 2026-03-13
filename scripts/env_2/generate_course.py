@@ -11,9 +11,10 @@ from scripts.lib.file import read_config_from_canvas, read_course, read_secret_a
     read_dashboard_from_canvas, write_course, read_dashboard
 from scripts.lib.lib_student import get_groups, get_section_students, get_students_in_groups, link_students_to_role, \
     link_assessors_to_groups_and_students, link_principal_assessor_to_groups_and_students
-from scripts.lib.lib_text import get_extracted_text
+from scripts.lib.lib_text import get_extracted_text, get_lu_from_extracted_text
 from scripts.model.Assignment import Assignment
 from scripts.model.Student import Student
+from scripts.model.StudentGroup import StudentGroup
 from scripts.model.rubric.Criterion import Criterion
 from scripts.model.rubric.Rating import Rating
 from scripts.model.attendance.AttendanceMoment import AttendanceMoment
@@ -63,7 +64,7 @@ def get_used_assignment_groups(config):
         if len(config.level_moments.assignment_group_ids) > 0:
             used_assignment_groups += config.level_moments.assignment_group_ids
         else:
-            message = "GC01 - WARNING no assignments_group for level_moments perspective ", config.level_moments.name
+            message = "GC01 - WARNING no assignments_group for level_moments perspective " + config.level_moments.name
             print(message)
     else:
         print("GC03 - NO level_moments perspective ")
@@ -72,7 +73,7 @@ def get_used_assignment_groups(config):
         if len(config.grade_moments.assignment_group_ids) > 0:
             used_assignment_groups += config.grade_moments.assignment_group_ids
         else:
-            message = "GC05 - WARNING no assignments_group for grade_moments perspective ", config.grade_moments.name
+            message = "GC05 - WARNING no assignments_group for grade_moments perspective " + config.grade_moments.name
             print(message)
     else:
         print("GC07 - NO level_moments perspective ")
@@ -111,13 +112,16 @@ def get_attendance(attendance):
     return attendance
 
 def get_predefined_lu(course, assignment_sequence, assignment):
-    print("GC51 -", assignment.name)
+    print("GCRS51 -", assignment.name)
     if "@" in assignment.name:
-        feedback_list = get_extracted_text(assignment.name)
-        assignment.learning_outcomes.append(feedback_list[0]["lu"])
-        assignment.name = feedback_list[0]["text"]
-        # print("GC52 -", assignment.name, assignment_sequence.learning_outcomes)
+        print("GCRS52 -", assignment.name)
+        lu_list = get_lu_from_extracted_text(assignment.name)
+        print("GCRS53 -", len(lu_list))
+        assignment.learning_outcomes.extend(lu_list)
+        # assignment.name = text_list[0]["text"]
+        print("GCRS54 -", assignment.name, assignment.learning_outcomes)
         for lu in assignment.learning_outcomes:
+            # establish many-2-many relation
             learning_outcome = course.find_learning_outcome(lu)
             if learning_outcome is not None:
                 # print("GC53 -", assignment.name, "LU:", learning_outcome.id)
@@ -355,35 +359,50 @@ def generate_course(course_instance):
     for canvas_user in canvas_users:
         if hasattr(canvas_user, 'login_id'):
             print("GST007 - Create student", canvas_user.login_id, canvas_user.name, canvas_user.sis_user_id)
-            student = Student(canvas_user.id, 0, 0, canvas_user.name, canvas_user.sis_user_id, canvas_user.sortable_name, "", canvas_user.login_id, "", 0)
+            student = Student(canvas_user.id, 0, 0, canvas_user.name, canvas_user.sis_user_id, canvas_user.sortable_name, "", canvas_user.login_id, "")
             config.students.append(student)
         else:
             if hasattr(canvas_user, 'sis_user_id'):
                 print("GST008 - Create student without login_id", canvas_user.name, canvas_user.sis_user_id)
-                student = Student(canvas_user.id, 0, 0, canvas_user.name, canvas_user.sis_user_id, canvas_user.sortable_name, "", "", "", 0)
+                student = Student(canvas_user.id, 0, 0, canvas_user.name, canvas_user.sis_user_id, canvas_user.sortable_name, "", "", "")
                 # print("GS17 ", student)
                 config.students.append(student)
-    print("GST009 - Aantal studenten", len(config.students))
+    print("GCRS20 - Aantal studenten", len(config.students))
     # for student in course.students:
     #     print("GST010 -", student)
-    config.project_groups = get_groups(dashboard.project_group_name, canvas_course)
+    if dashboard.project_group_name == "SECTIONS":
+        group_list = []
+        print("GCRS21 - Werken met Canvas secties als groepen (meestal S1 propedeuse).")
+        for section in config.sections:
+            print("GCRS22 -", section)
+            student_group = StudentGroup(section.id, section.name, 0)
+            group_list.append(student_group)
+    else:
+        group_list = get_groups(dashboard.project_group_name, canvas_course)
+    config.project_groups = group_list
     config.guild_groups = get_groups(dashboard.guild_group_name, canvas_course)
     get_section_students(dashboard.project_group_name, config, canvas_course)
-    get_students_in_groups(dashboard, config, canvas_course)
+
+    if dashboard.project_group_name == "SECTIONS":
+        print("GCRS31 - Werken met Canvas secties als groepen (meestal S1 propedeuse).")
+    else:
+        get_students_in_groups(dashboard.project_group_name, config, canvas_course)
+    if len(dashboard.guild_group_name) >0 :
+        get_students_in_groups(dashboard.guild_group_name, config, canvas_course)
     link_students_to_role(config)
     link_assessors_to_groups_and_students(config)
     link_principal_assessor_to_groups_and_students(config)
 
-    print("GST011 - Opschonen studenten zonder Role, totaal", len(config.students))
+    print("GCRS72 - Opschonen studenten zonder Role, totaal", len(config.students))
     without_role = 0
     course_students = config.students.copy()
     for student in course_students:
         # print("GST23 -", student.name, "["+student.role+"]")
         if len(student.role) == 0:
-            print("GST012 - Verwijder student uit lijst, heeft geen role", student.name)
+            print("GCRS73 - Verwijder student uit lijst, heeft geen role", student.name)
             config.remove_student(student.id)
             without_role += 1
-    print("GST013 - Opschonen studenten zonder ProjectGroup")
+    print("GCRS74 - Opschonen studenten zonder ProjectGroup")
     course_students = config.students.copy()
     without_project = 0
     for student in course_students:
@@ -402,13 +421,13 @@ def generate_course(course_instance):
     for role in config.roles:
         role.students = sorted(role.students, key=lambda s: s.sortable_name)
 
-    print("GST016 - Aantal Canvas studenten", len(config.students))
+    print("GCRS80 - Aantal Canvas studenten", len(config.students))
     # for student in course.students:
     #     print("GST017 -", student)
 
     write_course(course_instance.get_course_file_name(), config)
 
-    print("GCS99 - Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
+    print("GCRS99 - Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
 
 
 if __name__ == "__main__":

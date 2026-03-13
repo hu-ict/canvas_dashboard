@@ -1,15 +1,16 @@
 import json
 import os
 import sys
+
+from scripts.lib.build_bootstrap import build_bootstrap_dashboard_index
 from scripts.lib.build_bootstrap_werkvoorraad import build_bootstrap_canvas_workload_general
 from scripts.lib.build_late import build_bootstrap_teacher_index
 from scripts.lib.build_total_progress import create_total_progress, process_total_progress
 from scripts.lib.build_total_workload import get_teachers, create_workload, get_workload
-from scripts.lib.build_bootstrap import build_bootstrap_general
 from scripts.lib.lib_bootstrap import load_templates
 from scripts.lib.lib_date import get_actual_date
-from scripts.lib.plot_totals import plot_werkvoorraad, plot_voortgang, plot_overall_opbouw
-from scripts.lib.file import read_course, read_results, read_workload, read_progress_history, read_environment, read_dashboard
+from scripts.lib.plot_totals import plot_voortgang, plot_overall_opbouw, plot_workload
+from scripts.lib.file import read_course, read_results, read_workload, read_progress_history, read_dashboard
 from scripts.model.workload.WorkloadDay import WorkloadDay
 
 
@@ -43,8 +44,8 @@ def generate_dashboard(course_instance):
     with open(course_instance.get_workload_file_name(), 'w') as f:
         dict_result = workload_history.to_json()
         json.dump(dict_result, f, indent=2)
-    print("GD09 - Plot werkvoorraad")
-    plot_werkvoorraad(course_instance, course, workload, workload_history)
+    print("GD09 - Plot workload")
+    plot_workload(course_instance, course, workload, workload_history)
     plot_overall_opbouw(course_instance, course, dashboard.level_serie_collection)
     print("GD08 - build_late_email(instance, templates, course, results, student_totals)")
 
@@ -54,7 +55,7 @@ def generate_dashboard(course_instance):
 
     build_bootstrap_canvas_workload_general(course_instance, course, workload, results.actual_date, templates)
     print("GD06 - build_bootstrap_general(start, course, results, team_coaches, labels_colors)")
-    build_bootstrap_general(course_instance, course, results, templates, teachers, dashboard.level_serie_collection, workload)
+    build_bootstrap_dashboard_index(course_instance, course, results, templates, teachers, dashboard, workload)
     print("GD07 - build_bootstrap_teacher_index(instances, templates, course, results, workload)")
     build_bootstrap_teacher_index(course_instance, templates, course, results, workload)
 

@@ -45,7 +45,7 @@ class AssignmentSequence:
                         # wel ingeleverd
                         if submission.graded:
                             # beoordeeld
-                            if submission.score == submission.points:
+                            if submission.score == submission.assignment.points:
                                 # voldaan
                                 return self.assignments[index].date, self.assignments[index].day
                             else:

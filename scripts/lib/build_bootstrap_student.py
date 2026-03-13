@@ -224,17 +224,18 @@ def build_bootstrap_portfolio(course_instance, course_id, course, student, stude
             'status_pending': 0
         }
     for perspective in course.perspectives.values():
-        level_serie = level_serie_collection.level_series[course.perspectives[perspective.name].levels]
-        for assignment_group_id in perspective.assignment_groups:
-            assignment_groep = course.find_assignment_group(assignment_group_id)
+        # print("BBS51 -", )
+        for assignment_group_id in perspective.assignment_group_ids:
+            assignment_groep = course.get_assignment_group(assignment_group_id)
+            level_serie = level_serie_collection.level_series[assignment_groep.levels]
             for assignment_sequence in assignment_groep.assignment_sequences:
                 portfolio_item = assignment_sequence.name + " (" + str(len(assignment_sequence.assignments)) + ")"
                 submission_sequence = student_results.get_submission_sequence_by_name(assignment_sequence.name)
                 student_group = course.find_project_group(student.project_id)
                 teacher_str = ""
                 if student_group is not None:
-                    for teacher in student_group.teachers:
-                        teacher = course.find_teacher(teacher)
+                    for assessor in student_group.assessors:
+                        teacher = course.find_teacher(assessor.teacher_id)
                         teacher_str += teacher.name + ", "
                 if submission_sequence is None:
                     status_label = level_serie.get_status(BEFORE_DEADLINE).label
@@ -284,7 +285,7 @@ def build_bootstrap_portfolio(course_instance, course_id, course, student, stude
                         teller += 1
                         url = "https://canvas.hu.nl/courses/" + str(
                             course_id) + "/gradebook/speed_grader?assignment_id=" + str(
-                            submission.assignment_id) + "&student_id=" + str(student.id)
+                            submission.assignment.id) + "&student_id=" + str(student.id)
                         badges += '<a class="badge mr-1 ' + badge_status + '" target="_blank" href="' + url + '">' + str(
                             teller) + '</a>'
                 date, day = assignment_sequence.get_date_day(submission_sequence, actual_day)
@@ -475,7 +476,9 @@ def build_bootstrap_student_index(course_instance, course_id, course, student_re
             'student_name': student.name,
             'student_email': student.email,
             'student_number': student.number,
+            'project_label': dashboard.dashboard_tabs["groups"],
             'project_group': project_group_name,
+            'guild_label': dashboard.dashboard_tabs["guilds"],
             'guild_group': guild_group_name,
             'project_group_teachers': project_group_teacher_str,
             'guild_group_teachers': guild_group_teacher_str,

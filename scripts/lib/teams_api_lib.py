@@ -4,11 +4,8 @@ from scripts.lib.translation_table import translation_table
 import subprocess
 import io
 
-teams = ["1221c52c-8dde-4f0a-8dd2-fafe98df6c2d",
-         "6cc9038c-76d1-4c7d-a40a-87b04d2e6d2f",
-         "c9f90014-7843-4e2c-92c2-2727b5d20ede",
-         "8a2cfa62-5ec8-4266-b2bc-4f1fed73cf6c",
-         "02a1e0ea-46c9-460a-956a-5f9ad7302ee6"]
+teams = ["eb631cbd-950d-42be-9a73-b8b544221a5a", "60fdb4ba-e8b3-4414-8d4e-a9331cd59f5a", "740bb11a-abc1-4474-b9ce-c2ef6ff8b0e4", "e5701102-1ce4-4b7c-bf9f-c5f2eab14c4b", "bf8a2550-2c69-4afb-8d0d-6f47ae3c1c08"]
+
 # https://teams.microsoft.com/l/team/19%3AcxEwbQY-TpX23Y4slSrFCWgIutGGF2JDk829QxLhmFY1%40thread.tacv2/conversations?groupId=8d309e88-cdae-4720-aed8-47384bc36820&tenantId=98932909-9a5a-4d18-ace4-7236b5b5e11d
 # https://teams.microsoft.com/l/team/19%3A3l-_a4EUOq-9AwvkU6dAVddcELw_bL3xU0xW2-hKWmg1%40thread.tacv2/conversations?groupId=59a9f9c3-4a23-4f74-ad75-a269f0e70891&tenantId=98932909-9a5a-4d18-ace4-7236b5b5e11d
 # https://teams.microsoft.com/l/team/19%3AJ0cuUcTJg79b1IGafrNhQxKV8xJSgIgP9BoDhBUEZOM1%40thread.tacv2/conversations?groupId=f66f15ab-36cf-4af7-8e36-9f380e8f8a5c&tenantId=98932909-9a5a-4d18-ace4-7236b5b5e11d
@@ -229,13 +226,36 @@ def upload_file_to_onedrive(a_token, a_name, a_drive_id, a_file_path, a_file_nam
 
     # drive_id = "b!JlWXSwZ06kqtE18zUw4nyLLiywuLAR9AiyKsmQ1pD5H1RQraPukJRoocfQ2Oj64W"
     # l_url = f"https://graph.microsoft.com/v1.0/sites/{a_channel}/drive/items/root:/{a_name}/{l_remote_file_name}%20progress.jpeg:/content"
-    url = f"https://graph.microsoft.com/v1.0/drives/{a_drive_id}/items/root:/{a_name.replace(' ', '%20')}/{l_remote_file_name.replace(' ', '%20')}:/content"
+    # url = f"https://graph.microsoft.com/v1.0/drives/{a_drive_id}/items/root:/{a_name.replace(' ', '%20')}/{l_remote_file_name.replace(' ', '%20')}:/content"
+    url = f"https://graph.microsoft.com/v1.0/drives/{a_drive_id}/items/root:/{l_remote_file_name.replace(' ', '%20')}:/content"
     # print(url)
     response = requests.put(url, headers=l_headers, data=data)
     if response.status_code not in [200, 201]:
         print(f"Error {response.status_code} response: {response.json()}")
 
 
+def opschonen_onedrive(a_token, a_drive_id):
+    l_headers = {
+        "Authorization": "Bearer "+a_token,
+    }
+    # print(l_headers)/drives/{drive-id}/root/children
+    url = f"https://graph.microsoft.com/v1.0/drives/{a_drive_id}/root/children"
+    # url = f"https://graph.microsoft.com/v1.0/drives/{a_drive_id}/items/root:"
+    # print(url)
+    response = requests.get(url, headers=l_headers)
+    if response.status_code not in [200, 201]:
+        print(f"Error {response.status_code} response: {response.json()}")
+    else:
+        # print(f"GET response: {response.json()}")
+        result = response.json()
+        items = result['value']
+        for item in items:
+            item_id = item['id']
+            print(item_id)
+            url = f"https://graph.microsoft.com/v1.0/drives/{a_drive_id}/items/{item_id}"
+            response = requests.delete(url, headers=l_headers)
+            if response.status_code not in [200, 204]:
+                print(f"Error {response.status_code} response: {response.json()}")
 
 def create_channel(a_token, a_team_id, a_diplay_name):
     l_headers = {

@@ -1,5 +1,217 @@
 from scripts.model.dashboard.LevelSerie import LevelSerie
 
+BIN2 = {
+    "status": {
+        "1": {
+            "label": "Voor deadline",
+            "color": "#BFBFBF"
+        },
+        "2": {
+            "label": "Nog niet beoordeeld",
+            "color": "#E97132"
+        },
+        "3": {
+            "label": "Niet correct beoordeeld",
+            "color": "#E97132"
+        },
+        "4": {
+            "label": "Niet gemaakt",
+            "color": "#000000"
+        },
+        "5": {
+            "label": "Beoordeeld",
+            "color": "#3C7D22"
+        }
+    },
+    "grades": {
+        "0": {
+            "level": "0",
+            "label": "Niet voldaan",
+            "color": "#0070C0",
+            "fraction": 0.00,
+            "value": 0
+        },
+        "1": {
+            "level": "1",
+            "label": "Niet voldaan",
+            "color": "#0070C0",
+            "fraction": 0.99,
+            "value": 0
+        },
+        "2": {
+            "level": "2",
+            "label": "Voldaan",
+            "color": "#3C7D22",
+            "fraction": 1.0,
+            "value": 1
+        }
+    }
+}
+
+SAMEN = {
+    "status": {
+        "1": {
+            "label": "Voor deadline",
+            "color": "#aaaaaa"
+        },
+        "2": {
+            "label": "Nog niet gewaardeerd",
+            "color": "CornflowerBlue"
+        },
+        "3": {
+            "label": "Niet correct gewaardeerd",
+            "color": "CornflowerBlue"
+        },
+        "4": {
+            "label": "Niets ingeleverd",
+            "color": "#f25829"
+        },
+        "5": {
+            "label": "Gewaardeerd",
+            "color": "#3C7D22"
+        }
+    },
+    "grades": {
+        "0": {
+            "level": "0",
+            "label": "Niet zichtbaar",
+            "color": "#EDF8F0",
+            "fraction": 0.1,
+            "value": 0
+        },
+        "1": {
+            "level": "1",
+            "label": "Startend",
+            "color": "#B8E3C4",
+            "fraction": 0.55,
+            "value": 1
+        },
+        "2": {
+            "level": "2",
+            "label": "Samenwerkend",
+            "color": "#85e043",
+            "fraction": 0.8,
+            "value": 1
+        },
+        "3": {
+            "level": "3",
+            "label": "Excellerend",
+            "color": "#2bad4e",
+            "fraction": 1.0,
+            "value": 1
+        }
+    }
+}
+
+GILDE = {
+    "status": {
+        "1": {
+            "label": "Voor deadline",
+            "color": "#aaaaaa"
+        },
+        "2": {
+            "label": "Nog niet gewaardeerd",
+            "color": "CornflowerBlue"
+        },
+        "3": {
+            "label": "Niet correct gewaardeerd",
+            "color": "CornflowerBlue"
+        },
+        "4": {
+            "label": "Niets ingeleverd",
+            "color": "#f25829"
+        },
+        "5": {
+            "label": "Gewaardeerd",
+            "color": "#3C7D22"
+        }
+    },
+    "grades": {
+        "0": {
+            "level": "0",
+            "label": "Niet aanwezig",
+            "color": "#f25829",
+            "fraction": 0.01,
+            "value": 1
+        },
+        "1": {
+            "level": "1",
+            "label": "Aanwezig en passief",
+            "color": "#85e043",
+            "fraction": 0.55,
+            "value": 1
+        },
+        "2": {
+            "level": "2",
+            "label": "Aanwezig en passief",
+            "color": "#85e043",
+            "fraction": 0.8,
+            "value": 1
+        },
+        "3": {
+            "level": "3",
+            "label": "Aanwezig en actief",
+            "color": "#2bad4e",
+            "fraction": 1.0,
+            "value": 1
+        }
+    }
+}
+NIVEAU = {
+    "status": {
+        "1": {
+            "label": "Voor deadline",
+            "color": "#aaaaaa"
+        },
+        "2": {
+            "label": "Nog niet gewaardeerd",
+            "color": "CornflowerBlue"
+        },
+        "3": {
+            "label": "Niet correct gewaardeerd",
+            "color": "CornflowerBlue"
+        },
+        "4": {
+            "label": "Niets ingeleverd",
+            "color": "#f25829"
+        },
+        "5": {
+            "label": "Gewaardeerd",
+            "color": "#3C7D22"
+        }
+    },
+    "grades": {
+        "0": {
+            "level": "0",
+            "label": "Niet zichtbaar",
+            "color": "#f25829",
+            "fraction": 0.01,
+            "value": 1
+        },
+        "1": {
+            "level": "1",
+            "label": "Onder niveau",
+            "color": "#f2a529",
+            "fraction": 0.55,
+            "value": 1
+        },
+        "2": {
+            "level": "2",
+            "label": "Op niveau",
+            "color": "#85e043",
+            "fraction": 0.8,
+            "value": 1
+        },
+        "3": {
+            "level": "3",
+            "label": "Boven niveau",
+            "color": "#2bad4e",
+            "fraction": 1.0,
+            "value": 1
+        }
+    }
+}
+
 ATTENDANCE_LABELS = {
     "status": {
         "1": {

@@ -6,10 +6,11 @@ class GradeMoments:
         self.assignment_group_ids = []
 
     def to_json(self):
+        # print("GM11 -", self.assignment_group_ids)
         dict_result = {
             'name': self.name,
             'title': self.title,
-            'assignment_groups': self.assignment_group_ids
+            'assignment_group_ids': self.assignment_group_ids
         }
         return dict_result
 
@@ -20,6 +21,6 @@ class GradeMoments:
     def from_dict(data_dict):
         # print("Perspective.from_dict", data_dict)
         new = GradeMoments(data_dict['name'], data_dict['title'])
-        if 'assignment_groups' in data_dict.keys():
-            new.assignment_group_ids = data_dict['assignment_groups']
+        if 'assignment_group_ids' in data_dict.keys():
+            new.assignment_group_ids = data_dict['assignment_group_ids']
         return new

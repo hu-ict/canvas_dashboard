@@ -17,6 +17,13 @@ class Environment:
     def __str__(self):
         return f'Environment({self.name})'
 
+    def get_current_instance(self):
+        for course in self.courses:
+            for instance in course.course_instances:
+                if instance.name == self.current_instance["course_instance_name"]:
+                    return instance
+        return None
+
     def get_course_names(self):
         names = []
         for course in self.courses:

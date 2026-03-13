@@ -192,7 +192,7 @@ def read_dashboard_from_canvas(canvas_course):
 
 def read_dashboard(dashboard_file_name):
     print("F024 - Read dashboard_file from os:", dashboard_file_name)
-    with open(dashboard_file_name, mode='r', encoding="utf-8") as file_dashboard:
+    with open(dashboard_file_name, mode='r', encoding="cp1252") as file_dashboard:
         data = json.load(file_dashboard)
         dashboard = Dashboard.from_dict(data)
         return dashboard

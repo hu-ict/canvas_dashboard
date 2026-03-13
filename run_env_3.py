@@ -22,7 +22,7 @@ def run_env_3(a_actual_date):
                 generate_plotly(course_instance)
                 generate_portfolio(course_instance)
                 publish_dashboard(course_instance)
-                generate_user_data(course_instance)
+                # generate_user_data(course_instance)
 
 
 if __name__ == "__main__":

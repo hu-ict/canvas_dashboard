@@ -1,24 +1,26 @@
 import json
-from lib.file import read_course, read_msteams_api, read_course_instances
-from lib.teams_api_lib import get_me_for_check, get_access_token, add_member_to_team, \
-    add_member_to_channel, create_channel, teams, get_team
 
-# teams like ["b7cf78ae-8c6f-460d-a47a-d4bc2b8b2f18"]
+from scripts.lib.file import read_environment, read_course, read_msteams_api
+from scripts.lib.file_const import MSTEAMS_API_KEY_FILE_NAME, ENVIRONMENT_FILE_NAME
+from scripts.lib.teams_api_lib import get_me_for_check, get_access_token, get_team, create_channel, add_member_to_team, \
+    add_member_to_channel, teams
+
 print("GCH01 - generate_channels.py")
 RedirectURI = "https://localhost"
-instance_name = ""
-instances = read_course_instances()
-if len(instance_name) > 0:
-    instances.current_instance = instance_name
-instance = instances.get_instance_by_name(instances.current_instance)
-course = read_course(instance.get_course_file_name())
-msteams_api = read_msteams_api("../courses/msteams_api.json")
+
+environment = read_environment(ENVIRONMENT_FILE_NAME)
+execution = environment.get_execution_by_name("env_2")
+course_instance = environment.get_current_instance()
+print("RUN213 - Instance:", course_instance.name)
+course_instance.execution_source_path = execution.source_path
+course = read_course(course_instance.get_course_file_name())
+msteams_api = read_msteams_api(MSTEAMS_API_KEY_FILE_NAME)
 
 if get_me_for_check(msteams_api.gen_token) is None:
     token = get_access_token(msteams_api.tenant_id, msteams_api.client_id)
     print(token)
     msteams_api.gen_token = token
-    with open("../courses/msteams_api.json", 'w') as f:
+    with open(MSTEAMS_API_KEY_FILE_NAME, 'w') as f:
         dict_result = msteams_api.to_json()
         json.dump(dict_result, f, indent=2)
 
@@ -28,15 +30,15 @@ print(f"Aantal studenten {len(course.students)}, aantal teams {len(teams)}")
 student_count = 1
 if len(teams) > 0:
     for student in course.students:
-        print("GCH10 -", student_count+1, student.name)
+        print("GCH10 -", student_count+1, student.email)
         if len(student.email) > 0:
             team_id = teams[student_count % len(teams)]
-            print(team_id, student.email)
             email_parts = student.email.split("@")
             if len(email_parts) > 1:
+                # print(student.email)
                 channel_id = create_channel(msteams_api.gen_token, team_id, email_parts[0])
                 if channel_id:
-                    print(channel_id, student.email)
+                    print("GCH12", student.email)
                     add_member_to_team(msteams_api.gen_token, team_id, student.email)
                     add_member_to_channel(msteams_api.gen_token, team_id, channel_id, student.email)
                 student_count += 1

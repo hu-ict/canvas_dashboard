@@ -1,5 +1,12 @@
 import re
 
+def get_lu_from_extracted_text(text):
+    text_lu_result = []
+    print("LTXT03 -", text)
+    at_sign_words = [woord[1:] for woord in re.findall(r'@\w+', text)]
+    print("LTXT05 -", at_sign_words)
+    return at_sign_words
+
 
 def get_extracted_text(text):
     text_lu_result = []

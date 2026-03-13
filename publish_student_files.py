@@ -3,7 +3,7 @@ import sys
 
 from scripts.lib.file import read_course, read_msteams_api, read_environment
 from scripts.lib.lib_date import get_actual_date
-from scripts.lib.teams_api_lib import upload_file_to_onedrive, get_me_for_check, get_access_token
+from scripts.lib.teams_api_lib import upload_file_to_onedrive, get_me_for_check, get_access_token, opschonen_onedrive
 from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, MSTEAMS_API_KEY_FILE_NAME
 
 
@@ -20,7 +20,7 @@ def publish_student_files(course_code, instance_name):
     print("PSF04 - Instance:", course_instance.name)
     course = read_course(course_instance.get_course_file_name())
     msteams_api = read_msteams_api(MSTEAMS_API_KEY_FILE_NAME)
-    if get_me_for_check(msteams_api.my_token) is None:
+    if get_me_for_check(msteams_api.gen_token) is None:
         token = get_access_token(msteams_api.tenant_id, msteams_api.client_id)
         print(token)
         msteams_api.gen_token = token
@@ -32,12 +32,12 @@ def publish_student_files(course_code, instance_name):
         if len(l_student.site) > 0:
             print('PSF11 Upload files for Student:', l_student.name)
             student_name = l_student.email.split("@")[0].lower()
-            source_filename = student_name + "_progress.jpg"
-            upload_file_to_onedrive(msteams_api.my_token, student_name, l_student.site, course_instance.get_html_student_path(),
-                                    source_filename)
+            # source_filename = student_name + "_progress.jpg"
+            # upload_file_to_onedrive(msteams_api.my_token, student_name, l_student.site, course_instance.get_html_student_path(),
+            #                         source_filename)
             source_filename = student_name + "_index.html"
-            upload_file_to_onedrive(msteams_api.my_token, student_name, l_student.site, course_instance.get_html_student_path(),
-                                    source_filename)
+            # opschonen_onedrive(msteams_api.gen_token, l_student.site)
+            upload_file_to_onedrive(msteams_api.gen_token, student_name, l_student.site, course_instance.get_html_student_path(), source_filename)
         else:
             print("PSF12 MSTeams channel not defined (site)")
 

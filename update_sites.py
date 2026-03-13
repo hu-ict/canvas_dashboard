@@ -1,27 +1,23 @@
 import json
 import sys
 
-from lib.file import read_course, read_msteams_api, read_environment
-from lib.file_const import ENVIRONMENT_FILE_NAME, MSTEAMS_API_KEY_FILE_NAME
-from lib.lib_date import get_actual_date
-from lib.teams_api_lib import teams, get_channels, get_drive, get_me_for_check, get_access_token, \
+from scripts.lib.file import read_course, read_msteams_api, read_environment
+from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, MSTEAMS_API_KEY_FILE_NAME
+from scripts.lib.lib_date import get_actual_date
+from scripts.lib.teams_api_lib import teams, get_channels, get_drive, get_me_for_check, get_access_token, \
     get_team
 from scripts.model.TeamsApi import Channel
 
 
 def update_sites(course_code, instance_name):
-    print("US01 - update_sites.py", instance_name)
+    print("UPS01 - update_sites.py", instance_name)
     g_actual_date = get_actual_date()
     environment = read_environment(ENVIRONMENT_FILE_NAME)
-    if len(instance_name) > 0:
-        environment.current_instance = {"course_name": course_code, "course_instance_name": instance_name}
-        with open(ENVIRONMENT_FILE_NAME, 'w') as f:
-            dict_result = environment.to_json()
-            json.dump(dict_result, f, indent=2)
-    print("US03 - update_sites.py", ENVIRONMENT_FILE_NAME)
+    environment.current_instance["course_name"] = course_code
+    environment.current_instance["course_instance_name"] = instance_name
+    current_instance = environment.get_instance_of_course(environment.current_instance)
+    print("UPS02 - Instance:", current_instance.name)
     course_instance = environment.get_instance_of_course(environment.current_instance)
-    print("Instance:", course_instance.name)
-
     if course_instance.course_code not in ["TICT-V3SE6-25"]:
         print("US04 - No student channels defined for this course")
         return
@@ -47,7 +43,7 @@ def update_sites(course_code, instance_name):
     for team in teams:
         team_id = team #teams[team_index]
         team = get_team(token, team_id)
-        print("US05 -", team)
+        print("UPS05 -", team)
         student_channels = get_channels(token, team_id)
         # student_channels = get_channels_from_json(team_file)
         channel_count += len(student_channels)
@@ -55,21 +51,14 @@ def update_sites(course_code, instance_name):
             print(channel)
             student = course.find_student_by_email_part(channel["display_name"])
             if student is None:
-                print(f"US06 - Student not found in course: [{channel['display_name']}]")
+                print(f"UPS06 - Student not found in course: [{channel['display_name']}]")
             else:
-                print("US07 - Student", student.name)
+                print("UPS07 - Student", student.email)
                 drive = get_drive(token, team_id, channel["id"])
                 # print("US81 - Drive", drive)
                 site_count += 1
                 student.site = drive["drive_id"]
                 msteams_api.channels.append(Channel(student.id, student.name, drive["drive_id"]))
-            with open(MSTEAMS_API_KEY_FILE_NAME, 'w') as f:
-                dict_result = msteams_api.to_json()
-                json.dump(dict_result, f, indent=2)
-
-            with open(course_instance.get_course_file_name(), 'w') as f:
-                dict_result = course.to_json()
-                json.dump(dict_result, f, indent=2)
         team_index += 1
     print("US10 - Channels:", channel_count, "Students linked:", site_count)
     sites = 0
@@ -98,4 +87,4 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         update_sites(sys.argv[1], sys.argv[2])
     else:
-        update_sites("", "")
+        update_sites("TICT-V3SE6-25", "TICT-V3SE6-25_feb26")
