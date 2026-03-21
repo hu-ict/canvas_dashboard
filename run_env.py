@@ -8,7 +8,7 @@ if __name__ == "__main__":
     import os
 
     current_path = os.getcwd()
-    print("Huidige pad:", current_path)
+    print("RUN01 - Huidige pad:", current_path)
 
     sys.stdout.reconfigure(encoding="utf-8")
     l_actual_date = get_actual_date()
@@ -19,6 +19,6 @@ if __name__ == "__main__":
     seconds = total_seconds % 60
     minutes = total_seconds // 60
 
-    print(f"Time running: {minutes}:{seconds:02d} (m:ss)")
-    print("Time running:", total_seconds, "seconds")
-    print("Date running:", get_actual_date())
+    print(f"RUN08 - Time running: {minutes}:{seconds:02d} (m:ss)")
+    print("RUN09 - Time running:", total_seconds, "seconds")
+    print("RUN10 - Date running:", get_actual_date())

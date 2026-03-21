@@ -5,7 +5,7 @@ from scripts.lib.bandwidth.lib_bandwidth import IMPROVEMENT_PERIOD
 from scripts.lib.file_const import ENVIRONMENT_FILE_NAME, SECRET_API_KEY_FILE_NAME
 from scripts.lib.lib_date import API_URL, get_actual_date, get_date_time_obj
 from scripts.lib.file import read_dashboard_from_canvas, read_environment, read_secret_api_key, read_dashboard
-from scripts.lib.lib_student import get_groups
+from scripts.lib.lib_student import get_groups_in_scope
 from scripts.lib.lib_trm import generate_trm
 from scripts.model.AssignmentGroup import AssignmentGroup
 from scripts.model.Bandwidth import Bandwidth
@@ -48,7 +48,7 @@ def generate_config(instance_name):
         config.roles = dashboard.roles
     if len(dashboard.learning_outcomes) > 0:
         config.learning_outcomes = dashboard.learning_outcomes
-    print("GCNF20 -", dashboard.assignment_groups)
+    print("GCNF20 - dashboard.assignment_groups", len(dashboard.assignment_groups))
     for perspective in dashboard.perspectives:
         if len(perspective.assignment_group_names) > 0:
             print("GCNF21 -", perspective.assignment_group_names)
@@ -103,6 +103,8 @@ def generate_config(instance_name):
             assignment_group = config.find_assignment_group_by_name(assignment_group_name)
             if assignment_group:
                 perspective.assignment_group_ids.append(assignment_group.id)
+            else:
+                print("GCNF52 - Not found", assignment_group_name)
         config.perspectives[perspective.name] = perspective
     if current_instance.course_code in ["TICT-V1SE1-24"]:
         role = Role("role", "Student", "HBO-ICT", "border-dark")
@@ -110,8 +112,10 @@ def generate_config(instance_name):
         # policy = Policy([1], "WEEKLY", 19, [9, 17, 18])
         # config.attendance = Attendance("attendance", "Aanwezigheid", "attendance", True, False, "ATTENDANCE", 100, 75,
         #                               90, Bandwidth(), policy)
-    config.project_principal_assignment_group_id = config.find_assignment_group_by_name(dashboard.project_principal_assignment_group).id
-    config.guild_principal_assignment_group_id = config.find_assignment_group_by_name(dashboard.guild_principal_assignment_group).id
+    print("GCNF31 - Find assignment_group", dashboard.groups_1_principal_assignment_group)
+    config.groups_1_principal_assignment_group_id = config.find_assignment_group_by_name(dashboard.groups_1_principal_assignment_group).id
+    print("GCNF31 - Find assignment_group", dashboard.groups_2_principal_assignment_group)
+    config.groups_2_principal_assignment_group_id = config.find_assignment_group_by_name(dashboard.groups_2_principal_assignment_group).id
 
     # ophalen secties
     course_sections = canvas_course.get_sections()
@@ -144,7 +148,7 @@ def generate_config(instance_name):
             print(f"GCNF81 - Verwijder section {section.name}")
             config.sections.remove(section)
 
-    if dashboard.project_group_name == "SECTIONS":
+    if dashboard.groups_1_name == "SECTIONS":
         group_list = []
         print("GCNF91 - Werken met Canvas secties als groepen (meestal S1 propedeuse).")
         for section in config.sections:
@@ -152,19 +156,20 @@ def generate_config(instance_name):
             student_group = StudentGroup(section.id, section.name, 0)
             group_list.append(student_group)
     else:
-        group_list = get_groups(dashboard.project_group_name, canvas_course)
-    config.project_groups = group_list
-    if len(dashboard.guild_group_name) > 0:
-        group_list = get_groups(dashboard.guild_group_name, canvas_course)
-        config.guild_groups = group_list
-
+        group_list = get_groups_in_scope(dashboard.groups_1_name, canvas_course)
+    print("GCNF94 -", len(group_list))
+    config.groups_1 = group_list
+    if len(dashboard.groups_2_name) > 0:
+        group_list = get_groups_in_scope(dashboard.groups_2_name, canvas_course)
+        config.groups_2 = group_list
+        print("GCNF95 -", len(group_list))
 
     # opschonen van assignment_groups zonder revelantie
-    print("GCNF95 - config.assignment_groups", len(config.assignment_groups))
+    print("GCNF96 - config.assignment_groups", len(config.assignment_groups))
     for assignment_group in config.assignment_groups[:]:  # kopie met slicing
         yes_no = input(f"assignment_group behouden {assignment_group.name} [enter or n]")
         if yes_no == 'n':
-            print(f"GCNF96 - Verwijder assignment_group {assignment_group.name}")
+            print(f"GCNF97 - Verwijder assignment_group {assignment_group.name}")
             config.assignment_groups.remove(assignment_group)
 
     print("GCONF98 - ConfigFileName:", current_instance.get_config_file_name())

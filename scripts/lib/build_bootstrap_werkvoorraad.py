@@ -16,7 +16,7 @@ def build_bootstrap_teacher_tab(a_instance, a_templates, a_workload):
     return overzicht_html_string
 
 
-def build_bootstrap_canvas_workload_general(a_instance, a_course, a_workload, a_actual_date, a_templates):
+def build_workload_index_html(a_instance, a_course, a_workload, a_actual_date, a_templates):
     html_string = ""
     file_name = a_instance.get_html_general_path() + WORKLOAD_PLOTLY_HTML
     html_string += a_templates["workload_index"].substitute(

@@ -1,6 +1,6 @@
+from scripts.lib.lib_portfolio import STATUS_COMPLETE, STATUS_INCOMPLETE, STATUS_MISSED, STATUS_PENDING
 from scripts.model.Submission import Submission
 from scripts.model.perspective.Status import MISSED_ITEM, GRADED, BEFORE_DEADLINE, NOT_CORRECT_GRADED, NOT_YET_GRADED
-
 
 class SubmissionSequence:
     def __init__(self, name, tag, grading_type, points, flow):
@@ -60,13 +60,13 @@ class SubmissionSequence:
         if self.get_status() == GRADED:
             for submission in self.submissions:
                 if submission.graded and submission.score == self.points:
-                    return "status_complete"
-            return "status_incomplete"
+                    return STATUS_COMPLETE
+            return STATUS_INCOMPLETE
         else:
             if self.get_status() is MISSED_ITEM:
-                return "status_missed"
+                return STATUS_MISSED
             else:
-                return "status_pending"
+                return STATUS_PENDING
         return "status_unknown"
 
     def is_graded(self):
@@ -81,7 +81,7 @@ class SubmissionSequence:
                 return True
         return False
 
-    def get_submission_by_assignment_id(self, assignment_id):
+    def get_submission_by_assignment(self, assignment_id):
         for submission in self.submissions:
             if submission.assignment.id == assignment_id:
                 return submission

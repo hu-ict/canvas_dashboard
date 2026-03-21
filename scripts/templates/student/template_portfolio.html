@@ -1,38 +1,5 @@
 <h2 class="mt-2">Portfolio</h2>
-<p>
-    <table class="table table-sm">
-        <thead>
-            <tr>
-                <th scope="col">Samenvatting</th>
-                $learning_outcomes
-            </tr>
-        </thead>
-        <tbody>
-            <!-- <tr><td>Behaalde punten</td>$behaalde_punten</tr> -->
-            <tr><td class="text-nowrap status_complete">Complete items (punten)</td>$complete_items</tr>
-            <tr><td class="text-nowrap status_incomplete">Incomplete items</td>$incomplete_items</tr>
-            <tr><td class="text-nowrap status_missed">Niet gemaakt</td>$niet_gemaakt</tr>
-            <tr><td class="text-nowrap status_pending">Openstaande items</td>$niet_beoordeeld</tr>
-        </tbody>
-    </table>
-</p>
+$portfolio_summary
 $attendance
-<h3>Portfolio-matrix</h3>
-<p>
-    <table class="table table-sm">
-        <thead>
-            <tr>
-                <th scope="col">Datum</th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col">Portfolio-item</th>
-                <th scope="col">Status</th>
-                $learning_outcomes
-            </tr>
-        </thead>
-        <tbody>
-            $portfolio_items
-        </tbody>
-    </table>
-</p>
+$portfolio_matrix
 $portfolio_items_modal

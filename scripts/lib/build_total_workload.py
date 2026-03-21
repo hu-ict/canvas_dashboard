@@ -43,23 +43,26 @@ def get_submitted_at(item):
 def check_for_late(a_course, a_submission, a_workload, a_actual_day):
     if a_submission.status == NOT_YET_GRADED or a_submission.status == NOT_CORRECT_GRADED:
         student = a_course.find_student(a_submission.student_id)
-        assessor = student.get_assessor_by_assignment_group(a_submission.assignment.group_id)
-        if assessor is not None:
-            # print("BTW82", student.name, assessor)
-            workload_teacher = a_workload.get_workload_teacher(assessor.teacher_id)
-            if a_submission.submitted_day is None:
-                late_days = a_actual_day - a_submission.assignment.day
+        if student:
+            assessor = student.get_assessor_by_assignment_group(a_submission.assignment.group_id)
+            if assessor is not None:
+                # print("BTW82", student.name, assessor)
+                workload_teacher = a_workload.get_workload_teacher(assessor.teacher_id)
+                if a_submission.submitted_day is None:
+                    late_days = a_actual_day - a_submission.assignment.day
+                else:
+                    late_days = a_actual_day - a_submission.submitted_day
+                if late_days <= 7:
+                    workload_teacher.w1_count += 1
+                elif 7 < late_days <= 14:
+                    workload_teacher.w2_count += 1
+                else:
+                    workload_teacher.w3_count += 1
+                workload_teacher.worklist.append(a_submission.to_json())
             else:
-                late_days = a_actual_day - a_submission.submitted_day
-            if late_days <= 7:
-                workload_teacher.w1_count += 1
-            elif 7 < late_days <= 14:
-                workload_teacher.w2_count += 1
-            else:
-                workload_teacher.w3_count += 1
-            workload_teacher.worklist.append(a_submission.to_json())
+                print("BTW85 - No assessor for assignment.group_id", a_submission.assignment.group_id, student.name)
         else:
-            print("BTW85 - No assessor for assignment.group_id", a_submission.assignment.group_id, student.name)
+            print("BTW86 - Student not found: a_course.find_student(a_submission.student_id)", a_submission.student_id)
 
 
 def get_workload(a_course, a_results, a_workload):

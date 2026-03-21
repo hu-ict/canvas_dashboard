@@ -7,6 +7,7 @@ def plot_bandbreedte_colored(a_row, a_col, a_fig, a_days, a_bandwidth, a_flow, a
         return
     if a_bandwidth is None:
         return
+    print("BPG05 - plot_bandbreedte_colored", a_total_points, len(a_bandwidth.points))
     band_min = calc_dev(a_days, 0, 0, 0, 0)
     if a_flow:
         band_lower = calc_dev(a_days, 0, 0, 0, 0.3)

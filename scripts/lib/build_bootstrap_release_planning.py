@@ -170,15 +170,6 @@ def build_bootstrap_release_planning_tab(a_instance, a_course, a_templates, leve
     for level_serie in level_serie_collection.level_series.values():
         file_name = a_instance.get_html_general_path() + "level_serie_" + str(level_serie.name) + ".html"
         write_level_serie(a_course, a_templates, level_serie, file_name)
-    for perspective in a_course.perspectives.values():
-        for assignment_group_id in perspective.assignment_group_ids:
-            file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group_id) + ".html"
-            process_bandwidth(a_course, assignment_group_id, level_serie_collection, file_name_bandwidth)
-    for perspective in a_course.perspectives.values():
-        for assignment_group_id in perspective.assignment_group_ids:
-            file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group_id) + ".html"
-            file_name_release_planning = a_instance.get_html_general_path() + "release_planning_" + str(assignment_group_id) + ".html"
-            write_release_planning_index(a_course, a_templates, assignment_group_id, file_name_release_planning, file_name_bandwidth)
 
     assignment_group_html_string = ""
     # voor elk perspectief een card
@@ -198,6 +189,25 @@ def build_bootstrap_release_planning_tab(a_instance, a_course, a_templates, leve
         for assignment_group_id in a_course.grade_moments.assignment_group_ids:
             assignment_group = a_course.get_assignment_group(assignment_group_id)
             perspectives_html_string += get_assignment_group_release_planning(a_instance, assignment_group, a_templates)
+
     html_string += a_templates["release_planning"].substitute({'perspective': "peil en beoordelingen", 'assignment_groups': perspectives_html_string})
     return html_string
+
+def build_release_planning_index_html(a_instance, a_course, a_templates):
+    # schrijf de release_planning_ bestanden
+    for perspective in a_course.perspectives.values():
+        for assignment_group_id in perspective.assignment_group_ids:
+            file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group_id) + ".html"
+            file_name_release_planning = a_instance.get_html_general_path() + "release_planning_" + str(assignment_group_id) + ".html"
+            write_release_planning_index(a_course, a_templates, assignment_group_id, file_name_release_planning, file_name_bandwidth)
+    if a_course.level_moments is not None:
+        for assignment_group_id in a_course.level_moments.assignment_group_ids:
+            file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group_id) + ".html"
+            file_name_release_planning = a_instance.get_html_general_path() + "release_planning_" + str(assignment_group_id) + ".html"
+            write_release_planning_index(a_course, a_templates, assignment_group_id, file_name_release_planning, file_name_bandwidth)
+    if a_course.grade_moments is not None:
+        for assignment_group_id in a_course.grade_moments.assignment_group_ids:
+            file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group_id) + ".html"
+            file_name_release_planning = a_instance.get_html_general_path() + "release_planning_" + str(assignment_group_id) + ".html"
+            write_release_planning_index(a_course, a_templates, assignment_group_id, file_name_release_planning, file_name_bandwidth)
 

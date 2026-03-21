@@ -13,37 +13,27 @@ from scripts.model.dashboard.MetaAssignmentGroup import MetaAssignmentGroup
 from scripts.model.dashboard.Subplot import Subplot
 from scripts.model.environment.Course import Course
 
-SUBPLOT = {
-    "rows": 2,
-    "cols": 1,
-    "titles": [
-        "Tijdlijn",
-        "Portfolio"
-    ],
-    "positions": {
-        "timeline": {
-            "row": 1,
-            "col": 1
-        },
-        "portfolio": {
-            "row": 2,
-            "col": 1
-        }
+feedback_colors = {
+    "-": {
+        "color": "#EDF8F0"
     },
-    "specs": [
-        [
-            {
-                "type": "scatter"
-            }
-        ],
-        [
-            {
-                "type": "scatter"
-            }
-        ]
-    ]
+    "N": {
+        "color": "#B8E3C4"
+    },
+    "+": {
+        "color": "#85e043"
+    }
 }
+positions = {
+    "timeline": {"row": 1, "col": 1},
+    "portfolio": {"row": 2, "col": 1 }
+    }
 
+specs = [[{"type": "scatter"}],
+        [{"type": "scatter"}]]
+
+titles = ["Tijdlijn", "Portfolio"]
+subplot = Subplot(2, 1, titles,  positions, specs)
 
 environment = read_environment(ENVIRONMENT_FILE_NAME)
 course_code = input("Give the course_code for the new course: ")
@@ -62,8 +52,8 @@ with open(ENVIRONMENT_FILE_NAME, 'w') as f:
 
 if course_code in ["TICT-V1SE1-24"]:
     dashboard_tabs = {
-        "groups": "Klas",
-        "guilds": "Leerteam",
+        "groups_1": "Klas",
+        "groups_2": "Leerteam",
         "roles": "Rollen",
         "levels": "Voortgang",
         "workload": "Werkvoorraad",
@@ -72,27 +62,16 @@ if course_code in ["TICT-V1SE1-24"]:
         "learning_analytics": "Learning analytics"
     }
 
-    project_principal_assignment_group_id = "Beoordelingsmomenten"
-    guild_principal_assignment_group_id = ""
+    groups_1_principal_assignment_group_name = "Beoordelingsmomenten"
+    groups_2_principal_assignment_group_name = ""
+    groups_1_name = "SECTIONS"
+    groups_2_name = "Leerteams"
 
     student_tabs = {
         "portfolio": "Portfolio",
         "voortgang": "Voortgang"
       }
-    subplot = SUBPLOT
-    project_group_name=  "SECTIONS"
-    guild_group_name = "Leerteams"
-    feedback_colors = {
-        "-": {
-            "color": "#EDF8F0"
-        },
-        "N": {
-            "color": "#B8E3C4"
-        },
-        "+": {
-            "color": "#85e043"
-        }
-    }
+
 
     level_serie_collection_dict = {
         "bin2": BIN2,
@@ -105,8 +84,8 @@ if course_code in ["TICT-V1SE1-24"]:
 
 else:
     dashboard_tabs = {
-        "groups": "Projecten",
-        "guilds": "Gilden",
+        "groups_1": "Projecten",
+        "groups_2": "Gilden",
         "roles": "Rollen",
         "levels": "Voortgang",
         "workload": "Werkvoorraad",
@@ -115,27 +94,16 @@ else:
         "learning_analytics": "Learning analytics"
     }
 
-    project_principal_assignment_group_id = "Beoordelingsmomenten"
-    guild_principal_assignment_group_id = "Gilde"
+    groups_1_principal_assignment_group_name = "Beoordelingsmomenten"
+    groups_2_principal_assignment_group_name = "Gilde"
 
     student_tabs = {
         "voortgang": "Voortgang",
         "feedback": "Feedback"
     }
-    project_group_name = "Project Groups"
-    guild_group_name = "Guild Groups"
-    feedback_colors = {
-        "-": {
-            "color": "#EDF8F0"
-        },
-        "N": {
-            "color": "#B8E3C4"
-        },
-        "+": {
-            "color": "#85e043"
-        }
-    },
-    subplot = SUBPLOT
+    groups_1_name = "Project Groups"
+    groups_2_name = "Guild Groups"
+
     level_serie_collection_dict = {
         "samen": SAMEN,
         "gilde": GILDE,
@@ -166,7 +134,8 @@ canvas_course_id = input("Give the course_id for the new course, only for assign
 canvas_course = canvas.get_course(canvas_course_id)
 canvas_assignment_groups = canvas_course.get_assignment_groups()
 
-dashboard = Dashboard(dashboard_tabs, student_tabs, subplot, project_group_name, guild_group_name, feedback_colors, level_serie_collection)
+
+dashboard = Dashboard(dashboard_tabs, student_tabs, subplot, groups_1_principal_assignment_group_name, groups_2_principal_assignment_group_name, groups_1_name, groups_2_name, feedback_colors, level_serie_collection)
 dashboard.perspectives = perspectives
 for canvas_assignment_group in canvas_assignment_groups:
     yes_no = input(f"AssignmentGroup behouden {canvas_assignment_group.name} [enter or n]")

@@ -3,8 +3,8 @@ from scripts.model.StudentGroup import StudentGroup
 from scripts.model.StudentLink import StudentLink
 
 
-def get_groups(scope, canvas_course):
-    print("LST11 -", scope, canvas_course.name)
+def get_groups_in_scope(scope, canvas_course):
+    print("LST11 -", scope, "in", canvas_course.name)
     group_list = []
     if not scope or len(scope) == 0:
         return group_list
@@ -17,9 +17,9 @@ def get_groups(scope, canvas_course):
             for canvas_group in canvas_groups:
                 student_group = StudentGroup(canvas_group.id, canvas_group.name, 0)
                 group_list.append(student_group)
-                # print("GST23 - project_group", canvas_group)
+                print("LST23 - group", canvas_group)
             return group_list
-    print("GST25 - onbekende group_category", canvas_group_category.name)
+    print("LST25 - onbekende group_category", canvas_group_category.name)
     return group_list
 
 
@@ -29,11 +29,11 @@ def get_students_in_groups(group_category_name, course, canvas_course):
         print("GST32 -", canvas_group_category)
         # Link students to project_groups
         if canvas_group_category.name == group_category_name:
-            print("GST33 - Link students to project_groups", canvas_group_category.name)
-            link_students_to_project_groups(course, canvas_group_category.get_groups())
+            print("GST33 - Link students to link_students_to_groups_1", canvas_group_category.name)
+            link_students_to_groups_1(course, canvas_group_category.get_groups())
         if canvas_group_category.name == group_category_name:
-            print("GST34 - Link students to guild_groups", canvas_group_category.name)
-            link_students_to_guild_groups(course, canvas_group_category.get_groups())
+            print("GST34 - Link students to link_students_to_groups_2", canvas_group_category.name)
+            link_students_to_groups_2(course, canvas_group_category.get_groups())
 
 
 def add_assessors_to_groups_and_students(course, student_group, teacher, responsibility):
@@ -51,26 +51,26 @@ def link_assessors_to_groups_and_students(course):
     for teacher in course.teachers:
         for responsibility in teacher.responsibilities:
             # print("GST43 -", responsibility.student_group_collection)
-            if responsibility.student_group_collection == "project_groups":
+            if responsibility.student_group_collection == "groups_1":
                 for student_group_id in responsibility.student_groups:
-                    # zoeken naar project_group en nummer of naam
-                    student_group = course.find_project_group(student_group_id)
+                    # zoeken naar groups_1 en nummer of naam
+                    student_group = course.find_groups_1_group(student_group_id)
                     if student_group is None:
                         # zoeken op naam
-                        student_group = course.find_project_group_by_name(student_group_id)
+                        student_group = course.find_groups_1_group_by_name(student_group_id)
                     if student_group is not None:
                         add_assessors_to_groups_and_students(course, student_group, teacher, responsibility)
                     else:
                         print("GST45 - geen student_group voor", student_group_id)
 
-            if responsibility.student_group_collection == "guild_groups":
+            if responsibility.student_group_collection == "groups_2":
                 for student_group_name in responsibility.student_groups:
-                    # zoeken naar project_group en nummer of naam
+                    # zoeken naar groups_1 en nummer of naam
                     print("GST81 -", student_group_name)
-                    student_group = course.find_guild_group(student_group_name)
+                    student_group = course.find_groups_2_group(student_group_name)
                     if student_group is None:
                         # zoeken op naam
-                        student_group = course.find_guild_group_by_name(student_group_name)
+                        student_group = course.find_groups_2_group_by_name(student_group_name)
                     if student_group is not None:
                         add_assessors_to_groups_and_students(course, student_group, teacher, responsibility)
                     else:
@@ -78,17 +78,17 @@ def link_assessors_to_groups_and_students(course):
 
 
 def link_principal_assessor_to_groups_and_students(course):
-    for student_group in course.project_groups:
+    for student_group in course.groups_1:
         for assessor in student_group.assessors:
-            if assessor.assignment_group_id == course.project_principal_assignment_group_id:
+            if assessor.assignment_group_id == course.groups_1_principal_assignment_group_id:
                 student_group.principal_assessor = assessor.teacher_id
-    for student_group in course.guild_groups:
+    for student_group in course.groups_2:
         for assessor in student_group.assessors:
-            if assessor.assignment_group_id == course.guild_principal_assignment_group_id:
+            if assessor.assignment_group_id == course.groups_2_principal_assignment_group_id:
                 student_group.principal_assessor = assessor.teacher_id
 
 
-def get_section_students(project_group_name, course, canvas_course):
+def get_section_students(canvas_course, course):
     # Ophalen Secties en Roles
     print("GST61 -", "Ophalen students and secties uit Canvas deze koppelen aan Role ")
     canvas_sections = canvas_course.get_sections(include=['students'])
@@ -102,19 +102,8 @@ def get_section_students(project_group_name, course, canvas_course):
                     student_id = section_student["id"]
                     student = course.find_student(student_id)
                     if student is not None:
-                        if project_group_name == "SECTIONS":
-                            project_group = course.find_project_group_by_name(section.name)
-                            # print("GST63 -", section.name, project_group)
-                            if project_group:
-                                student.project_id = project_group.id
-                                for teacher_id in project_group.assessors:
-                                    student.project_teachers.append(teacher_id)
-                                student_link = StudentLink.from_student(student)
-                                # print("GS64 -", student_link)
-                                project_group.students.append(student_link)
-                            else:
-                                print(f"GST65 - ERROR - section.name ({section.name}) not found in list student_group for student {student.name}.")
                         student.role = section.role
+                        student.section = section.name
                         if student.role is None:
                             print("GST66 - student.role is leeg", student.name)
                     else:
@@ -136,12 +125,29 @@ def link_students_to_role(course):
             role.students.append(student_link)
 
 
-def link_students_to_project_groups(course, canvas_groups):
-    # dit zijn de project_groups of de guild_groups
-    print("GST81 - link_students_to_project_groups")
+def link_section_students_to_groups_1(course):
+    # dit zijn de groups_1 of de guild_groups
+    print("LST81 - link_section_students_to_groups_1")
+    for student in course.students:
+        student_group = course.find_groups_1_group_by_name(student.section)
+        if student_group:
+            print("LST63 -", student.section, student_group.name, len(student_group.students))
+            student.groups_1_group_id = student_group.id
+            for teacher_id in student_group.assessors:
+                student.group_1_teachers.append(teacher_id)
+            student_link = StudentLink.from_student(student)
+            # print("GS64 -", student_link)
+            student_group.students.append(student_link)
+        else:
+            print(f"GST65 - ERROR - student.section ({student.section}) not found in list find_groups_1_group_by_name.")
+
+
+def link_students_to_groups_1(course, canvas_groups):
+    # dit zijn de groups_1 of de guild_groups
+    print("GST81 - link_students_to_groups_1")
     for canvas_group in canvas_groups:
         print("GST82 -", canvas_group)
-        student_group = course.find_project_group(canvas_group.id)
+        student_group = course.find_groups_1_group(canvas_group.id)
         if student_group:
             canvas_users = canvas_group.get_users()
             for canvas_user in canvas_users:
@@ -149,22 +155,22 @@ def link_students_to_project_groups(course, canvas_groups):
                 # print("GST84 - Student", student)
                 if student:
                     # print("GST85 - Student", student)
-                    student.project_id = student_group.id
+                    student.groups_1_group_id = student_group.id
                     # for teacher_id in student_group.teachers:
                     #     student.project_teachers.append(teacher_id)
                     student_link = StudentLink.from_student(student)
                     # print("GS86 -", student_link)
                     student_group.students.append(student_link)
                 else:
-                    print("GST87 - Student in Canvas project_group not found", canvas_user.id, canvas_user.name)
+                    print("GST87 - Student in Canvas groups_1_group_id not found", canvas_user.id, canvas_user.name)
 
 
-def link_students_to_guild_groups(course, canvas_groups):
-    # dit zijn de project_groups of de guild_groups
-    print("GST91 - link_students_to_guild_groups")
+def link_students_to_groups_2(course, canvas_groups):
+    # dit zijn de groups_2_group_id of de guild_groups
+    print("GST91 - link_students_to_groups_2")
     for canvas_group in canvas_groups:
         print("GST92 -", canvas_group)
-        student_group = course.find_guild_group(canvas_group.id)
+        student_group = course.find_groups_2_group(canvas_group.id)
         if student_group:
             # print("GTS93 -", student_group)
             canvas_users = canvas_group.get_users()
@@ -172,12 +178,12 @@ def link_students_to_guild_groups(course, canvas_groups):
                 student = course.find_student(canvas_user.id)
                 if student:
                     # print("GTS94 -", student.name)
-                    student.guild_id = student_group.id
+                    student.groups_2_group_id = student_group.id
                     # for teacher_id in student_group.teachers:
                     #     student.guild_teachers.append(teacher_id)
                     student_link = StudentLink.from_student(student)
                     # print("GS95 -", student_link)
                     student_group.students.append(student_link)
                 else:
-                    print("GST96 - Student in Canvas guild group not found", canvas_user.id, canvas_user.name)
+                    print("GST96 - Student in Canvas groups_2_group not found", canvas_user.id, canvas_user.name)
 

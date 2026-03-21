@@ -407,7 +407,10 @@ class LevelSerieCollection:
     def to_json(self):
         dict_result = {}
         for key in self.level_series:
-            dict_result[key] = self.level_series[key].to_json()
+            if self.level_series[key] is None:
+                return dict_result
+            else:
+                dict_result[key] = self.level_series[key].to_json()
         return dict_result
 
     @staticmethod

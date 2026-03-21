@@ -37,6 +37,8 @@ class LevelSerie:
 
     @staticmethod
     def from_dict(data_dict, a_name):
+        if data_dict is None:
+            return None
         new = LevelSerie(a_name)
         for key in data_dict[STR_STATUS].keys():
             new.status[key] = Status.from_dict(data_dict[STR_STATUS][key])

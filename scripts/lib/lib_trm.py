@@ -26,6 +26,8 @@ def create_picklist(list_items):
 def get_data_frame(assignment_group_names, student_groups):
 # Bouw de data voor Excel
     rows = []
+    print("LIBT25 -", assignment_group_names)
+    print("LIBT26 -", student_groups)
     for student_group in student_groups:
         row = {}
         for assignment_group_name in assignment_group_names:
@@ -66,24 +68,29 @@ def generate_trm(course_instance, config):
         teachers.append(teacher.name)
 
     # Maak kolomnamen (eerste kolom = 'group', daarna assignment group names)
-    assignment_group_names = ["Group"]
+    assignment_groups_1_names = ["Group"]
     for assignment_group in config.assignment_groups:
-        assignment_group_names.append(assignment_group.name)
+        if assignment_group.groups == "groups_1":
+            assignment_groups_1_names.append(assignment_group.name)
 
+    assignment_groups_2_names = ["Group"]
+    for assignment_group in config.assignment_groups:
+        if assignment_group.groups == "groups_2":
+            assignment_groups_2_names.append(assignment_group.name)
     # Maak workbook en sheet
     wb = Workbook()
     # wb.create_sheet(title="Projects", index=0) # Vooraan
     ws = wb["Sheet"]
-    ws.title = "projects"
-    df_projects = get_data_frame(assignment_group_names, config.project_groups)
-    create_tab(ws, df_projects, teachers)
+    ws.title = "groups_1"
+    df_groups_1 = get_data_frame(assignment_groups_1_names, config.groups_1)
+    create_tab(ws, df_groups_1, teachers)
 
     dashboard = read_dashboard(course_instance.get_dashboard_file_name())
-    if len(dashboard.guild_group_name) > 0:
-        wb.create_sheet(title="guilds", index=1)  # Vooraan
-        ws = wb["guilds"]
-        df_guilds = get_data_frame(assignment_group_names, config.guild_groups)
-        create_tab(ws, df_guilds, teachers)
+    if len(dashboard.groups_2_name) > 0:
+        wb.create_sheet(title="groups_2", index=1)  # Vooraan
+        ws = wb["groups_2"]
+        df_groups_2 = get_data_frame(assignment_groups_2_names, config.groups_2)
+        create_tab(ws, df_groups_2, teachers)
 
     # wb.create_sheet(title="learning_outcomes", index=2)
     # ws = wb["learning_outcomes"]

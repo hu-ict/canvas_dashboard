@@ -1,4 +1,3 @@
-import json
 import sys
 
 from canvasapi import Canvas
@@ -9,8 +8,9 @@ from scripts.lib.file_const import SECRET_API_KEY_FILE_NAME
 from scripts.lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
 from scripts.lib.file import read_config_from_canvas, read_course, read_secret_api_key, \
     read_dashboard_from_canvas, write_course, read_dashboard
-from scripts.lib.lib_student import get_groups, get_section_students, get_students_in_groups, link_students_to_role, \
-    link_assessors_to_groups_and_students, link_principal_assessor_to_groups_and_students
+from scripts.lib.lib_student import get_section_students, get_students_in_groups, link_students_to_role, \
+    link_assessors_to_groups_and_students, link_principal_assessor_to_groups_and_students, get_groups_in_scope, \
+    link_section_students_to_groups_1
 from scripts.lib.lib_text import get_extracted_text, get_lu_from_extracted_text
 from scripts.model.Assignment import Assignment
 from scripts.model.Student import Student
@@ -126,7 +126,7 @@ def get_predefined_lu(course, assignment_sequence, assignment):
             if learning_outcome is not None:
                 # print("GC53 -", assignment.name, "LU:", learning_outcome.id)
                 learning_outcome.add_assignment_tag_id(assignment_sequence.tag)
-                assignment_sequence.learning_outcomes.append(learning_outcome.id)
+                assignment_sequence.add_learning_outcome(learning_outcome.id)
     for criterium in assignment.rubrics:
         # print("GC55 -", criterium.description)
         if "@" in criterium.description:
@@ -337,18 +337,18 @@ def generate_course(course_instance):
         for assignment_sequence in assignment_group.assignment_sequences:
             for assignment in assignment_sequence.assignments:
                 get_predefined_lu(config, assignment_sequence, assignment)
-
     for assignment_group in config.assignment_groups:
         assignment_group.assignment_sequences = sorted(assignment_group.assignment_sequences, key=lambda a: a.get_day())
         print("GS101 -", assignment_group.name, assignment_group.strategy)
         assignment_group.bandwidth = bandwidth_builder(assignment_group, config.days_in_semester)
-
     for perspective_key in config.perspectives:
         config.perspectives[perspective_key].assignment_sequences = sorted(config.perspectives[perspective_key].assignment_sequences, key=lambda a: a.get_day())
         config.perspectives[perspective_key].bandwidth = get_bandwidth_sum(config, config.perspectives[perspective_key].assignment_group_ids)
         config.perspectives[perspective_key].total_points = 0
-        for assignment_sequence in config.perspectives[perspective_key].assignment_sequences:
-            config.perspectives[perspective_key].total_points += assignment_sequence.points
+        for assignment_group_id in config.perspectives[perspective_key].assignment_group_ids:
+            assignment_group = config.get_assignment_group(assignment_group_id)
+            config.perspectives[perspective_key].total_points += assignment_group.total_points
+        print("GCS91 -", perspective_key, "assignment_groups", len(config.perspectives[perspective_key].assignment_group_ids), "total_points", config.perspectives[perspective_key].total_points)
     if config.attendance is not None:
         config.attendance.bandwidth = bandwidth_builder_attendance(config.attendance.lower_points, config.attendance.upper_points, config.attendance.total_points, config.days_in_semester)
 
@@ -359,36 +359,33 @@ def generate_course(course_instance):
     for canvas_user in canvas_users:
         if hasattr(canvas_user, 'login_id'):
             print("GST007 - Create student", canvas_user.login_id, canvas_user.name, canvas_user.sis_user_id)
-            student = Student(canvas_user.id, 0, 0, canvas_user.name, canvas_user.sis_user_id, canvas_user.sortable_name, "", canvas_user.login_id, "")
+            student = Student(canvas_user.id, 0, 0, canvas_user.name, canvas_user.sis_user_id, canvas_user.sortable_name, "", "", canvas_user.login_id, "")
             config.students.append(student)
         else:
             if hasattr(canvas_user, 'sis_user_id'):
                 print("GST008 - Create student without login_id", canvas_user.name, canvas_user.sis_user_id)
-                student = Student(canvas_user.id, 0, 0, canvas_user.name, canvas_user.sis_user_id, canvas_user.sortable_name, "", "", "")
+                student = Student(canvas_user.id, 0, 0, canvas_user.name, canvas_user.sis_user_id, canvas_user.sortable_name, "", "", "", "")
                 # print("GS17 ", student)
                 config.students.append(student)
     print("GCRS20 - Aantal studenten", len(config.students))
-    # for student in course.students:
-    #     print("GST010 -", student)
-    if dashboard.project_group_name == "SECTIONS":
+    get_section_students(canvas_course, config)
+
+    if dashboard.groups_1_name == "SECTIONS":
         group_list = []
         print("GCRS21 - Werken met Canvas secties als groepen (meestal S1 propedeuse).")
         for section in config.sections:
             print("GCRS22 -", section)
             student_group = StudentGroup(section.id, section.name, 0)
             group_list.append(student_group)
+        config.groups_1 = group_list
+        link_section_students_to_groups_1(config)
     else:
-        group_list = get_groups(dashboard.project_group_name, canvas_course)
-    config.project_groups = group_list
-    config.guild_groups = get_groups(dashboard.guild_group_name, canvas_course)
-    get_section_students(dashboard.project_group_name, config, canvas_course)
+        config.groups_1 = get_groups_in_scope(dashboard.groups_1_name, canvas_course)
+        get_students_in_groups(dashboard.groups_1_name, config, canvas_course)
+    if len(dashboard.groups_2_name) > 0:
+        config.groups_2 = get_groups_in_scope(dashboard.groups_2_name, canvas_course)
+        get_students_in_groups(dashboard.groups_2_name, config, canvas_course)
 
-    if dashboard.project_group_name == "SECTIONS":
-        print("GCRS31 - Werken met Canvas secties als groepen (meestal S1 propedeuse).")
-    else:
-        get_students_in_groups(dashboard.project_group_name, config, canvas_course)
-    if len(dashboard.guild_group_name) >0 :
-        get_students_in_groups(dashboard.guild_group_name, config, canvas_course)
     link_students_to_role(config)
     link_assessors_to_groups_and_students(config)
     link_principal_assessor_to_groups_and_students(config)
@@ -402,21 +399,21 @@ def generate_course(course_instance):
             print("GCRS73 - Verwijder student uit lijst, heeft geen role", student.name)
             config.remove_student(student.id)
             without_role += 1
-    print("GCRS74 - Opschonen studenten zonder ProjectGroup")
+    print("GCRS74 - Opschonen studenten zonder groups_1")
     course_students = config.students.copy()
-    without_project = 0
+    without_groups_1 = 0
     for student in course_students:
-        # print("GST014 -", student.name, "["+student.role+"]")
-        if student.project_id == 0:
-            print("GST015 - Verwijder student uit lijst, heeft geen project", student.name)
+        print("GST014 -", student.name, "["+str(student.groups_1_group_id)+"]")
+        if student.groups_1_group_id == 0:
+            print("GST015 - Verwijder student uit lijst, heeft without_groups_1", student.name)
             config.remove_student(student.id)
-            without_project += 1
+            without_groups_1 += 1
 
     config.student_count = len(config.students)
 
-    for student_group in config.project_groups:
+    for student_group in config.groups_1:
         student_group.students = sorted(student_group.students, key=lambda s: s.sortable_name)
-    for student_group in config.guild_groups:
+    for student_group in config.groups_2:
         student_group.students = sorted(student_group.students, key=lambda s: s.sortable_name)
     for role in config.roles:
         role.students = sorted(role.students, key=lambda s: s.sortable_name)

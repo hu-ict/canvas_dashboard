@@ -70,7 +70,7 @@ def get_feedback_from_submission(course, student, submission):
                     # print("LSU88 -", assignment_criterion.learning_outcomes, criterion_score.comment)
                 if len(assignment_criterion.learning_outcomes) == 1:
                     # de assignment rubric is gekoppeld aan een leeruitkomst
-                    feedback = Feedback("id", submission.grader_name, feedback_date, feedback_day,
+                    feedback = Feedback(submission.grader_id, submission.grader_name, feedback_date, feedback_day,
                                         criterion_score.comment, "N",
                                         submission.assignment.name + " (" + assignment_criterion.description + ")",
                                         submission.assignment.id, criterion_score_score, rating_description)

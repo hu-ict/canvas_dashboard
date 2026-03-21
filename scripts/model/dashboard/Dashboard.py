@@ -9,14 +9,14 @@ from scripts.model.moment.MetaLevelMoments import MetaLevelMoments
 
 
 class Dashboard:
-    def __init__(self, dashboard_tabs, student_tabs, subplot, project_principal_assignment_group, guild_principal_assignment_group, project_group_name, guild_group_name, feedback_colors, level_serie_collection):
+    def __init__(self, dashboard_tabs, student_tabs, subplot, groups_1_principal_assignment_group, groups_2_principal_assignment_group, groups_1_name, groups_2_name, feedback_colors, level_serie_collection):
         self.dashboard_tabs = dashboard_tabs
         self.student_tabs = student_tabs
         self.subplot = subplot
-        self.project_principal_assignment_group = project_principal_assignment_group
-        self.guild_principal_assignment_group = guild_principal_assignment_group
-        self.project_group_name = project_group_name
-        self.guild_group_name = guild_group_name
+        self.groups_1_principal_assignment_group = groups_1_principal_assignment_group
+        self.groups_2_principal_assignment_group = groups_2_principal_assignment_group
+        self.groups_1_name = groups_1_name
+        self.groups_2_name = groups_2_name
         self.feedback_colors = feedback_colors
         self.level_serie_collection = level_serie_collection
         self.roles = []
@@ -34,9 +34,9 @@ class Dashboard:
 
     def to_json(self):
         dict_result = {"dashboard_tabs": self.dashboard_tabs, "student_tabs": self.student_tabs,
-                       "project_principal_assignment_group": self.project_principal_assignment_group,
-                       "guild_principal_assignment_group": self.guild_principal_assignment_group,
-                       "subplot": self.subplot.to_json(), "project_group_name": self.project_group_name, "guild_group_name": self.guild_group_name, "feedback_colors": self.feedback_colors,
+                       "groups_1_principal_assignment_group": self.groups_1_principal_assignment_group,
+                       "groups_2_principal_assignment_group": self.groups_2_principal_assignment_group,
+                       "subplot": self.subplot.to_json(), "groups_1_name": self.groups_1_name, "groups_2_name": self.groups_2_name, "feedback_colors": self.feedback_colors,
                        "level_serie_collection": self.level_serie_collection.to_json()}
         if len(self.assignment_groups) > 0:
             dict_result["assignment_groups"] = list(map(lambda a: a.to_json(), self.assignment_groups))
@@ -49,11 +49,11 @@ class Dashboard:
     def from_dict(data_dict):
         # print("DAS04 -", data_dict)
         new = Dashboard(data_dict["dashboard_tabs"], data_dict["student_tabs"], Subplot.from_dict(data_dict["subplot"]),
-                        data_dict["project_principal_assignment_group"], data_dict["guild_principal_assignment_group"],
-                        data_dict["project_group_name"], data_dict["guild_group_name"], data_dict["feedback_colors"],
+                        data_dict["groups_1_principal_assignment_group"], data_dict["groups_2_principal_assignment_group"],
+                        data_dict["groups_1_name"], data_dict["groups_2_name"], data_dict["feedback_colors"],
                         LevelSerieCollection.from_dict(data_dict["level_serie_collection"]))
         if "level_moments" in data_dict:
-            print("DAS05 -", data_dict["level_moments"])
+            # print("DAS05 -", data_dict["level_moments"])
             new.level_moments = MetaLevelMoments.from_dict(data_dict['level_moments'])
         if "grade_moments" in data_dict:
             # print("DAS05 -", len(data_dict["perspectives"]))

@@ -369,7 +369,7 @@ def get_moments(assignment_group, student):
                                     assignment.date, assignment.day,
                                     BEFORE_DEADLINE, False, False,
                                     "-1", None, None,
-                                    0, 0, 0)
+                                    0, 0, 0, 0)
         moments.append(moment)
     return moments
 

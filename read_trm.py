@@ -18,7 +18,7 @@ def read_trm(course_code, instance_name):
     print("GCF01 - generate_config.py")
     g_actual_date = get_actual_date()
     print(Path(__file__).resolve().parent)
-    BASE_DIR = Path(__file__).resolve().parent
+
     environment = read_environment(ENVIRONMENT_FILE_NAME)
     current_instance = environment.get_instance_of_course(environment.current_instance)
     execution = environment.get_execution_by_name("env_1")
@@ -28,7 +28,7 @@ def read_trm(course_code, instance_name):
 
     # Open het Excel-bestand
     wb = load_workbook(current_instance.get_trm_file_name())
-    ws = wb["projects"]
+    ws = wb["groups_1"]
     assignment_groups = {}
     for header in ws[1][1:]:
         assignment_groups[header.column] = header.value
@@ -45,12 +45,12 @@ def read_trm(course_code, instance_name):
                     print("RRM13 -", assignment_group)
                     print("RRM14 -", student_group_name)
                     print("RRM15 -", teacher)
-                    teacher.put_responsibility("project_groups", student_group_name, assignment_group.id)
+                    teacher.put_responsibility("groups_1", student_group_name, assignment_group.id)
             else:
                 student_group_name = cell.value
                 print("RRM17 - student_group_name", student_group_name)
 
-    ws = wb["guilds"]
+    ws = wb["groups_2"]
     assignment_groups = {}
     for header in ws[1][1:]:
         assignment_groups[header.column] = header.value
@@ -64,10 +64,10 @@ def read_trm(course_code, instance_name):
                 # group = course.find_guild_group_by_name(student_group_name)
                 teacher = course.find_teacher_by_name(cell.value)
                 if teacher:
-                    # print("RRM23 -", assignment_group)
-                    # print("RRM24 -", student_group_name)
-                    # print("RRM25 -", teacher)
-                    teacher.put_responsibility("guild_groups", student_group_name, assignment_group.id)
+                    print("RRM23 -", assignment_group)
+                    print("RRM24 -", student_group_name)
+                    print("RRM25 -", teacher)
+                    teacher.put_responsibility("groups_2", student_group_name, assignment_group.id)
             else:
                 student_group_name = cell.value
                 print("RRM27 - group_name", student_group_name)

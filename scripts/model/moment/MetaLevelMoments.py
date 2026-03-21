@@ -18,7 +18,7 @@ class MetaLevelMoments:
 
     @staticmethod
     def from_dict(data_dict):
-        print("Perspective.from_dict", data_dict)
+        # print("MLM09 - Perspective.from_dict", data_dict)
         new = MetaLevelMoments(data_dict['name'], data_dict['title'])
         if 'assignment_group_names' in data_dict.keys():
             new.assignment_group_names = data_dict['assignment_group_names']

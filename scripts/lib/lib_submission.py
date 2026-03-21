@@ -157,7 +157,7 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
                                   None,
                                   None,
                                   NOT_YET_GRADED, graded, posted, submission_grade,
-                                  grader_name, grader_date, submission_score,
+                                  0, grader_name, grader_date, submission_score,
                                   submission_value, submission_flow)
         for canvas_comment in canvas_comments:
             l_comment_text = canvas_comment['comment']
@@ -289,6 +289,7 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
 
     if a_canvas_submission.grader_id is not None and a_canvas_submission.grader_id > 0:
         teacher = a_course.find_teacher(a_canvas_submission.grader_id)
+        grader_id = a_canvas_submission.grader_id
         if teacher:
             grader_name = teacher.name
         else:
@@ -297,6 +298,7 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
             grader_date = get_date_time_obj(a_canvas_submission.graded_at)
     else:
         grader_name = "onbekend"
+        grader_id = 0
 
     if graded:
         if perspective.name == GRADE_MOMENTS or perspective.name == LEVEL_MOMENTS:
@@ -317,7 +319,7 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
     l_submission = Submission(a_canvas_submission.id, a_submission_assignment, a_student.id,
                               None,
                               None,
-                              status, graded, posted, submission_grade, grader_name, grader_date, submission_score,
+                              status, graded, posted, submission_grade, grader_id, grader_name, grader_date, submission_score,
                               submission_value, 0)
     for canvas_comment in canvas_comments:
         # print("LS51 -", a_student.name, canvas_comment['comment'])
@@ -372,11 +374,13 @@ def add_open_level_moments(course, actual_day, student_id, student_level_moments
                     # komt 7 dagen voor de Canvas deadline als "openstaand" item in de werklijst
                     if student_level_moments.get_submission_by_assignment(assignment.id) is None:
                         # print("AOL08 -", assignment.name, assignment.unlock_day, actual_day, assignment.day+21)
-                        l_submission = Submission(0, submission_assignment, student_id,
+                        l_submission = Submission(0, submission_assignment, 0,
                                                   None,
                                                   None,
-                                                  NOT_YET_GRADED, False, False, None, 0, 0, 0, 0, 0)
+                                                  NOT_YET_GRADED, False, False, None, 0, "Geen",
+                                                  0, 0, 0, 0)
                         l_submission.comments.append(Comment(1, ROBOT, assignment.date, NO_SUBMISSION_GRADE))
+
                         student_level_moments.submissions.append(l_submission)
     elif len(student_level_moments.assignment_groups) > 1:
         print("AOL96 - Perspective has more then one assignment_groups attached", student_level_moments.name,
@@ -401,10 +405,11 @@ def add_open_grade_moments(course, actual_day, student_id, student_grade_moments
                     # komt 7 dagen voor de Canvas deadline als "openstaand" item in de werklijst
                     if student_grade_moments.get_submission_by_assignment(assignment.id) is None:
                         # print("AOL08 -", assignment.name, assignment.unlock_day, actual_day, assignment.day+21)
-                        l_submission = Submission(0, submission_assignment, student_id,
+                        l_submission = Submission(0, submission_assignment, 0,
                                                   None,
                                                   None,
-                                                  NOT_YET_GRADED, False, False, None, 0, 0, 0, 0, 0)
+                                                  NOT_YET_GRADED, False, False, None, 0, "Geen",
+                                                  0, 0, 0, 0)
                         l_submission.comments.append(Comment(1, ROBOT, assignment.date, NO_SUBMISSION_GRADE))
                         student_grade_moments.submissions.append(l_submission)
     elif len(student_grade_moments.assignment_groups) > 1:
@@ -434,12 +439,12 @@ def read_submissions(a_course_code, a_canvas_course, a_course, a_results, a_tota
 
                 if assignment.unlock_date is not None:
                     if assignment.unlock_date > a_results.actual_date:
-                        print("LSU11 - overslaan", assignment.name, assignment.unlock_date, ">", a_results.actual_date)
+                        print("LSU11 - overslaan", assignment.name)
                         continue
                     else:
-                        print("LSU12 - processing", assignment.name, assignment.unlock_date, ">", a_results.actual_date)
+                        print("LSU12 - ophalen", assignment.name)
                 else:
-                    print("LSU13 - processing", assignment.name, assignment.unlock_date, ">", a_results.actual_date)
+                    print("LSU13 - ophalen", assignment.name)
                 submission_assignment = SubmissionAssignment(assignment.id, assignment.name, assignment.group_id, assignment.points, assignment.date, assignment.day)
                 # print("LSU10 - Processing Assignment {0:6} - {1} - {2} {4} points, grading: [{3}]".format(assignment.id,
                 #                                                                                          assignment_group.name,

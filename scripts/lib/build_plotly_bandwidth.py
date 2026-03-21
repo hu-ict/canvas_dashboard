@@ -1,6 +1,7 @@
 from plotly.subplots import make_subplots
 from scripts.lib.build_plotly_generic import plot_bandbreedte_colored
 from scripts.lib.build_plotly_perspective import plot_assignments
+from scripts.lib.plot_totals import RELEASE_PLANNING_PLOTLY_HTML
 
 
 def process_bandwidth(a_course, a_assignment_group_id, a_level_serie_collection, a_file_name):
@@ -34,3 +35,20 @@ def process_bandwidth_overall(a_course, a_level_serie_collection, a_file_name):
     fig.update_xaxes(title_text="Dagen in onderwijsperiode", range=[0, a_course.days_in_semester])
     # plot_assignments(0, 0, fig, a_course, True, assignment_group.assignment_sequences, a_level_serie_collection)
     fig.write_html(a_file_name, include_plotlyjs="cdn")
+
+
+def build_plotly_bandwidth(a_instance, a_course, a_level_serie_collection):
+    file_name = a_instance.get_html_general_path() + RELEASE_PLANNING_PLOTLY_HTML
+    process_bandwidth_overall(a_course, a_level_serie_collection, file_name)
+    for perspective in a_course.perspectives.values():
+        for assignment_group_id in perspective.assignment_group_ids:
+            file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group_id) + ".html"
+            process_bandwidth(a_course, assignment_group_id, a_level_serie_collection, file_name_bandwidth)
+    if a_course.level_moments is not None:
+        for assignment_group_id in a_course.level_moments.assignment_group_ids:
+            file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group_id) + ".html"
+            process_bandwidth(a_course, assignment_group_id, a_level_serie_collection, file_name_bandwidth)
+    if a_course.grade_moments is not None:
+        for assignment_group_id in a_course.grade_moments.assignment_group_ids:
+            file_name_bandwidth = a_instance.get_temp_path() + "bandwidth_" + str(assignment_group_id) + ".html"
+            process_bandwidth(a_course, assignment_group_id, a_level_serie_collection, file_name_bandwidth)

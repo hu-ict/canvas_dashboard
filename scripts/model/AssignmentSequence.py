@@ -20,22 +20,26 @@ class AssignmentSequence:
     def get_date(self):
         return self.assignments[0].date
 
+    # Returns date and day
     def get_date_day(self, submission_sequence, actual_day):
         if len(self.assignments) > 0:
             index = 0
-            for assignment in self.assignments:
-                if submission_sequence is None:
-                    if actual_day < assignment.day:
+            if submission_sequence is None:
+                for assignment in self.assignments:
+                    if actual_day <= assignment.day:
                         # deadline nog niet verstreken
                         return self.assignments[index].date, self.assignments[index].day
                     else:
                         # deadline verstreken
                         index += 1
-                else:
-                    submission = submission_sequence.get_submission_by_assignment_id(assignment.id)
+                # alle deadlines verstreken, de laatste telt
+                return self.assignments[-1].date, self.assignments[-1].day
+            else:
+                for assignment in self.assignments:
+                    submission = submission_sequence.get_submission_by_assignment(assignment.id)
                     if submission is None:
                         # niets ingeleverd
-                        if actual_day < assignment.day:
+                        if actual_day <= assignment.day:
                             # deadline nog niet verstreken
                             return self.assignments[index].date, self.assignments[index].day
                         else:
@@ -57,9 +61,7 @@ class AssignmentSequence:
                         else:
                             # nog niet beoordeeld
                             return self.assignments[index].date, self.assignments[index].day
-            if index >= len(self.assignments):
-                index = len(self.assignments) - 1
-                return self.assignments[index].date, self.assignments[index].day
+                return self.assignments[-1].date, self.assignments[-1].day
         return 0, 0
 
     def get_passed_assignments(self, actual_day):

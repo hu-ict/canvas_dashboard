@@ -157,6 +157,14 @@ def load_templates(template_path):
         string_html = file_template.read()
         templates["portfolio"] = Template(string_html)
 
+    with open(template_path + 'student'+ DIR_DIV + 'template_portfolio_summary.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["portfolio_summary"] = Template(string_html)
+
+    with open(template_path + 'student'+ DIR_DIV + 'template_portfolio_matrix.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["portfolio_matrix"] = Template(string_html)
+
     with open(template_path + 'student'+ DIR_DIV + 'template_attendance.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["attendance"] = Template(string_html)

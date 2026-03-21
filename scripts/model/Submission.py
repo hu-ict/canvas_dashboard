@@ -1,4 +1,5 @@
 from scripts.lib.lib_date import get_date_time_obj, get_date_time_str
+from scripts.lib.lib_portfolio import STATUS_MISSED, STATUS_PENDING, STATUS_COMPLETE, STATUS_INCOMPLETE
 from scripts.model.Comment import Comment
 from scripts.model.SubmissionAssignment import SubmissionAssignment
 from scripts.model.rubric.CriteriumScore import CriteriumScore
@@ -9,7 +10,7 @@ class Submission:
     def __init__(self, submission_id, submission_assignment, student_id,
                  submitted_date, submitted_day,
                  status, graded, posted,
-                 grade, grader_name, graded_date,
+                 grade, grader_id, grader_name, graded_date,
                  score, value, flow):
         self.id = submission_id
         self.assignment = submission_assignment
@@ -20,6 +21,7 @@ class Submission:
         self.graded = graded
         self.posted = posted
         self.grade = grade
+        self.grader_id = grader_id
         self.grader_name = grader_name
         self.graded_date = graded_date
         self.score = score
@@ -53,6 +55,7 @@ class Submission:
             'graded': self.graded,
             'posted': self.posted,
             'grade': self.grade,
+            'grader_id': self.grader_id,
             'grader_name': self.grader_name,
             "graded_date": get_date_time_str(self.graded_date),
             'score': l_score,
@@ -84,13 +87,13 @@ class Submission:
     def get_complete_status_css(self):
         if self.get_status() == GRADED:
             if self.graded and self.score == self.assignment.points:
-                return "status_complete"
-            return "status_incomplete"
+                return STATUS_COMPLETE
+            return STATUS_INCOMPLETE
         else:
             if self.status is MISSED_ITEM:
-                return "status_missed"
+                return STATUS_MISSED
             else:
-                return "status_pending"
+                return STATUS_PENDING
         return "status_unknown"
 
     def __str__(self):
@@ -103,7 +106,7 @@ class Submission:
         new_submission = Submission(data_dict['id'], SubmissionAssignment.from_dict(data_dict['assignment']), data_dict['student_id'],
                                     get_date_time_obj(data_dict['submitted_date']), data_dict['submitted_day'],
                                     data_dict['status'], data_dict['graded'], data_dict['posted'],
-                                    data_dict['grade'], data_dict['grader_name'],
+                                    data_dict['grade'], data_dict['grader_id'], data_dict['grader_name'],
                                     get_date_time_obj(data_dict['graded_date']), data_dict['score'],
                                     data_dict['value'], data_dict['flow'])
         new_submission.comments = list(map(lambda c: Comment.from_dict(c), data_dict['comments']))

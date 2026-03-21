@@ -21,7 +21,7 @@ def build_bootstrap_late_submission_item(a_templates, a_result, l_submission):
     return submission_html_string
 
 
-def build_bootstrap_teacher_index(a_instance, a_templates, a_course, a_result, a_workload):
+def build_teacher_index_html(a_instance, a_templates, a_dashboard, a_course, a_result, a_workload):
     for workload_teacher in a_workload.workload_teachers:
         late_list_temp = workload_teacher.worklist
         late_list = sorted(late_list_temp, key=itemgetter('submitted_date'))
@@ -41,34 +41,38 @@ def build_bootstrap_teacher_index(a_instance, a_templates, a_course, a_result, a
         teacher = a_course.find_teacher_by_initials(workload_teacher.initials)
         groups = dict()
         for responsibility in teacher.responsibilities:
-            if responsibility.student_group_collection == "project_groups":
-                groups["Projectgroepen"] = dict()
+            if responsibility.student_group_collection == "groups_1":
+                groups[a_dashboard.groups_1_name] = dict()
                 break
         for responsibility in teacher.responsibilities:
-            if responsibility.student_group_collection == "guild_groups":
-                groups["Gildegroepen"] = dict()
+            if responsibility.student_group_collection == "groups_2":
+                groups[a_dashboard.groups_2_name] = dict()
                 break
         for responsibility in teacher.responsibilities:
-            if responsibility.student_group_collection == "project_groups":
+            if responsibility.student_group_collection == "groups_1":
                 for student_group_name in responsibility.student_groups:
-                    # print("BL31 - student_group_name", student_group_name)
-                    group_name = a_course.find_project_group_by_name(student_group_name).name
-                    assignment_group = a_course.get_assignment_group(responsibility.assignment_group_id)
-                    if group_name in groups["Projectgroepen"]:
-                        groups["Projectgroepen"][group_name] += ", "+assignment_group.name
-                    else:
-                        groups["Projectgroepen"][group_name] = "Opdrachtgroepen: "+assignment_group.name
-
-            elif responsibility.student_group_collection == "guild_groups":
-                for student_group_name in responsibility.student_groups:
-                    group = a_course.find_guild_group_by_name(student_group_name)
+                    print("BL31 - student_group_name", student_group_name)
+                    group = a_course.find_groups_1_group_by_name(student_group_name)
                     if group:
-                        group_name = a_course.find_guild_group_by_name(student_group_name).name
+                        group_name = group.name
                         assignment_group = a_course.get_assignment_group(responsibility.assignment_group_id)
-                        if group_name in groups["Gildegroepen"]:
-                            groups["Gildegroepen"][group_name] += ", "+assignment_group.name
+                        if group_name in groups[a_dashboard.groups_1_name]:
+                            groups[a_dashboard.groups_1_name][group_name] += ", "+assignment_group.name
                         else:
-                            groups["Gildegroepen"][group_name] = "Opdrachtgroepen: "+assignment_group.name
+                            groups[a_dashboard.groups_1_name][group_name] = "Opdrachtgroepen: "+assignment_group.name
+                    else:
+                        print("BL32 - student_group_name not found", student_group_name)
+
+            elif responsibility.student_group_collection == "groups_2":
+                for student_group_name in responsibility.student_groups:
+                    group = a_course.find_groups_2_group_by_name(student_group_name)
+                    if group:
+                        group_name = a_course.find_groups_2_group_by_name(student_group_name).name
+                        assignment_group = a_course.get_assignment_group(responsibility.assignment_group_id)
+                        if group_name in groups[a_dashboard.groups_2_name]:
+                            groups[a_dashboard.groups_2_name][group_name] += ", "+assignment_group.name
+                        else:
+                            groups[a_dashboard.groups_2_name][group_name] = "Opdrachtgroepen: "+assignment_group.name
                     else:
                         print("BL41 -", "Group not found", student_group_name)
             teacher_html_string = "<ul>"

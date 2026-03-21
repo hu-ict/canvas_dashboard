@@ -15,7 +15,7 @@ from scripts.model.perspective.Perspective import Perspective
 
 class CourseConfig:
     def __init__(self, course_code, canvas_id, name, start_date, end_date, improvement_period, student_count,
-                 project_principal_assignment_group_id, guild_principal_assignment_group_id):
+                 groups_1_principal_assignment_group_id, groups_2_principal_assignment_group_id):
         self.course_code = course_code
         self.canvas_id = canvas_id
         self.name = name
@@ -24,8 +24,8 @@ class CourseConfig:
         self.improvement_period = improvement_period
         self.start_date = start_date
         self.end_date = end_date
-        self.project_principal_assignment_group_id = project_principal_assignment_group_id
-        self.guild_principal_assignment_group_id = guild_principal_assignment_group_id
+        self.groups_1_principal_assignment_group_id = groups_1_principal_assignment_group_id
+        self.groups_2_principal_assignment_group_id = groups_2_principal_assignment_group_id
         self.sections = []
         self.level_moments = None
         self.attendance = None
@@ -35,13 +35,13 @@ class CourseConfig:
         self.learning_outcomes = []
         self.teachers = []
         self.assignment_groups = []
-        self.project_groups = []
-        self.guild_groups = []
+        self.groups_1 = []
+        self.groups_2 = []
         self.role_groups = []
         self.students = []
 
     def __str__(self):
-        line = f'CourseConfig({self.course_code}, {self.canvas_id}, {self.name}, {self.project_principal_assignment_group_id})'
+        line = f'CourseConfig({self.course_code}, {self.canvas_id}, {self.name}, {self.groups_1_principal_assignment_group_id})'
         return line
 
     def to_json(self):
@@ -54,8 +54,8 @@ class CourseConfig:
             'start_date': get_date_time_str(self.start_date),
             'end_date': get_date_time_str(self.end_date),
             'improvement_period': self.improvement_period,
-            'project_principal_assignment_group_id': self.project_principal_assignment_group_id,
-            'guild_principal_assignment_group_id': self.guild_principal_assignment_group_id,
+            'groups_1_principal_assignment_group_id': self.groups_1_principal_assignment_group_id,
+            'groups_2_principal_assignment_group_id': self.groups_2_principal_assignment_group_id,
             'sections': list(map(lambda s: s.to_json(), self.sections))
         }
         # print("CC10 -", self.attendance)
@@ -81,8 +81,8 @@ class CourseConfig:
         dict_result['roles'] = list(map(lambda r: r.to_json([]), self.roles))
         dict_result['teachers'] = list(map(lambda t: t.to_json(), self.teachers))
         dict_result['assignment_groups'] = list(map(lambda ag: ag.to_json(), self.assignment_groups))
-        dict_result['project_groups'] = list(map(lambda sg: sg.to_json(), self.project_groups))
-        dict_result['guild_groups'] = list(map(lambda sg: sg.to_json(), self.guild_groups))
+        dict_result['groups_1'] = list(map(lambda sg: sg.to_json(), self.groups_1))
+        dict_result['groups_2'] = list(map(lambda sg: sg.to_json(), self.groups_2))
         dict_result['students'] = list(map(lambda s: s.to_json(), self.students))
 
         return dict_result
@@ -109,14 +109,14 @@ class CourseConfig:
                     return group
         return None
 
-    def find_project_group(self, group_id):
-        for group in self.project_groups:
+    def find_groups_1_group(self, group_id):
+        for group in self.groups_1:
             if group.id == group_id:
                 return group
         return None
 
-    def find_guild_group(self, group_id):
-        for group in self.guild_groups:
+    def find_groups_2_group(self, group_id):
+        for group in self.groups_2:
             if group.id == group_id:
                 return group
         return None
@@ -127,29 +127,30 @@ class CourseConfig:
                 return learning_outcome
         return None
 
-    def exists_in_group(self, student_id):
-        for group in self.project_groups:
+    def exists_in_group_groups_1(self, student_id):
+        for group in self.groups_1:
             for student in group.students:
                 if student.id == student_id:
                     return True
         return False
 
-    def find_project_group_by_name(self, group_name):
+    def find_groups_1_group_by_name(self, group_name):
         if (type(group_name)) is int:
             return None
-        # print("CCF21 - find_project_group_by_name", group_name, self.project_groups)
-        for group in self.project_groups:
+        # print("CCF21 - find_groups_1_group_by_name", group_name, self.groups_1)
+        for group in self.groups_1:
             if group_name in group.name:
                 return group
-        print("CCF23 - not found find_project_group_by_name", group_name)
+        print("CCF23 - not found find_groups_1_group_by_name", group_name)
         return None
 
-    def find_guild_group_by_name(self, group_name):
+    def find_groups_2_group_by_name(self, group_name):
         if (type(group_name)) is int:
             return None
-        for group in self.guild_groups:
+        for group in self.groups_2:
             if group_name in group.name:
                 return group
+        print("CCF26 - not found find_groups_2_group_by_name", group_name)
         return None
 
     def find_students_by_role(self, role_short):
@@ -301,7 +302,7 @@ class CourseConfig:
 
     def find_teacher_by_group(self, group_id):
         for teacher in self.teachers:
-            if group_id in teacher.projects:
+            if group_id in teacher.groups_1:
                 return teacher
         return None
 
@@ -321,8 +322,8 @@ class CourseConfig:
             get_date_time_obj(data_dict['end_date']),
             IMPROVEMENT_PERIOD,
             data_dict['student_count'],
-            data_dict['project_principal_assignment_group_id'],
-            data_dict['guild_principal_assignment_group_id'])
+            data_dict['groups_1_principal_assignment_group_id'],
+            data_dict['groups_2_principal_assignment_group_id'])
         new.perspectives = {}
         if 'improvement_period' in data_dict.keys() and data_dict['improvement_period'] is not None:
             new.improvement_period = data_dict['improvement_period']
@@ -345,13 +346,13 @@ class CourseConfig:
         new.roles = list(map(lambda r: Role.from_dict(r), data_dict['roles']))
         new.assignment_groups = list(
             map(lambda g: AssignmentGroup.from_dict(g), data_dict['assignment_groups']))
-        if 'project_groups' in data_dict:
-            new.project_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['project_groups']))
+        if 'groups_1' in data_dict:
+            new.groups_1 = list(map(lambda s: StudentGroup.from_dict(s), data_dict['groups_1']))
         else:
-            new.project_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['student_groups']))
-        if 'guild_groups' in data_dict:
-            new.guild_groups = list(map(lambda s: StudentGroup.from_dict(s), data_dict['guild_groups']))
+            new.groups_1 = list(map(lambda s: StudentGroup.from_dict(s), data_dict['student_groups']))
+        if 'groups_2' in data_dict:
+            new.groups_2 = list(map(lambda s: StudentGroup.from_dict(s), data_dict['groups_2']))
         else:
-            new.guild_groups = []
+            new.groups_2 = []
         new.students = list(map(lambda s: Student.from_dict(s), data_dict['students']))
         return new

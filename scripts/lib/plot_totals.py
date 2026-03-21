@@ -2,7 +2,6 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
 from scripts.lib.build_bootstrap_werkvoorraad import WORKLOAD_PLOTLY_HTML
-from scripts.lib.build_plotly_bandwidth import process_bandwidth_overall
 from scripts.lib.lib_plotly import hover_style
 
 RELEASE_PLANNING_PLOTLY_HTML = "release_planning.html"
@@ -121,7 +120,7 @@ def plot_grades(a_fig, a_row, a_col, student_totals, a_course, a_grade_levels):
     a_fig.update_yaxes(title_text="Aantal", range=[0, y_axis], row=a_row, col=a_col)
 
 
-def plot_voortgang(a_instance, a_course, student_totals, a_progress_history, a_progress_levels, a_grade_levels):
+def build_plotly_progress(a_instance, a_course, student_totals, a_progress_history, a_progress_levels, a_grade_levels):
     titles = ['Dagelijkse voortgang <b>studenten</b>', 'Peilingen', ""]
     for perspective in a_course.perspectives.values():
         titles.append(perspective.title)
@@ -153,7 +152,7 @@ def plot_voortgang(a_instance, a_course, student_totals, a_progress_history, a_p
     fig.write_html(file_name, include_plotlyjs="cdn")
 
 
-def plot_workload(a_instance, a_course, a_workload, a_workload_history):
+def build_plotly_workload(a_instance, a_course, a_workload):
     specs = [
         [{'type': 'bar'}, {'type': 'bar'}],
         [{'type': 'bar'}, {'type': 'bar'}]
@@ -191,7 +190,3 @@ def plot_workload(a_instance, a_course, a_workload, a_workload_history):
     file_name = a_instance.get_html_general_path() + WORKLOAD_PLOTLY_HTML
     fig.write_html(file_name, include_plotlyjs="cdn")
 
-
-def plot_overall_opbouw(a_instance, a_course, a_level_serie_collection):
-    file_name = a_instance.get_html_general_path() + RELEASE_PLANNING_PLOTLY_HTML
-    process_bandwidth_overall(a_course, a_level_serie_collection, file_name)

@@ -31,7 +31,7 @@ def build_student_button(instance, role, student, templates, level_serie_collect
          })
 
 
-def build_bootstrap_groups(a_instance, a_course, a_student_groups, a_results, a_templates, level_series, group_type):
+def build_bootstrap_groups(a_instance, a_course, a_student_groups, a_results, a_templates, level_series):
     # coaches = {}
     html_string = ''
     for group in a_student_groups:
@@ -54,7 +54,7 @@ def build_bootstrap_groups(a_instance, a_course, a_student_groups, a_results, a_
         for student in group.students:
             l_student = a_results.find_student(student.id)
             if l_student is None:
-                print("BBDI08 - ERROR Student not found in results", student, "re-run generate_results")
+                print("BBDI09 - ERROR Student not found in results", student, "re-run generate_results")
             else:
                 # print('BB07 -', l_student.name, "[", l_student.number, "]")
                 role = a_course.get_role(l_student.role)
@@ -113,9 +113,9 @@ def build_bootstrap_progress(a_instance, a_course, a_results, a_templates, level
 def build_bootstrap_menu_html(a_instance, a_templates, menu_items):
     start_pages = {}
     for menu_item in menu_items:
-        if menu_item == "groups":
+        if menu_item == "groups_1":
             start_pages[menu_item] = a_instance.get_link_general_path() + "standard.html"
-        elif menu_item == "guilds":
+        elif menu_item == "groups_2":
             start_pages[menu_item] = a_instance.get_link_general_path() + "standard.html"
         elif menu_item == "roles":
             start_pages[menu_item] = a_instance.get_link_general_path() + "standard.html"
@@ -151,12 +151,12 @@ def build_bootstrap_menu_html(a_instance, a_templates, menu_items):
 def build_bootstrap_left_panel_html(a_instance, a_menu_items, a_course, a_results, a_templates, a_level_serie_collection, a_workload):
     html_tabs = ""
     for tab in a_menu_items:
-        if tab == "groups":
+        if tab == "groups_1":
             print("BBDI51 - Tab", tab)
-            tabs_html_string = build_bootstrap_groups(a_instance, a_course, a_course.project_groups, a_results, a_templates, a_level_serie_collection, "PROJECT")
-        elif tab == "guilds":
+            tabs_html_string = build_bootstrap_groups(a_instance, a_course, a_course.groups_1, a_results, a_templates, a_level_serie_collection)
+        elif tab == "groups_2":
             print("BBDI52 - Tab", tab)
-            tabs_html_string = build_bootstrap_groups(a_instance, a_course, a_course.guild_groups, a_results, a_templates, a_level_serie_collection, "GUILD")
+            tabs_html_string = build_bootstrap_groups(a_instance, a_course, a_course.groups_2, a_results, a_templates, a_level_serie_collection)
         elif tab == "roles":
             print("BBDI53 - Tab", tab)
             tabs_html_string = build_bootstrap_role(a_instance, a_course, a_results, a_templates, a_level_serie_collection)
@@ -225,7 +225,7 @@ def build_bootstrap_dashboard_index(a_instance, a_course, a_results, a_templates
 
     index_html_string = a_templates['index'].substitute(
         {'course_name': a_course.name, 'aantal_studenten': a_course.student_count,
-         'aantal_teams': len(a_course.project_groups),
+         'aantal_teams': len(a_course.groups_1),
          'submission_count': a_results.submission_count, 'not_graded_count': a_results.not_graded_count,
          'actual_date': actual_date_str, 'semester_day': l_semester_day,
          'percentage': percentage,
