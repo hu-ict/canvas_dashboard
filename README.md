@@ -4,9 +4,12 @@ Deze Python modules genereren een set van statische html-pagina's op basis van g
 # De workflow
 Er wordt gebruik gemaakt van verschillende stappen om tot het dashboard te komen.
 ![Activity Diagram](dashboard.png)
-## Stap 1 - Genereren nieuwe instance (tenant)
-Om een nieuwe course omgeving te maken:
-- run het Python script `generate_start.py`
+## Stap 1 - Nieuwe omgeving
+Om een geheel nieuwe omgeving te maken op je persoonlijke computer/laptop run het Python script `generate_environment.py`. Er wordt gevraagd om je persoonlijk Canvas-Api_Key. Deze sleutel wordt opgeslagen het bestand `msteams_api.json` binnen de map `environment`. Deze sleutel is zeer persoonlijk en moet dus niet gaan rondslingeren. Het bestand `environment.json` wordt ook hier aangemaakt. Daarnaast wordt de directory `.\courses` gemaakt.
+## Stap 2 - Nieuwe cursus
+Aanmaken van een nieuwe cursus. Dit is nog niet de cursus instantie.
+Om een nieuwe course omgeving te maken, run het Python script `generate_new_course.py`
+- 
 Gebruik wordt gemaakt van het `course_instances.json`. Als dit bestand nog niet bestaat wordt deze gemaakt in de directory `.\courses`. Er wordt gevraagd naar een naam van de `instance` bijvoorbeeld `inno-sep24`. Deze naam wordt alleen lokaal grbuikt. De `category` moet opgegeven worden, bijvoorbeeld `inno_courses`. Geef ook het `canvas_course_id` op.
 Hier worden attributen in JSON formaat opgegeven:
 ```json 
