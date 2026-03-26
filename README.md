@@ -7,8 +7,24 @@ Er wordt gebruik gemaakt van verschillende stappen om tot het dashboard te komen
 Om een geheel nieuwe omgeving te maken op je persoonlijke computer/laptop run het Python script `generate_environment.py`. Er wordt gevraagd om je persoonlijk `Canvas-Api_Key`. Deze sleutel wordt opgeslagen het bestand `msteams_api.json` binnen de map `environment`. Deze sleutel is zeer persoonlijk en moet dus niet gaan rondslingeren. Het bestand `environment.json` wordt ook hier aangemaakt. Daarnaast wordt de directory `.\courses` gemaakt.
 # Stap 2 - Nieuwe cursus
 Aanmaken van een nieuwe cursus, bijvoorbeeld `TICT-V1SE1-24` of `TICT-V3SE6-25`. Dit is nog niet de cursus instantie. Om een nieuwe cursus omgeving te maken, run het Python script `generate_new_course.py`. Er wordt contact gezocht met Canvas om AssignmentGroups op te halen en te vragen of deze relevant zijn voor het portfolio. Er wordt nu een `dashboard.json` gemaakt en de bijbehorende cursus map. In het bestand zijn wat standaard zaken in geregeld, maar er moet goed naar gekeken worden of de verschillenda attributen goed staan. In dit bestand staat de basale structuur van het portfolio in de cursus. Je kan dit bestand ook kopiëren van een collega.
+## Attributen `dashboard.json`
+### `dashboard_tabs`
+### `groups_1`
+### `groups_2`
+### `assignment_groups`
+### `perspectives`
+### `level_moments`
+### `grade_moments`
+### `learning_outcomes`
+
 # Stap 3 - Nieuwe cursus instantie
-Om een nieuwe cursus omgeving te maken, run het Python script `generate_new_course_instance.py`. Er wordt aangevraagd onder welke cursus deze instantie valt. Daarna een naam voor de instantie gervraagd, bijvoorbeeld: `TICT-V1SE1-24_feb26` of `TICT-V3SE6-25_feb26`. Geef ook de periode aan, bijvoorbeel `feb26`. Er wordt een copy van `dashboard.json` gemaakt in de aangemaakte map van de instantie met de naam van de instantie.
+Om een nieuwe cursus omgeving te maken, run het Python script `generate_new_course_instance.py`. 
+- Er wordt aangevraagd onder welke cursus deze instantie valt.
+- Daarna een naam voor de instantie gervraagd, bijvoorbeeld: `TICT-V1SE1-24_feb26` of `TICT-V3SE6-25_feb26`. 
+- Geef ook de periode aan, bijvoorbeeld `feb26`.
+- Canvas ID wordt gevraagd.
+- De relevantie van de secties wordt aangegeven door een vraag uit het systeem.
+- Er wordt een copy van `dashboard.json` gemaakt in de aangemaakte map van de instantie met de naam van de instantie.
 # Stap 4 - Configuratie opzetten
 Door het uitvoeren van het Python script `generate_config.py`. De Canvas API wordt aangeroepen om de structuur van Canvas uit te lezen.
 - Canvas secties (Sections)
