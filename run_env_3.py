@@ -19,7 +19,7 @@ def run_env_3(a_actual_date):
                 print("Instance:", course_instance.name)
                 course_instance.execution_source_path = execution.source_path
                 generate_dashboard(course_instance)
-                # generate_plotly(course_instance)
+                generate_plotly(course_instance)
                 generate_portfolio(course_instance)
                 publish_dashboard(course_instance)
                 # generate_user_data(course_instance)

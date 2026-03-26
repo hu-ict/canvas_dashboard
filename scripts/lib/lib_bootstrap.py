@@ -197,6 +197,10 @@ def load_templates(template_path):
         string_html = file_template.read()
         templates["student_index"] = Template(string_html)
 
+    with open(template_path + 'student'+ DIR_DIV + 'template_student_header.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["student_header"] = Template(string_html)
+
     with open(template_path + 'student'+ DIR_DIV + 'template_students_tabs.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["students_tabs"] = Template(string_html)

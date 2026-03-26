@@ -3,11 +3,11 @@ from scripts.model.Bandwidth import Bandwidth
 
 
 class Perspective:
-    def __init__(self, name, title, show_points, show_flow, total_points):
+    def __init__(self, name, title, show_flow, show_points, total_points):
         self.name = name
         self.title = title
-        self.show_points = show_points
         self.show_flow = show_flow
+        self.show_points = show_points
         self.total_points = total_points
         self.assignment_group_ids = []
         self.assignment_sequences = []
@@ -17,8 +17,8 @@ class Perspective:
         dict_result = {
             'name': self.name,
             'title': self.title,
-            'show_points': self.show_points,
             'show_flow': self.show_flow,
+            'show_points': self.show_points,
             'total_points': self.total_points,
             'assignment_group_ids': self.assignment_group_ids,
             'assignment_sequences': list(map(lambda a: a.to_json(), self.assignment_sequences)),
@@ -31,9 +31,9 @@ class Perspective:
 
     @staticmethod
     def from_dict(data_dict):
-        # print("Perspective.from_dict", data_dict)
-        new = Perspective(data_dict['name'], data_dict['title'], data_dict['show_points'],
-                          data_dict['show_flow'], data_dict['total_points'])
+        print("PERS09 - Perspective.from_dict", data_dict)
+        new = Perspective(data_dict['name'], data_dict['title'], data_dict['show_flow'], data_dict['show_points'],
+                          data_dict['total_points'])
         if 'assignment_group_ids' in data_dict.keys():
             new.assignment_group_ids = data_dict['assignment_group_ids']
         if 'bandwidth' in data_dict.keys():

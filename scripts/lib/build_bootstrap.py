@@ -20,13 +20,17 @@ def build_student_button(instance, role, student, templates, level_serie_collect
     bof_count = 0
     for learning_outcome in student.learning_outcomes.values():
         bof_count += len(learning_outcome.feedback_list)
+    if instance.course_code in ["TICT-V1SE1-24", "TICT-V1SE1-24a"]:
+        bof_count_str = ""
+    else:
+        bof_count_str = str(bof_count)
     return templates['student'].substitute(
         {'btn_color': color,
          'progress_color': l_progress_color,
          'student_name': student.name,
          'student_number': student.number,
          'student_role': role.name,
-         'bof_count': bof_count,
+         'bof_count': bof_count_str,
          'frame_right': index_file_name
          })
 
@@ -35,7 +39,7 @@ def build_bootstrap_groups(a_instance, a_course, a_student_groups, a_results, a_
     # coaches = {}
     html_string = ''
     for group in a_student_groups:
-        # print("BBDI05 -", group.name, len(group.assessors))
+        print("BBDI05 -", group.name, len(group.assessors))
         students_html_string = ""
         if group.principal_assessor > 0:
             assessor = a_course.find_teacher(group.principal_assessor)
@@ -197,6 +201,11 @@ def get_initials(item):
 
 def build_bootstrap_dashboard_index(a_instance, a_course, a_results, a_templates, a_teachers, dashboard, a_total_workload):
     l_semester_day = a_results.actual_day
+    for tab in dashboard.dashboard_tabs:
+        if tab == "groups_1":
+            dashboard.dashboard_tabs[tab] = dashboard.groups_1.title
+        if tab == "groups_2":
+            dashboard.dashboard_tabs[tab] = dashboard.groups_2.title
     menu_html_string = build_bootstrap_menu_html(a_instance, a_templates, dashboard.dashboard_tabs)
     print("BBDI71 - menu_html_string", len(menu_html_string))
     left_panel_html_string = build_bootstrap_left_panel_html(a_instance, dashboard.dashboard_tabs, a_course, a_results, a_templates, dashboard.level_serie_collection, a_total_workload)

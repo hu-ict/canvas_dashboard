@@ -30,6 +30,13 @@ def get_submission_badges(assignment_sequence, submission_sequence, actual_day):
                     badge["assignment_id"] = assignment.id
                     badge["teller"] = teller
                     badges.append(badge)
+                else:
+                    teller += 1
+                    badge = {}
+                    badge["status"] = STATUS_COMING
+                    badge["assignment_id"] = assignment.id
+                    badge["teller"] = teller
+                    badges.append(badge)
         else:
             if actual_day > assignment.day:
                 teller += 1
@@ -38,7 +45,15 @@ def get_submission_badges(assignment_sequence, submission_sequence, actual_day):
                 badge["assignment_id"] = assignment.id
                 badge["teller"] = teller
                 badges.append(badge)
+            else:
+                teller += 1
+                badge = {}
+                badge["status"] = STATUS_COMING
+                badge["assignment_id"] = assignment.id
+                badge["teller"] = teller
+                badges.append(badge)
     return badges
+
 
 def get_comments_html(comments):
     comments_html_string = ""
@@ -101,11 +116,8 @@ def get_rubrics_comments(course, submission, grade):
     return l_hover
 
 
-def build_student_tabs(instance, course, student_tab_content, student_tabs):
-    for assignment in course.get_level_moments():
-        student_tabs[assignment.name.replace(" ", "_").lower()] = assignment.name
-    for assignment in course.get_grade_moments():
-        student_tabs[assignment.name.replace(" ", "_").lower()] = assignment.name
+def build_student_tabs(student_tab_content, student_tabs):
+    # print("BSI10 - ", student_tabs.keys())
     tabs_html_string = ""
     tab_count = 0
     for tab in student_tabs:
@@ -225,24 +237,6 @@ def build_moment(course_id, course, level_serie, assignment_name, submission, te
         )
         # print("BLM09 -", student_tabs_html_string)
     return level_moment_html_string
-
-
-# def get_badge_status(graded, score, points, level_series):
-#     if graded:
-#         if score == 0:  # "Niet zichtbaar"
-#             # status = level_series.level_series["bin2"].levels["0"].label
-#             cell_status = "status_missed"
-#         elif score == points:
-#             # portfolio items moet compleet zijn
-#             # status = level_series.level_series["bin2"].levels["2"].label
-#             cell_status = "status_complete"
-#         else:  # Niet voldaan
-#             # status = level_series.level_series["bin2"].levels["1"].label
-#             cell_status = "status_incomplete"
-#     else:  # Nog niet beoordeeld
-#         # status = level_series.level_series["bin2"].levels["-2"].label
-#         cell_status = "status_pending"
-#     return cell_status
 
 
 def build_bootstrap_portfolio(course_instance, course_id, course, student, student_results, actual_date, actual_day, templates,
@@ -486,6 +480,29 @@ def build_bootstrap_student_index(course_instance, course_id, course, student_re
             groups_1_group_teacher_str += "<li>"+course.find_teacher(assessor.teacher_id).name+" voor "+course.get_assignment_group(assessor.assignment_group_id).name+"</li>"
         if assessor.student_group_collection == "groups_2":
             groups_2_group_teacher_str += "<li>"+course.find_teacher(assessor.teacher_id).name+" voor "+course.get_assignment_group(assessor.assignment_group_id).name+"</li>"
+    if dashboard.dashboard_tabs["groups_1"] == "groups_1":
+        dashboard_tab_groups_1 = dashboard.groups_1.title
+    else:
+        dashboard_tab_groups_1 = "Geen"
+    if dashboard.dashboard_tabs["groups_2"] == "groups_2":
+        dashboard_tab_groups_2 = dashboard.groups_2.title
+    else:
+        dashboard_tab_groups_2 = "Geen"
+    student_header_html_string = templates['student_header'].substitute(
+        {
+            'semester': course.name,
+            'student_name': student.name,
+            'student_email': student.email,
+            'student_number': student.number,
+            'groups_1_label': dashboard_tab_groups_1,
+            'groups_1_name': groups_1_group_name,
+            'groups_1_teachers': groups_1_group_teacher_str,
+            'groups_2_label': dashboard_tab_groups_2,
+            'groups_2_name': groups_2_group_name,
+            'groups_2_teachers': groups_2_group_teacher_str,
+            'actual_date': get_date_time_loc(actual_date)
+        }
+    )
 
     # ******************************
     # Student index menu
@@ -517,22 +534,16 @@ def build_bootstrap_student_index(course_instance, course_id, course, student_re
         student_tab_content['feedback'] = build_bootstrap_feedback(course, student_results, templates,
                                                                    dashboard.feedback_colors)
 
-    # print("BSI10 - ", student_tabs.keys())
-    student_tabs_html_string = build_student_tabs(course_instance, course, student_tab_content,
-                                                  dashboard.student_tabs)
+    # Voeg de moments toe aan de student_tabs
+    for assignment in course.get_level_moments():
+        dashboard.student_tabs[assignment.name.replace(" ", "_").lower()] = assignment.name
+    for assignment in course.get_grade_moments():
+        dashboard.student_tabs[assignment.name.replace(" ", "_").lower()] = assignment.name
+    student_tabs_html_string = build_student_tabs(student_tab_content, dashboard.student_tabs)
     student_index_html_string = templates['student_index'].substitute(
         {
-            'semester': course.name,
             'student_name': student.name,
-            'student_email': student.email,
-            'student_number': student.number,
-            'groups_1_label': dashboard.dashboard_tabs["groups_1"],
-            'groups_1_name': groups_1_group_name,
-            'groups_1_teachers': groups_1_group_teacher_str,
-            'groups_2_label': dashboard.dashboard_tabs["groups_2"],
-            'groups_2_name': groups_2_group_name,
-            'groups_2_teachers': groups_2_group_teacher_str,
-            'actual_date': get_date_time_loc(actual_date),
+            'student_header': student_header_html_string,
             'student_tabs': student_tabs_html_string
         }
     )

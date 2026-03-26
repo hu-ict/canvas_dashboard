@@ -1,4 +1,5 @@
 from scripts.model.Role import Role
+from scripts.model.dashboard.Groups import Groups
 from scripts.model.dashboard.LevelSerieCollection import LevelSerieCollection
 from scripts.model.dashboard.MetaAssignmentGroup import MetaAssignmentGroup
 from scripts.model.dashboard.Subplot import Subplot
@@ -9,18 +10,18 @@ from scripts.model.moment.MetaLevelMoments import MetaLevelMoments
 
 
 class Dashboard:
-    def __init__(self, dashboard_tabs, student_tabs, subplot, groups_1_principal_assignment_group, groups_2_principal_assignment_group, groups_1_name, groups_2_name, feedback_colors, level_serie_collection):
+    def __init__(self, dashboard_tabs, student_tabs, subplot, feedback_colors, level_serie_collection):
         self.dashboard_tabs = dashboard_tabs
         self.student_tabs = student_tabs
         self.subplot = subplot
-        self.groups_1_principal_assignment_group = groups_1_principal_assignment_group
-        self.groups_2_principal_assignment_group = groups_2_principal_assignment_group
-        self.groups_1_name = groups_1_name
-        self.groups_2_name = groups_2_name
         self.feedback_colors = feedback_colors
         self.level_serie_collection = level_serie_collection
+        self.groups_1 = None
+        self.groups_2 = None
         self.roles = []
         self.learning_outcomes = []
+        self.level_moments = None
+        self.grade_moments = None
         self.perspectives = []
         self.assignment_groups = []
 
@@ -33,25 +34,29 @@ class Dashboard:
         return None
 
     def to_json(self):
-        dict_result = {"dashboard_tabs": self.dashboard_tabs, "student_tabs": self.student_tabs,
-                       "groups_1_principal_assignment_group": self.groups_1_principal_assignment_group,
-                       "groups_2_principal_assignment_group": self.groups_2_principal_assignment_group,
-                       "subplot": self.subplot.to_json(), "groups_1_name": self.groups_1_name, "groups_2_name": self.groups_2_name, "feedback_colors": self.feedback_colors,
+        dict_result = {"dashboard_tabs": self.dashboard_tabs,
+                       "groups_1": self.groups_1.to_json(), "groups_2": self.groups_2.to_json(),
+                       "perspectives": self.perspectives,
+                       "level_moments": self.level_moments, "grade_moments": self.grade_moments,
+                       "assignment_groups": list(map(lambda a: a.to_json(), self.assignment_groups)),
+                       "roles": list(map(lambda r: r.to_json(), self.roles)),
+                       "student_tabs": self.student_tabs,
+                       "learning_outcomes": self.learning_outcomes,
+                       "subplot": self.subplot.to_json(), "feedback_colors": self.feedback_colors,
                        "level_serie_collection": self.level_serie_collection.to_json()}
-        if len(self.assignment_groups) > 0:
-            dict_result["assignment_groups"] = list(map(lambda a: a.to_json(), self.assignment_groups))
-        dict_result["learning_outcomes"] = self.learning_outcomes
-        dict_result["perspectives"] = self.perspectives
-
         return dict_result
 
     @staticmethod
     def from_dict(data_dict):
         # print("DAS04 -", data_dict)
         new = Dashboard(data_dict["dashboard_tabs"], data_dict["student_tabs"], Subplot.from_dict(data_dict["subplot"]),
-                        data_dict["groups_1_principal_assignment_group"], data_dict["groups_2_principal_assignment_group"],
-                        data_dict["groups_1_name"], data_dict["groups_2_name"], data_dict["feedback_colors"],
-                        LevelSerieCollection.from_dict(data_dict["level_serie_collection"]))
+                        data_dict["feedback_colors"], LevelSerieCollection.from_dict(data_dict["level_serie_collection"]))
+        if "groups_1" in data_dict:
+            # print("DAS05 -", data_dict["level_moments"])
+            new.groups_1 = Groups.from_dict(data_dict['groups_1'])
+        if "groups_2" in data_dict:
+            # print("DAS05 -", data_dict["level_moments"])
+            new.groups_2 = Groups.from_dict(data_dict['groups_2'])
         if "level_moments" in data_dict:
             # print("DAS05 -", data_dict["level_moments"])
             new.level_moments = MetaLevelMoments.from_dict(data_dict['level_moments'])

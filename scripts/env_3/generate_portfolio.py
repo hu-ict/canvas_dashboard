@@ -1,6 +1,3 @@
-import json
-import sys
-
 from scripts.lib.build_bootstrap_student import build_bootstrap_student_index
 from scripts.lib.lib_bootstrap import load_templates
 from scripts.lib.lib_date import get_actual_date

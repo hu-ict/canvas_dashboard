@@ -86,7 +86,7 @@ def generate_trm(course_instance, config):
     create_tab(ws, df_groups_1, teachers)
 
     dashboard = read_dashboard(course_instance.get_dashboard_file_name())
-    if len(dashboard.groups_2_name) > 0:
+    if len(dashboard.groups_2.name) > 0:
         wb.create_sheet(title="groups_2", index=1)  # Vooraan
         ws = wb["groups_2"]
         df_groups_2 = get_data_frame(assignment_groups_2_names, config.groups_2)

@@ -370,7 +370,7 @@ def generate_course(course_instance):
     print("GCRS20 - Aantal studenten", len(config.students))
     get_section_students(canvas_course, config)
 
-    if dashboard.groups_1_name == "SECTIONS":
+    if dashboard.groups_1.name == "SECTIONS":
         group_list = []
         print("GCRS21 - Werken met Canvas secties als groepen (meestal S1 propedeuse).")
         for section in config.sections:
@@ -380,11 +380,11 @@ def generate_course(course_instance):
         config.groups_1 = group_list
         link_section_students_to_groups_1(config)
     else:
-        config.groups_1 = get_groups_in_scope(dashboard.groups_1_name, canvas_course)
-        get_students_in_groups(dashboard.groups_1_name, config, canvas_course)
-    if len(dashboard.groups_2_name) > 0:
-        config.groups_2 = get_groups_in_scope(dashboard.groups_2_name, canvas_course)
-        get_students_in_groups(dashboard.groups_2_name, config, canvas_course)
+        config.groups_1 = get_groups_in_scope(dashboard.groups_1.name, canvas_course)
+        get_students_in_groups(dashboard.groups_1.name, config, canvas_course)
+    if len(dashboard.groups_2.name) > 0:
+        config.groups_2 = get_groups_in_scope(dashboard.groups_2.name, canvas_course)
+        get_students_in_groups(dashboard.groups_2.name, config, canvas_course)
 
     link_students_to_role(config)
     link_assessors_to_groups_and_students(config)

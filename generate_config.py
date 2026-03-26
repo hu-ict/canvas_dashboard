@@ -44,10 +44,8 @@ def generate_config(instance_name):
                           get_date_time_obj(current_instance.period["end_date"]),
                           IMPROVEMENT_PERIOD,
                           0, 0, 0)
-    if len(dashboard.roles) > 1:
-        config.roles = dashboard.roles
-    if len(dashboard.learning_outcomes) > 0:
-        config.learning_outcomes = dashboard.learning_outcomes
+    config.roles = dashboard.roles
+    config.learning_outcomes = dashboard.learning_outcomes
     print("GCNF20 - dashboard.assignment_groups", len(dashboard.assignment_groups))
     for perspective in dashboard.perspectives:
         if len(perspective.assignment_group_names) > 0:
@@ -76,6 +74,8 @@ def generate_config(instance_name):
                 else:
                     print("GCNF27 - assignment_group wordt niet gebruikt", canvas_assignment_group.name)
             print("GCNF26 - assignment_groups", len(config.assignment_groups))
+        else:
+            print(print("GCNF29 - No assignment_groups for perspective", perspective.title))
 
     if dashboard.level_moments:
         print("GCNF31 -", dashboard.level_moments)
@@ -112,10 +112,10 @@ def generate_config(instance_name):
         # policy = Policy([1], "WEEKLY", 19, [9, 17, 18])
         # config.attendance = Attendance("attendance", "Aanwezigheid", "attendance", True, False, "ATTENDANCE", 100, 75,
         #                               90, Bandwidth(), policy)
-    print("GCNF31 - Find assignment_group", dashboard.groups_1_principal_assignment_group)
-    config.groups_1_principal_assignment_group_id = config.find_assignment_group_by_name(dashboard.groups_1_principal_assignment_group).id
-    print("GCNF31 - Find assignment_group", dashboard.groups_2_principal_assignment_group)
-    config.groups_2_principal_assignment_group_id = config.find_assignment_group_by_name(dashboard.groups_2_principal_assignment_group).id
+    print("GCNF31 - Find assignment_group", dashboard.groups_1.principal_assignment_group)
+    config.groups_1_principal_assignment_group_id = config.find_assignment_group_by_name(dashboard.groups_1.principal_assignment_group).id
+    print("GCNF31 - Find assignment_group", dashboard.groups_2.principal_assignment_group)
+    config.groups_2_principal_assignment_group_id = config.find_assignment_group_by_name(dashboard.groups_2.principal_assignment_group).id
 
     # ophalen secties
     course_sections = canvas_course.get_sections()
@@ -148,7 +148,7 @@ def generate_config(instance_name):
             print(f"GCNF81 - Verwijder section {section.name}")
             config.sections.remove(section)
 
-    if dashboard.groups_1_name == "SECTIONS":
+    if dashboard.groups_1.name == "SECTIONS":
         group_list = []
         print("GCNF91 - Werken met Canvas secties als groepen (meestal S1 propedeuse).")
         for section in config.sections:
@@ -156,11 +156,11 @@ def generate_config(instance_name):
             student_group = StudentGroup(section.id, section.name, 0)
             group_list.append(student_group)
     else:
-        group_list = get_groups_in_scope(dashboard.groups_1_name, canvas_course)
+        group_list = get_groups_in_scope(dashboard.groups_1.name, canvas_course)
     print("GCNF94 -", len(group_list))
     config.groups_1 = group_list
-    if len(dashboard.groups_2_name) > 0:
-        group_list = get_groups_in_scope(dashboard.groups_2_name, canvas_course)
+    if len(dashboard.groups_2.name) > 0:
+        group_list = get_groups_in_scope(dashboard.groups_2.name, canvas_course)
         config.groups_2 = group_list
         print("GCNF95 -", len(group_list))
 
