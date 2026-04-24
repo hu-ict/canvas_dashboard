@@ -1,7 +1,7 @@
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
-from scripts.lib.build_bootstrap_werkvoorraad import WORKLOAD_PLOTLY_HTML
+from scripts.lib.build_bootstrap_werkvoorraad import WORKLOAD_PLOTLY
 from scripts.lib.lib_plotly import hover_style
 
 RELEASE_PLANNING_PLOTLY_HTML = "release_planning.html"
@@ -153,40 +153,39 @@ def build_plotly_progress(a_instance, a_course, student_totals, a_progress_histo
 
 
 def build_plotly_workload(a_instance, a_course, a_workload):
-    specs = [
-        [{'type': 'bar'}, {'type': 'bar'}],
-        [{'type': 'bar'}, {'type': 'bar'}]
-    ]
-    titles = []
-    for perspective in a_course.perspectives.values():
-        titles.append(perspective.title)
-    fig = make_subplots(rows=2, cols=2, specs=specs, subplot_titles=titles)
-    fig.update_layout(height=800, width=1200, showlegend=False)
+    for dimension in a_workload.dimensions:
+        specs = [
+            [{'type': 'bar'}, {'type': 'bar'}],
+            [{'type': 'bar'}, {'type': 'bar'}]
+        ]
+        titles = []
+        for perspective in a_course.perspectives.values():
+            titles.append(perspective.title)
+        fig = make_subplots(rows=2, cols=2, specs=specs, subplot_titles=titles)
+        fig.update_layout(height=800, width=1200, showlegend=False)
 
-    fig.update_layout(
-        title_text='Werkvoorraad',  # title of plot
-        yaxis_title_text='Aantal',  # yaxis perspective
-        yaxis3_title_text='Aantal',  # yaxis perspective
+        fig.update_layout(
+            title_text='Werkvoorraad',  # title of plot
+            yaxis_title_text='Aantal',  # yaxis perspective
+            yaxis3_title_text='Aantal',  # yaxis perspective
 
-        # yaxis9_title_text='Aantal',  # yaxis perspective
-        bargap=0.2,  # gap between bars of adjacent location coordinates
-        bargroupgap=0.1,  # gap between bars of the same location coordinates
-        barmode='stack'
-    )
+            # yaxis9_title_text='Aantal',  # yaxis perspective
+            bargap=0.2,  # gap between bars of adjacent location coordinates
+            bargroupgap=0.1,  # gap between bars of the same location coordinates
+            barmode='stack'
+        )
 
-    x_initials = a_workload.get_initials()
-    y_counts = a_workload.get_w1_count()
-    fig.add_trace(go.Bar(x=x_initials, y=y_counts, name="Pending", marker=dict(color="#4e73df")), 1, 1)
-    x_initials = a_workload.get_initials()
-    y_counts = a_workload.get_w2_count()
-    fig.add_trace(go.Bar(x=x_initials, y=y_counts, name="Pending", marker=dict(color="#e74a3b")), 1, 1)
-    x_initials = a_workload.get_initials()
-    y_counts = a_workload.get_w3_count()
-    fig.add_trace(go.Bar(x=x_initials, y=y_counts, name="Pending", marker=dict(color="#555555")), 1, 1)
+        x_initials = dimension.get_shorts()
+        y_counts = dimension.get_w1_count()
+        fig.add_trace(go.Bar(x=x_initials, y=y_counts, name="Pending", marker=dict(color="#4e73df")), 1, 1)
+        y_counts = dimension.get_w2_count()
+        fig.add_trace(go.Bar(x=x_initials, y=y_counts, name="Pending", marker=dict(color="#e74a3b")), 1, 1)
+        y_counts = dimension.get_w3_count()
+        fig.add_trace(go.Bar(x=x_initials, y=y_counts, name="Pending", marker=dict(color="#555555")), 1, 1)
 
-    # plot_workload_history(fig, 2, 3, a_workload_history)
-    # data = go.Histogram(x=np.array(student_totals['late']['count']))
-    # fig.add_trace(data, 2, 3)
-    file_name = a_instance.get_html_general_path() + WORKLOAD_PLOTLY_HTML
-    fig.write_html(file_name, include_plotlyjs="cdn")
+        # plot_workload_history(fig, 2, 3, a_workload_history)
+        # data = go.Histogram(x=np.array(student_totals['late']['count']))
+        # fig.add_trace(data, 2, 3)
+        file_name = a_instance.get_html_general_path() + WORKLOAD_PLOTLY + "_" + dimension.name + ".html"
+        fig.write_html(file_name, include_plotlyjs="cdn")
 

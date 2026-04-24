@@ -9,7 +9,7 @@ class Role:
         self.btn_color = btn_color
         self.students = []
 
-    def to_json(self, scope):
+    def to_json(self):
         return {
             'short': self.short,
             'name': self.name,
@@ -24,10 +24,6 @@ class Role:
 
     @staticmethod
     def from_dict(data_dict):
-        if 'major' in data_dict:
-            major = data_dict['major']
-        else:
-            major = "HBO-ICT"
-        new_role = Role(data_dict['short'], data_dict['name'], major, data_dict['btn_color'])
+        new_role = Role(data_dict['short'], data_dict['name'], data_dict['major'], data_dict['btn_color'])
         new_role.students = list(map(lambda s: StudentLink.from_dict(s), data_dict['students']))
         return new_role

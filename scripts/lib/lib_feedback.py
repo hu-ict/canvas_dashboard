@@ -81,7 +81,7 @@ def get_feedback_from_submission(course, student, submission):
                 else:
                     feedback_list = categorize_feedback(criterion_score.comment)
                     for feedback_dict in feedback_list:
-                        feedback = Feedback("id", submission.grader_name, feedback_date, feedback_day,
+                        feedback = Feedback(submission.grader_id, submission.grader_name, feedback_date, feedback_day,
                                             feedback_dict["text"], feedback_dict["positive_neutral_negative"],
                                             submission.assignment.name + " (" + assignment_criterion.description + ")",
                                             submission.assignment.id, criterion_score_score, rating_description)

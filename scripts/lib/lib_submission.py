@@ -6,7 +6,7 @@ from scripts.model.perspective.Status import NOT_YET_GRADED, MISSED_ITEM, NOT_CO
 from scripts.model.rubric.CriteriumScore import CriteriumScore
 
 NO_SUBMISSION = "Niets ingeleverd voor de deadline"
-NO_SUBMISSION_GRADE = "Moet nog beoordeeld worden"
+NO_SUBMISSION_GRADE = "Moet nog bepaald worden"
 NO_DATA = "Geen data"
 ROBOT = "Automatisch door systeem"
 LEVEL_MOMENTS = "level_moments"
@@ -153,12 +153,20 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
         return
     # print("SB05 -", graded, a_canvas_submission.grader_id)
     if not graded:
-        l_submission = Submission(a_canvas_submission.id, a_submission_assignment, a_student.id,
-                                  None,
-                                  None,
-                                  NOT_YET_GRADED, graded, posted, submission_grade,
-                                  0, grader_name, grader_date, submission_score,
-                                  submission_value, submission_flow)
+        print("LSUB31 -", a_canvas_submission.submitted_at)
+        if a_canvas_submission.submitted_at:
+            l_submission = Submission(a_canvas_submission.id, a_submission_assignment, a_student.id,
+                                      None,None,
+                                      NOT_YET_GRADED, graded, posted, submission_grade,
+                                      0, grader_name, grader_date, submission_score,
+                                      submission_value, submission_flow)
+        else:
+            l_submission = Submission(a_canvas_submission.id, a_submission_assignment, a_student.id,
+                                      None, None,
+                                      MISSED_ITEM, graded, posted, submission_grade,
+                                      0, grader_name, grader_date, submission_score,
+                                      submission_value, submission_flow)
+
         for canvas_comment in canvas_comments:
             l_comment_text = canvas_comment['comment']
             if len(l_comment_text) == 0:
@@ -374,7 +382,7 @@ def add_open_level_moments(course, actual_day, student_id, student_level_moments
                     # komt 7 dagen voor de Canvas deadline als "openstaand" item in de werklijst
                     if student_level_moments.get_submission_by_assignment(assignment.id) is None:
                         # print("AOL08 -", assignment.name, assignment.unlock_day, actual_day, assignment.day+21)
-                        l_submission = Submission(0, submission_assignment, 0,
+                        l_submission = Submission(0, submission_assignment, student_id,
                                                   None,
                                                   None,
                                                   NOT_YET_GRADED, False, False, None, 0, "Geen",
@@ -390,34 +398,34 @@ def add_open_level_moments(course, actual_day, student_id, student_level_moments
               student_level_moments.assignment_groups)
 
 
-def add_open_grade_moments(course, actual_day, student_id, student_grade_moments):
-    if len(student_grade_moments.assignment_groups) == 1:
-        assignment_group = course.get_assignment_group(student_grade_moments.assignment_groups[0])
+def add_open_moments(course, actual_day, student_id, student_moments):
+    if len(student_moments.assignment_groups) == 1:
+        assignment_group = course.get_assignment_group(student_moments.assignment_groups[0])
         if assignment_group is None:
             print("AOL02 - Assignment_group for perspective not found in course",
-                  student_grade_moments.assignment_groups[0])
+                  student_moments.assignment_groups[0])
             return
         for assignment_sequence in assignment_group.assignment_sequences:
             for assignment in assignment_sequence.assignments:
                 submission_assignment = SubmissionAssignment(assignment.id, assignment.name, assignment.group_id, assignment.points, assignment.date, assignment.day)
                 # print("AOL04 -", assignment.name)
-                if assignment.unlock_day <= actual_day:
+                if (actual_day + 7) > assignment.day:
                     # komt 7 dagen voor de Canvas deadline als "openstaand" item in de werklijst
-                    if student_grade_moments.get_submission_by_assignment(assignment.id) is None:
+                    if student_moments.get_submission_by_assignment(assignment.id) is None:
                         # print("AOL08 -", assignment.name, assignment.unlock_day, actual_day, assignment.day+21)
-                        l_submission = Submission(0, submission_assignment, 0,
+                        l_submission = Submission(0, submission_assignment, student_id,
                                                   None,
                                                   None,
                                                   NOT_YET_GRADED, False, False, None, 0, "Geen",
                                                   0, 0, 0, 0)
                         l_submission.comments.append(Comment(1, ROBOT, assignment.date, NO_SUBMISSION_GRADE))
-                        student_grade_moments.submissions.append(l_submission)
-    elif len(student_grade_moments.assignment_groups) > 1:
-        print("AOL98 - Perspective has more then one assignment_groups attached", student_grade_moments.name,
-              student_grade_moments.assignment_groups)
+                        student_moments.submissions.append(l_submission)
+    elif len(student_moments.assignment_groups) > 1:
+        print("AOL98 - Perspective has more then one assignment_groups attached", student_moments.name,
+              student_moments.assignment_groups)
     else:
-        print("AOL99 - Perspective has no assignment_groups attached", student_grade_moments.name,
-              student_grade_moments.assignment_groups)
+        print("AOL99 - Perspective has no assignment_groups attached", student_moments.name,
+              student_moments.assignment_groups)
 
 
 def read_submissions(a_course_code, a_canvas_course, a_course, a_results, a_total_refresh, dashboard):

@@ -1,14 +1,14 @@
 import json
 import os
-import sys
+
 
 from scripts.lib.build_bootstrap import build_bootstrap_dashboard_index
 from scripts.lib.build_bootstrap_release_planning import build_release_planning_index_html
 from scripts.lib.build_bootstrap_werkvoorraad import build_workload_index_html
-from scripts.lib.build_late import build_teacher_index_html
+from scripts.lib.build_late import build_workload_item_index_html
 from scripts.lib.build_plotly_bandwidth import build_plotly_bandwidth
 from scripts.lib.build_total_progress import create_total_progress, process_total_progress
-from scripts.lib.build_total_workload import get_teachers, create_workload, get_workload
+from scripts.lib.build_total_workload import get_teachers, create_workload, get_workload, get_bof_value
 from scripts.lib.lib_bootstrap import load_templates
 from scripts.lib.lib_date import get_actual_date
 from scripts.lib.plot_totals import build_plotly_workload, build_plotly_progress
@@ -36,9 +36,11 @@ def generate_dashboard(course_instance):
 
     teachers = get_teachers(course)
     print("GD04 - create_total_workload(instance, course, team_coaches)")
-    workload = create_workload(teachers)
+    workload = create_workload(dashboard, teachers, course.groups_1, course.groups_2)
     print("GD05 - process_total_workload(instance, course, results, total_workload)")
     workload = get_workload(course, results, workload)
+    workload = get_bof_value(course, results, workload)
+
     workload_history = read_workload(course_instance.get_workload_file_name())
     workload_day = WorkloadDay(results.actual_day)
     workload_day.from_actual_workload(workload)
@@ -66,10 +68,16 @@ def generate_dashboard(course_instance):
 
     build_workload_index_html(course_instance, course, workload, results.actual_date, templates)
     print("GD07 - build_teacher_index_html(instances, templates, course, results, workload)")
-    build_teacher_index_html(course_instance, templates, dashboard, course, results, workload)
+    build_workload_item_index_html(course_instance, templates, dashboard, course, results, workload)
     print("GD08 - build_release_planning_index_html(course_instance, course, templates)")
     build_release_planning_index_html(course_instance, course, templates)
-    print("GD19 - build_bootstrap_dashboard_indexcourse_instance, course, results, templates, teachers, dashboard, workload)")
+    print("GD19 - build_bootstrap_dashboard_index, course_instance, course, results, templates, teachers, dashboard, workload)")
     build_bootstrap_dashboard_index(course_instance, course, results, templates, teachers, dashboard, workload)
+
+    for teacher in workload.get_dimension("teachers").items:
+        if teacher.total_value == 0:
+            print("GD20 - Teacher:", teacher.total_value)
+        else:
+            print(f"GD06 - {teacher.name:30} {teacher.bof_count:4} {teacher.total_value:5} {int(teacher.bof_count*100/teacher.total_value):4}")
 
     print("GPL99 - Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")

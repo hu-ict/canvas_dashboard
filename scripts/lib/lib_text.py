@@ -1,9 +1,14 @@
 import re
 
+REG_EX = "(?i)@LU\s*\d+\s*[+-]?"
+# REG_EX = "@LU\s*\d+\s*"
+# REG_EX = "@LU"
+REG_EX_ALG = "@\w+"
+
 def get_lu_from_extracted_text(text):
     text_lu_result = []
     print("LTXT03 -", text)
-    at_sign_words = [woord[1:] for woord in re.findall(r'@\w+', text)]
+    at_sign_words = [woord[1:] for woord in re.findall(REG_EX_ALG, text)]
     print("LTXT05 -", at_sign_words)
     return at_sign_words
 
@@ -19,27 +24,26 @@ def get_extracted_text(text):
                 text_parts.append("@" + text_part)
     else:
         text_parts.append(text)
-    # print("GC32 -", text_parts)
+    # print("LTXT32 -", text_parts)
     for text_part in text_parts:
-        # print("GC33 -", text_part)
+        print("LTXT33 -", text_part)
         # Vind alle woorden die beginnen met @
-        at_sign_words = [woord[1:] for woord in re.findall(r'@\w+', text_part)]
+        print("LTXT34 -", re.findall(REG_EX, text_part))
+        at_sign_words = [woord[1:] for woord in re.findall(REG_EX, text_part)]
         if len(at_sign_words) == 0:
             break
-        # print("GC34 -", at_sign_words)
+        print("LTXT35 -", at_sign_words)
         # Verwijder deze woorden inclusief eventuele spatie ervoor
-        aangepaste_tekst = re.sub(r'\s?@\w+', '', text_part)
+        aangepaste_tekst = re.sub(REG_EX, '', text_part)
         # Extra spaties opruimen
-        aangepaste_tekst = re.sub(r'\s+', ' ', aangepaste_tekst).strip()
-        if len(aangepaste_tekst) > 0:
-            if aangepaste_tekst[0] == "-":
-                positive_neutral_negative = "-"
-                aangepaste_tekst = aangepaste_tekst[1:].strip()
-            elif aangepaste_tekst[0] == "+":
-                positive_neutral_negative = "+"
-                aangepaste_tekst = aangepaste_tekst[1:].strip()
-            else:
-                positive_neutral_negative = "N"
+        aangepaste_tekst = aangepaste_tekst.strip()
+        at_sign_words[0] = at_sign_words[0].upper().replace(" ", "")
+        if at_sign_words[0][-1] == "-":
+            positive_neutral_negative = "-"
+            at_sign_words[0] = at_sign_words[0][:-1]
+        elif at_sign_words[0][-1] == "+":
+            positive_neutral_negative = "+"
+            at_sign_words[0] = at_sign_words[0][:-1]
         else:
             positive_neutral_negative = "N"
         text_lu_result.append({"lu": at_sign_words[0], "positive_neutral_negative": positive_neutral_negative, "text": aangepaste_tekst})

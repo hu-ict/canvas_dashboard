@@ -7,12 +7,13 @@ from scripts.lib.file import read_course, write_results, write_progress_history,
     read_progress_history, read_secret_api_key, read_dashboard, read_dashboard_from_canvas
 from scripts.lib.lib_attendance import read_attendance
 from scripts.lib.lib_feedback import get_feedback_from_submission
-from scripts.lib.lib_submission import count_graded, add_missed_assignments, read_submissions, add_open_level_moments, \
-    add_open_grade_moments
+from scripts.lib.lib_submission import count_graded, add_missed_assignments, read_submissions, add_open_moments
 from scripts.model.Result import *
 from scripts.lib.lib_date import get_actual_date, API_URL, date_to_day
 from scripts.model.StudentResults import StudentResults
 import sys
+
+from scripts.model.perspective.Status import VIEW_UNPOSTED
 
 
 def generate_results(course_instance):
@@ -58,8 +59,8 @@ def generate_results(course_instance):
         for student_perspective in student.perspectives.values():
             # Perspective aanvullen met missed Assignments waar nodig (niets ingeleverd)
             add_missed_assignments(course, results.actual_day, student_perspective)
-        add_open_level_moments(course, results.actual_day, student.id, student.student_level_moments)
-        add_open_grade_moments(course, results.actual_day, student.id, student.student_grade_moments)
+        add_open_moments(course, results.actual_day, student.id, student.student_level_moments)
+        add_open_moments(course, results.actual_day, student.id, student.student_grade_moments)
     # for student in results.students:
     #     print("GR75", student.name)
     # sorteer de attendance en submissions
@@ -79,16 +80,16 @@ def generate_results(course_instance):
         for student_perspective in student.perspectives.values():
             for submission_sequence in student_perspective.submission_sequences:
                 for submission in submission_sequence.submissions:
-                    if submission.posted:
+                    if submission.posted or VIEW_UNPOSTED:
                         get_feedback_from_submission(course, student, submission)
         if student.student_level_moments is not None:
             for submission in student.student_level_moments.submissions:
-                if submission.posted:
+                if submission.posted or VIEW_UNPOSTED:
                     get_feedback_from_submission(course, student, submission)
         if student.student_grade_moments is not None:
             for submission in student.student_grade_moments.submissions:
-                # if submission.posted:
-                get_feedback_from_submission(course, student, submission)
+                if submission.posted or VIEW_UNPOSTED:
+                    get_feedback_from_submission(course, student, submission)
 
     results.submission_count, results.not_graded_count = count_graded(results)
     # with open(instances.get_result_file_name(instances.current_instance), 'w') as f:

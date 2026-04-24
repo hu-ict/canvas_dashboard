@@ -1,6 +1,5 @@
 import json
 import os
-from pathlib import Path
 
 from scripts.model.ProgressHistory import ProgressHistory
 from scripts.model.Result import Result
@@ -205,4 +204,22 @@ def read_plotly(plotly_file_name):
         for line in lines:
             result_str += line.strip()
         return result_str
+
+def write_feedback_csv(learning_outcomes, feedback_filename):
+    def pnn_to_pn(positive_neutral_negative):
+        if "N" in positive_neutral_negative:
+            return "neutraal"
+        elif "+" in positive_neutral_negative:
+            return "positief"
+        elif "-" in positive_neutral_negative:
+            return "negatief"
+        else:
+            return ""
+
+    # print("F025 - feedback_filename", feedback_filename)
+    with open(feedback_filename, mode='w', encoding="utf-8-sig") as outfile:
+        outfile.write('lu;grade;bof\n')
+        for learning_outcome in learning_outcomes.values():
+            for bof in learning_outcome.feedback_list:
+                outfile.write(learning_outcome.id+';'+pnn_to_pn(bof.positive_neutral_negative)+';'+bof.comment+'\n')
 

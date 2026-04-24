@@ -1,7 +1,6 @@
 DIR_DIV = "/"
 ENVIRONMENT_PATH = "." + DIR_DIV + "environment" + DIR_DIV
 COURSES_PATH = "." + DIR_DIV + "courses" + DIR_DIV
-
 ENVIRONMENT_FILE_NAME = ENVIRONMENT_PATH + "environment.json"
 SECRET_API_KEY_FILE_NAME = ENVIRONMENT_PATH + "canvas_api_key.json"
 MSTEAMS_API_KEY_FILE_NAME = ENVIRONMENT_PATH + "msteams_api.json"

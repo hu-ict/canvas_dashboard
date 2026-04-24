@@ -32,6 +32,7 @@ def generate_feedback_csv(course_instance):
             print("GFC05 - student, learning_outcome", student.name, learning_outcome.id )
             for feedback in learning_outcome.feedback_list:
                 feedback_list[learning_outcome.id].append(feedback)
+        course_instance.get_feedback_file_name
     for learning_outcome in feedback_list:
         write_feedback_csv(course_instance.get_feedback_file_name(learning_outcome), feedback_list[learning_outcome])
 

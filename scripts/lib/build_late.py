@@ -21,75 +21,76 @@ def build_bootstrap_late_submission_item(a_templates, a_result, l_submission):
     return submission_html_string
 
 
-def build_teacher_index_html(a_instance, a_templates, a_dashboard, a_course, a_result, a_workload):
-    for workload_teacher in a_workload.workload_teachers:
-        late_list_temp = workload_teacher.worklist
-        late_list = sorted(late_list_temp, key=itemgetter('submitted_date'))
-        late_list_html_total_string = ''
-        for l_submission in late_list:
-            # if l_submission["submitted_day"]+7 < a_result.actual_day:
-            #     print("BL22 -", l_submission)
-            late_item = build_bootstrap_late_submission_item(a_templates, a_result, l_submission)
-            late_list_html_total_string += late_item
-            if l_submission["submitted_day"] is None:
-                day = a_course.days_in_semester
-            else:
-                day = l_submission["submitted_day"]
-            item = {"submitted_day": day, "item": late_item}
-        workload_html_string = a_templates["teacher_workload"].substitute({'submissions': late_list_html_total_string})
-        # teacher_html_string = a_templates["teacher_teacher"].substitute({'teacher_name': teacher.name})
-        teacher = a_course.find_teacher_by_initials(workload_teacher.initials)
-        groups = dict()
-        for responsibility in teacher.responsibilities:
-            if responsibility.student_group_collection == "groups_1":
-                groups[a_dashboard.groups_1.name] = dict()
-                break
-        for responsibility in teacher.responsibilities:
-            if responsibility.student_group_collection == "groups_2":
-                groups[a_dashboard.groups_2.name] = dict()
-                break
-        for responsibility in teacher.responsibilities:
-            if responsibility.student_group_collection == "groups_1":
-                for student_group_name in responsibility.student_groups:
-                    print("BL31 - student_group_name", student_group_name)
-                    group = a_course.find_groups_1_group_by_name(student_group_name)
-                    if group:
-                        group_name = group.name
-                        assignment_group = a_course.get_assignment_group(responsibility.assignment_group_id)
-                        if group_name in groups[a_dashboard.groups_1.name]:
-                            groups[a_dashboard.groups_1.name][group_name] += ", "+assignment_group.name
-                        else:
-                            groups[a_dashboard.groups_1.name][group_name] = "Opdrachtgroepen: "+assignment_group.name
-                    else:
-                        print("BL32 - student_group_name not found", student_group_name)
+def build_workload_item_index_html(a_instance, a_templates, a_dashboard, a_course, a_result, a_workload):
+    for dimension in a_workload.dimensions:
+        for workload_item in dimension.items:
+            late_list_temp = workload_item.worklist
+            late_list = sorted(late_list_temp, key=itemgetter('submitted_date'))
+            late_list_html_total_string = ''
+            for l_submission in late_list:
+                # if l_submission["submitted_day"]+7 < a_result.actual_day:
+                #     print("BL22 -", l_submission)
+                late_item = build_bootstrap_late_submission_item(a_templates, a_result, l_submission)
+                late_list_html_total_string += late_item
+                if l_submission["submitted_day"] is None:
+                    day = a_course.days_in_semester
+                else:
+                    day = l_submission["submitted_day"]
+                item = {"submitted_day": day, "item": late_item}
+            workload_html_string = a_templates["teacher_workload"].substitute({'submissions': late_list_html_total_string})
+            # teacher_html_string = a_templates["teacher_teacher"].substitute({'teacher_name': teacher.name})
+            if dimension.name is "teachers":
+                teacher = a_course.find_teacher_by_initials(workload_item.short)
+                groups = dict()
+                for responsibility in teacher.responsibilities:
+                    if responsibility.student_group_collection == "groups_1":
+                        groups[a_dashboard.groups_1.name] = dict()
+                        break
+                for responsibility in teacher.responsibilities:
+                    if responsibility.student_group_collection == "groups_2":
+                        groups[a_dashboard.groups_2.name] = dict()
+                        break
+                for responsibility in teacher.responsibilities:
+                    if responsibility.student_group_collection == "groups_1":
+                        for student_group_name in responsibility.student_groups:
+                            # print("BL31 - student_group_name", student_group_name)
+                            group = a_course.find_groups_1_group_by_name(student_group_name)
+                            if group:
+                                group_name = group.name
+                                assignment_group = a_course.get_assignment_group(responsibility.assignment_group_id)
+                                if group_name in groups[a_dashboard.groups_1.name]:
+                                    groups[a_dashboard.groups_1.name][group_name] += ", "+assignment_group.name
+                                else:
+                                    groups[a_dashboard.groups_1.name][group_name] = "Opdrachtgroepen: "+assignment_group.name
+                            else:
+                                print("BL32 - student_group_name not found", student_group_name)
 
-            elif responsibility.student_group_collection == "groups_2":
-                for student_group_name in responsibility.student_groups:
-                    group = a_course.find_groups_2_group_by_name(student_group_name)
-                    if group:
-                        group_name = a_course.find_groups_2_group_by_name(student_group_name).name
-                        assignment_group = a_course.get_assignment_group(responsibility.assignment_group_id)
-                        if group_name in groups[a_dashboard.groups_2.name]:
-                            groups[a_dashboard.groups_2.name][group_name] += ", "+assignment_group.name
-                        else:
-                            groups[a_dashboard.groups_2.name][group_name] = "Opdrachtgroepen: "+assignment_group.name
-                    else:
-                        print("BL41 -", "Group not found", student_group_name)
-            teacher_html_string = "<ul>"
-            for item in groups:
-                teacher_html_string += "<li>"+item
-                teacher_html_string += "<ul>"
-                for item_n1 in groups[item]:
-                    teacher_html_string += "<li>"+item_n1
-                    teacher_html_string += "<ul><li>" + groups[item][item_n1] + "</li></ul>"
-                    teacher_html_string += "</li>"
-                teacher_html_string += "</ul>"
-                teacher_html_string += "</li>"
-            teacher_html_string += "</ul>"
+                    elif responsibility.student_group_collection == "groups_2":
+                        for student_group_name in responsibility.student_groups:
+                            group = a_course.find_groups_2_group_by_name(student_group_name)
+                            if group:
+                                group_name = a_course.find_groups_2_group_by_name(student_group_name).name
+                                assignment_group = a_course.get_assignment_group(responsibility.assignment_group_id)
+                                if group_name in groups[a_dashboard.groups_2.name]:
+                                    groups[a_dashboard.groups_2.name][group_name] += ", "+assignment_group.name
+                                else:
+                                    groups[a_dashboard.groups_2.name][group_name] = "Opdrachtgroepen: "+assignment_group.name
+                            else:
+                                print("BL41 -", "Group not found", student_group_name)
+                    teacher_html_string = "<ul>"
+                    for item in groups:
+                        teacher_html_string += "<li>"+item
+                        teacher_html_string += "<ul>"
+                        for item_n1 in groups[item]:
+                            teacher_html_string += "<li>"+item_n1
+                            teacher_html_string += "<ul><li>" + groups[item][item_n1] + "</li></ul>"
+                            teacher_html_string += "</li>"
+                        teacher_html_string += "</ul>"
+                        teacher_html_string += "</li>"
+                    teacher_html_string += "</ul>"
+            teacher_index_html = a_templates["teacher_index"].substitute({'teacher_id': workload_item.short, 'teacher_name': workload_item.name, 'workload': workload_html_string, 'teacher': teacher_html_string})
 
-        teacher_index_html = a_templates["teacher_index"].substitute({'teacher_id': teacher.initials, 'teacher_name': teacher.name, 'workload': workload_html_string, 'teacher': teacher_html_string})
-
-        file_name = "teacher_"+teacher.initials+".html"
-        with open(a_instance.get_html_general_path()+file_name, mode='w', encoding="utf-8") as file_late_list:
-            file_late_list.write(teacher_index_html)
+            file_name = dimension.name+"_"+workload_item.short+".html"
+            with open(a_instance.get_html_general_path()+file_name, mode='w', encoding="utf-8") as file_late_list:
+                file_late_list.write(teacher_index_html)
 

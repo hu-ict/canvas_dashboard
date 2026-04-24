@@ -31,7 +31,7 @@ class Perspective:
 
     @staticmethod
     def from_dict(data_dict):
-        print("PERS09 - Perspective.from_dict", data_dict)
+        # print("PERS09 - Perspective.from_dict", data_dict)
         new = Perspective(data_dict['name'], data_dict['title'], data_dict['show_flow'], data_dict['show_points'],
                           data_dict['total_points'])
         if 'assignment_group_ids' in data_dict.keys():

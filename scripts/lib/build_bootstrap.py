@@ -4,7 +4,7 @@ from scripts.lib.build_bootstrap_learning_analytics import build_learning_analyt
 from scripts.lib.build_bootstrap_learning_outcome import build_bootstrap_learning_outcome_tab
 from scripts.lib.build_bootstrap_release_planning import build_bootstrap_release_planning_tab
 
-from scripts.lib.build_bootstrap_werkvoorraad import build_bootstrap_teacher_tab, WORKLOAD_PLOTLY_HTML
+from scripts.lib.build_bootstrap_werkvoorraad import build_bootstrap_workload_tab, WORKLOAD_PLOTLY
 from scripts.lib.plot_totals import RELEASE_PLANNING_PLOTLY_HTML, PROGRESS_PLOTLY_HTML
 
 
@@ -39,7 +39,7 @@ def build_bootstrap_groups(a_instance, a_course, a_student_groups, a_results, a_
     # coaches = {}
     html_string = ''
     for group in a_student_groups:
-        print("BBDI05 -", group.name, len(group.assessors))
+        # print("BBDI05 -", group.name, len(group.assessors))
         students_html_string = ""
         if group.principal_assessor > 0:
             assessor = a_course.find_teacher(group.principal_assessor)
@@ -50,7 +50,7 @@ def build_bootstrap_groups(a_instance, a_course, a_student_groups, a_results, a_
                 print("BBDI07 - teacher_id not found:", assessor.teacher_id)
         else:
             assessors_string = ""
-        print("BBDI08 -", group.principal_assessor,  assessors_string)
+        # print("BBDI08 -", group.principal_assessor,  assessors_string)
         coaches = ""
         for assessor in group.assessors:
             coaches += " "+str(assessor.teacher_id)
@@ -126,7 +126,7 @@ def build_bootstrap_menu_html(a_instance, a_templates, menu_items):
         elif menu_item == "levels":
             start_pages[menu_item] = a_instance.get_link_general_path() + PROGRESS_PLOTLY_HTML
         elif menu_item == "workload":
-            start_pages[menu_item] = a_instance.get_link_general_path() + WORKLOAD_PLOTLY_HTML
+            start_pages[menu_item] = a_instance.get_link_general_path() + WORKLOAD_PLOTLY + "_teachers.html"
         elif menu_item == "learning_outcomes":
             start_pages[menu_item] = a_instance.get_link_general_path() + "standard.html"
         elif menu_item == "release_planning":
@@ -169,7 +169,7 @@ def build_bootstrap_left_panel_html(a_instance, a_menu_items, a_course, a_result
             tabs_html_string = build_bootstrap_progress(a_instance, a_course, a_results, a_templates, a_level_serie_collection)
         elif tab == "workload":
             print("BBDI55 - Tab", tab)
-            tabs_html_string = build_bootstrap_teacher_tab(a_instance, a_templates, a_workload)
+            tabs_html_string = build_bootstrap_workload_tab(a_instance, a_templates, a_workload)
         elif tab == "release_planning":
             print("BBDI56 - Tab", tab)
             tabs_html_string = build_bootstrap_release_planning_tab(a_instance, a_course, a_templates,

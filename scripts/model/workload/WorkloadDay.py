@@ -19,7 +19,7 @@ class WorkloadDay:
         pending = 0
         late = 0
         to_late = 0
-        for workload_teacher in workload.workload_teachers:
+        for workload_teacher in workload.get_dimension("teachers").items:
             pending += workload_teacher.w1_count
             late += workload_teacher.w2_count
             to_late += workload_teacher.w3_count

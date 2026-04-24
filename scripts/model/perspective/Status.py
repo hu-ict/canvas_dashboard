@@ -4,6 +4,8 @@ NOT_CORRECT_GRADED = "3"
 MISSED_ITEM = "4"
 GRADED = "5"
 
+VIEW_UNPOSTED = False
+
 
 class Status:
     def __init__(self, label, color):

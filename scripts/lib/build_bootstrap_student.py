@@ -1,10 +1,11 @@
 from scripts.lib.build_plotly_hover import get_hover_assignment, \
     get_hover_grade, get_hover_status
-from scripts.lib.file import read_plotly
+from scripts.lib.file import read_plotly, write_feedback_csv
 from scripts.lib.lib_date import get_date_time_loc
 from scripts.lib.lib_portfolio import TOTAL_POINTS, STATUS_COMPLETE, STATUS_INCOMPLETE, STATUS_MISSED, STATUS_PENDING, \
     STATUS_COMING
-from scripts.model.perspective.Status import NOT_YET_GRADED, BEFORE_DEADLINE, GRADED, MISSED_ITEM
+from scripts.model.perspective.Status import NOT_YET_GRADED, BEFORE_DEADLINE, GRADED, MISSED_ITEM, VIEW_UNPOSTED
+
 
 def get_submission_badges(assignment_sequence, submission_sequence, actual_day):
     # *******************************
@@ -173,9 +174,28 @@ def build_moment(course_id, course, level_serie, assignment_name, submission, te
              'reflection': ""
              }
         )
+    elif not submission.posted and not VIEW_UNPOSTED:
+        # print("BLM03 - len(moment_submissions) == 0")
+        progress_label = level_serie.get_status(BEFORE_DEADLINE).label
+        progress_color = level_serie.get_status(BEFORE_DEADLINE).color
+        comments = "Leeg"
+        url = "https://canvas.hu.nl/courses/" + str(course_id)
+        learning_outcomes_table = ""
+        level_moment_html_string = templates['level_moment'].substitute(
+            {'level_moment_title': assignment_name,
+             'url': url,
+             'progress_label': progress_label,
+             'progress_color': progress_color,
+             'submitted_date': "leeg",
+             'grader_name': "leeg",
+             'graded_date': "leeg",
+             'comments': comments,
+             'learning_outcomes_table': learning_outcomes_table,
+             'reflection': ""
+             }
+        )
     else:
         level_moment_html_string = ""
-
         # print("BLM04 -", moment_submission.assignment_name, moment_submission.graded, moment_submission.grade)
         # print("BLM05 -", level_serie)
         comments = get_comments_html(submission.comments)
@@ -458,7 +478,7 @@ def build_bootstrap_feedback(course, student_results, templates, feedback_colors
 def build_bootstrap_student_index(course_instance, course_id, course, student_results, actual_date, actual_day, templates,
                                   dashboard):
     student = course.find_student(student_results.id)
-
+    student_name = student.email.split("@")[0].lower()
     # ******************************
     # Student top of page header
     # ******************************
@@ -490,6 +510,7 @@ def build_bootstrap_student_index(course_instance, course_id, course, student_re
         dashboard_tab_groups_2 = "Geen"
     student_header_html_string = templates['student_header'].substitute(
         {
+            'csv_filename': student_name + "_bof.csv",
             'semester': course.name,
             'student_name': student.name,
             'student_email': student.email,
@@ -547,9 +568,13 @@ def build_bootstrap_student_index(course_instance, course_id, course, student_re
             'student_tabs': student_tabs_html_string
         }
     )
-    student_name = student.email.split("@")[0].lower()
+
     file_name_html = course_instance.get_html_student_path() + student_name + "_index.html"
-    # print("BB21 - Write portfolio for", student.name)
+    file_name_csv = course_instance.get_html_student_path() + student_name + "_bof.csv"
+    # print("BB21 - Write feedback for", student.name)
+    write_feedback_csv(student_results.learning_outcomes, file_name_csv)
+
+    # print("BB22 - Write portfolio for", student.name)
     with open(file_name_html, mode='w', encoding="utf-8") as file_portfolio:
         file_portfolio.write(student_index_html_string)
     return

@@ -49,13 +49,7 @@ print("Creating new course", course_code)
 course = Course(course_code)
 environment.courses.append(course)
 
-os.makedirs(os.path.dirname(course.get_path()), exist_ok=True)
-
-with open(ENVIRONMENT_FILE_NAME, 'w') as f:
-    dict_result = environment.to_json()
-    json.dump(dict_result, f, indent=2)
-
-if course_code in ["TICT-V1SE1-24", "TICT-V1SE1-24a"]:
+if course_code in ["TICT-V1SE1-24", "TICT-V1SE1-24a", "TICT-V1SE1-24b"]:
     dashboard_tabs = {
         "groups_1": "groups_1",
         "groups_2": "groups_2",
@@ -164,6 +158,12 @@ for canvas_assignment_group in canvas_assignment_groups:
     if 'n' not in yes_no.lower():
         meta_assignment_group = MetaAssignmentGroup(canvas_assignment_group.name, "groups_1", "POINTS", "bin2", "circle", 0, 0, 0, 0, 0)
         dashboard.assignment_groups.append(meta_assignment_group)
+
+os.makedirs(os.path.dirname(course.get_path()), exist_ok=True)
+
+with open(ENVIRONMENT_FILE_NAME, 'w') as f:
+    dict_result = environment.to_json()
+    json.dump(dict_result, f, indent=2)
 
 dashboard_file_name = course.get_path() + DIR_DIV + "dashboard.json"
 with open(dashboard_file_name, 'w') as f:

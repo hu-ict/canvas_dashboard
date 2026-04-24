@@ -1,49 +1,50 @@
 from scripts.lib.file import read_plotly
 
-WORKLOAD_PLOTLY_HTML = "workload_plotly.html"
-WORKLOAD_INDEX_HTML = "workload_index.html"
+WORKLOAD_PLOTLY = "workload_plotly"
+WORKLOAD_INDEX = "workload_index"
 
-def build_bootstrap_teacher_tab(a_instance, a_templates, a_workload):
+def build_bootstrap_workload_tab(a_instance, a_templates, a_workload):
     overzicht_html_string = ""
-    list_html_string = ""
-    for teacher in a_workload.workload_teachers:
-        file_name = "teacher_" + teacher.initials + ".html"
-        link_path_name = a_instance.get_link_general_path() + file_name
-        list_html_string += a_templates["selector"].substitute(
-                {'selector_file': link_path_name, 'selector_name': teacher.name,  'selector': teacher.initials})
-
-    overzicht_html_string += a_templates["overzicht"].substitute({'perspective': "Docent", 'buttons': list_html_string})
+    for dimension in a_workload.dimensions:
+        list_html_string = ""
+        dimension_link_path_name = a_instance.get_link_general_path() + WORKLOAD_PLOTLY + "_" + dimension.name + ".html"
+        for item in dimension.items:
+            item_file_name = dimension.name + "_" + item.short + ".html"
+            link_path_name = a_instance.get_link_general_path() + item_file_name
+            list_html_string += a_templates["selector"].substitute(
+                    {'selector_file': link_path_name, 'selector_name': item.name,  'selector': item.short})
+        overzicht_html_string += a_templates["overzicht"].substitute({'url': dimension_link_path_name, 'perspective': dimension.description, 'buttons': list_html_string})
     return overzicht_html_string
 
 
 def build_workload_index_html(a_instance, a_course, a_workload, a_actual_date, a_templates):
-    html_string = ""
-    file_name = a_instance.get_html_general_path() + WORKLOAD_PLOTLY_HTML
-    html_string += a_templates["workload_index"].substitute(
-        {'semester': a_course.name,
-         'actual_date': a_actual_date,
-         'workload_plot': read_plotly(file_name),
-         'workload_late': build_problems(a_course, a_workload, a_templates)})
-    file_name_html = a_instance.get_html_general_path() + WORKLOAD_INDEX_HTML
-    # print("BB21 - Write portfolio for", student.name)
-    with open(file_name_html, mode='w', encoding="utf-8") as file:
-        file.write(html_string)
+    for dimension in a_workload.dimensions:
+        html_string = ""
+        file_name = a_instance.get_html_general_path() + WORKLOAD_PLOTLY + "_" + dimension.name + ".html"
+        html_string += a_templates["workload_index"].substitute(
+            {'semester': a_course.name,
+             'actual_date': a_actual_date,
+             'workload_plot': read_plotly(file_name),
+             'workload_late': build_workload_dimension_overview(dimension, a_templates)})
+        file_name_html = a_instance.get_html_general_path() + WORKLOAD_INDEX + "_" + dimension.name + ".html"
+        # print("BB21 - Write portfolio for", student.name)
+        with open(file_name_html, mode='w', encoding="utf-8") as file:
+            file.write(html_string)
 
 
-def build_problems(a_course, a_workload, a_templates):
+def build_workload_dimension_overview(workload_dimension, templates):
     problem_html = ""
     problem_count = 0
-    recipients = ""
-    for teacher in a_workload.workload_teachers:
-        if teacher.w2_count > 0 or teacher.w3_count > 0:
-            problem_html += a_templates["workload_problem"].substitute({'url': 'url',
-                            'assessor': teacher.name,
-                            'items_open': teacher.w1_count+teacher.w2_count+teacher.w3_count,
-                            'items_late': teacher.w2_count+teacher.w3_count,
-                            'items_to_late': teacher.w3_count,
+    for item in workload_dimension.items:
+        if item.w2_count > 0 or item.w3_count > 0:
+            problem_html += templates["workload_problem"].substitute({'url': 'url',
+                            'assessor': item.name,
+                            'items_open': item.w1_count+item.w2_count+item.w3_count,
+                            'items_late': item.w2_count+item.w3_count,
+                            'items_to_late': item.w3_count,
                             'items_problem': problem_count
                             })
-    html_string = a_templates["workload_problems"].substitute({'problems': problem_html})
+    html_string = templates["workload_problems"].substitute({'problems': problem_html})
     return html_string
 
 

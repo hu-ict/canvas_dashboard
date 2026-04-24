@@ -78,7 +78,7 @@ class CourseConfig:
         for key in self.perspectives:
             dict_result['perspectives'][key] = self.perspectives[key].to_json()
         dict_result['learning_outcomes'] = list(map(lambda l: l.to_json(), self.learning_outcomes))
-        dict_result['roles'] = list(map(lambda r: r.to_json([]), self.roles))
+        dict_result['roles'] = list(map(lambda r: r.to_json(), self.roles))
         dict_result['teachers'] = list(map(lambda t: t.to_json(), self.teachers))
         dict_result['assignment_groups'] = list(map(lambda ag: ag.to_json(), self.assignment_groups))
         dict_result['groups_1'] = list(map(lambda sg: sg.to_json(), self.groups_1))

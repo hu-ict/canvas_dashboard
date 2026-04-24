@@ -50,7 +50,7 @@ def link_assessors_to_groups_and_students(course):
     print('GST41 - Link assessors to groups and students')
     for teacher in course.teachers:
         for responsibility in teacher.responsibilities:
-            # print("GST43 -", responsibility.student_group_collection)
+            print("GST43 -", responsibility.student_group_collection)
             if responsibility.student_group_collection == "groups_1":
                 for student_group_id in responsibility.student_groups:
                     # zoeken naar groups_1 en nummer of naam
@@ -63,7 +63,7 @@ def link_assessors_to_groups_and_students(course):
                     else:
                         print("GST45 - geen student_group voor", student_group_id)
 
-            if responsibility.student_group_collection == "groups_2":
+            elif responsibility.student_group_collection == "groups_2":
                 for student_group_name in responsibility.student_groups:
                     # zoeken naar groups_1 en nummer of naam
                     print("GST81 -", student_group_name)
@@ -74,7 +74,10 @@ def link_assessors_to_groups_and_students(course):
                     if student_group is not None:
                         add_assessors_to_groups_and_students(course, student_group, teacher, responsibility)
                     else:
-                        print("GST47 - geen student_group voor", student_group_id)
+                        print("GST47 - geen student_group voor", student_group_name)
+            else:
+                print("GST48 - student_group_collection niet gevonden", responsibility.student_group_collection)
+
 
 
 def link_principal_assessor_to_groups_and_students(course):

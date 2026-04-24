@@ -8,7 +8,7 @@ from scripts.lib.lib_date import date_to_day, get_date_time_loc
 from scripts.lib.lib_plotly import get_marker_size, hover_style
 from scripts.model.Submission import Submission
 from scripts.model.SubmissionAssignment import SubmissionAssignment
-from scripts.model.perspective.Status import BEFORE_DEADLINE
+from scripts.model.perspective.Status import BEFORE_DEADLINE, VIEW_UNPOSTED
 
 
 def find_submissions(a_student, a_peil_construction):
@@ -240,7 +240,7 @@ def plot_submissions(a_row, a_col, a_fig, a_course, a_student_perspective, a_lev
         y_size.append(get_marker_size(submission_sequence.is_graded()))
         x_submission.append(submission_sequence.get_day())
 
-        if submission_sequence.is_graded() and submission_sequence.is_posted():
+        if submission_sequence.is_graded() and (submission_sequence.is_posted() or VIEW_UNPOSTED):
             cum_score += submission_sequence.get_score()
             if submission_sequence.points == 0:
                 # lelijke hack
@@ -256,13 +256,13 @@ def plot_submissions(a_row, a_col, a_fig, a_course, a_student_perspective, a_lev
         l_hover = ""
         for submission in submission_sequence.submissions:
             l_hover += get_hover_assignment(l_perspective.show_points, submission)
-            if submission.graded and submission.posted:
+            if submission.graded and (submission.posted or VIEW_UNPOSTED):
                 grade = l_level_serie.grades[submission.grade]
                 l_hover += get_hover_grade(a_course, submission, grade)
             else:
                 status = l_level_serie.status[submission.status]
                 l_hover += get_hover_status(submission, status)
-            if submission.posted:
+            if submission.posted or VIEW_UNPOSTED:
                 l_hover += get_hover_comments(submission.comments)
                 if submission.graded:
                     grade = l_level_serie.grades[submission.grade]
@@ -412,7 +412,7 @@ def plot_timeline_moments(a_row, a_col, a_fig, a_course, a_submission_list, a_le
         y_feedback.append("BP<br>Peil/Beslissing")
         # print("BPP61 -", submission.assignment.name, submission.graded, submission.grade)
         y_hover.append(get_hover_moment(a_course, submission, level_serie))
-        if submission.graded:
+        if submission.graded and (submission.posted or VIEW_UNPOSTED):
             y_colors.append(level_serie.grades[submission.grade].color)
         else:
             y_colors.append(level_serie.get_status(BEFORE_DEADLINE).color)
