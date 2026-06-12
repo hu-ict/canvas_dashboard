@@ -1,4 +1,5 @@
 import csv
+import sys
 
 from scripts.lib.file import read_course, read_environment
 from scripts.lib.file_const import ENVIRONMENT_FILE_NAME
@@ -13,6 +14,7 @@ def read_attendancy_csv(a_filename):
     return attendancy
 
 def main():
+    sys.stdout.reconfigure(encoding="utf-8")
     environment = read_environment(ENVIRONMENT_FILE_NAME)
     execution = environment.get_execution_by_name("env_2")
     attendancy = read_attendancy_csv("attendancy.txt")
@@ -20,9 +22,14 @@ def main():
     print("RUN213 - Instance:", course_instance.name)
     course_instance.execution_source_path = execution.source_path
     course = read_course(course_instance.get_course_file_name())
+    not_attended = []
     print(len(attendancy))
     for student in course.students:
         if student.email not in attendancy:
-            print("NOT", student.email)
+            not_attended.append(student)
+    sorted_not_attended = sorted(not_attended, key=lambda s: student.sortable_name)
+    for student in sorted_not_attended:
+        print(student.sortable_name)
+
 
 main()

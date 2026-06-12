@@ -3,6 +3,7 @@ from scripts.model.learning_outcome.StudentLearningOutcome import StudentLearnin
 from scripts.model.attendance.StudentAttendance import StudentAttendance
 from scripts.model.moment.StudentGradeMoments import StudentGradeMoments
 from scripts.model.moment.StudentLevelMoments import StudentLevelMoments
+from scripts.model.moment.StudentObservations import StudentObservations
 from scripts.model.perspective.StudentPerspective import StudentPerspective
 
 
@@ -19,7 +20,7 @@ class StudentResults:
         self.role = a_role
         self.student_level_moments = None
         self.student_grade_moments = None
-        self.student_attendance = None
+        self.student_observations = None
         self.perspectives = {}
         self.learning_outcomes = {}
         self.general_feedback_list = []
@@ -29,7 +30,6 @@ class StudentResults:
         if self.perspectives is not None:
             for perspective in self.perspectives:
                 line += " p "+str(self.perspectives[perspective])
-        line += " a "+str(self.student_attendance)
         return line
 
     def get_submission_sequence_by_name(self, name):
@@ -66,8 +66,8 @@ class StudentResults:
             dict_result['student_level_moments'] = self.student_level_moments.to_json()
         if self.student_grade_moments is not None:
             dict_result['student_grade_moments'] = self.student_grade_moments.to_json()
-        if self.student_attendance is not None:
-            dict_result['student_attendance'] = self.student_attendance.to_json()
+        if self.student_observations is not None:
+            dict_result['student_observations'] = self.student_observations.to_json()
         for key in self.perspectives:
             dict_result['perspectives'][key] = self.perspectives[key].to_json()
         for key in self.learning_outcomes:
@@ -175,8 +175,8 @@ class StudentResults:
             # print("SR41 -", new.student_level_moments)
         if 'student_grade_moments' in data_dict.keys() and data_dict['student_grade_moments'] is not None:
             new.student_grade_moments = StudentGradeMoments.from_dict(data_dict['student_grade_moments'])
-        if 'student_attendance' in data_dict.keys() and data_dict['student_attendance'] is not None:
-            new.student_attendance = StudentAttendance.from_dict(data_dict['student_attendance'])
+        if 'student_observations' in data_dict.keys() and data_dict['student_observations'] is not None:
+            new.student_observations = StudentObservations.from_dict(data_dict['student_observations'])
         for key in data_dict['perspectives'].keys():
             new.perspectives[key] = StudentPerspective.from_dict(data_dict['perspectives'][key])
         for key in data_dict['learning_outcomes'].keys():
@@ -193,12 +193,12 @@ class StudentResults:
                              student.role, student.email, student.site, -1)
         for perspective in course.perspectives.values():
             new.perspectives[perspective.name] = StudentPerspective.copy_from(course, student, perspective)
+        if course.observations is not None:
+            new.student_observations = StudentObservations.copy_from(course.observations)
         if course.level_moments is not None:
             new.student_level_moments = StudentLevelMoments.copy_from(course.level_moments)
         if course.grade_moments is not None:
             new.student_grade_moments = StudentGradeMoments.copy_from(course.grade_moments)
-        if course.attendance is not None:
-            new.student_attendance = StudentAttendance.copy_from(course.attendance)
         if course.learning_outcomes is not None:
             for learning_outcome in course.learning_outcomes:
                 new.learning_outcomes[learning_outcome.id] = StudentLearningOutcome.copy_from(learning_outcome)

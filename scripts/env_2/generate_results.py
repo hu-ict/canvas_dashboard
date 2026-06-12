@@ -43,17 +43,7 @@ def generate_results(course_instance):
     for student in course.students:
         student_results = StudentResults.copy_from(student, course)
         results.students.append(student_results)
-        # with open(".//output//"+student_results.name+".json", 'w') as f:
-        #     dict_results = student_results.to_json()
-        #     print(student_results.name)
-        #     json.dump(dict_results, f, indent=2)
 
-    # for student in results.students:
-    #     print("GR07 -", student.name, student.number)
-    if course.attendance is not None:
-        read_attendance(course_instance.attendance_report, course, results)
-    else:
-        print("GR10 - No attendance")
     read_submissions(course_instance.course_code, canvas_course, course, results, True, dashboard)
     for student in results.students:
         for student_perspective in student.perspectives.values():
@@ -65,9 +55,6 @@ def generate_results(course_instance):
     #     print("GR75", student.name)
     # sorteer de attendance en submissions
     for student in results.students:
-        if course.attendance is not None:
-            student.student_attendance.attendance_submissions = sorted(
-                student.student_attendance.attendance_submissions, key=lambda s: s.day)
         for perspective in student.perspectives.values():
             for submission_sequence in perspective.submission_sequences:
                 submission_sequence.submissions = sorted(submission_sequence.submissions,
@@ -76,12 +63,16 @@ def generate_results(course_instance):
 
     # Feedback comments naar leeruitkomsten
     for student in results.students:
-        # print("GRE81 -", student.name)
+        print("GRE81 -", student.name)
         for student_perspective in student.perspectives.values():
             for submission_sequence in student_perspective.submission_sequences:
                 for submission in submission_sequence.submissions:
                     if submission.posted or VIEW_UNPOSTED:
                         get_feedback_from_submission(course, student, submission)
+        if student.student_observations is not None:
+            for submission in student.student_observations.submissions:
+                if submission.posted or VIEW_UNPOSTED:
+                    get_feedback_from_submission(course, student, submission)
         if student.student_level_moments is not None:
             for submission in student.student_level_moments.submissions:
                 if submission.posted or VIEW_UNPOSTED:
@@ -90,7 +81,8 @@ def generate_results(course_instance):
             for submission in student.student_grade_moments.submissions:
                 if submission.posted or VIEW_UNPOSTED:
                     get_feedback_from_submission(course, student, submission)
-
+        for learning_outcome in student.learning_outcomes.values():
+            learning_outcome.feedback_list = sorted(learning_outcome.feedback_list, key=lambda s: s.day)
     results.submission_count, results.not_graded_count = count_graded(results)
     # with open(instances.get_result_file_name(instances.current_instance), 'w') as f:
     #     dict_result = results.to_json(["perspectives"])

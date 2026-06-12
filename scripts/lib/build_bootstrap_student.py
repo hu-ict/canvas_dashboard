@@ -508,8 +508,17 @@ def build_bootstrap_student_index(course_instance, course_id, course, student_re
         dashboard_tab_groups_2 = dashboard.groups_2.title
     else:
         dashboard_tab_groups_2 = "Geen"
+    observations = course.get_observations()
+    if len(observations) > 0:
+        observation_url = ("https://canvas.hu.nl/courses/" + str(course_id) + "/gradebook/speed_grader?assignment_id="
+                           + str(course.get_observations()[0].id)
+                           + "&student_id=" + str(student_results.id))
+    else:
+        observation_url = None
+
     student_header_html_string = templates['student_header'].substitute(
         {
+            'observation_url': observation_url,
             'csv_filename': student_name + "_bof.csv",
             'semester': course.name,
             'student_name': student.name,

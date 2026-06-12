@@ -39,16 +39,16 @@ def build_workload_item_index_html(a_instance, a_templates, a_dashboard, a_cours
                 item = {"submitted_day": day, "item": late_item}
             workload_html_string = a_templates["teacher_workload"].substitute({'submissions': late_list_html_total_string})
             # teacher_html_string = a_templates["teacher_teacher"].substitute({'teacher_name': teacher.name})
-            if dimension.name is "teachers":
+            if dimension.name == "teachers":
                 teacher = a_course.find_teacher_by_initials(workload_item.short)
                 groups = dict()
                 for responsibility in teacher.responsibilities:
                     if responsibility.student_group_collection == "groups_1":
-                        groups[a_dashboard.groups_1.name] = dict()
+                        groups[a_dashboard.groups_1.title] = dict()
                         break
                 for responsibility in teacher.responsibilities:
                     if responsibility.student_group_collection == "groups_2":
-                        groups[a_dashboard.groups_2.name] = dict()
+                        groups[a_dashboard.groups_2.title] = dict()
                         break
                 for responsibility in teacher.responsibilities:
                     if responsibility.student_group_collection == "groups_1":
@@ -58,10 +58,10 @@ def build_workload_item_index_html(a_instance, a_templates, a_dashboard, a_cours
                             if group:
                                 group_name = group.name
                                 assignment_group = a_course.get_assignment_group(responsibility.assignment_group_id)
-                                if group_name in groups[a_dashboard.groups_1.name]:
-                                    groups[a_dashboard.groups_1.name][group_name] += ", "+assignment_group.name
+                                if group_name in groups[a_dashboard.groups_1.title]:
+                                    groups[a_dashboard.groups_1.title][group_name] += ", "+assignment_group.name
                                 else:
-                                    groups[a_dashboard.groups_1.name][group_name] = "Opdrachtgroepen: "+assignment_group.name
+                                    groups[a_dashboard.groups_1.title][group_name] = "Opdrachtgroepen: "+assignment_group.name
                             else:
                                 print("BL32 - student_group_name not found", student_group_name)
 
@@ -71,10 +71,10 @@ def build_workload_item_index_html(a_instance, a_templates, a_dashboard, a_cours
                             if group:
                                 group_name = a_course.find_groups_2_group_by_name(student_group_name).name
                                 assignment_group = a_course.get_assignment_group(responsibility.assignment_group_id)
-                                if group_name in groups[a_dashboard.groups_2.name]:
-                                    groups[a_dashboard.groups_2.name][group_name] += ", "+assignment_group.name
+                                if group_name in groups[a_dashboard.groups_2.title]:
+                                    groups[a_dashboard.groups_2.title][group_name] += ", "+assignment_group.name
                                 else:
-                                    groups[a_dashboard.groups_2.name][group_name] = "Opdrachtgroepen: "+assignment_group.name
+                                    groups[a_dashboard.groups_2.title][group_name] = "Opdrachtgroepen: "+assignment_group.name
                             else:
                                 print("BL41 -", "Group not found", student_group_name)
                     teacher_html_string = "<ul>"

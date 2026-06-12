@@ -5,6 +5,7 @@ from scripts.model.Role import Role
 from scripts.model.Section import Section
 from scripts.model.Student import Student
 from scripts.model.StudentGroup import StudentGroup
+from scripts.model.moment.Observations import Observations
 from scripts.model.teacher.Teacher import Teacher
 from scripts.model.learning_outcome.LearningOutcome import LearningOutcome
 from scripts.model.attendance.Attendance import Attendance
@@ -27,8 +28,8 @@ class CourseConfig:
         self.groups_1_principal_assignment_group_id = groups_1_principal_assignment_group_id
         self.groups_2_principal_assignment_group_id = groups_2_principal_assignment_group_id
         self.sections = []
+        self.observations = None
         self.level_moments = None
-        self.attendance = None
         self.grade_moments = None
         self.perspectives = {}
         self.roles = []
@@ -44,25 +45,11 @@ class CourseConfig:
         line = f'CourseConfig({self.course_code}, {self.canvas_id}, {self.name}, {self.groups_1_principal_assignment_group_id})'
         return line
 
-    def to_json(self):
-        # print("CC05 -", self.course_code, self)
-        dict_result = {
-            'course_code': self.course_code,
-            'canvas_id': self.canvas_id,
-            'name': self.name,
-            'student_count': self.student_count,
-            'start_date': get_date_time_str(self.start_date),
-            'end_date': get_date_time_str(self.end_date),
-            'improvement_period': self.improvement_period,
-            'groups_1_principal_assignment_group_id': self.groups_1_principal_assignment_group_id,
-            'groups_2_principal_assignment_group_id': self.groups_2_principal_assignment_group_id,
-            'sections': list(map(lambda s: s.to_json(), self.sections))
-        }
-        # print("CC10 -", self.attendance)
-        if self.attendance is not None:
-            dict_result['attendance'] = self.attendance.to_json()
+    def to_generic_json(self, dict_result):
+        if self.observations is not None:
+            dict_result['observations'] = self.observations.to_json()
         else:
-            dict_result['attendance'] = None
+            dict_result['observations'] = None
 
         if self.level_moments is not None:
             dict_result['level_moments'] = self.level_moments.to_json()
@@ -77,6 +64,37 @@ class CourseConfig:
         dict_result['perspectives'] = {}
         for key in self.perspectives:
             dict_result['perspectives'][key] = self.perspectives[key].to_json()
+        return dict_result
+
+
+    def to_student_json(self):
+        dict_result = {
+            'course_code': self.course_code,
+            'canvas_id': self.canvas_id,
+            'name': self.name,
+            'start_date': get_date_time_str(self.start_date),
+            'end_date': get_date_time_str(self.end_date)
+        }
+        dict_result = self.to_generic_json(dict_result)
+        dict_result['assignment_groups'] = list(map(lambda ag: ag.to_student_json(), self.assignment_groups))
+        return dict_result
+
+
+    def to_json(self):
+        # print("CC05 -", self.course_code, self)
+        dict_result = {
+            'course_code': self.course_code,
+            'canvas_id': self.canvas_id,
+            'name': self.name,
+            'student_count': self.student_count,
+            'start_date': get_date_time_str(self.start_date),
+            'end_date': get_date_time_str(self.end_date),
+            'improvement_period': self.improvement_period,
+            'groups_1_principal_assignment_group_id': self.groups_1_principal_assignment_group_id,
+            'groups_2_principal_assignment_group_id': self.groups_2_principal_assignment_group_id,
+            'sections': list(map(lambda s: s.to_json(), self.sections))
+        }
+        dict_result = self.to_generic_json(dict_result)
         dict_result['learning_outcomes'] = list(map(lambda l: l.to_json(), self.learning_outcomes))
         dict_result['roles'] = list(map(lambda r: r.to_json(), self.roles))
         dict_result['teachers'] = list(map(lambda t: t.to_json(), self.teachers))
@@ -84,7 +102,6 @@ class CourseConfig:
         dict_result['groups_1'] = list(map(lambda sg: sg.to_json(), self.groups_1))
         dict_result['groups_2'] = list(map(lambda sg: sg.to_json(), self.groups_2))
         dict_result['students'] = list(map(lambda s: s.to_json(), self.students))
-
         return dict_result
 
     def get_assignment_group(self, group_id):
@@ -253,12 +270,12 @@ class CourseConfig:
         for perspective in self.perspectives.values():
             if assignment_group_id in perspective.assignment_group_ids:
                 return perspective
+        if self.observations is not None and assignment_group_id in self.observations.assignment_group_ids:
+            return self.observations
         if self.level_moments is not None and assignment_group_id in self.level_moments.assignment_group_ids:
             return self.level_moments
         if self.grade_moments is not None and assignment_group_id in self.grade_moments.assignment_group_ids:
             return self.grade_moments
-        # if self.attendance is not None and assignment_group_id in self.attendance.assignment_groups:
-        #     return self.attendance
         return None
 
     def find_assignment_by_group(self, assigment_group_id, assignment_id):
@@ -269,6 +286,15 @@ class CourseConfig:
             if assigment.id == assignment_id:
                 return assigment
         return None
+
+    def get_observations(self):
+        assignments = []
+        for assignment_group_id in self.observations.assignment_group_ids:
+            assignment_group = self.get_assignment_group(assignment_group_id)
+            for assignment_sequence in assignment_group.assignment_sequences:
+                for assignment in assignment_sequence.assignments:
+                    assignments.append(assignment)
+        return assignments
 
     def get_level_moments(self):
         assignments = []
@@ -335,8 +361,8 @@ class CourseConfig:
             new.grade_moments = GradeMoments.from_dict(data_dict['grade_moments'])
         if 'learning_outcomes' in data_dict.keys() and data_dict['learning_outcomes'] is not None:
             new.learning_outcomes = list(map(lambda l: LearningOutcome.from_dict(l), data_dict['learning_outcomes']))
-        if 'attendance' in data_dict.keys() and data_dict['attendance'] is not None:
-            new.attendance = Attendance.from_dict(data_dict['attendance'])
+        if 'observations' in data_dict.keys() and data_dict['observations'] is not None:
+            new.observations = Observations.from_dict(data_dict['observations'])
         if 'perspectives' in data_dict.keys():
             for key in data_dict['perspectives'].keys():
                 new.perspectives[key] = Perspective.from_dict(data_dict['perspectives'][key])

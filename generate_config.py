@@ -13,6 +13,7 @@ from scripts.model.CourseConfig import CourseConfig
 from scripts.model.Role import Role
 from scripts.model.Section import Section
 from scripts.model.StudentGroup import StudentGroup
+from scripts.model.moment.Observations import Observations
 from scripts.model.teacher.Teacher import Teacher
 from scripts.model.attendance.Attendance import Attendance
 from scripts.model.moment.GradeMoments import GradeMoments
@@ -77,15 +78,24 @@ def generate_config(instance_name):
         else:
             print(print("GCNF29 - No assignment_groups for perspective", perspective.title))
 
-    if dashboard.level_moments:
-        print("GCNF31 -", dashboard.level_moments)
-        config.level_moments = LevelMoments("level_moments", dashboard.level_moments.title)
-        for assignment_group_name in dashboard.level_moments.assignment_group_names:
+    if dashboard.observations:
+        print("GCNF31 -", dashboard.observations)
+        config.observations = Observations("observations", dashboard.observations.title)
+        for assignment_group_name in dashboard.observations.assignment_group_names:
             assignment_group = config.find_assignment_group_by_name(assignment_group_name)
             print("GCNF32 -", assignment_group_name, assignment_group)
             if assignment_group:
-                config.level_moments.assignment_group_ids.append(assignment_group.id)
+                config.observations.assignment_group_ids.append(assignment_group.id)
         print("GCNF33 -", config.level_moments)
+    if dashboard.level_moments:
+        print("GCNF36 -", dashboard.level_moments)
+        config.level_moments = LevelMoments("level_moments", dashboard.level_moments.title)
+        for assignment_group_name in dashboard.level_moments.assignment_group_names:
+            assignment_group = config.find_assignment_group_by_name(assignment_group_name)
+            print("GCNF37 -", assignment_group_name, assignment_group)
+            if assignment_group:
+                config.level_moments.assignment_group_ids.append(assignment_group.id)
+        print("GCNF38 -", config.level_moments)
     if dashboard.grade_moments:
         print("GCNF41 -", dashboard.grade_moments)
         config.grade_moments = GradeMoments("grade_moments", dashboard.grade_moments.title)

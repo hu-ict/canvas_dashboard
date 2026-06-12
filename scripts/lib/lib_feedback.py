@@ -6,6 +6,9 @@ from scripts.model.learning_outcome.Feedback import Feedback
 def categorize_feedback(feedback_comment):
     feedback_list = []
     if '@' in feedback_comment:
+        feedback_comment = feedback_comment.replace("\u00a0", " ")
+        feedback_comment = feedback_comment.replace(".@", ". @")
+        feedback_list.append(feedback_comment)
         feedback_list = get_extracted_text(feedback_comment)
     else:
         feedback_list.append({"lu": "AF", "positive_neutral_negative": "N", "text": feedback_comment})

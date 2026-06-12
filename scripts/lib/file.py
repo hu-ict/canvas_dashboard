@@ -115,6 +115,12 @@ def write_course(file_name, course):    # Write JSON file with UTF-8 encoding
         json.dump(dict_result, file, ensure_ascii=False, indent=2)
 
 
+def write_course_student(file_name, course):    # Write JSON file with UTF-8 encoding
+    with open(file_name, "w", encoding="utf-8") as file:
+        dict_result = course.to_student_json()
+        json.dump(dict_result, file, ensure_ascii=False, indent=2)
+
+
 def read_workload(workload_file_name):
     print("F008 - read_workload", workload_file_name)
     if os.path.isfile(workload_file_name):
@@ -161,6 +167,18 @@ def read_config_from_canvas(canvas_course):
     return course_config
 
 
+def write_course_student_to_canvas(canvas_course, course_student):
+    print("F031 - write course_student to Canvas", "course_student-dot-json")
+    # Step 1: get page
+    page = canvas_course.get_page("course_student-dot-json")
+    print(page.body)
+    # Step 3: modify it
+    new_body = course_student.to_student_json()
+    # Step 4: update page
+    page.edit(wiki_page={
+        "body": new_body
+    })
+
 def read_levels_from_canvas1(canvas_course):
     print("F022 - read levels_file from Canvas", "levels-dot-json")
     page = canvas_course.get_page("levels-dot-json")
@@ -181,7 +199,6 @@ def read_subplots_from_canvas1(canvas_course):
 
 def read_dashboard_from_canvas(canvas_course):
     print("F023 - Read dashboard_file from Canvas dashboard-dot-json", canvas_course.name)
-    page = canvas_course.get_page("dashboard-dot-json")
     page = canvas_course.get_page("dashboard-dot-json")
     dashboard_file = remove_html_tags(page.body)
     data = json.loads(dashboard_file)

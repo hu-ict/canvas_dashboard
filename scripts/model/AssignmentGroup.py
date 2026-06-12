@@ -18,6 +18,19 @@ class AssignmentGroup:
         self.marker = marker
         self.assignment_sequences = []
 
+    def to_student_json(self):
+        json_string = {
+            'name': self.name,
+            'id': self.id,
+            'groups': self.groups,
+            'total_points': self.total_points,
+            'levels': self.levels,
+            'marker': self.marker
+        }
+        if len(self.assignment_sequences) > 0:
+            json_string['assignment_sequences'] = list(map(lambda a: a.to_json(), self.assignment_sequences))
+        return json_string
+
     def to_json(self):
         json_string = {
             'name': self.name,

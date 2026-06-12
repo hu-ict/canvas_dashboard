@@ -7,7 +7,7 @@ from scripts.lib.bandwidth.lib_bandwidth_improved import bandwidth_builder, get_
 from scripts.lib.file_const import SECRET_API_KEY_FILE_NAME
 from scripts.lib.lib_date import API_URL, get_date_time_obj, date_to_day, get_actual_date
 from scripts.lib.file import read_config_from_canvas, read_course, read_secret_api_key, \
-    read_dashboard_from_canvas, write_course, read_dashboard
+    read_dashboard_from_canvas, write_course, read_dashboard, write_course_student, write_course_student_to_canvas
 from scripts.lib.lib_student import get_section_students, get_students_in_groups, link_students_to_role, \
     link_assessors_to_groups_and_students, link_principal_assessor_to_groups_and_students, get_groups_in_scope, \
     link_section_students_to_groups_1
@@ -60,14 +60,24 @@ def get_rubrics(canvas_rubrics):
 
 def get_used_assignment_groups(config):
     used_assignment_groups = []
+
+    if config.observations is not None:
+        if len(config.observations.assignment_group_ids) > 0:
+            used_assignment_groups += config.observations.assignment_group_ids
+        else:
+            message = "GC01 - WARNING no assignments_group for observations perspective " + config.observations.name
+            print(message)
+    else:
+        print("GC02 - NO observations perspective ")
+
     if config.level_moments is not None:
         if len(config.level_moments.assignment_group_ids) > 0:
             used_assignment_groups += config.level_moments.assignment_group_ids
         else:
-            message = "GC01 - WARNING no assignments_group for level_moments perspective " + config.level_moments.name
+            message = "GC03 - WARNING no assignments_group for level_moments perspective " + config.level_moments.name
             print(message)
     else:
-        print("GC03 - NO level_moments perspective ")
+        print("GC04 - NO level_moments perspective ")
 
     if config.grade_moments is not None:
         if len(config.grade_moments.assignment_group_ids) > 0:
@@ -76,7 +86,7 @@ def get_used_assignment_groups(config):
             message = "GC05 - WARNING no assignments_group for grade_moments perspective " + config.grade_moments.name
             print(message)
     else:
-        print("GC07 - NO level_moments perspective ")
+        print("GC06 - NO level_moments perspective ")
 
     for perspective in config.perspectives.values():
         if len(perspective.assignment_group_ids) > 0:
@@ -164,10 +174,6 @@ def generate_course(course_instance):
 
     user = canvas.get_current_user()
     print("GCS03 -", user.name)
-    if config.attendance is not None:
-        attendance = get_attendance(config.attendance)
-        if attendance is not None:
-            config.attendance = attendance
 
     uses_assignment_groups = get_used_assignment_groups(config)
 
@@ -201,6 +207,8 @@ def generate_course(course_instance):
                     else:
                         message = f"GCS65 - WARNING [{canvas_assignment.grading_type}] points_possible is not set for", canvas_assignment.name
                         print(message)
+                elif canvas_assignment.grading_type == 'not_graded':
+                    points_possible = 0
                 else:
                     message = f"GCS26 - ERROR - {canvas_assignment.grading_type} AFGEWEZEN grading_type {canvas_assignment.name} points_possible {canvas_assignment.points_possible}"
                     print(message)
@@ -288,6 +296,8 @@ def generate_course(course_instance):
                             message = f"GCS38 - WARNING No rubric in assignment {assignment.name} grading_type {assignment.grading_type}"
                             assignment.messages.append(message)
                             print(message)
+                elif canvas_assignment.grading_type == 'not_graded':
+                    assignment.points = 0
                 else:
                     message = f"GCS40 - ERROR Unsupported grading_type {assignment.grading_type}"
                     assignment.messages.append(message)
@@ -349,8 +359,6 @@ def generate_course(course_instance):
             assignment_group = config.get_assignment_group(assignment_group_id)
             config.perspectives[perspective_key].total_points += assignment_group.total_points
         print("GCS91 -", perspective_key, "assignment_groups", len(config.perspectives[perspective_key].assignment_group_ids), "total_points", config.perspectives[perspective_key].total_points)
-    if config.attendance is not None:
-        config.attendance.bandwidth = bandwidth_builder_attendance(config.attendance.lower_points, config.attendance.upper_points, config.attendance.total_points, config.days_in_semester)
 
     # Ophalen Students
     print("GS005 - Retrieve students")
@@ -423,12 +431,7 @@ def generate_course(course_instance):
     #     print("GST017 -", student)
 
     write_course(course_instance.get_course_file_name(), config)
+    write_course_student(course_instance.get_course_student_file_name(), config)
+    # write_course_student_to_canvas(canvas_course, config)
 
     print("GCRS99 - Time running:",(get_actual_date() - g_actual_date).seconds, "seconds")
-
-
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        generate_course(sys.argv[1], sys.argv[2])
-    else:
-        generate_course("", "")

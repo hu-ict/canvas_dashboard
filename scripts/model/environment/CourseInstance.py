@@ -59,6 +59,9 @@ class CourseInstance:
     def get_course_file_name(self):
         return self.get_project_path() + "course_"+self.name +".json"
 
+    def get_course_student_file_name(self):
+        return self.get_project_path() + "course_student_"+self.name +".json"
+
     def get_result_file_name(self):
         return self.get_project_path() + "result_"+self.name +".json"
 

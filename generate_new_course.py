@@ -90,6 +90,7 @@ if course_code in ["TICT-V1SE1-24", "TICT-V1SE1-24a", "TICT-V1SE1-24b"]:
       }
 
     ]
+    observations = {"name": "observations", "title": "Observaties", "assignment_group_names": ["Observaties"]}
     level_moments = {"name": "level_moments", "title": "Peilmomenten", "assignment_group_names": ["Voortgangsmomenten"]}
     grade_moments = {"name": "grade_moments", "title": "Beoordelingsmomenten", "assignment_group_names": ["Beoordelingsmomenten"]}
 else:
@@ -106,6 +107,7 @@ else:
     groups_1 = Groups("Projecten", "Project Groups", "Beoordelingsmomenten")
     groups_2 = Groups("Gilden", "Guild Groups", "Gilde")
     learning_outcomes = learning_outcomes_V3SE6
+    observations = {"name": "observations", "title": "Observaties", "assignment_group_names": ["Observaties"]}
     level_moments = {"name": "level_moments", "title": "Peilmomenten", "assignment_group_names": ["Peilmomenten"]}
     grade_moments = {"name": "grade_moments", "title": "Beoordelingsmomenten", "assignment_group_names": ["Beoordelingsmomenten"]}
     student_tabs = {
@@ -150,6 +152,7 @@ dashboard.groups_1 = groups_1
 dashboard.groups_2 = groups_2
 dashboard.learning_outcomes = learning_outcomes
 dashboard.perspectives = perspectives
+dashboard.observations = observations
 dashboard.level_moments = level_moments
 dashboard.grade_moments = grade_moments
 dashboard.roles = roles

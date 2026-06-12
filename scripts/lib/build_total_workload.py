@@ -115,7 +115,7 @@ def get_bof_value(a_course, a_results, a_workload):
     for student in a_results.students:
         for learning_outcome in student.learning_outcomes.values():
             for feedback in learning_outcome.feedback_list:
-                teacher = a_workload.get_dimension("teacher").get_workload_item(feedback.author_id)
+                teacher = a_workload.get_dimension("teachers").get_workload_item(feedback.author_id)
                 if teacher is not None:
                     teacher.bof_count += 1
                 else:

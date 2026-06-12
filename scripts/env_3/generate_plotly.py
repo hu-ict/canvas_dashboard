@@ -26,12 +26,6 @@ def plot_student(course_instance, course, student, actual_date, actual_day,
                              actual_day, get_date_time_loc(actual_date),
                              level_serie_collection)
 
-    if "attendance" in subplots.positions:
-        if course.attendance is not None:
-            row = subplots.positions["attendance"]['row']
-            col = subplots.positions["attendance"]['col']
-            plot_attendance_perspective(row, col, fig, course, student.student_attendance, actual_day,
-                                        get_date_time_loc(actual_date), level_serie_collection)
     # last_date = get_time_div("13", last_date)
     if "timeline" in subplots.positions:
         row = subplots.positions["timeline"]['row']

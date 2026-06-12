@@ -7,6 +7,7 @@ from scripts.model.learning_outcome.LearningOutcome import LearningOutcome
 from scripts.model.dashboard.MetaPerspective import MetaPerspective
 from scripts.model.moment.MetaGradeMoments import MetaGradeMoments
 from scripts.model.moment.MetaLevelMoments import MetaLevelMoments
+from scripts.model.moment.MetaObservations import MetaObservations
 
 
 class Dashboard:
@@ -20,6 +21,7 @@ class Dashboard:
         self.groups_2 = None
         self.roles = []
         self.learning_outcomes = []
+        self.observations = None
         self.level_moments = None
         self.grade_moments = None
         self.perspectives = []
@@ -37,7 +39,9 @@ class Dashboard:
         dict_result = {"dashboard_tabs": self.dashboard_tabs,
                        "groups_1": self.groups_1.to_json(), "groups_2": self.groups_2.to_json(),
                        "perspectives": self.perspectives,
-                       "level_moments": self.level_moments, "grade_moments": self.grade_moments,
+                       "observations": self.observations,
+                       "level_moments": self.level_moments,
+                       "grade_moments": self.grade_moments,
                        "assignment_groups": list(map(lambda a: a.to_json(), self.assignment_groups)),
                        "roles": list(map(lambda r: r.to_json(), self.roles)),
                        "student_tabs": self.student_tabs,
@@ -57,6 +61,9 @@ class Dashboard:
         if "groups_2" in data_dict:
             # print("DAS05 -", data_dict["level_moments"])
             new.groups_2 = Groups.from_dict(data_dict['groups_2'])
+        if "observations" in data_dict:
+            # print("DAS05 -", data_dict["level_moments"])
+            new.observations = MetaObservations.from_dict(data_dict['observations'])
         if "level_moments" in data_dict:
             # print("DAS05 -", data_dict["level_moments"])
             new.level_moments = MetaLevelMoments.from_dict(data_dict['level_moments'])

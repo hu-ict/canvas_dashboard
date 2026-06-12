@@ -9,6 +9,7 @@ NO_SUBMISSION = "Niets ingeleverd voor de deadline"
 NO_SUBMISSION_GRADE = "Moet nog bepaald worden"
 NO_DATA = "Geen data"
 ROBOT = "Automatisch door systeem"
+OBSERVATIONS = "observations"
 LEVEL_MOMENTS = "level_moments"
 GRADE_MOMENTS = "grade_moments"
 
@@ -145,7 +146,7 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
     else:
         posted = False
     canvas_comments = a_canvas_submission.submission_comments
-    if a_assignment.grading_type not in ["pass_fail", "points", "letter_grade"]:
+    if a_assignment.grading_type not in ["pass_fail", "points", "letter_grade", "not_graded"]:
         print("LSU04 - unknown grading_type", a_assignment.grading_type)
         return
     if not a_canvas_submission.submitted_at and len(canvas_comments) == 0 and not graded:
@@ -153,7 +154,7 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
         return
     # print("SB05 -", graded, a_canvas_submission.grader_id)
     if not graded:
-        print("LSUB31 -", a_canvas_submission.submitted_at)
+        # print("LSUB31 -", a_canvas_submission.submitted_at)
         if a_canvas_submission.submitted_at:
             l_submission = Submission(a_canvas_submission.id, a_submission_assignment, a_student.id,
                                       None,None,
@@ -429,11 +430,14 @@ def add_open_moments(course, actual_day, student_id, student_moments):
 
 
 def read_submissions(a_course_code, a_canvas_course, a_course, a_results, a_total_refresh, dashboard):
+    print(f"LSU30 - Perspectives {a_course.perspectives}")
     for assignment_group in a_course.assignment_groups:
         perspective = a_course.find_perspective_by_assignment_group(assignment_group.id)
         if perspective is None:
-            print(f"LSU32 - Warning, could not find perspective for assignment_group {assignment_group.name}")
+            print(f"LSU31 - Warning, could not find perspective for assignment_group {assignment_group.name}")
             continue
+        else:
+            print(f"LSU32 - Perspective {perspective} for assignment_group {assignment_group.name}")
         for assignment_sequence in assignment_group.assignment_sequences:
             for assignment in assignment_sequence.assignments:
                 if not a_total_refresh and ((a_results.actual_date - assignment.date).days > 10):
@@ -479,7 +483,16 @@ def read_submissions(a_course_code, a_canvas_course, a_course, a_results, a_tota
                     if l_submission is None:
                         # print(f"RS25 - Error creating submission {assignment.name} for student {student.name}")
                         continue
-                    if perspective.name == LEVEL_MOMENTS:
+                    # print("LSU15 -", perspective.name, OBSERVATIONS)
+                    if perspective.name == OBSERVATIONS:
+                        if "online_text_entry" in assignment.submission_types:
+                            l_submission.body = canvas_submission.body
+                        if a_total_refresh:
+                            student.student_observations.submissions.append(l_submission)
+                        else:
+                            student.student_observations.put_submission(l_submission)
+                        # print("LS18 - PERSPECTIVE level_moments")
+                    elif perspective.name == LEVEL_MOMENTS:
                         if "online_text_entry" in assignment.submission_types:
                             l_submission.body = canvas_submission.body
                         if a_total_refresh:
