@@ -6,11 +6,12 @@ from scripts.model.Result import Result
 from scripts.model.CourseConfig import CourseConfig
 from scripts.model.Start import Start
 from scripts.model.TeamsApi import TeamsApi
+from scripts.model.dashboard.Dashboard import Dashboard
 from scripts.model.environment.Environment import Environment
 from scripts.model.environment.SecretApiKey import SecretApiKey
 from scripts.model.environment.Workflow import Workflow
 from scripts.model.workload.WorkloadHistory import WorkloadHistory
-from scripts.model.dashboard.Dashboard import Dashboard
+
 from scripts.model.dashboard.Subplot import Subplot
 from scripts.model.dashboard.LevelSerieCollection import LevelSerieCollection
 
@@ -235,8 +236,8 @@ def write_feedback_csv(learning_outcomes, feedback_filename):
 
     # print("F025 - feedback_filename", feedback_filename)
     with open(feedback_filename, mode='w', encoding="utf-8-sig") as outfile:
-        outfile.write('lu;grade;bof\n')
+        outfile.write('learning_outcome;day;grade;portfolio_item;observation\n')
         for learning_outcome in learning_outcomes.values():
             for bof in learning_outcome.feedback_list:
-                outfile.write(learning_outcome.id+';'+pnn_to_pn(bof.positive_neutral_negative)+';'+bof.comment+'\n')
+                outfile.write(learning_outcome.id+';'+str(bof.day)+";"+pnn_to_pn(bof.positive_neutral_negative)+';'+bof.assignment_name+';'+bof.comment+'\n')
 

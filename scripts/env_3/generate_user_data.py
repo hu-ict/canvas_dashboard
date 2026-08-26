@@ -1,6 +1,5 @@
 import json
-from scripts.lib.file import read_course, read_environment
-from scripts.lib.file_const import ENVIRONMENT_FILE_NAME
+from scripts.lib.file import read_course
 from scripts.lib.lib_date import get_actual_date
 
 import csv

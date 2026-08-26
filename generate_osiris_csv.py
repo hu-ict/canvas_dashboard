@@ -39,7 +39,7 @@ def run_env_4(a_actual_date):
 
 def generate_osiris_csv(course_instance):
     print("GOC02 - Instance:", course_instance.name)
-    assignment_id = 366679
+    assignment_id = 395061
     course = read_course(course_instance.get_course_file_name())
     results = read_results(course_instance.get_result_file_name())
     write_osiris_data_csv(course_instance.get_osiris_data_file_name(), course, results.students, assignment_id)

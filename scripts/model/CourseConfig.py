@@ -1,3 +1,4 @@
+# from generate_new_course import observations
 from scripts.lib.bandwidth.lib_bandwidth import IMPROVEMENT_PERIOD
 from scripts.lib.lib_date import get_date_time_obj, get_date_time_str, date_to_day
 from scripts.model.AssignmentGroup import AssignmentGroup
@@ -289,11 +290,12 @@ class CourseConfig:
 
     def get_observations(self):
         assignments = []
-        for assignment_group_id in self.observations.assignment_group_ids:
-            assignment_group = self.get_assignment_group(assignment_group_id)
-            for assignment_sequence in assignment_group.assignment_sequences:
-                for assignment in assignment_sequence.assignments:
-                    assignments.append(assignment)
+        if self.observations is not None:
+            for assignment_group_id in self.observations.assignment_group_ids:
+                assignment_group = self.get_assignment_group(assignment_group_id)
+                for assignment_sequence in assignment_group.assignment_sequences:
+                    for assignment in assignment_sequence.assignments:
+                        assignments.append(assignment)
         return assignments
 
     def get_level_moments(self):

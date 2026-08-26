@@ -175,11 +175,22 @@ def build_moment(course_id, course, level_serie, assignment_name, submission, te
              }
         )
     elif not submission.posted and not VIEW_UNPOSTED:
+        # Zichtbaarheid: docenten wel en student niet
         # print("BLM03 - len(moment_submissions) == 0")
-        progress_label = level_serie.get_status(BEFORE_DEADLINE).label
-        progress_color = level_serie.get_status(BEFORE_DEADLINE).color
+        if submission.graded:
+            progress_label = "Nog niet gepubliceerd"
+            progress_color = level_serie.get_status(BEFORE_DEADLINE).color
+            grader_name = submission.grader_name
+            graded_date = get_date_time_loc(submission.graded_date)
+
+        else:
+            progress_label = level_serie.get_status(BEFORE_DEADLINE).label
+            progress_color = level_serie.get_status(BEFORE_DEADLINE).color
+            grader_name = "leeg"
+            graded_date = "leeg"
         comments = "Leeg"
-        url = "https://canvas.hu.nl/courses/" + str(course_id)
+        url = "https://canvas.hu.nl/courses/" + str(course_id) + "/gradebook/speed_grader?assignment_id=" + str(
+            submission.assignment.id) + "&student_id=" + str(submission.student_id)
         learning_outcomes_table = ""
         level_moment_html_string = templates['level_moment'].substitute(
             {'level_moment_title': assignment_name,
@@ -187,8 +198,8 @@ def build_moment(course_id, course, level_serie, assignment_name, submission, te
              'progress_label': progress_label,
              'progress_color': progress_color,
              'submitted_date': "leeg",
-             'grader_name': "leeg",
-             'graded_date': "leeg",
+             'grader_name': grader_name,
+             'graded_date': graded_date,
              'comments': comments,
              'learning_outcomes_table': learning_outcomes_table,
              'reflection': ""

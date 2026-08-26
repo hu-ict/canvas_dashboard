@@ -19,7 +19,7 @@ def run_env_2(a_actual_date):
             if course_instance.stage != "SLEEP": #get_date_time_obj(course_instance.period["end_date"]) > a_actual_date and
                 print("RUN23 - Instance:", course_instance.name)
                 course_instance.execution_source_path = execution.source_path
-                # generate_course(course_instance)
+                generate_course(course_instance)
                 generate_results(course_instance)
 
 

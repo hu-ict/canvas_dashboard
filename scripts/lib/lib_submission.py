@@ -123,6 +123,7 @@ def get_rubric_score(rubrics_submission, student):
 
 
 def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submission_assignment, a_canvas_submission, a_dashboard):
+
     grader_name = None
     grader_date = None
     submission_grade = None
@@ -281,6 +282,7 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
             submission_score = round(a_canvas_submission.score, 2)
 
     if not has_assignment_rubric and a_assignment.grading_type == "points":
+        print("LSU81 -", a_student.name)
         submission_score = round(a_canvas_submission.score, 2)
 
     if not has_assignment_rubric and a_assignment.grading_type == "letter_grade":

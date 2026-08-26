@@ -137,6 +137,9 @@ def get_hover_moment(a_course, a_submission, a_level_serie):
             hover += ", bepaald door " + str(a_submission.grader_name) + " op " + get_date_time_loc(a_submission.graded_date)
             hover += get_hover_comments(a_submission.comments)
             hover += get_hover_rubrics_comments(a_course, a_submission, a_level_serie.grades)
+        elif a_submission.graded and not a_submission.posted and not VIEW_UNPOSTED:
+            hover += "Nog niet gepubliceerd"
+            hover += ", bepaald door " + str(a_submission.grader_name) + " op " + get_date_time_loc(a_submission.graded_date)
         else:
             hover += a_level_serie.get_status(BEFORE_DEADLINE).label
     return hover

@@ -16,6 +16,7 @@ def get_time_div(code, last_date):
     print("LIBD - ", code, "Time running:", f"{div_date_time.seconds}.{nummer:03}", "seconds")
     return actual_date
 
+
 def get_date_time_obj(date_time_str):
     if len(date_time_str) == 0:
         return None

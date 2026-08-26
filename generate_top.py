@@ -20,7 +20,7 @@ def generate_top(course_instance):
     print("GT02 - Instance:", course_instance.name)
     course = read_course(course_instance.get_course_file_name())
     team_scores = {}
-    for group in course.project_groups:
+    for group in course.groups_1:
         team_scores[group.id] = {"team": group.name, "score": 0, "scores": []}
     results = read_results(course_instance.get_result_file_name())
     scores_k = {"portfolio": []}

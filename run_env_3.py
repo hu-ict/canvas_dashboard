@@ -1,6 +1,5 @@
 import sys
 
-from scripts.env_3.generate_user_data import generate_user_data
 from scripts.lib.file import read_environment
 from scripts.lib.lib_date import get_actual_date, get_date_time_obj
 from scripts.env_3.generate_dashboard import generate_dashboard
@@ -21,7 +20,7 @@ def run_env_3(a_actual_date):
                 generate_dashboard(course_instance)
                 generate_plotly(course_instance)
                 generate_portfolio(course_instance)
-                publish_dashboard(course_instance)
+                #publish_dashboard(course_instance)
                 # generate_user_data(course_instance)
 
 
