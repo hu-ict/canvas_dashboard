@@ -36,15 +36,15 @@ Verder worden de attributen aangemaakt (gekopieerd uit `dashboard.json`) en gege
 - Rollen
 Dit bestand is ook weer een JSON-bestand met de naam `config_[instance].json` uit op basis van de `instance_name`.
 Daarnaast wordt een excel bestand gegeneerd (`trm_[instance].xlsx`) om de docenten makkelijk en overzichtelijk aan groepen te koppelen. Dit Excel bestand volgens de wensen aanpassen en opslaan.
-## Stap 5 Docent verantwoordelijkheden importeren
+# Stap 5 Docent verantwoordelijkheden importeren
 Het `config_[instance].json` bestand moet verrijkt worden met de docent verantwoordelijkheden. Dit wordt gedaan met het Python script `read_trm.py`. Niet relevante `teachers` worden verwijderd.
 
 In principe is de configuratie van een nieuwe instantie klaar.
-## Stap 6 Configuratie compleet maken
+# Stap 6 Configuratie compleet maken
 `generate_course.py` actualiseert de opdrachten in opdrachtgroepen en studenten in groepen. Deze stap hoeft niet dagelijks uitgevoerd te worden. Zolang er geen nieuwe of aanpassingen van studenten of geen nieuwe en aanpassing aan opdrachten hoeft deze stap niet uitgevoerd worden.  Zit ook in `env_2.py`.
-## stap 7 Ophalen van de Canvas resultaten
+# stap 7 Ophalen van de Canvas resultaten
 'generate_results.py` leest de resultaten en commentaren van de Canvas opdrachten. Zit ook in `env_2.py`.
-## stap 8 genereren en publiceren van de html
+# stap 8 genereren en publiceren van de html
 'env_3.py`
 
 In de dagelijkse praktijd kan je `env.py` aanroepen. Hierin zit `env_2.py' en `env_3.py`. Optie om `generate_course.py` uit te zetten in `env_2.py`.
