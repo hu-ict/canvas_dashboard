@@ -407,15 +407,15 @@ def generate_course(course_instance):
             print("GCRS73 - Verwijder student uit lijst, heeft geen role", student.name)
             config.remove_student(student.id)
             without_role += 1
-    print("GCRS74 - Opschonen studenten zonder groups_1")
-    course_students = config.students.copy()
-    without_groups_1 = 0
-    for student in course_students:
-        print("GST014 -", student.name, "["+str(student.groups_1_group_id)+"]")
-        if student.groups_1_group_id == 0:
-            print("GST015 - Verwijder student uit lijst, heeft without_groups_1", student.name)
-            config.remove_student(student.id)
-            without_groups_1 += 1
+    # print("GCRS74 - Opschonen studenten zonder groups_1")
+    # course_students = config.students.copy()
+    # without_groups_1 = 0
+    # for student in course_students:
+    #     print("GST014 -", student.name, "["+str(student.groups_1_group_id)+"]")
+    #     if student.groups_1_group_id == 0:
+    #         print("GST015 - Verwijder student uit lijst, heeft without_groups_1", student.name)
+    #         config.remove_student(student.id)
+    #         without_groups_1 += 1
 
     config.student_count = len(config.students)
 

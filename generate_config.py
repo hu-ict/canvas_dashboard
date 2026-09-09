@@ -86,7 +86,7 @@ def generate_config(instance_name):
             print("GCNF32 -", assignment_group_name, assignment_group)
             if assignment_group:
                 config.observations.assignment_group_ids.append(assignment_group.id)
-        print("GCNF33 -", config.level_moments)
+        print("GCNF33 -", config.observations)
     if dashboard.level_moments:
         print("GCNF36 -", dashboard.level_moments)
         config.level_moments = LevelMoments("level_moments", dashboard.level_moments.title)
@@ -187,7 +187,7 @@ def generate_config(instance_name):
         dict_result = config.to_json()
         json.dump(dict_result, f, indent=2)
 
-    generate_trm(current_instance, config)
+    # generate_trm(current_instance, config)
 
     print("GCONF99 Time running:", (get_actual_date() - g_actual_date).seconds, "seconds")
 

@@ -38,7 +38,7 @@ def build_workload_item_index_html(a_instance, a_templates, a_dashboard, a_cours
                     day = l_submission["submitted_day"]
                 item = {"submitted_day": day, "item": late_item}
             workload_html_string = a_templates["teacher_workload"].substitute({'submissions': late_list_html_total_string})
-            # teacher_html_string = a_templates["teacher_teacher"].substitute({'teacher_name': teacher.name})
+            teacher_html_string = "Leeg"
             if dimension.name == "teachers":
                 teacher = a_course.find_teacher_by_initials(workload_item.short)
                 groups = dict()

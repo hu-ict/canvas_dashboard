@@ -54,6 +54,9 @@ def create_tab(ws, data_frame, teachers):
     ws.add_data_validation(picklist)
     column = columns[len(data_frame.columns)-1]
     row = len(data_frame)+1
+    if len(data_frame) == 0:
+        return
+    ws.column_dimensions['A'].width = 75
     print("LIBT31 -", column, row)
     picklist.add(f"B2:{column}{row}")  # assignment1
     for column in columns[1:len(data_frame.columns)]:
