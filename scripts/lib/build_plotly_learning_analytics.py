@@ -2,7 +2,7 @@ from plotly.subplots import make_subplots
 import plotly.graph_objs as go
 
 
-def process_analytics(learning_analytics, assignment, level_serie_collection, filename):
+def build_plotly_learning_analytics(learning_analytics, assignment, level_serie_collection, filename):
     # print("BPA10 - Processing", assignment.name)
     positions = {'status': {'row': 1, 'col': 1},
                  'grades': {'row': 1, 'col': 2}
@@ -21,7 +21,7 @@ def process_analytics(learning_analytics, assignment, level_serie_collection, fi
         # print("BPA11 - Status", status, level_serie_name, level_serie.status)
         l_color = level_serie.status[str(status)].color
         x = [level_serie.status[str(status)].label]
-        y = [learning_analytics[str(assignment.id)]["status"][status]]
+        y = [learning_analytics[str(assignment.id)]["status"][status]["count"]]
         fig.add_trace(
             go.Bar(x=x,
                    y=y,
@@ -37,7 +37,7 @@ def process_analytics(learning_analytics, assignment, level_serie_collection, fi
         level_serie = level_serie_collection.level_series[level_serie_name]
         l_color = level_serie.grades[str(grade)].color
         x = [level_serie.grades[str(grade)].label]
-        y = [learning_analytics[str(assignment.id)]["grades"][grade]]
+        y = [learning_analytics[str(assignment.id)]["grades"][grade]["count"]]
 
         fig.add_trace(
             go.Bar(x=x,

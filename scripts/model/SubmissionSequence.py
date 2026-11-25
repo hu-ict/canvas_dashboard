@@ -1,5 +1,6 @@
 from scripts.lib.lib_portfolio import STATUS_COMPLETE, STATUS_INCOMPLETE, STATUS_MISSED, STATUS_PENDING
 from scripts.model.Submission import Submission
+from scripts.model.learning_outcome.StudentLearningOutcome import StudentLearningOutcome
 from scripts.model.perspective.Status import MISSED_ITEM, GRADED, BEFORE_DEADLINE, NOT_CORRECT_GRADED, NOT_YET_GRADED
 
 class SubmissionSequence:
@@ -10,6 +11,7 @@ class SubmissionSequence:
         self.points = points
         self.flow = flow
         self.submissions = []
+
 
     def __str__(self):
         return f'SubmissionSequence({self.name}, {self.tag}, {self.grading_type}, {self.points})'
@@ -29,6 +31,24 @@ class SubmissionSequence:
                 score = submission.score
         return score
 
+    def is_posted(self):
+        '''
+        Look for posted
+        '''
+        for submission in self.submissions:
+            if not submission.posted:
+                return False
+        return True
+
+    def is_late(self):
+        '''
+        Look for late
+        '''
+        for submission in self.submissions:
+            if submission.late:
+                return True
+        return False
+
     def get_grade(self):
         '''
         Look for the highest score
@@ -42,19 +62,25 @@ class SubmissionSequence:
     def get_status(self):
         for submission in self.submissions:
             if submission.status == NOT_CORRECT_GRADED:
-                return NOT_CORRECT_GRADED
-        for submission in self.submissions:
-            if submission.status == NOT_YET_GRADED:
-                return NOT_YET_GRADED
+                return submission.status
         graded_count = 0
         for submission in self.submissions:
             if submission.graded:
                 graded_count += 1
         if graded_count > 0:
             return GRADED
+        if self.submissions[-1].status == NOT_YET_GRADED:
+            return NOT_YET_GRADED
         if self.submissions[-1].score == 0:
             return MISSED_ITEM
         return BEFORE_DEADLINE
+
+    #
+    # def get_grade(self):
+    #     if len(self.submissions) == 1:
+    #         if self.submissions[0].graded:
+    #             return self.submissions[0].grade
+    #     return 0
 
     def get_complete_status_css(self):
         if self.get_status() == GRADED:
@@ -121,14 +147,17 @@ class SubmissionSequence:
             return None
 
     def to_json(self):
-        return {
+        dict_result = {
             'name': self.name,
             'tag': self.tag,
             'grading_type': self.grading_type,
             'points': int(self.points),
             'flow': round(self.flow, 2),
             'submissions': list(map(lambda a: a.to_json(), self.submissions)),
+            'learning_outcomes': {},
         }
+
+        return dict_result
 
     @staticmethod
     def from_dict(data_dict):
@@ -136,4 +165,5 @@ class SubmissionSequence:
                                  data_dict['flow'])
         if 'submissions' in data_dict.keys():
             new.submissions = list(map(lambda a: Submission.from_dict(a), data_dict['submissions']))
+
         return new

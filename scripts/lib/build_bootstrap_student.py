@@ -1,68 +1,12 @@
-from scripts.lib.build_plotly_hover import get_hover_assignment, \
-    get_hover_grade, get_hover_status
+from scripts.lib.build_bootstrap_speedgrader import build_bootstrap_speedgrader
+from scripts.lib.build_hover import get_hover_assignment, get_hover_grade, get_hover_status, get_comments_html
+from scripts.lib.build_portfolio import get_portfolio_item, build_bootstrap_prop_portfolio, get_observation_item
 from scripts.lib.file import read_plotly, write_feedback_csv
 from scripts.lib.lib_date import get_date_time_loc
+from scripts.lib.lib_feedback import parse_feedback_from_submission
 from scripts.lib.lib_portfolio import TOTAL_POINTS, STATUS_COMPLETE, STATUS_INCOMPLETE, STATUS_MISSED, STATUS_PENDING, \
     STATUS_COMING
 from scripts.model.perspective.Status import NOT_YET_GRADED, BEFORE_DEADLINE, GRADED, MISSED_ITEM, VIEW_UNPOSTED
-
-
-def get_submission_badges(assignment_sequence, submission_sequence, actual_day):
-    # *******************************
-    # Maak de submission_badges aan
-    # *******************************
-    badges = []
-    teller = 0
-    for assignment in assignment_sequence.assignments:
-        if submission_sequence:
-            submission = submission_sequence.get_submission_by_assignment(assignment.id)
-            if submission:
-                teller += 1
-                badge = {}
-                badge["status"] = submission.get_complete_status_css()
-                badge["assignment_id"] = assignment.id
-                badge["teller"] = teller
-                badges.append(badge)
-            else:
-                if actual_day > assignment.day:
-                    teller += 1
-                    badge = {}
-                    badge["status"] = STATUS_MISSED
-                    badge["assignment_id"] = assignment.id
-                    badge["teller"] = teller
-                    badges.append(badge)
-                else:
-                    teller += 1
-                    badge = {}
-                    badge["status"] = STATUS_COMING
-                    badge["assignment_id"] = assignment.id
-                    badge["teller"] = teller
-                    badges.append(badge)
-        else:
-            if actual_day > assignment.day:
-                teller += 1
-                badge = {}
-                badge["status"] = STATUS_MISSED
-                badge["assignment_id"] = assignment.id
-                badge["teller"] = teller
-                badges.append(badge)
-            else:
-                teller += 1
-                badge = {}
-                badge["status"] = STATUS_COMING
-                badge["assignment_id"] = assignment.id
-                badge["teller"] = teller
-                badges.append(badge)
-    return badges
-
-
-def get_comments_html(comments):
-    comments_html_string = ""
-    if len(comments) > 0:
-        for comment in comments:
-            comments_html_string += get_date_time_loc(
-                comment.date) + " " + comment.author_name + " - <i>" + comment.comment + "</i><br>"
-    return comments_html_string
 
 
 def get_feedback_list_html(course, student_id, feedback_list, templates, feedback_colors):
@@ -71,8 +15,15 @@ def get_feedback_list_html(course, student_id, feedback_list, templates, feedbac
         url = "https://canvas.hu.nl/courses/" + str(course.canvas_id) + "/gradebook/speed_grader?assignment_id=" \
               + str(feedback.assignment_id) + "&student_id=" + str(student_id)
         background_color = feedback_colors[feedback.positive_neutral_negative]["color"]
+        if feedback.positive_neutral_negative == "+":
+            feedback_level = "Positief"
+        elif feedback.positive_neutral_negative == "-":
+            feedback_level = "Negatief"
+        else:
+            feedback_level = "Neutraal"
         feedback_list_html_string += templates['feedback'].substitute({
             "feedback_color": background_color,
+            "feedback_level": feedback_level,
             "date": get_date_time_loc(feedback.date),
             "author_name": feedback.author_name,
             "comment": feedback.comment,
@@ -83,38 +34,6 @@ def get_feedback_list_html(course, student_id, feedback_list, templates, feedbac
     return feedback_list_html_string
 
 
-def get_rubrics_comments(course, submission, grade):
-    if len(submission.rubrics) == 0:
-        return ""
-    l_hover = "<br><b>Criteria:</b>"
-    for criterion_score in submission.rubrics:
-        # print("BP10 -", submission.assignment_id, criterion_score)
-        assignment = course.find_assignment(submission.assignment.id)
-        # print("BP11 -", assignment)
-        assignment_criterion = assignment.get_criterion(criterion_score.id)
-        if assignment_criterion is None:
-            continue
-        # if submission.assignment_id ==  298261 and submission.student_id == 148369:
-        # print("BP11 -", assignment_criterion, criterion_score)
-        if criterion_score.rating_id:
-            if assignment_criterion.get_rating(criterion_score.rating_id) is not None:
-                l_hover += "<br>- " + assignment_criterion.description + " <b>" + assignment_criterion.get_rating(
-                    criterion_score.rating_id).description + "</b>"
-            # if submission.assignment_id == 298261 and submission.student_id == 148369:
-            #     print("BP14 -", l_hover)
-        else:
-            if criterion_score.score == 0:
-                l_hover += "<br>- " + assignment_criterion.description + " <b>" + grade.label + "</b>"
-                # if submission.assignment_id == 298261 and submission.student_id == 148369:
-                #     print("BP15 -", l_hover)
-            else:
-                l_hover += "<br>- " + assignment_criterion.description + " <b>" + str(criterion_score.score) + "</b>"
-                # if submission.assignment_id == 298261 and submission.student_id == 148369:
-                #     print("BP16 -", l_hover)
-
-        if criterion_score.comment:
-            l_hover += "<br><i>" + criterion_score.comment + "</i>"
-    return l_hover
 
 
 def build_student_tabs(student_tab_content, student_tabs):
@@ -270,10 +189,7 @@ def build_moment(course_id, course, level_serie, assignment_name, submission, te
     return level_moment_html_string
 
 
-def build_bootstrap_portfolio(course_instance, course_id, course, student, student_results, actual_date, actual_day, templates,
-                              level_serie_collection):
-    portfolio_items_html_string = ""
-    portfolio_items = []
+def build_bootstrap_inno_portfolio_totals(course, dashboard):
     learning_outcome_totals = {}
     for learning_outcome in course.learning_outcomes:
         learning_outcome_totals[learning_outcome.id] = {
@@ -283,118 +199,59 @@ def build_bootstrap_portfolio(course_instance, course_id, course, student, stude
             STATUS_MISSED: 0,
             STATUS_PENDING: 0
         }
+    return learning_outcome_totals
+
+
+
+def get_portfolio_list(course, student_results, actual_day, templates, dashboard):
+    items = []
     for perspective in course.perspectives.values():
         # print("BBS51 -", )
         for assignment_group_id in perspective.assignment_group_ids:
             assignment_groep = course.get_assignment_group(assignment_group_id)
-            level_serie = level_serie_collection.level_series[assignment_groep.levels]
+            level_serie = dashboard.level_serie_collection.level_series[assignment_groep.levels]
             for assignment_sequence in assignment_groep.assignment_sequences:
-                # ********************************
-                # Start portfolio item in matrix
-                # ********************************
-                portfolio_item_name = assignment_sequence.name + " (" + str(len(assignment_sequence.assignments)) + ")"
-                submission_sequence = student_results.get_submission_sequence_by_name(assignment_sequence.name)
-                if submission_sequence is None:
-                    # No submissions
-                    portfolio_item_date, portfolio_item_day = assignment_sequence.get_date_day(submission_sequence, actual_day)
-                    if actual_day <= portfolio_item_day:
-                        status_label = level_serie.get_status(BEFORE_DEADLINE).label
-                        cell_status = STATUS_COMING
-                    else:
-                        status_label = level_serie.get_status(MISSED_ITEM).label
-                        cell_status = STATUS_MISSED
-                else:
-                    cell_status = submission_sequence.get_complete_status_css()
-                    if submission_sequence.get_status() is GRADED:
-                        if cell_status == STATUS_INCOMPLETE:
-                            status_label = level_serie.grades["0"].label
-                        else:
-                            status_label = level_serie.grades["2"].label
-                            for learning_outcome_id in assignment_sequence.learning_outcomes:
-                                learning_outcome_totals[learning_outcome_id][TOTAL_POINTS] += submission_sequence.get_score()
-                    else:
-                        status_label = level_serie.get_status(submission_sequence.get_status()).label
+                portfolio_item_dict = get_portfolio_item(course, student_results, assignment_sequence, actual_day, dashboard.feedback_colors, level_serie, templates)
+                items.append(portfolio_item_dict)
+    return items
 
-                for learning_outcome_id in assignment_sequence.learning_outcomes:
-                    if cell_status in learning_outcome_totals[learning_outcome_id]:
-                        learning_outcome_totals[learning_outcome_id][cell_status] += 1
 
-                badges = get_submission_badges(assignment_sequence, submission_sequence, actual_day)
-                submission_badges = ""
-                for badge in badges:
-                    url = "https://canvas.hu.nl/courses/" + str(
-                        course_id) + "/gradebook/speed_grader?assignment_id=" + str(badge["assignment_id"]) + "&student_id=" + str(student.id)
-                    submission_badges += '<a class="badge mr-1 ' + badge["status"] + '" target="_blank" href="' + url + '">' + str(
-                        badge["teller"]) + '</a>'
+def get_observation_list(course, student_results, actual_day, templates, dashboard):
+    items = []
+    if student_results.student_observations is not None:
+        for assignment_group_id in student_results.student_observations.assignment_groups:
+            assignment_group = course.get_assignment_group(assignment_group_id)
+            level_serie = dashboard.level_serie_collection.level_series[assignment_group.levels]
+            for assignment_sequence in assignment_group.assignment_sequences:
+                for submission in student_results.student_observations.submissions:
+                    for learning_outcome in submission.learning_outcomes.values():
+                        for feedback in learning_outcome.feedback_list:
+                            portfolio_item_dict = get_observation_item(course, student_results, assignment_sequence, learning_outcome, feedback, actual_day, dashboard.feedback_colors, level_serie, templates)
+                            items.append(portfolio_item_dict)
+    return items
 
-                modal_content_html_string = ""
-                # **********************************
-                # Bouw het modal window met feedback
-                # **********************************
-                portfolio_items_modal_html_string = ""
-                if submission_sequence is not None:
-                    for submission in submission_sequence.submissions:
-                        # bouw de teksten voor het modal scherm
-                        modal_content_html_string += "<p>"
-                        modal_content_html_string += get_hover_assignment(True, submission)
-                        if submission.graded:
-                            grade = level_serie.grades[submission.grade]
-                            modal_content_html_string += get_hover_grade(course, submission, grade)
-                            modal_content_html_string += get_rubrics_comments(course, submission, grade)
-                        else:
-                            status = level_serie.status[submission.status]
-                            modal_content_html_string += get_hover_status(submission, status)
-                        modal_content_html_string += get_comments_html(submission.comments)
-                        modal_content_html_string += "</p>"
-                    portfolio_items_modal_html_string += templates['portfolio_item_modal'].substitute(
-                        {"portfolio_item_id": assignment_sequence.tag,
-                         "portfolio_item": portfolio_item_name,
-                         "content": modal_content_html_string})
-                    portfolio_items_modal_html_string += '<a class="badge btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#target' + assignment_sequence.tag + '"' + " onclick='scrollToTop()'>Detail</a>"
-                date, day = assignment_sequence.get_date_day(submission_sequence, actual_day)
-                if day < actual_day:
-                    background_color = "#ffb3b3"
-                else:
-                    background_color = "#c6ecd9"
-                portfolio_item_dict = {
-                    "portfolio_item": portfolio_item_name,
-                    "portfolio_item_id": assignment_sequence.tag,
-                    "portfolio_item_modal": portfolio_items_modal_html_string,
-                    "submission_badges": submission_badges,
-                    "portfolio_date": get_date_time_loc(date),
-                    "portfolio_day": day,
-                    "background_color": background_color,
-                    "portfolio_status": status_label,
-                    "cell_status": cell_status
-                }
-                learning_outcomes_row_html_string = ""
-                for learning_outcome in course.learning_outcomes:
-                    if learning_outcome.id in assignment_sequence.learning_outcomes:
-                        learning_outcomes_row_html_string += '<td style="text-align:center;"><span class="badge badge-primary">' + str(
-                            assignment_sequence.points) + '</span></td>'
-                    else:
-                        learning_outcomes_row_html_string += '<td></td>'
-                portfolio_item_dict["learning_outcomes"] = learning_outcomes_row_html_string
-                portfolio_items.append(portfolio_item_dict)
-    portfolio_items = sorted(portfolio_items, key=lambda p: p['portfolio_day'])
 
+def build_learning_outcomes_header(course):
+    learning_outcomes_header_html_string = ""
+    for learning_outcome in course.learning_outcomes:
+        # items = learning_outcome_totals[learning_outcome.id][STATUS_COMPLETE]
+        # score = learning_outcome_totals[learning_outcome.id][TOTAL_POINTS]
+        # grade = learning_outcome.get_grade(items, score)
+        # background_color = level_serie_collection.level_series["grade"].grades[grade].color
+        # learning_outcomes_header_html_string += '<th scope = "col" style="text-align: center; color:white; background-color:''' + background_color + '''">''' + learning_outcome.id + '</th>'
+        learning_outcomes_header_html_string += '<th scope = "col" style="text-align: center;">' + learning_outcome.id + '</th>'
+    return learning_outcomes_header_html_string
+
+
+def build_portfolio_summary(course, templates, learning_outcome_totals, learning_outcomes_header):
     #**************************
     # Opbouwen tabel met totals
     #**************************
-    learning_outcomes_header_html_string = ""
-    total_points_html = ""
     complete_items_html = ""
     incomplete_items_html = ""
     status_missed_items_html = ""
     status_pending_items_html = ""
     for learning_outcome in course.learning_outcomes:
-        items = learning_outcome_totals[learning_outcome.id][STATUS_COMPLETE]
-        score = learning_outcome_totals[learning_outcome.id][TOTAL_POINTS]
-        grade = learning_outcome.get_grade(items, score)
-        background_color = level_serie_collection.level_series["grade"].grades[grade].color
-        learning_outcomes_header_html_string += '<th scope = "col" style="text-align: center; color:white; background-color:''' + background_color + '''">''' + learning_outcome.id + '</th>'
-        # behaalde_punten_html += "<td>"+str(learning_outcome_summary[learning_outcome.id]['total_points'])+"</td>"
-        # print("BBP51 -", items, score, grade, background_color)
         complete_items_html += "<td>" + str(
             learning_outcome_totals[learning_outcome.id][STATUS_COMPLETE]) + " (" + str(
             learning_outcome_totals[learning_outcome.id][TOTAL_POINTS]) + ")</td>"
@@ -402,36 +259,22 @@ def build_bootstrap_portfolio(course_instance, course_id, course, student, stude
             learning_outcome_totals[learning_outcome.id][STATUS_INCOMPLETE]) + "</td>"
         status_missed_items_html += "<td>" + str(learning_outcome_totals[learning_outcome.id]['status_missed']) + "</td>"
         status_pending_items_html += "<td>" + str(learning_outcome_totals[learning_outcome.id]['status_pending']) + "</td>"
-    portfolio_summary_html = templates['portfolio_summary'].substitute({
-        'learning_outcomes': learning_outcomes_header_html_string,
+    return templates['portfolio_summary'].substitute({
+        'learning_outcomes': learning_outcomes_header,
         'status_complete_items': complete_items_html,
         'status_incomplete_items': incomplete_items_html,
         'status_missed_items': status_missed_items_html,
         'status_pending_items': status_pending_items_html,
     })
 
+def build_portfolio_matrix(course, student, templates, portfolio_items, learning_outcomes_header):
+
     # **************************
     # opbouwen portfolio-matrix
     # **************************
+    portfolio_items_html_string = ""
     for portfolio_item in portfolio_items:
-        # print(portfolio_item)
         portfolio_items_html_string += templates['portfolio_item'].substitute(portfolio_item)
-    # portfolio_items_model_html_string = ""
-    # for perspective in course.perspectives.values():
-    #     for assignment_group_id in perspective.assignment_groups:
-    #         assignment_groep = course.find_assignment_group(assignment_group_id)
-    #         for assignment_sequence in assignment_groep.assignment_sequences:
-    #             portfolio_items_model_html_string += templates['portfolio_item_modal'].substitute({"portfolio_item_id": assignment_sequence.tag, "portfolio_item": portfolio_item["portfolio_item"], "content": "Content"})
-    attendance_html = ""
-    if course_instance.course_code in ["TICT-V1S1-24"]:
-        attendance_dict = {}
-        attendance_dict['attendance_essential_count'] = str(int(student_results.student_attendance.essential_count))
-        attendance_dict['attendance_count'] = str(int(student_results.student_attendance.count))
-        attendance_dict['attendance_essential_percentage'] = str(
-            int(student_results.student_attendance.essential_percentage * 100))
-        attendance_dict['attendance_percentage'] = str(int(student_results.student_attendance.percentage * 100))
-        attendance_html = templates['attendance'].substitute(attendance_dict)
-
     groups_1_group = course.find_groups_1_group(student.groups_1_group_id)
     if groups_1_group is not None:
         groups_1_group_name = groups_1_group.name
@@ -439,18 +282,10 @@ def build_bootstrap_portfolio(course_instance, course_id, course, student, stude
         groups_1_group_name = "leeg"
 
     portfolio_matrix_html = templates['portfolio_matrix'].substitute({
-        'learning_outcomes': learning_outcomes_header_html_string,
+        'learning_outcomes': learning_outcomes_header,
         'portfolio_items': portfolio_items_html_string
     })
-
-    portfolio_dict = {
-        'portfolio_summary': portfolio_summary_html,
-        'attendance': attendance_html,
-        'portfolio_matrix': portfolio_matrix_html,
-        'portfolio_items_modal': ""  # portfolio_items_modal_html_string
-    }
-    portfolio_html_string = templates['portfolio'].substitute(portfolio_dict)
-    return portfolio_html_string
+    return portfolio_matrix_html
 
 
 def build_bootstrap_feedback(course, student_results, templates, feedback_colors):
@@ -485,11 +320,13 @@ def build_bootstrap_feedback(course, student_results, templates, feedback_colors
 
     return student_feedback_html_string
 
-
 def build_bootstrap_student_index(course_instance, course_id, course, student_results, actual_date, actual_day, templates,
                                   dashboard):
     student = course.find_student(student_results.id)
     student_name = student.email.split("@")[0].lower()
+    initials = ''.join([x[0].upper() for x in student.name.split(' ')])
+    initials += student.number[-3:]
+
     # ******************************
     # Student top of page header
     # ******************************
@@ -530,7 +367,7 @@ def build_bootstrap_student_index(course_instance, course_id, course, student_re
     student_header_html_string = templates['student_header'].substitute(
         {
             'observation_url': observation_url,
-            'csv_filename': student_name + "_bof.csv",
+            'csv_filename': initials + "_observaties.csv",
             'semester': course.name,
             'student_name': student.name,
             'student_email': student.email,
@@ -566,14 +403,36 @@ def build_bootstrap_student_index(course_instance, course_id, course, student_re
         # Importeren plotly html in index html file
         student_name = student.email.split("@")[0].lower()
         file_name_html = course_instance.get_temp_path() + student_name + "_progress.html"
-        student_tab_content['voortgang'] = '<h2 class="mt-2">Voortgang</h2>' + read_plotly(file_name_html)
+        student_tab_content['voortgang'] = '<h2 class="mt-2">Overzicht</h2>' + read_plotly(file_name_html)
+    if 'inno_portfolio' in dashboard.student_tabs:
+        portfolio_items = get_portfolio_list(course, student_results, actual_day, templates, dashboard)
+        portfolio_items += get_observation_list(course, student_results, actual_day, templates, dashboard)
+        portfolio_items = sorted(portfolio_items, key=lambda p: p['portfolio_day'])
+
+        learning_outcomes_header = build_learning_outcomes_header(course)
+        portfolio_matrix_html = build_portfolio_matrix(course, student, templates, portfolio_items, learning_outcomes_header)
+        student_tab_content['inno_portfolio'] = templates['portfolio'].substitute({
+            'portfolio_summary': "",
+            'portfolio_matrix': portfolio_matrix_html
+        })
+
     if 'portfolio' in dashboard.student_tabs:
-        student_tab_content['portfolio'] = build_bootstrap_portfolio(course_instance, course_id, course, student,
-                                                                     student_results, actual_date, actual_day,
-                                                                     templates, dashboard.level_serie_collection)
+        learning_outcome_totals, portfolio_items = build_bootstrap_prop_portfolio(course_id, course, student,
+                                       student_results, actual_day,
+                                       templates, dashboard.level_serie_collection)
+        learning_outcomes_header = build_learning_outcomes_header(course)
+        portfolio_summary_html = build_portfolio_summary(course, templates, learning_outcome_totals, learning_outcomes_header)
+        portfolio_matrix_html = build_portfolio_matrix(course, student, templates, portfolio_items, learning_outcomes_header)
+        student_tab_content['portfolio'] = templates['portfolio'].substitute({
+            'portfolio_summary': portfolio_summary_html,
+            'portfolio_matrix': portfolio_matrix_html
+        })
     if 'feedback' in dashboard.student_tabs:
         student_tab_content['feedback'] = build_bootstrap_feedback(course, student_results, templates,
                                                                    dashboard.feedback_colors)
+
+    # if 'speedgrader' in dashboard.student_tabs:
+    student_tab_content['speedgrader'] = build_bootstrap_speedgrader(course, student_results, templates)
 
     # Voeg de moments toe aan de student_tabs
     for assignment in course.get_level_moments():
@@ -581,6 +440,7 @@ def build_bootstrap_student_index(course_instance, course_id, course, student_re
     for assignment in course.get_grade_moments():
         dashboard.student_tabs[assignment.name.replace(" ", "_").lower()] = assignment.name
     student_tabs_html_string = build_student_tabs(student_tab_content, dashboard.student_tabs)
+    # student_tabs_html_string = "Hier komt je persoonlijk Canvas dashboard"
     student_index_html_string = templates['student_index'].substitute(
         {
             'student_name': student.name,
@@ -590,7 +450,7 @@ def build_bootstrap_student_index(course_instance, course_id, course, student_re
     )
 
     file_name_html = course_instance.get_html_student_path() + student_name + "_index.html"
-    file_name_csv = course_instance.get_html_student_path() + student_name + "_bof.csv"
+    file_name_csv = course_instance.get_html_student_path() + initials + "_observaties.csv"
     # print("BB21 - Write feedback for", student.name)
     write_feedback_csv(student_results.learning_outcomes, file_name_csv)
 

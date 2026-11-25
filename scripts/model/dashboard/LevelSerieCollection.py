@@ -293,7 +293,7 @@ PROGRESS_LABELS = {
         },
         "0": {
             "level": "0",
-            "label": "Voortgang niet zichtbaar",
+            "label": "Onvoldoende informatie",
             "color": "#f25829",
             "fraction": 0.01,
             "value": 0

@@ -84,7 +84,7 @@ class CourseInstance:
         return self.get_project_path() + "feedback_"+self.name+"_"+leaning_outcome+".csv"
 
     def from_dict(data_dict):
-        # print(data_dict)
+        # print("COI02 -", data_dict)
         new = CourseInstance(data_dict["name"], data_dict["course_code"], data_dict["canvas_course_id"],
                              data_dict['target_path'], data_dict["period"], data_dict["stage"])
         return new

@@ -41,6 +41,13 @@ class Student:
                 return assessor
         return None
 
+    def is_assessor(self, teacher_id, assignment_group_id):
+        # print("STUD41 -", self.id, teacher_id, assignment_group_id)
+        for assessor in self.assessors:
+            if assessor.teacher_id == teacher_id and assessor.assignment_group_id == assignment_group_id:
+                return True
+        return False
+
     @staticmethod
     def from_dict(data_dict):
         new = Student(data_dict['id'], data_dict['groups_1_group_id'], data_dict['groups_2_group_id'], data_dict['name'],

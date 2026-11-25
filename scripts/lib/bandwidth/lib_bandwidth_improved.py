@@ -93,11 +93,13 @@ def get_bandwidth_sum(course, assignment_group_ids: Iterable[int]) -> Bandwidth:
     assignment_groups = [course.get_assignment_group(ag_id) for ag_id in assignment_group_ids]
 
     for ag in assignment_groups:
-        print("LBI31 - bandwidth.points", ag.name)
+        print("LBI31 - bandwidth.points", ag.name, ag.strategy)
     bandwidth = Bandwidth()
     for day in range(course.days_in_semester + 1):
         new_point = Point(day, 0, 0)
         for ag in assignment_groups:
+            if ag.strategy == "NONE":
+                continue
             point = ag.bandwidth.points[day]
             new_point.lower += point.lower
             new_point.upper += point.upper

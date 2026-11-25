@@ -1,6 +1,5 @@
 import json
 import os
-
 from scripts.model.ProgressHistory import ProgressHistory
 from scripts.model.Result import Result
 from scripts.model.CourseConfig import CourseConfig
@@ -14,6 +13,15 @@ from scripts.model.workload.WorkloadHistory import WorkloadHistory
 
 from scripts.model.dashboard.Subplot import Subplot
 from scripts.model.dashboard.LevelSerieCollection import LevelSerieCollection
+
+def read_workflow(workflow_file_name):
+    print("F034 - read_workflow", workflow_file_name)
+    if os.path.isfile(workflow_file_name):
+        with open(workflow_file_name, mode='r', encoding="utf-8") as workflow_file:
+            data = json.load(workflow_file)
+            environment = Workflow.from_dict(data)
+            return environment
+    return None
 
 
 def read_environment(file_name):
@@ -29,18 +37,8 @@ def read_environment(file_name):
     return None
 
 
-def read_workflow(workflow_file_name):
-    print("F032 - read_workflow", workflow_file_name)
-    if os.path.isfile(workflow_file_name):
-        with open(workflow_file_name, mode='r', encoding="utf-8") as workflow_file:
-            data = json.load(workflow_file)
-            environment = Workflow.from_dict(data)
-            return environment
-    return None
-
-
 def read_secret_api_key(file_name):
-    print("F033 - read_secret_api_key", file_name)
+    print("F036 - read_secret_api_key", file_name)
     if os.path.isfile(file_name):
         with open(file_name, mode='r', encoding="utf-8") as secret_api_key_file:
             data = json.load(secret_api_key_file)
@@ -240,4 +238,15 @@ def write_feedback_csv(learning_outcomes, feedback_filename):
         for learning_outcome in learning_outcomes.values():
             for bof in learning_outcome.feedback_list:
                 outfile.write(learning_outcome.id+';'+str(bof.day)+";"+pnn_to_pn(bof.positive_neutral_negative)+';'+bof.assignment_name+';'+bof.comment+'\n')
+
+def write_peil_beslis_csv(course, results, peil_beslis_filename):
+    # print("F025 - feedback_filename", feedback_filename)
+    with open(peil_beslis_filename, mode='w', encoding="utf-8-sig") as outfile:
+        outfile.write('student_id;docent_id;learning_outcome;peilmoment_1_grade;peilmoment_1_bof\n')
+        for student in results.students:
+            for submission in student.student_level_moments.submissions:
+                assignment = course.find_assignment(submission.assignment.id)
+                for rubric in submission.rubrics:
+                    criterion = assignment.get_criterion(rubric.id)
+                    outfile.write(f"{student.id};{submission.grader_id};{criterion.description};{criterion.get_rating(rubric.rating_id).description};{rubric.comment.replace("\t", "").replace("\n", "").replace(";", ",")}\n")
 

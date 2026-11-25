@@ -68,7 +68,7 @@ if course_code in ["TICT-V1SE1-24", "TICT-V1SE1-24a", "TICT-V1SE1-24b"]:
     learning_outcomes = learning_outcomes_V1SE1
     student_tabs = {
         "portfolio": "Portfolio",
-        "voortgang": "Voortgang"
+        "voortgang": "Overzicht"
       }
 
 
@@ -111,7 +111,7 @@ else:
     level_moments = {"name": "level_moments", "title": "Peilmomenten", "assignment_group_names": ["Peilmomenten"]}
     grade_moments = {"name": "grade_moments", "title": "Beoordelingsmomenten", "assignment_group_names": ["Beoordelingsmomenten"]}
     student_tabs = {
-        "voortgang": "Voortgang",
+        "voortgang": "Overzicht",
         "feedback": "Feedback"
     }
 

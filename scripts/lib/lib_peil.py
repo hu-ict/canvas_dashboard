@@ -1,6 +1,6 @@
 import textwrap
-from lib.lib_plotly import peil_labels
-from lib.lib_submission import NO_DATA
+
+from scripts.lib.lib_submission import NO_DATA
 
 
 def peil_contruct(a_course, a_peil_perspective):

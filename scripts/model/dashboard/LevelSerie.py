@@ -26,6 +26,9 @@ class LevelSerie:
     def get_status(self, status):
         return self.status[status]
 
+    def get_grades(self, grade):
+        return self.grades[str(grade)]
+
     def get_grade_by_fraction(self, fraction):
         last_fraction = -0.05
         for grade in self.grades.values():

@@ -103,25 +103,6 @@ def check_for_late(a_course, a_submission, a_workload, a_actual_day):
             print("BTW86 - Student not found: a_course.find_student(a_submission.student_id)", a_submission.student_id, a_submission.assignment.id)
 
 
-def get_bof_value(a_course, a_results, a_workload):
-    for student in a_course.students:
-        for assessor in student.assessors:
-            teacher = a_workload.get_dimension("teachers").get_workload_item(assessor.teacher_id)
-            assignment_group = a_course.get_assignment_group(assessor.assignment_group_id)
-            for assignment_sequence in assignment_group.assignment_sequences:
-                for assignment in assignment_sequence.assignments:
-                    if assignment.day <= a_results.actual_day:
-                        teacher.total_value += assignment.points
-    for student in a_results.students:
-        for learning_outcome in student.learning_outcomes.values():
-            for feedback in learning_outcome.feedback_list:
-                teacher = a_workload.get_dimension("teachers").get_workload_item(feedback.author_id)
-                if teacher is not None:
-                    teacher.bof_count += 1
-                else:
-                    print("BTW91 - teacher not found", feedback.author_id, feedback.author_name )
-    return a_workload
-
 def get_workload(a_course, a_results, a_workload):
     for student_results in a_results.students:
         for perspective in student_results.perspectives.values():

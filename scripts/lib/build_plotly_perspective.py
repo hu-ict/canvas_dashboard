@@ -2,8 +2,8 @@ import copy
 
 import plotly.graph_objs as go
 
-from scripts.lib.build_plotly_hover import get_hover_assignment, get_hover_day_bar, get_hover_grade, \
-    get_hover_comments, get_hover_rubrics_comments, get_hover_status, get_hover_moment, get_hover_feedback
+from scripts.lib.build_hover import get_hover_assignment, get_hover_day_bar, get_hover_grade, \
+    get_hover_comments, get_hover_status, get_hover_moment, get_hover_feedback, get_rubrics_comments
 from scripts.lib.lib_date import date_to_day, get_date_time_loc
 from scripts.lib.lib_plotly import get_marker_size, hover_style
 from scripts.model.Submission import Submission
@@ -78,9 +78,7 @@ def plot_progress(a_row, a_col, a_fig, a_course, a_perspective, a_level_serie_co
 
 
 def plot_assignments(a_row, a_col, a_fig, a_course, a_show_points, a_assignment_sequences, a_levels):
-    series = {"color": [], "size": [], "size2": [], 'x': [], 'y': [], 'hover': []}
     cum_points = 0
-
     for assignment_sequence in a_assignment_sequences:
         cum_points += assignment_sequence.points
         series = {"color": [], "size": [], "size2": [], 'x': [], 'y': [], 'hover': []}
@@ -195,24 +193,24 @@ def plot_day_bar_lu(a_row, a_col, a_fig,
     l_color = a_grades[str(-1)].color
     l_hover = get_hover_day_bar(l_label, a_actual_day, a_actual_date, False, 0)
 
-    a_fig.add_trace(
-        go.Scatter(
-            x=[a_actual_day, a_actual_day - 1, a_actual_day - 1, a_actual_day, a_actual_day],
-            y=["AF<br>Algemene feedback", "AF<br>Algemene feedback", "BP<br>Peil/Beslissing", "BP<br>Peil/Beslissing",
-               "AF<br>Algemene feedback"],
-            fill="toself",
-            mode='lines',
-            name='',
-            hoverlabel=hover_style,
-            text=l_hover,
-            opacity=0
-        ),
-        row=a_row,
-        col=a_col
-    )
+    # a_fig.add_trace(
+    #     go.Scatter(
+    #         x=[a_actual_day, a_actual_day - 1, a_actual_day - 1, a_actual_day, a_actual_day],
+    #         y=["AF<br>Algemene feedback", "AF<br>Algemene feedback", "BP<br>Peil/Beslissing", "BP<br>Peil/Beslissing",
+    #            "AF<br>Algemene feedback"],
+    #         fill="toself",
+    #         mode='lines',
+    #         name='',
+    #         hoverlabel=hover_style,
+    #         text=l_hover,
+    #         opacity=0
+    #     ),
+    #     row=a_row,
+    #     col=a_col
+    # )
     a_fig.add_shape(
-        dict(type="rect", x0=a_actual_day - 1, x1=a_actual_day, y0="AF<br>Algemene feedback",
-             y1="BP<br>Peil/Beslissing",
+        dict(type="rect", x0=a_actual_day - 1, x1=a_actual_day,
+             y0="P<br>Portfolio", y1="BP<br>Peil/Beslissing",
              fillcolor=l_color, line_color=l_color
              ),
         row=a_row,
@@ -266,7 +264,7 @@ def plot_submissions(a_row, a_col, a_fig, a_course, a_student_perspective, a_lev
                 l_hover += get_hover_comments(submission.comments)
                 if submission.graded:
                     grade = l_level_serie.grades[submission.grade]
-                    l_hover += get_hover_rubrics_comments(a_course, submission, grade)
+                    l_hover += get_rubrics_comments(a_course, submission, grade, True)
             if submission_nr < len(submission_sequence.submissions) - 1:
                 l_hover += "<br><br>"
         if len(l_hover) > 4000:
@@ -358,7 +356,7 @@ def plot_perspective(a_row, a_col, a_fig, a_course, a_student_perspective,
                             perspective.assignment_sequences, a_student_perspective, a_actual_day,
                             a_level_serie_collection)
 
-def get_moments(assignment_group, student):
+def get_moments(course, assignment_group, student):
     moments = []
     for assignment_sequence in assignment_group.assignment_sequences:
         assignment = assignment_sequence.assignments[0]
@@ -368,151 +366,8 @@ def get_moments(assignment_group, student):
             moment = Submission(0, submission_assignment, 0,
                                     assignment.date, assignment.day,
                                     BEFORE_DEADLINE, False, False,
-                                    "-1", None, None,
-                                    0, 0, 0, 0)
+                                    "-1", False,None, None,
+                                    0, 0, 0, 0, course.learning_outcomes)
         moments.append(moment)
     return moments
 
-def plot_timeline(a_row, a_col, a_fig, a_course, a_student, a_actual_day, a_actual_date, a_level_serie_collection,
-                  a_feedback_colors):
-    a_fig.update_yaxes(title_text="Leeruitkomsten",
-                       # range=[0, len(a_student.learning_outcomes)+1],
-                       row=a_row, col=a_col)
-    plot_timeline_gf(a_row, a_col, a_fig, a_course, a_student.general_feedback_list, a_feedback_colors)
-    learning_outcomes_list = list(a_student.learning_outcomes.values())
-    learning_outcomes_list = sorted(learning_outcomes_list, key=lambda x: x.id.lower(), reverse=True)
-    for timeline_lu in learning_outcomes_list:
-        # print("BPP11 -", timeline_lu)
-        plot_timeline_lu(a_row, a_col, a_fig, a_course, timeline_lu, a_feedback_colors)
-
-    assignment_group = a_course.get_assignment_group(a_course.level_moments.assignment_group_ids[0])
-    moments = get_moments(assignment_group, a_student)
-    assignment_group = a_course.get_assignment_group(a_course.grade_moments.assignment_group_ids[0])
-    moments.extend(get_moments(assignment_group, a_student))
-    # print("BPP71 - Moments", moments)
-    plot_timeline_moments(a_row, a_col, a_fig, a_course, moments, a_level_serie_collection)
-
-    plot_day_bar_lu(a_row, a_col, a_fig, a_actual_day, a_actual_date,
-                    a_student.progress, a_level_serie_collection.level_series["progress"].grades,
-                    learning_outcomes_list[0].id + "<br>" + learning_outcomes_list[0].short)
-
-
-def plot_timeline_moments(a_row, a_col, a_fig, a_course, a_submission_list, a_level_serie_collection):
-    x_feedback = [0]
-    y_feedback = ["BP<br>Peil/Beslissing"]
-    y_hover = ['<b>Start</b> ' + get_date_time_loc(a_course.start_date)]
-    y_colors = [a_level_serie_collection.level_series[a_course.level_moments.levels].get_status(BEFORE_DEADLINE).color]
-    y_size = [get_marker_size(False)]
-    y_marker_symbols = ["circle"]
-    for submission in a_submission_list:
-        levels = a_course.get_assignment_group(submission.assignment.group_id).levels
-        level_serie = a_level_serie_collection.level_series[levels]
-        y_size.append(get_marker_size(True))
-        x_feedback.append(submission.assignment.day)
-        y_feedback.append("BP<br>Peil/Beslissing")
-        # print("BPP61 -", submission.assignment.name, submission.graded, submission.grade)
-        y_hover.append(get_hover_moment(a_course, submission, level_serie))
-        if submission.graded and (submission.posted or VIEW_UNPOSTED):
-            y_colors.append(level_serie.grades[submission.grade].color)
-        else:
-            y_colors.append(level_serie.get_status(BEFORE_DEADLINE).color)
-        y_marker_symbols.append(a_course.get_assignment_group_by_assignment(submission.assignment.id).marker)
-    a_fig.add_trace(
-        go.Scatter(
-            x=x_feedback,
-            y=y_feedback,
-            hoverinfo="text",
-            hovertext=y_hover,
-            mode='lines+markers',
-            marker_color=y_colors,
-            marker_symbol=y_marker_symbols,
-            line_color="#444444",
-            hoverlabel=hover_style,
-            marker=dict(
-                size=y_size,
-                opacity=1.0,
-                line=dict(
-                    width=2
-                )
-            )
-        ),
-        row=a_row, col=a_col
-    )
-
-
-def plot_timeline_gf(a_row, a_col, a_fig, a_course, a_feedback_list, a_feedback_colors):
-    x_feedback = [0]
-    y_feedback = ["AF<br>Algemene feedback"]
-    y_hover = ['<b>Start</b> ' + get_date_time_loc(a_course.start_date)]
-    y_colors = [a_feedback_colors["N"]["color"]]
-    y_size = [get_marker_size(False)]
-    y_marker_symbols = ["circle"]
-    for feedback in a_feedback_list:
-        y_size.append(get_marker_size(True))
-        x_feedback.append(feedback.day)
-        y_feedback.append("AF<br>Algemene feedback")
-        y_hover.append(get_hover_feedback("Dialoog", feedback))
-        y_colors.append(a_feedback_colors["N"]["color"])
-        assigment_group = a_course.get_assignment_group_by_assignment(feedback.assignment_id)
-        marker_symbol = assigment_group.marker
-        y_marker_symbols.append(marker_symbol)
-    a_fig.add_trace(
-        go.Scatter(
-            x=x_feedback,
-            y=y_feedback,
-            hoverinfo="text",
-            hovertext=y_hover,
-            mode='lines+markers',
-            marker_color=y_colors,
-            marker_symbol=y_marker_symbols,
-            line_color="#444444",
-            hoverlabel=hover_style,
-            marker=dict(
-                size=y_size,
-                opacity=1.0,
-                line=dict(
-                    width=2
-                )
-            )
-        ),
-        row=a_row, col=a_col
-    )
-
-
-def plot_timeline_lu(a_row, a_col, a_fig, a_course, a_timeline_lu, a_feedback_colors):
-    x_feedback = [0]
-    y_feedback = [a_timeline_lu.id + "<br>" + a_timeline_lu.short]
-    y_hover = ['<b>Start</b> ' + get_date_time_loc(a_course.start_date)]
-    y_colors = [a_feedback_colors['N']["color"]]
-    y_size = [get_marker_size(False)]
-    y_marker_symbols = ["circle"]
-    for feedback in a_timeline_lu.feedback_list:
-        y_size.append(get_marker_size(True))
-        x_feedback.append(feedback.day)
-        y_feedback.append(a_timeline_lu.id + "<br>" + a_timeline_lu.short)
-        y_hover.append(get_hover_feedback("Observatie", feedback))
-        y_colors.append(a_feedback_colors[feedback.positive_neutral_negative]["color"])
-        y_marker_symbols.append(a_course.get_assignment_group_by_assignment(feedback.assignment_id).marker)
-    a_fig.add_trace(
-        go.Scatter(
-            x=x_feedback,
-            y=y_feedback,
-            hoverinfo="text",
-            hovertext=y_hover,
-            mode='lines+markers',
-            marker_color=y_colors,
-            marker_symbol=y_marker_symbols,
-            line_color="#444444",
-            hoverlabel=hover_style,
-            marker=dict(
-                size=y_size,
-                opacity=1.0,
-                line=dict(
-                    width=2
-                )
-            )
-        ),
-        row=a_row, col=a_col
-    )
-    a_fig.update_xaxes(title_text="Dagen in onderwijsperiode", range=[0, a_course.days_in_semester], row=a_row,
-                       col=a_col)

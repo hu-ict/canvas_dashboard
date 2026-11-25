@@ -2,6 +2,7 @@ from scripts.lib.lib_date import get_date_time_obj, get_date_time_str
 from scripts.lib.lib_portfolio import STATUS_MISSED, STATUS_PENDING, STATUS_COMPLETE, STATUS_INCOMPLETE
 from scripts.model.Comment import Comment
 from scripts.model.SubmissionAssignment import SubmissionAssignment
+from scripts.model.learning_outcome.StudentLearningOutcome import StudentLearningOutcome
 from scripts.model.rubric.CriteriumScore import CriteriumScore
 from scripts.model.perspective.Status import NOT_CORRECT_GRADED, NOT_YET_GRADED, GRADED, MISSED_ITEM, BEFORE_DEADLINE
 
@@ -10,8 +11,8 @@ class Submission:
     def __init__(self, submission_id, submission_assignment, student_id,
                  submitted_date, submitted_day,
                  status, graded, posted,
-                 grade, grader_id, grader_name, graded_date,
-                 score, value, flow):
+                 grade, late, grader_id, grader_name, graded_date,
+                 score, value, flow, a_learning_outcomes):
         self.id = submission_id
         self.assignment = submission_assignment
         self.student_id = student_id
@@ -21,6 +22,7 @@ class Submission:
         self.graded = graded
         self.posted = posted
         self.grade = grade
+        self.late = late
         self.grader_id = grader_id
         self.grader_name = grader_name
         self.graded_date = graded_date
@@ -31,6 +33,13 @@ class Submission:
         self.messages = []
         self.comments = []
         self.rubrics = []
+        self.learning_outcomes = {}
+        if a_learning_outcomes is not None:
+            if type(a_learning_outcomes) is dict:
+                self.learning_outcomes = a_learning_outcomes
+            else:
+                for l_learning_outcome in a_learning_outcomes:
+                    self.learning_outcomes[l_learning_outcome.id] = StudentLearningOutcome.copy_from(l_learning_outcome)
 
     def to_json(self):
         if self.flow is None:
@@ -45,7 +54,7 @@ class Submission:
             l_value = None
         else:
             l_value = int(self.value * 10) / 10
-        return {
+        dict_result = {
             'id': self.id,
             'student_id': self.student_id,
             'status': self.status,
@@ -55,6 +64,7 @@ class Submission:
             'graded': self.graded,
             'posted': self.posted,
             'grade': self.grade,
+            'late': self.late,
             'grader_id': self.grader_id,
             'grader_name': self.grader_name,
             "graded_date": get_date_time_str(self.graded_date),
@@ -65,7 +75,13 @@ class Submission:
             'messages': self.messages,
             'comments': list(map(lambda c: c.to_json(), self.comments)),
             'rubrics': list(map(lambda r: r.to_json(), self.rubrics)),
+            'learning_outcomes': {},
         }
+
+        for key in self.learning_outcomes:
+            dict_result['learning_outcomes'][key] = self.learning_outcomes[key].to_json()
+        return dict_result
+
 
     def get_criterium_score(self, criterium_id):
         for criterium in self.rubrics:
@@ -74,27 +90,7 @@ class Submission:
         return None
 
     def get_status(self):
-        if self.status == NOT_CORRECT_GRADED:
-            return NOT_CORRECT_GRADED
-        if self.status == NOT_YET_GRADED:
-            return NOT_YET_GRADED
-        if self.graded:
-            return GRADED
-        if self.score == 0:
-            return MISSED_ITEM
-        return BEFORE_DEADLINE
-
-    def get_complete_status_css(self):
-        if self.get_status() == GRADED:
-            if self.graded and self.score == self.assignment.points:
-                return STATUS_COMPLETE
-            return STATUS_INCOMPLETE
-        else:
-            if self.status is MISSED_ITEM:
-                return STATUS_MISSED
-            else:
-                return STATUS_PENDING
-        return "status_unknown"
+        return self.status
 
     def __str__(self):
         return f'Submission({self.id}, {self.student_id}, ' \
@@ -103,12 +99,16 @@ class Submission:
 
     @staticmethod
     def from_dict(data_dict):
+        new_learning_outcomes = {}
+        for key in data_dict['learning_outcomes'].keys():
+            new_learning_outcomes[key] = StudentLearningOutcome.from_dict(
+                data_dict['learning_outcomes'][key])
         new_submission = Submission(data_dict['id'], SubmissionAssignment.from_dict(data_dict['assignment']), data_dict['student_id'],
                                     get_date_time_obj(data_dict['submitted_date']), data_dict['submitted_day'],
                                     data_dict['status'], data_dict['graded'], data_dict['posted'],
-                                    data_dict['grade'], data_dict['grader_id'], data_dict['grader_name'],
+                                    data_dict['grade'], data_dict['late'], data_dict['grader_id'], data_dict['grader_name'],
                                     get_date_time_obj(data_dict['graded_date']), data_dict['score'],
-                                    data_dict['value'], data_dict['flow'])
+                                    data_dict['value'], data_dict['flow'], new_learning_outcomes)
         new_submission.comments = list(map(lambda c: Comment.from_dict(c), data_dict['comments']))
         new_submission.rubrics = list(map(lambda c: CriteriumScore.from_dict(c), data_dict['rubrics']))
         # print("SU05 -", data_dict)
@@ -116,5 +116,6 @@ class Submission:
             new_submission.body = data_dict['body']
         if ("messages" in data_dict) and (data_dict['messages'] is not None) and len(data_dict['messages']) > 0:
             new_submission.messages = data_dict['messages']
+
         return new_submission
 

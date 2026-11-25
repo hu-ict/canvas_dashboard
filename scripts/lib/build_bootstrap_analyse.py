@@ -2,7 +2,7 @@ from scripts.lib.build_bootstrap_structure import process_analyse_moment
 from scripts.lib.lib_date import get_date_time_loc
 
 
-def build_bootstrap_analyse_tab(instance, a_course, a_results, a_templates, a_level_serie_collection):
+def build_bootstrap_learning_analytics_tab1(instance, a_course, a_results, a_templates, a_level_serie_collection):
     html_string = ""
     moments_html_string = ""
     for level_moment in a_course.get_level_moments():

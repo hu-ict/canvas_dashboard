@@ -340,6 +340,14 @@ class CourseConfig:
                 return teacher
         return None
 
+    def is_responsible(self, teacher_id, assignment_group_id):
+        for teacher in self.teachers:
+            if teacher.id == teacher_id:
+                for responsibility in teacher.responsibilities:
+                    if responsibility.assignment_group_id == assignment_group_id:
+                        return True
+        return False
+
     @staticmethod
     def from_dict(data_dict):
         new = CourseConfig(

@@ -13,7 +13,7 @@ def build_bootstrap_workload_tab(a_instance, a_templates, a_workload):
             link_path_name = a_instance.get_link_general_path() + item_file_name
             list_html_string += a_templates["selector"].substitute(
                     {'selector_file': link_path_name, 'selector_name': item.name,  'selector': item.short})
-        overzicht_html_string += a_templates["overzicht"].substitute({'url': dimension_link_path_name, 'perspective': dimension.description, 'buttons': list_html_string})
+        overzicht_html_string += a_templates["overzicht"].substitute({'url': dimension_link_path_name, 'title': dimension.description + " openstaand", 'buttons': list_html_string})
     return overzicht_html_string
 
 

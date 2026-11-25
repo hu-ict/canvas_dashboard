@@ -11,6 +11,15 @@ def get_punten_str(points):
         return " punten"
 
 
+def get_comments_html(comments):
+    comments_html_string = ""
+    if len(comments) > 0:
+        for comment in comments:
+            comments_html_string += "<br>"+get_date_time_loc(
+                comment.date) + " " + comment.author_name + " - <i>" + comment.comment + "</i>"
+    return comments_html_string
+
+
 def get_hover_assignment(points, data_point):
     if "AssignmentSequence" in str(type(data_point)):
         # geen oplevering
@@ -35,7 +44,12 @@ def get_hover_assignment(points, data_point):
 
 def get_hover_status(submission, status):
     l_hover = "<br>Ingeleverd " + get_date_time_loc(submission.submitted_date)
+    # print("BPH31 - Late:", submission.late)
+    if submission.late:
+        l_hover += " <b>TE LAAT</b>"
     l_hover += "<br><b>" + status.label + "</b>"
+    if not submission.posted:
+        l_hover += "<br><b>Nog niet gepubliceerd</b>"
     l_hover += "<br>"
     return l_hover
 
@@ -66,7 +80,7 @@ def get_hover_comments(comments):
     return l_hover
 
 
-def get_hover_rubrics_comments(course, submission, grade):
+def get_hover_rubrics_comments_1(course, submission, grade):
     if len(submission.rubrics) == 0:
         return ""
     l_hover = "<br><b>Criteria:</b>"
@@ -77,31 +91,55 @@ def get_hover_rubrics_comments(course, submission, grade):
         assignment_criterion = assignment.get_criterion(criterion_score.id)
         if assignment_criterion is None:
             continue
-        # if submission.assignment.id ==  298261 and submission.student_id == 148369:
-        # print("BP11 -", assignment_criterion, criterion_score)
         if criterion_score.rating_id:
             if assignment_criterion.get_rating(criterion_score.rating_id) is not None:
                 l_hover += "<br>- " + assignment_criterion.description + " <b>" + assignment_criterion.get_rating(criterion_score.rating_id).description + "</b>"
-            # if submission.assignment.id == 298261 and submission.student_id == 148369:
-            #     print("BP14 -", l_hover)
         else:
             if criterion_score.score == 0:
                 l_hover += "<br>- " + assignment_criterion.description + " <b>"+grade.label+"</b>"
-                # if submission.assignment.id == 298261 and submission.student_id == 148369:
-                #     print("BP15 -", l_hover)
             else:
                 l_hover += "<br>- " + assignment_criterion.description + " <b>"+str(criterion_score.score)+"</b>"
-                # if submission.assignment.id == 298261 and submission.student_id == 148369:
-                #     print("BP16 -", l_hover)
-
         if criterion_score.comment:
             value = "<i>" + criterion_score.comment + "</i>"
             wrapper = textwrap.TextWrapper(width=125)
             word_list = wrapper.wrap(text=value)
             for line in word_list:
                 l_hover += "<br>" + line
-        # if submission.assignment.id == 298261 and submission.student_id == 148369:
-        #     print("BP20 -", l_hover)
+    return l_hover
+
+def get_rubrics_comments(course, submission, grade, is_hover):
+    if len(submission.rubrics) == 0:
+        return ""
+    l_hover = "<br><b>Criteria:</b>"
+    for criterion_score in submission.rubrics:
+        # print("BP10 -", submission.assignment_id, criterion_score)
+        assignment = course.find_assignment(submission.assignment.id)
+        # print("BP11 -", assignment)
+        assignment_criterion = assignment.get_criterion(criterion_score.id)
+        if assignment_criterion is None:
+            continue
+        # if submission.assignment_id ==  298261 and submission.student_id == 148369:
+        # print("BP11 -", assignment_criterion, criterion_score)
+        if criterion_score.rating_id:
+            if assignment_criterion.get_rating(criterion_score.rating_id) is not None:
+                l_hover += "<br>- " + assignment_criterion.description + " <b>" + assignment_criterion.get_rating(
+                    criterion_score.rating_id).description + "</b>"
+            # if submission.assignment_id == 298261 and submission.student_id == 148369:
+            #     print("BP14 -", l_hover)
+        else:
+            if criterion_score.score == 0:
+                l_hover += "<br>- " + assignment_criterion.description + " <b>" + grade.label + "</b>"
+            else:
+                l_hover += "<br>- " + assignment_criterion.description + " <b>" + str(criterion_score.score) + "</b>"
+        if criterion_score.comment:
+            if is_hover:
+                value = "<i>" + criterion_score.comment + "</i>"
+                wrapper = textwrap.TextWrapper(width=125)
+                word_list = wrapper.wrap(text=value)
+                for line in word_list:
+                    l_hover += "<br>" + line
+            else:
+                l_hover += "<br><i>" + criterion_score.comment + "</i>"
     return l_hover
 
 
@@ -136,17 +174,20 @@ def get_hover_moment(a_course, a_submission, a_level_serie):
             hover += a_level_serie.grades[a_submission.grade].label
             hover += ", bepaald door " + str(a_submission.grader_name) + " op " + get_date_time_loc(a_submission.graded_date)
             hover += get_hover_comments(a_submission.comments)
-            hover += get_hover_rubrics_comments(a_course, a_submission, a_level_serie.grades)
+            hover += get_rubrics_comments(a_course, a_submission, a_level_serie.grades, True)
         elif a_submission.graded and not a_submission.posted and not VIEW_UNPOSTED:
             hover += "Nog niet gepubliceerd"
             hover += ", bepaald door " + str(a_submission.grader_name) + " op " + get_date_time_loc(a_submission.graded_date)
         else:
             hover += a_level_serie.get_status(BEFORE_DEADLINE).label
+        hover += "<br>"
     return hover
 
 
 def get_hover_grade(course, submission, grade):
     l_hover = "<br>Ingeleverd " + get_date_time_loc(submission.submitted_date)
+    if submission.late:
+        l_hover += " <b>TE LAAT</b>"
     l_label = grade.label
     l_hover += "<br><b>" + l_label + "</b>, gewaardeerd door " + str(submission.grader_name) + " op " + get_date_time_loc(submission.graded_date)
     if course.find_perspective_by_assignment_group(submission.assignment.group_id).show_points:

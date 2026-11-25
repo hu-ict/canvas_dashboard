@@ -15,7 +15,7 @@ def categorize_feedback(feedback_comment):
     return feedback_list
 
 
-def get_feedback_from_submission(course, student, submission):
+def parse_feedback_from_submission(course, student, submission):
     # print("LSU81 -", submission.assignment.name)
     # algemeen commentaar veld
     for comment in submission.comments:
@@ -33,6 +33,7 @@ def get_feedback_from_submission(course, student, submission):
             if 'LU' in feedback_dict["lu"].upper():
                 if feedback_dict["lu"].upper() in student.learning_outcomes:
                     student.learning_outcomes[feedback_dict["lu"].upper()].feedback_list.append(feedback)
+                    submission.learning_outcomes[feedback_dict["lu"].upper()].feedback_list.append(feedback)
                 else:
                     print("LSU82 - Leeruitkomst uit comment niet gevonden in lijst van leeruitkomsten",
                           feedback_dict["lu"].upper(),
@@ -80,6 +81,7 @@ def get_feedback_from_submission(course, student, submission):
                     lu = assignment_criterion.learning_outcomes[0]
                     # print("LSU89 -", assignment_criterion.learning_outcomes, len(student.learning_outcomes[lu].feedback_list), student.learning_outcomes[lu])
                     student.learning_outcomes[lu].feedback_list.append(feedback)
+                    submission.learning_outcomes[lu].feedback_list.append(feedback)
                     # print("LSU91 -", assignment_criterion.learning_outcomes, len(student.learning_outcomes[lu].feedback_list), student.learning_outcomes[lu])
                 else:
                     feedback_list = categorize_feedback(criterion_score.comment)
@@ -91,6 +93,7 @@ def get_feedback_from_submission(course, student, submission):
                         if 'LU' in feedback_dict["lu"].upper():
                             if feedback_dict["lu"].upper() in student.learning_outcomes:
                                 student.learning_outcomes[feedback_dict["lu"].upper()].feedback_list.append(feedback)
+                                submission.learning_outcomes[feedback_dict["lu"].upper()].feedback_list.append(feedback)
                             else:
                                 feedback.comment = "Incorrecte @LUx annotatie. " + feedback.comment
                                 student.general_feedback_list.append(feedback)

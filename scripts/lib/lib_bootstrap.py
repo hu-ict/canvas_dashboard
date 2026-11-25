@@ -57,6 +57,10 @@ def load_templates(template_path):
         string_html = file_template.read()
         templates["index_tab"] = Template(string_html)
 
+    with open(template_path + 'saturation'+ DIR_DIV + 'template_saturation_index.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["saturation_index"] = Template(string_html)
+
     with open(template_path + 'teacher'+ DIR_DIV + 'template_overzichten.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["overzichten"] = Template(string_html)
@@ -221,27 +225,48 @@ def load_templates(template_path):
         string_html = file_template.read()
         templates["feedback"] = Template(string_html)
 
-    with open(template_path + 'analyse'+ DIR_DIV + 'template_analytics_card.html', mode='r', encoding="utf-8") as file_template:
+    with open(template_path + 'student'+ DIR_DIV + 'template_canvas.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["canvas"] = Template(string_html)
+
+    with open(template_path + 'student'+ DIR_DIV + 'template_canvas_line.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["canvas_line"] = Template(string_html)
+
+    with open(template_path + 'learning_analytics'+ DIR_DIV + 'template_analytics_card.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["analytics_card"] = Template(string_html)
 
-    with open(template_path + 'analyse'+ DIR_DIV + 'template_analytics_assignment.html', mode='r', encoding="utf-8") as file_template:
+    with open(template_path + 'learning_analytics' + DIR_DIV + 'template_analytics_index.html', mode='r',
+              encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["analytics_index"] = Template(string_html)
+
+    with open(template_path + 'learning_analytics'+ DIR_DIV + 'template_analytics_assignment.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["analytics_assignment"] = Template(string_html)
 
-    with open(template_path + 'analyse'+ DIR_DIV + 'template_analyse_card.html', mode='r', encoding="utf-8") as file_template:
+    with open(template_path + 'learning_analytics'+ DIR_DIV + 'template_analytics_assignment_status.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["analytics_assignment_status"] = Template(string_html)
+
+    with open(template_path + 'learning_analytics'+ DIR_DIV + 'template_analytics_assignment_item.html', mode='r', encoding="utf-8") as file_template:
+        string_html = file_template.read()
+        templates["analytics_assignment_item"] = Template(string_html)
+
+    with open(template_path + 'learning_analytics'+ DIR_DIV + 'template_analyse_card.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["analyse_card"] = Template(string_html)
 
-    with open(template_path + 'analyse'+ DIR_DIV + 'template_analyse_moment.html', mode='r', encoding="utf-8") as file_template:
+    with open(template_path + 'learning_analytics'+ DIR_DIV + 'template_analyse_moment.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["analyse_moment"] = Template(string_html)
 
-    with open(template_path + 'analyse'+ DIR_DIV + 'template_moments_list.html', mode='r', encoding="utf-8") as file_template:
+    with open(template_path + 'learning_analytics'+ DIR_DIV + 'template_moments_list.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["moments_list"] = Template(string_html)
 
-    with open(template_path + 'analyse'+ DIR_DIV + 'template_moment.html', mode='r', encoding="utf-8") as file_template:
+    with open(template_path + 'learning_analytics'+ DIR_DIV + 'template_moment.html', mode='r', encoding="utf-8") as file_template:
         string_html = file_template.read()
         templates["moment"] = Template(string_html)
 

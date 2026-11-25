@@ -34,10 +34,11 @@ def generate_config(instance_name):
     user = canvas.get_current_user()
     print(user.name)
     canvas_course = canvas.get_course(current_instance.canvas_course_id)
-    if current_instance.stage == "DEV":
-        dashboard = read_dashboard(current_instance.get_dashboard_file_name())
-    else:
+    if current_instance.stage == "PROD":
         dashboard = read_dashboard_from_canvas(canvas_course)
+    else:
+        dashboard = read_dashboard(current_instance.get_dashboard_file_name())
+
     print("GCF11 - course_instance.course_code", current_instance.course_code)
 
     config = CourseConfig(current_instance.course_code, current_instance.canvas_course_id, canvas_course.name,

@@ -126,29 +126,6 @@ class StudentResults:
                 return grade_moment
         return None
 
-    # def get_grade_moment_grade(self, assigment_id):
-    #     for grade_moment in self.student_grade_moments.submissions:
-    #         if grade_moment.assignment.id == assigment_id:
-    #             return grade_moment.grade
-    #     return -1
-
-    # def get_grade_moment_submissions_by_query(self, a_query):
-    #     grade_moments = []
-    #     for grade_moment in self.student_grade_moments.submissions:
-    #         condition = 0
-    #         # moet aan alle selectie criteria voldoen
-    #         for selector in a_query:
-    #             if selector.lower() in grade_moment.assignment.name.lower():
-    #                 condition += 1
-    #         if condition == len(a_query):
-    #             grade_moments.append(grade_moment)
-    #     return grade_moments
-
-    # def get_judgement(self, perspective_name):
-    #     for level_moment in self.student_level_moments.submissions:
-    #         if perspective_name in level_moment.assignment.name.lower() and "beoordeling" in level_moment.assignment.name.lower():
-    #             return int(level_moment.score)
-    #     return None
 
     def get_submission_sequence_by_name(self, name):
         for student_perspective in self.perspectives.values():
@@ -156,6 +133,29 @@ class StudentResults:
                 if submission_sequence.name == name:
                     return submission_sequence
         return None
+
+    def get_saturation(self):
+        lowest_saturation = 3
+        for learning_outcome in self.learning_outcomes.values():
+            if learning_outcome.saturation < lowest_saturation:
+                lowest_saturation = learning_outcome.saturation
+        return lowest_saturation
+
+    def get_saturation_level(self):
+        lowest_saturation = 3
+        for learning_outcome in self.learning_outcomes.values():
+            if learning_outcome.saturation < lowest_saturation:
+                lowest_saturation = learning_outcome.saturation
+        lowest_saturation += 5
+        for learning_outcome in self.learning_outcomes.values():
+            if learning_outcome.saturation == 1:
+                lowest_saturation -= 1
+        if lowest_saturation == 7:
+            lowest_saturation = 6
+        elif lowest_saturation == 8:
+            lowest_saturation = 7
+
+        return lowest_saturation
 
 
     @staticmethod

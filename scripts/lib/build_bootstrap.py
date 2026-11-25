@@ -1,41 +1,16 @@
-from scripts.lib.build_bootstrap_analyse import build_bootstrap_analyse_tab
-from scripts.lib.build_bootstrap_learning_analytics import build_learning_analytics, \
+
+from scripts.lib.build_bootstrap_learning_analytics import build_learning_analytics_dict, \
     build_bootstrap_learning_analytics_tab
 from scripts.lib.build_bootstrap_learning_outcome import build_bootstrap_learning_outcome_tab
 from scripts.lib.build_bootstrap_release_planning import build_bootstrap_release_planning_tab
+from scripts.lib.build_bootstrap_saturation import build_bootstrap_saturation_tab
+from scripts.lib.build_bootstrap_student_button import build_student_button
 
 from scripts.lib.build_bootstrap_werkvoorraad import build_bootstrap_workload_tab, WORKLOAD_PLOTLY
-from scripts.lib.plot_totals import RELEASE_PLANNING_PLOTLY_HTML, PROGRESS_PLOTLY_HTML
+from scripts.lib.plot_totals import RELEASE_PLANNING_PLOTLY_HTML, PROGRESS_PLOTLY_HTML, SATURATION_PLOTLY_HTML
 
 
-def build_student_button(instance, role, student, templates, level_serie_collection):
-    color = role.btn_color
-    student_name = student.email.split("@")[0].lower()
-    index_file_name = instance.get_link_student_path() + student_name + "_index.html"
-    # print("BBDI25 -", level_serie_collection.level_series['progress'].grades, str(student.progress))
-    if student.progress >= 0:
-        l_progress_color = level_serie_collection.level_series['progress'].grades[str(student.progress)].color
-    else:
-        l_progress_color = level_serie_collection.level_series['progress'].grades[str(-1)].color
-    bof_count = 0
-    for learning_outcome in student.learning_outcomes.values():
-        bof_count += len(learning_outcome.feedback_list)
-    if instance.course_code in ["TICT-V1SE1-24", "TICT-V1SE1-24a"]:
-        bof_count_str = ""
-    else:
-        bof_count_str = str(bof_count)
-    return templates['student'].substitute(
-        {'btn_color': color,
-         'progress_color': l_progress_color,
-         'student_name': student.name,
-         'student_number': student.number,
-         'student_role': role.name,
-         'bof_count': bof_count_str,
-         'frame_right': index_file_name
-         })
-
-
-def build_bootstrap_groups(a_instance, a_course, a_student_groups, a_results, a_templates, level_series):
+def build_bootstrap_groups(a_instance, a_course, a_student_groups, a_results, a_templates, level_serie_collection):
     # coaches = {}
     html_string = ''
     for group in a_student_groups:
@@ -56,16 +31,18 @@ def build_bootstrap_groups(a_instance, a_course, a_student_groups, a_results, a_
             coaches += " "+str(assessor.teacher_id)
 
         for student in group.students:
-            l_student = a_results.find_student(student.id)
-            if l_student is None:
+            result_student = a_results.find_student(student.id)
+            if result_student is None:
                 print("BBDI09 - ERROR Student not found in results", student, "re-run generate_results")
             else:
                 # print('BB07 -', l_student.name, "[", l_student.number, "]")
-                role = a_course.get_role(l_student.role)
+                role = a_course.get_role(result_student.role)
                 if role is not None:
-                    students_html_string += build_student_button(a_instance, role, l_student, a_templates, level_series)
+                    student_name = result_student.email.split("@")[0].lower()
+                    url = a_instance.get_link_student_path() + student_name + "_index.html"
+                    students_html_string += build_student_button(role.btn_color, result_student, "frame_right", url, a_templates, level_serie_collection)
                 else:
-                    print("BBDI21 - role for student is NoneType", l_student)
+                    print("BBDI21 - role for student is NoneType", result_student)
         if len(coaches) > 0:
             group_html_string = a_templates['group'].substitute(
                 {'selector_type': 'coach', 'selector': coaches, 'student_group_name': group.name + ", " + assessors_string,
@@ -78,7 +55,7 @@ def build_bootstrap_groups(a_instance, a_course, a_student_groups, a_results, a_
     return html_string
 
 
-def build_bootstrap_role(a_instance, a_course, a_results, a_templates, level_series):
+def build_bootstrap_role(a_instance, a_course, a_results, a_templates, level_serie_collection):
     html_string = ''
     for role in a_course.roles:
         students_html_string = ''
@@ -87,7 +64,10 @@ def build_bootstrap_role(a_instance, a_course, a_results, a_templates, level_ser
             if l_student is None:
                 print("BBDI11 - Student niet gevonden in resultaten", student)
             else:
-                students_html_string += build_student_button(a_instance, role, l_student, a_templates, level_series)
+                student_name = l_student.email.split("@")[0].lower()
+                url = a_instance.get_link_student_path() + student_name + "_index.html"
+                students_html_string += build_student_button(role.btn_color, l_student, "frame_right", url, a_templates,
+                                                             level_serie_collection)
         titel = role.name + ", " + str(len(role.students)) + " studenten"
         role_html_string = a_templates['group'].substitute(
             {'selector_type': 'role_view', 'selector': role.short, 'student_group_name': titel,
@@ -100,11 +80,15 @@ def build_bootstrap_progress(a_instance, a_course, a_results, a_templates, level
     html_string = ''
     for level in level_serie_collection.level_series['progress'].grades:
         students_html_string = ''
-        for student in a_results.students:
-            if str(student.progress) == str(level):
-                role = a_course.get_role(student.role)
+        for l_student in a_results.students:
+            if str(l_student.progress) == str(level):
+                role = a_course.get_role(l_student.role)
                 if role is not None:
-                    students_html_string += build_student_button(a_instance, role, student, a_templates, level_serie_collection)
+                    student_name = l_student.email.split("@")[0].lower()
+                    url = a_instance.get_link_student_path() + student_name + "_index.html"
+                    students_html_string += build_student_button(role.btn_color, l_student, "frame_right", url,
+                                                                 a_templates,
+                                                                 level_serie_collection)
         titel = level_serie_collection.level_series['progress'].grades[level].label + ", " + " studenten"
         level_html_string = a_templates['group'].substitute(
             {'selector_type': 'progress_view', 'selector': 'level', 'student_group_name': titel,
@@ -125,6 +109,8 @@ def build_bootstrap_menu_html(a_instance, a_templates, menu_items):
             start_pages[menu_item] = a_instance.get_link_general_path() + "standard.html"
         elif menu_item == "levels":
             start_pages[menu_item] = a_instance.get_link_general_path() + PROGRESS_PLOTLY_HTML
+        elif menu_item == "saturation":
+            start_pages[menu_item] = a_instance.get_link_general_path() + "portfolio_item_saturation.html"
         elif menu_item == "workload":
             start_pages[menu_item] = a_instance.get_link_general_path() + WORKLOAD_PLOTLY + "_teachers.html"
         elif menu_item == "learning_outcomes":
@@ -167,26 +153,22 @@ def build_bootstrap_left_panel_html(a_instance, a_menu_items, a_course, a_result
         elif tab == "levels":
             print("BBDI54 - Tab", tab)
             tabs_html_string = build_bootstrap_progress(a_instance, a_course, a_results, a_templates, a_level_serie_collection)
+        elif tab == "saturation":
+            print("BBDI57 - Tab", tab)
+            tabs_html_string = build_bootstrap_saturation_tab(a_instance, a_course, a_templates, a_level_serie_collection)
         elif tab == "workload":
             print("BBDI55 - Tab", tab)
             tabs_html_string = build_bootstrap_workload_tab(a_instance, a_templates, a_workload)
         elif tab == "release_planning":
             print("BBDI56 - Tab", tab)
-            tabs_html_string = build_bootstrap_release_planning_tab(a_instance, a_course, a_templates,
-                                                                    a_level_serie_collection)
+            tabs_html_string = build_bootstrap_release_planning_tab(a_instance, a_course, a_templates, a_level_serie_collection)
         elif tab == "learning_outcomes":
             print("BBDI57 - Tab", tab)
-            tabs_html_string = build_bootstrap_learning_outcome_tab(a_instance, a_course, a_templates,
-                                                                    a_level_serie_collection)
+            tabs_html_string = build_bootstrap_learning_outcome_tab(a_instance, a_course, a_templates, a_level_serie_collection)
         elif tab == "learning_analytics":
             print("BBDI58 - Tab", tab)
-            learning_analytics = build_learning_analytics(a_course, a_results, a_level_serie_collection)
-            tabs_html_string = build_bootstrap_learning_analytics_tab(a_instance, a_course, learning_analytics, a_templates,
-                                                       a_level_serie_collection, a_results.actual_day)
-        elif tab == "analytics":
-            print("BBDI59 - Tab", tab)
-            tabs_html_string = build_bootstrap_analyse_tab(a_instance, a_course, a_results, a_templates,
-                                                       a_level_serie_collection)
+            learning_analytics = build_learning_analytics_dict(a_course, a_results, a_level_serie_collection)
+            tabs_html_string = build_bootstrap_learning_analytics_tab(a_instance, a_course, a_results, learning_analytics, a_templates, a_level_serie_collection, a_results.actual_day)
         else:
             print("BBDI60 - Unknown Tab", tab)
         html_tab = ""

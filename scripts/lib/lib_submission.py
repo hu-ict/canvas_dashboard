@@ -2,6 +2,7 @@ from scripts.lib.lib_date import get_date_time_obj, get_date_time_str, get_actua
 from scripts.model.Comment import Comment
 from scripts.model.Submission import Submission
 from scripts.model.SubmissionAssignment import SubmissionAssignment
+from scripts.model.learning_outcome.StudentLearningOutcome import StudentLearningOutcome
 from scripts.model.perspective.Status import NOT_YET_GRADED, MISSED_ITEM, NOT_CORRECT_GRADED, GRADED
 from scripts.model.rubric.CriteriumScore import CriteriumScore
 
@@ -146,6 +147,10 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
         posted = True
     else:
         posted = False
+    if a_canvas_submission.late:
+        late = True
+    else:
+        late = False
     canvas_comments = a_canvas_submission.submission_comments
     if a_assignment.grading_type not in ["pass_fail", "points", "letter_grade", "not_graded"]:
         print("LSU04 - unknown grading_type", a_assignment.grading_type)
@@ -159,15 +164,15 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
         if a_canvas_submission.submitted_at:
             l_submission = Submission(a_canvas_submission.id, a_submission_assignment, a_student.id,
                                       None,None,
-                                      NOT_YET_GRADED, graded, posted, submission_grade,
+                                      NOT_YET_GRADED, graded, posted, submission_grade, late,
                                       0, grader_name, grader_date, submission_score,
-                                      submission_value, submission_flow)
+                                      submission_value, submission_flow, a_course.learning_outcomes)
         else:
             l_submission = Submission(a_canvas_submission.id, a_submission_assignment, a_student.id,
                                       None, None,
-                                      MISSED_ITEM, graded, posted, submission_grade,
+                                      MISSED_ITEM, graded, posted, submission_grade, late,
                                       0, grader_name, grader_date, submission_score,
-                                      submission_value, submission_flow)
+                                      submission_value, submission_flow, a_course.learning_outcomes)
 
         for canvas_comment in canvas_comments:
             l_comment_text = canvas_comment['comment']
@@ -266,7 +271,7 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
         if not has_assignment_rubric and a_assignment.grading_type == "points":
             if a_canvas_submission.score is None:
                 errors.append(
-                    f"FOUT Score is leeg {a_canvas_submission.grade} {a_canvas_submission.grader_id} voor opdracht {a_assignment.name} en student {a_student.name} groep_id {a_student.group_id}.")
+                    f"FOUT Score is None {a_canvas_submission.grade} {a_canvas_submission.grader_id} voor opdracht {a_assignment.name} en student {a_student.name} groep_id {a_student.group_id}.")
                 print("LSU54 -", errors[-1])
             else:
                 submission_score = round(a_canvas_submission.score, 2)
@@ -282,8 +287,11 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
             submission_score = round(a_canvas_submission.score, 2)
 
     if not has_assignment_rubric and a_assignment.grading_type == "points":
-        print("LSU81 -", a_student.name)
-        submission_score = round(a_canvas_submission.score, 2)
+        print(f"LSU81 - Student: {a_student.name}, Score {a_canvas_submission.score}")
+        if a_canvas_submission.score is None:
+            submission_score = round(0, 2)
+        else:
+            submission_score = round(a_canvas_submission.score, 2)
 
     if not has_assignment_rubric and a_assignment.grading_type == "letter_grade":
         submission_score = round(a_canvas_submission.score, 2)
@@ -330,8 +338,8 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
     l_submission = Submission(a_canvas_submission.id, a_submission_assignment, a_student.id,
                               None,
                               None,
-                              status, graded, posted, submission_grade, grader_id, grader_name, grader_date, submission_score,
-                              submission_value, 0)
+                              status, graded, posted, submission_grade, late, grader_id, grader_name, grader_date, submission_score,
+                              submission_value, 0, a_course.learning_outcomes)
     for canvas_comment in canvas_comments:
         # print("LS51 -", a_student.name, canvas_comment['comment'])
         # comment_text = remove_html_tags(canvas_comment['comment']).strip()
@@ -354,18 +362,19 @@ def submission_builder(a_course_code, a_course, a_student, a_assignment, a_submi
     return l_submission
 
 
-def add_missed_assignments(course, actual_day, student_perspective):
+def add_missed_assignments(course, actual_day, student_id, student_perspective):
     for assignment_sequence in course.perspectives[student_perspective.name].assignment_sequences:
         submission_sequence = student_perspective.get_submission_sequence_by_tag(assignment_sequence.tag)
         missed_assignments = assignment_sequence.get_missed_assignments(submission_sequence, actual_day)
         # print("ASA07 - Missed assignments", len(missed_assignments))
         for assignment in missed_assignments:
-            l_submission = Submission(0, assignment.group_id, assignment.id, 0, assignment.name,
-                                      assignment.date,
-                                      assignment.day,
+            submission_assignment = SubmissionAssignment(assignment.id, assignment.name, assignment.group_id,
+                                                         assignment.points, assignment.date, assignment.day)
+            l_submission = Submission(0, submission_assignment, student_id,
                                       None,
                                       None,
-                                      MISSED_ITEM, False, False, None, 0, 0, 0, 0, assignment.points, 0)
+                                      NOT_YET_GRADED, False, False, None, 0, "Geen",
+                                      0, 0, 0, 0, 0, course.learning_outcomes)
             l_submission.comments.append(Comment(1, ROBOT, assignment.date, NO_SUBMISSION))
             student_perspective.put_submission(assignment_sequence, l_submission)
 
@@ -389,7 +398,7 @@ def add_open_level_moments(course, actual_day, student_id, student_level_moments
                                                   None,
                                                   None,
                                                   NOT_YET_GRADED, False, False, None, 0, "Geen",
-                                                  0, 0, 0, 0)
+                                                  0, 0, 0, 0, 0, course.learning_outcomes)
                         l_submission.comments.append(Comment(1, ROBOT, assignment.date, NO_SUBMISSION_GRADE))
 
                         student_level_moments.submissions.append(l_submission)
@@ -419,8 +428,8 @@ def add_open_moments(course, actual_day, student_id, student_moments):
                         l_submission = Submission(0, submission_assignment, student_id,
                                                   None,
                                                   None,
-                                                  NOT_YET_GRADED, False, False, None, 0, "Geen",
-                                                  0, 0, 0, 0)
+                                                  NOT_YET_GRADED, False, False, None, False,0, "Geen",
+                                                  0, 0, 0, 0, course.learning_outcomes)
                         l_submission.comments.append(Comment(1, ROBOT, assignment.date, NO_SUBMISSION_GRADE))
                         student_moments.submissions.append(l_submission)
     elif len(student_moments.assignment_groups) > 1:
@@ -479,9 +488,12 @@ def read_submissions(a_course_code, a_canvas_course, a_course, a_results, a_tota
                     if student is None:
                         # print("RS20 Could not find student", canvas_submission.user_id)
                         continue
+                    # voeg een submission toe aan een van de perspectieven
+                    if canvas_submission is None:
+                        print(f"LIBS - Submission is None {assignment.name} for student {student.name}")
+                        continue
                     l_submission = submission_builder(a_course_code, a_course, student, assignment, submission_assignment, canvas_submission,
                                                       dashboard)
-                    # voeg een submission toe aan een van de perspectieven
                     if l_submission is None:
                         # print(f"RS25 - Error creating submission {assignment.name} for student {student.name}")
                         continue

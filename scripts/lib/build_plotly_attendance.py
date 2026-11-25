@@ -1,7 +1,7 @@
 import plotly.graph_objs as go
 
 from scripts.lib.build_plotly_generic import plot_bandbreedte_colored
-from scripts.lib.build_plotly_hover import get_hover_attendance
+from scripts.lib.build_hover import get_hover_attendance
 from scripts.lib.build_plotly_perspective import plot_day_bar_perspective
 from scripts.lib.lib_date import get_date_time_loc
 from scripts.lib.lib_plotly import get_marker_size, hover_style

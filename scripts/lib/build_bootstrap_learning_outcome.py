@@ -1,3 +1,4 @@
+from scripts.lib.file import read_plotly
 from scripts.lib.lib_date import get_date_time_loc
 
 
@@ -11,13 +12,13 @@ def build_bootstrap_learning_outcome_tab(instance, course, templates, a_level_se
         learning_outcomes_html_string += templates["learning_outcome"].substitute(
                 {'url': link_path_name,
                  'learning_outcome_short': learning_outcome.short})
-        write_learning_outcome_index(course, templates, learning_outcome, instance.get_html_general_path()+file_name)
+        write_learning_outcome_index(instance, course, templates, learning_outcome, instance.get_html_general_path()+file_name)
 
     html_string += templates["learning_outcome_card"].substitute({'learning_outcomes': learning_outcomes_html_string})
     return html_string
 
 
-def write_learning_outcome_index(course, templates, learning_outcome, file_name):
+def write_learning_outcome_index(instance, course, templates, learning_outcome, file_name):
     write_learning_outcome_assignments_html_string = get_learning_outcome_assignments(course, templates, learning_outcome)
     if learning_outcome.min_items is not None:
         up_level = str(learning_outcome.min_items) + " items"
@@ -28,13 +29,19 @@ def write_learning_outcome_index(course, templates, learning_outcome, file_name)
     else:
         up_level = "niet bepaald"
         above_level = "niet bepaald"
+    file_name_html = instance.get_temp_path() + "distribution_" + learning_outcome.id + ".html"
+    distribution_plot_html = read_plotly(file_name_html)
+    file_name_html = instance.get_temp_path() + "saturation_" + learning_outcome.id + ".html"
+    saturation_plot_html = read_plotly(file_name_html)
     write_learning_outcome_index_html_string = templates['learning_outcome_index'].substitute(
         {
             'learning_outcome_short': learning_outcome.short,
             'learning_outcome_description': learning_outcome.description,
             'up_level': up_level,
             'above_level': above_level,
-            'assignment_sequences': write_learning_outcome_assignments_html_string
+            'assignment_sequences': write_learning_outcome_assignments_html_string,
+            'distribution_plot': distribution_plot_html,
+            'saturation_plot': saturation_plot_html
         }
     )
 

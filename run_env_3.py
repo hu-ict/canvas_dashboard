@@ -1,21 +1,24 @@
 import sys
 
-from scripts.lib.file import read_environment
-from scripts.lib.lib_date import get_actual_date, get_date_time_obj
 from scripts.env_3.generate_dashboard import generate_dashboard
 from scripts.env_3.generate_plotly import generate_plotly
 from scripts.env_3.generate_portfolio import generate_portfolio
+from scripts.lib.file import read_environment
 from scripts.lib.file_const import ENVIRONMENT_FILE_NAME
+from scripts.lib.lib_date import get_actual_date
 from scripts.publish_dashboard import publish_dashboard
 
 
 def run_env_3(a_actual_date):
+    print("RE310 - Environment start")
     environment = read_environment(ENVIRONMENT_FILE_NAME)
+    print("RE311 - Environment:", environment)
     execution = environment.get_execution_by_name("env_3")
+    print("RE312 - Execution:", execution)
     for course in environment.courses:
         for course_instance in course.course_instances:
             if course_instance.stage != "SLEEP": #get_date_time_obj(course_instance.period["end_date"]) > a_actual_date and
-                print("Instance:", course_instance.name)
+                print("RE321 - Instance:", course_instance.name)
                 course_instance.execution_source_path = execution.source_path
                 generate_dashboard(course_instance)
                 generate_plotly(course_instance)
@@ -25,6 +28,7 @@ def run_env_3(a_actual_date):
 
 
 if __name__ == "__main__":
+    print("Start run_env_3")
     l_actual_date = get_actual_date()
     sys.stdout.reconfigure(encoding="utf-8")
     run_env_3(l_actual_date)

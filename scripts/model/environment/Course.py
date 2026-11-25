@@ -27,7 +27,7 @@ class Course:
 
     @staticmethod
     def from_dict(data_dict):
-        # print("CourseCategory", data_dict)
+        # print("COU01: CourseCategory", data_dict)
         new = Course(data_dict['name'])
         new.course_instances = list(map(lambda c: CourseInstance.from_dict(c), data_dict['course_instances']))
         return new

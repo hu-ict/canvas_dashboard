@@ -6,7 +6,7 @@ from scripts.lib.lib_plotly import hover_style
 
 RELEASE_PLANNING_PLOTLY_HTML = "release_planning.html"
 PROGRESS_PLOTLY_HTML = "levels.html"
-
+SATURATION_PLOTLY_HTML = "saturation_overview.html"
 
 def plot_progress_history(a_fig, a_row, a_col, a_progress_history, a_perspective_name, a_course, a_progress_levels):
     x = []

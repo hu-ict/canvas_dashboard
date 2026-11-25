@@ -1,9 +1,6 @@
-import json
-import sys
-
 from plotly.subplots import make_subplots
-from scripts.lib.build_plotly_attendance import plot_attendance_perspective
-from scripts.lib.build_plotly_perspective import plot_perspective, plot_timeline
+from scripts.lib.build_plotly_perspective import plot_perspective
+from scripts.lib.build_plotly_timeline_portfolio import plot_timeline
 from scripts.lib.lib_date import get_date_time_loc, get_actual_date, get_time_div
 from scripts.lib.file import read_course, read_results, read_dashboard
 
@@ -15,23 +12,23 @@ def plot_student(course_instance, course, student, actual_date, actual_day,
     fig = make_subplots(rows=subplots.rows, cols=subplots.cols, subplot_titles=subplots.titles, specs=subplots.specs,
                         vertical_spacing=0.10,
                         horizontal_spacing=0.08)
-    fig.update_layout(height=900, width=1200, showlegend=False)
+    fig.update_layout(height=700, width=1400, showlegend=False)
 
-    for perspective in student.perspectives.values():
-        if perspective.name in subplots.positions:
-            row = subplots.positions[perspective.name]['row']
-            col = subplots.positions[perspective.name]['col']
-            # print("GP19 -", perspective, a_level_construction, a_grade_construction)
-            plot_perspective(row, col, fig, course, perspective,
-                             actual_day, get_date_time_loc(actual_date),
-                             level_serie_collection)
+    if "value" in subplots.positions:
+        for perspective in student.perspectives.values():
+            if perspective.name in subplots.positions:
+                row = subplots.positions[perspective.name]['row']
+                col = subplots.positions[perspective.name]['col']
+                # print("GP19 -", perspective, a_level_construction, a_grade_construction)
+                plot_perspective(row, col, fig, course, perspective,
+                                 actual_day, get_date_time_loc(actual_date),
+                                 level_serie_collection)
 
     # last_date = get_time_div("13", last_date)
     if "timeline" in subplots.positions:
         row = subplots.positions["timeline"]['row']
         col = subplots.positions["timeline"]['col']
-        plot_timeline(row, col, fig, course, student, actual_day, get_date_time_loc(actual_date),
-                      level_serie_collection, feedback_colors)
+        plot_timeline(row, col, fig, course, student, actual_day, get_date_time_loc(actual_date), level_serie_collection, feedback_colors)
     # last_date = get_time_div("14", last_date)
     student_name = student.email.split("@")[0].lower()
     file_name_html = course_instance.get_temp_path() + student_name + "_progress.html"

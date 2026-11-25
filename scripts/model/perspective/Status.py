@@ -6,7 +6,6 @@ GRADED = "5"
 
 VIEW_UNPOSTED = True
 
-
 class Status:
     def __init__(self, label, color):
         self.label = label

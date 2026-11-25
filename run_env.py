@@ -20,5 +20,5 @@ if __name__ == "__main__":
     minutes = total_seconds // 60
 
     print(f"RUN08 - Time running: {minutes}:{seconds:02d} (m:ss)")
-    print("RUN09 - Time running:", total_seconds, "seconds")
+    print("RUN09 - Time reunning:", total_seconds, "seconds")
     print("RUN10 - Date running:", get_actual_date())

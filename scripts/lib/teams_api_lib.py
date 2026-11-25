@@ -6,6 +6,7 @@ import io
 
 teams = ["eb631cbd-950d-42be-9a73-b8b544221a5a", "60fdb4ba-e8b3-4414-8d4e-a9331cd59f5a", "740bb11a-abc1-4474-b9ce-c2ef6ff8b0e4", "e5701102-1ce4-4b7c-bf9f-c5f2eab14c4b", "bf8a2550-2c69-4afb-8d0d-6f47ae3c1c08"]
 teams = ["f4a00fa7-f8fb-414f-a31f-5460d04a318a"]
+teams = ["aa596ee9-aa8f-4d64-8f07-bea0c4636ea4", "1be793d8-ee46-4061-ad63-b0499c3daf72", "e3fd7bc4-060e-4b6a-b4be-2e445f6440c3", "8031c789-c4f0-4ae7-aea3-97f878904ad1", "5bb0de5e-e426-4a2a-9cc8-63745d253a3d"]
 
 # https://teams.microsoft.com/l/team/19%3AcxEwbQY-TpX23Y4slSrFCWgIutGGF2JDk829QxLhmFY1%40thread.tacv2/conversations?groupId=8d309e88-cdae-4720-aed8-47384bc36820&tenantId=98932909-9a5a-4d18-ace4-7236b5b5e11d
 # https://teams.microsoft.com/l/team/19%3A3l-_a4EUOq-9AwvkU6dAVddcELw_bL3xU0xW2-hKWmg1%40thread.tacv2/conversations?groupId=59a9f9c3-4a23-4f74-ad75-a269f0e70891&tenantId=98932909-9a5a-4d18-ace4-7236b5b5e11d
@@ -265,7 +266,7 @@ def create_channel(a_token, a_team_id, a_diplay_name):
     }
     l_data = {
         'displayName': a_diplay_name,
-        'description': 'In dit kanaal wordt je persoonlijke INNO-dashboard geplaatst.',
+        'description': 'In dit kanaal wordt je persoonlijke Canvas-dashboard geplaatst.',
         "membershipType": "private"
     }
     l_json_object = json.dumps(l_data)

@@ -12,7 +12,7 @@ class Rating:
         }
 
     def __str__(self):
-        return f'Rating({self.id}, {self.points}, {self.description}'
+        return f'Rating({self.id}, {self.points}, {self.description})'
 
     @staticmethod
     def from_dict(data_dict):

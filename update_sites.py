@@ -87,4 +87,4 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         update_sites(sys.argv[1], sys.argv[2])
     else:
-        update_sites("TICT-V3SE6-25", "TICT-V3SE6-25_feb26")
+        update_sites("TICT-V3SE6-25", "TICT-V3SE6-25_sep26")
